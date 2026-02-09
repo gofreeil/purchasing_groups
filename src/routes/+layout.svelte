@@ -15,12 +15,16 @@
 	<header class="main-header">
 		<div class="header-container">
 			<div class="left-actions">
-				<button class="add-business-btn">+ הוסף עסק</button>
-				<button class="policy-btn">
+				<a
+					href="https://docs.google.com/forms/d/e/1FAIpQLSe2wvCp484_PyoJyDZ_n8GupIQVy00ozt5rxOhsWklr7UPkXQ/viewform?usp=header"
+					target="_blank"
+					class="add-business-btn">+ הוסף עסק</a
+				>
+				<a href="/policy" class="policy-btn">
 					<span class="icon">📄</span>
 					מדיניות הקהילה
-				</button>
-				<button class="login-link">התחברות</button>
+				</a>
+				<a href="/auth/login" class="login-link">התחברות</a>
 				<div class="lang-selector">
 					עברית IL <span class="chevron">⌄</span>
 				</div>
@@ -48,21 +52,27 @@
 
 		<!-- Sidebar for Ads -->
 		<aside class="sidebar-ads">
-			<div class="ad-card neighborhoods-ad">
+			<a
+				href="https://www.melecshop.com/"
+				target="_blank"
+				class="ad-card neighborhoods-ad"
+			>
 				<div class="ad-content">
 					<h3>הצטרף לועדי השכונות בארץ</h3>
-					<p>חזק את כוחו של עם ישראל במכלול הטבות ייחודיות!</p>
+					<p>חזק את כוחו של העם ותהנה משלל הטבות יחודיות!</p>
 				</div>
-			</div>
+			</a>
 
-			<div class="ad-card groups-ad">
+			<a
+				href="https://www.melecshop.com/"
+				target="_blank"
+				class="ad-card groups-ad"
+			>
 				<div class="ad-content">
-					<h3>רכישות קבוצתיות</h3>
-					<p>
-						הצטרפו לקבוצת רכישה והוזילו מיד את ההוצאות החודשיות שלך
-					</p>
+					<h3>הצטרף לקבוצת רכישה</h3>
+					<p>והוזל מיד את ההוצאות החודשיות שלך</p>
 				</div>
-			</div>
+			</a>
 
 			<div class="ad-status">תוכן שיווקי</div>
 
@@ -70,8 +80,8 @@
 				<div class="plus-icon">+</div>
 				<p class="promo-text">מקום פרסום זה יכול להיות שלך</p>
 				<div class="contact-links">
-					<a href="#">רוצים לפרסם כאן?</a>
-					<a href="#">צור קשר</a>
+					<a href="mailto:support@melecshop.com">רוצים לפרסם כאן?</a>
+					<a href="mailto:support@melecshop.com">צור קשר</a>
 				</div>
 			</div>
 		</aside>
