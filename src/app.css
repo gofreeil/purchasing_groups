@@ -155,14 +155,17 @@ a {
 }
 
 .ad-card {
-    height: 250px;
+    height: 350px;
+    /* Increased height for better visibility */
     border-radius: 15px;
     position: relative;
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.3s;
-    background-size: cover;
+    background-size: 100% 100%;
+    /* Stretch to fit exactly */
     background-position: center;
+    background-repeat: no-repeat;
     border: 1px solid var(--border-color);
 }
 
@@ -174,7 +177,7 @@ a {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    pointer-events: none;
 }
 
 .ad-content {
