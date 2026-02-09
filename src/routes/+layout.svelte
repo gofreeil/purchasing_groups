@@ -62,8 +62,13 @@
 			<a
 				href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
 				target="_blank"
-				class="ad-card groups-ad"
+				class="ad-card-image-wrapper"
 			>
+				<img
+					src="/assets/ad_groups.png"
+					alt="רכישות קבוצתיות"
+					class="full-ad-image"
+				/>
 			</a>
 
 			<div class="ad-status">תוכן שיווקי</div>
