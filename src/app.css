@@ -20,6 +20,10 @@ body {
     min-height: 100vh;
 }
 
+a {
+    text-decoration: none;
+}
+
 /* Layout Structure */
 .app-wrapper {
     display: flex;
@@ -108,6 +112,7 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
+    text-decoration: none;
 }
 
 .policy-btn {
@@ -121,6 +126,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    text-decoration: none;
 }
 
 .login-link {
@@ -129,6 +135,7 @@ body {
     border: none;
     cursor: pointer;
     font-size: 0.95rem;
+    text-decoration: none;
 }
 
 .lang-selector {
