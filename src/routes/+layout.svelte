@@ -32,10 +32,7 @@
 					target="_blank"
 					class="add-business-btn">+ הוסף הצעה</a
 				>
-				<a href="/policy" class="policy-btn">
-					<span class="icon">📄</span>
-					מדיניות הקהילה
-				</a>
+
 				<a href="/auth/login" class="login-link">התחברות</a>
 				<div class="lang-selector">
 					עברית IL <span class="chevron">⌄</span>
@@ -62,13 +59,8 @@
 			<a
 				href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
 				target="_blank"
-				class="ad-card-image-wrapper"
+				class="ad-card groups-ad"
 			>
-				<img
-					src="/assets/ad_groups.png"
-					alt="רכישות קבוצתיות"
-					class="full-ad-image"
-				/>
 			</a>
 
 			<div class="ad-status">תוכן שיווקי</div>

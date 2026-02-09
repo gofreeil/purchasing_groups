@@ -203,6 +203,8 @@ a {
 
 .groups-ad {
     background-image: url('/assets/ad_groups.png');
+    background-size: 100% 100%;
+    /* Important to show the full flyer design */
 }
 
 .ad-status {
@@ -245,25 +247,7 @@ a {
     font-size: 0.85rem;
 }
 
-.ad-card-image-wrapper {
-    display: block;
-    width: 100%;
-    margin-bottom: 1rem;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s;
-    border: 1px solid var(--border-color);
-}
 
-.ad-card-image-wrapper:hover {
-    transform: scale(1.02);
-}
-
-.full-ad-image {
-    width: 100%;
-    height: auto;
-    display: block;
-}
 
 /* Main Content Area */
 .content-area {
