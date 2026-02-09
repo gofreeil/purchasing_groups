@@ -64,14 +64,6 @@
 				target="_blank"
 				class="ad-card groups-ad"
 			>
-				<div class="ad-content">
-					<p
-						style="font-weight: bold; font-size: 1rem; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"
-					>
-						הצטרף עכשיו לקבוצת הווצאפ השקטה שלנו כדי להיות שותף
-						בהנחות החודשיות
-					</p>
-				</div>
 			</a>
 
 			<div class="ad-status">תוכן שיווקי</div>

@@ -155,15 +155,13 @@ a {
 }
 
 .ad-card {
-    height: 350px;
-    /* Increased height for better visibility */
-    border-radius: 15px;
+    height: 200px;
+    border-radius: 12px;
     position: relative;
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.3s;
-    background-size: 100% 100%;
-    /* Stretch to fit exactly */
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     border: 1px solid var(--border-color);
