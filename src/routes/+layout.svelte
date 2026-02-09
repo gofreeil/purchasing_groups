@@ -60,7 +60,7 @@
 			</a>
 
 			<a
-				href="https://chat.whatsapp.com/YOUR_LINK_HERE"
+				href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
 				target="_blank"
 				class="ad-card groups-ad"
 			>
