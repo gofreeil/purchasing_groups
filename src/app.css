@@ -31,9 +31,11 @@ body {
     background-color: var(--bg-header);
     padding: 1rem 4rem;
     border-bottom: 1px solid var(--border-color);
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 100;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 }
 
 .header-container {
@@ -49,6 +51,8 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
+    padding-top: 120px;
+    /* Space for the fixed header */
     gap: 2rem;
     width: 100%;
 }
@@ -190,11 +194,11 @@ body {
 
 /* Backgrounds for ads - will use your images */
 .neighborhoods-ad {
-    background-image: url('/assets/ad_forest.jpg');
+    background-image: url('/assets/ad_neighborhoods.png');
 }
 
 .groups-ad {
-    background-image: url('/assets/ad_home.jpg');
+    background-image: url('/assets/ad_groups.png');
 }
 
 .ad-status {

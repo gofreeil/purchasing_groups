@@ -7,7 +7,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>מדריך בעלי מקצוע כשירים</title>
+	<title>רכישות קבוצתיות יוצאים לחירות</title>
 </svelte:head>
 
 <div class="app-wrapper">
@@ -28,7 +28,7 @@
 
 			<div class="right-branding">
 				<div class="titles">
-					<h1 class="main-title">מדריך בעלי מקצוע כשירים</h1>
+					<h1 class="main-title">רכישות קבוצתיות יוצאים לחירות</h1>
 					<p class="sub-title">
 						בהנחות והטבות ייחודיות לחברי יוצאים לחירות
 					</p>
@@ -41,6 +41,11 @@
 	</header>
 
 	<div class="main-layout">
+		<!-- Main Content Area -->
+		<main class="content-area">
+			{@render children()}
+		</main>
+
 		<!-- Sidebar for Ads -->
 		<aside class="sidebar-ads">
 			<div class="ad-card neighborhoods-ad">
@@ -70,11 +75,6 @@
 				</div>
 			</div>
 		</aside>
-
-		<!-- Main Content Area -->
-		<main class="content-area">
-			{@render children()}
-		</main>
 	</div>
 </div>
 
