@@ -57,10 +57,6 @@
 				target="_blank"
 				class="ad-card neighborhoods-ad"
 			>
-				<div class="ad-content">
-					<h3>הצטרף לועדי השכונות בארץ</h3>
-					<p>חזק את כוחו של העם ותהנה משלל הטבות יחודיות!</p>
-				</div>
 			</a>
 
 			<a
@@ -68,10 +64,6 @@
 				target="_blank"
 				class="ad-card groups-ad"
 			>
-				<div class="ad-content">
-					<h3>הצטרף לקבוצת רכישה</h3>
-					<p>והוזל מיד את ההוצאות החודשיות שלך</p>
-				</div>
 			</a>
 
 			<div class="ad-status">תוכן שיווקי</div>
