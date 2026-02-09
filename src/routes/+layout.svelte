@@ -14,11 +14,23 @@
 	<!-- Header -->
 	<header class="main-header">
 		<div class="header-container">
+			<div class="right-branding">
+				<div class="logo-container">
+					<img src="/assets/logo.png" alt="לוגו" class="main-logo" />
+				</div>
+				<div class="titles">
+					<h1 class="main-title">רכישות קבוצתיות יוצאים לחירות</h1>
+					<p class="sub-title">
+						בהנחות והטבות ייחודיות לחברי יוצאים לחירות
+					</p>
+				</div>
+			</div>
+
 			<div class="left-actions">
 				<a
 					href="https://docs.google.com/forms/d/e/1FAIpQLSe2wvCp484_PyoJyDZ_n8GupIQVy00ozt5rxOhsWklr7UPkXQ/viewform?usp=header"
 					target="_blank"
-					class="add-business-btn">+ הוסף עסק</a
+					class="add-business-btn">+ הוסף הצעה</a
 				>
 				<a href="/policy" class="policy-btn">
 					<span class="icon">📄</span>
@@ -27,18 +39,6 @@
 				<a href="/auth/login" class="login-link">התחברות</a>
 				<div class="lang-selector">
 					עברית IL <span class="chevron">⌄</span>
-				</div>
-			</div>
-
-			<div class="right-branding">
-				<div class="titles">
-					<h1 class="main-title">רכישות קבוצתיות יוצאים לחירות</h1>
-					<p class="sub-title">
-						בהנחות והטבות ייחודיות לחברי יוצאים לחירות
-					</p>
-				</div>
-				<div class="logo-container">
-					<img src="/assets/logo.png" alt="לוגו" class="main-logo" />
 				</div>
 			</div>
 		</div>
