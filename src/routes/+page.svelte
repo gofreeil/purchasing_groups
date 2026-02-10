@@ -40,22 +40,20 @@
     </div>
 
     <div class="video-container-large">
-            <iframe
-                src="https://www.youtube.com/embed/pl7kV6-aTEw"
-                title="YouTube video player"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-            ></iframe>
-        </div>
-
+        <iframe
+            src="https://www.youtube.com/embed/pl7kV6-aTEw"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+        ></iframe>
     </div>
 </div>
 
-<div class="whatsapp-counter-standalone">
-    <div class="counter-content">
-        <div class="counter-number">{Math.floor($count)}</div>
-        <div class="counter-text">חברים בקבוצה</div>
+<div class="whatsapp-counter-final">
+    <div class="counter-wrap-anim">
+        <div class="count-big-number">{Math.floor($count)}</div>
+        <div class="count-label-text">חברים בקבוצה</div>
     </div>
 </div>
 
