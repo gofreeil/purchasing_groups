@@ -70,14 +70,6 @@
 			</a>
 
 			<div class="left-actions">
-				<a
-					href="https://docs.google.com/forms/d/e/1FAIpQLSeK7H6wdZnAddeD7TuQwutsEYAT3AKkMh6L82gX797DVw8sRQ/viewform?usp=dialog"
-					target="_blank"
-					class="add-business-btn">{$t.addOffer}</a
-				>
-
-				<a href="/auth/login" class="login-link">{$t.login}</a>
-
 				<div class="lang-selector-container">
 					<button
 						class="lang-selector-btn"
@@ -146,6 +138,12 @@
 						</div>
 					{/if}
 				</div>
+
+				<a
+					href="https://docs.google.com/forms/d/e/1FAIpQLSeK7H6wdZnAddeD7TuQwutsEYAT3AKkMh6L82gX797DVw8sRQ/viewform?usp=dialog"
+					target="_blank"
+					class="add-business-btn">{$t.addOffer}</a
+				>
 			</div>
 		</div>
 	</header>
