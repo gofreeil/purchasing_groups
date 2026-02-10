@@ -14,7 +14,7 @@
 	<!-- Header -->
 	<header class="main-header">
 		<div class="header-container">
-			<div class="right-branding">
+			<a href="/" class="right-branding">
 				<div class="logo-container">
 					<img src="/assets/logo.png" alt="לוגו" class="main-logo" />
 				</div>
@@ -24,7 +24,7 @@
 						הצטרף והוזל עכשיו את ההוצאות החודשיות שלך
 					</p>
 				</div>
-			</div>
+			</a>
 
 			<div class="left-actions">
 				<a
@@ -69,6 +69,12 @@
 				target="_blank"
 				class="ad-card neighborhoods-ad"
 			>
+				<div class="ad-content-whatsapp">
+					<p>
+						הצטרף לפרוייקט ועדי השכונות לקידום חברה מתוקנת שבה העם
+						שולט על מוסדותיו
+					</p>
+				</div>
 			</a>
 
 			<!-- New Special Ad (Third) -->
