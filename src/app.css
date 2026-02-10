@@ -349,10 +349,10 @@ a {
 
 .top-content {
     display: grid;
-    grid-template-columns: 1fr 1.5fr;
+    grid-template-columns: 1fr 1fr;
     gap: 2rem;
     margin-bottom: 2rem;
-    align-items: center;
+    align-items: stretch;
 }
 
 .video-container-large {
@@ -373,42 +373,64 @@ a {
 .whatsapp-counter-final {
     display: flex;
     justify-content: center;
-    margin: 3rem 0;
+    margin: 4rem 0;
     overflow: hidden;
 }
 
-.counter-wrap-anim {
-    text-align: center;
-    animation: convergeFast 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+.counter-merge-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    white-space: nowrap;
 }
 
 .count-big-number {
-    font-size: 5.5rem;
-    /* Increased size */
+    font-size: 6rem;
     font-weight: 950;
     color: #4ade80;
     line-height: 1;
-    margin-bottom: 0.5rem;
     text-shadow: 0 0 40px rgba(74, 222, 128, 0.4);
 }
 
 .count-label-text {
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     color: var(--text-white);
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
 }
 
-@keyframes convergeFast {
+.fly-in-right {
+    animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.fly-in-left {
+    animation: flyFromLeft 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes flyFromRight {
     0% {
         opacity: 0;
-        transform: scale(3);
-        filter: blur(10px);
+        transform: translateX(100vw) scale(2);
+        filter: blur(20px);
     }
 
     100% {
         opacity: 1;
-        transform: scale(1);
+        transform: translateX(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes flyFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-100vw) scale(2);
+        filter: blur(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
         filter: blur(0);
     }
 }

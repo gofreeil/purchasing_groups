@@ -6,7 +6,7 @@
     // הגדר כאן את מספר החברים הנוכחי בקבוצה
     let targetCount = 475;
     const count = tweened(0, {
-        duration: 800,
+        duration: 2500, // הגדלת זמן הספירה כדי שתמשיך גם אחרי הטעינה
         easing: cubicOut,
     });
 
@@ -51,9 +51,9 @@
 </div>
 
 <div class="whatsapp-counter-final">
-    <div class="counter-wrap-anim">
-        <div class="count-big-number">{Math.floor($count)}</div>
-        <div class="count-label-text">חברים בקבוצה</div>
+    <div class="counter-merge-wrapper">
+        <div class="count-big-number fly-in-right">{Math.floor($count)}</div>
+        <div class="count-label-text fly-in-left">חברים בקבוצה</div>
     </div>
 </div>
 
