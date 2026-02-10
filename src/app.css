@@ -32,7 +32,9 @@ a {
 }
 
 .main-header {
-    background-color: var(--bg-header);
+    background-color: rgba(10, 17, 40, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     padding: 1rem 4rem;
     border-bottom: 1px solid var(--border-color);
     position: fixed;
