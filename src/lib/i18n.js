@@ -22,10 +22,10 @@ export const translations = readable({
         homepage: {
             title: "עמוד הבית | רכישות קבוצתיות יוצאים לחירות",
             features: [
-                "ההנחה משמעותית בכל ההוצאות החודשיות.",
-                "התארגנות לכרטיס מועדון עם הנחות בחנויות המותגים.",
-                "התארגנות לרכישת ירקות ופירות היישר מהחקלאי עד לשכונה.",
-                "שמירה על זכות המזומן וייעול השימוש בו."
+                { icon: "💰", text: "ההנחה משמעותית בכל ההוצאות החודשיות." },
+                { icon: "🛒", text: "התארגנות לכרטיס מועדון עם הנחות בחנויות המותגים." },
+                { icon: "🍎", text: "התארגנות לרכישת ירקות ופירות היישר מהחקלאי עד לשכונה." },
+                { icon: "💵", text: "שמירה על זכות המזומן וייעול השימוש בו." }
             ],
             membersCount: "חברים בקבוצה",
             ourPurchases: "הרכישות הקבוצתיות שלנו:",
@@ -97,10 +97,10 @@ export const translations = readable({
         homepage: {
             title: "Home | Liberty Purchasing Groups",
             features: [
-                "Significant discount on all monthly expenses.",
-                "Organizing a club card with discounts at brand stores.",
-                "Organizing for purchasing vegetables and fruits directly from the farmer to the neighborhood.",
-                "Preserving the right to cash and optimizing its use."
+                { icon: "💰", text: "Significant discount on all monthly expenses." },
+                { icon: "🛒", text: "Organizing a club card with discounts at brand stores." },
+                { icon: "🍎", text: "Organizing for purchasing vegetables and fruits directly from the farmer to the neighborhood." },
+                { icon: "💵", text: "Preserving the right to cash and optimizing its use." }
             ],
             membersCount: "Group Members",
             ourPurchases: "Our Purchasing Groups:",
@@ -172,10 +172,10 @@ export const translations = readable({
         homepage: {
             title: "Главная | Группы Закупок Свобода",
             features: [
-                "Значительная скидка на все ежемесячные расходы.",
-                "Организация клубной карты со скидками в брендовых магазинах.",
-                "Организация закупки овощей и фруктов напрямую от фермера в район.",
-                "Сохранение права на наличные и оптимизация их использования."
+                { icon: "💰", text: "Значительная скидка на все ежемесячные расходы." },
+                { icon: "🛒", text: "Организация клубной карты со скидками в брендовых магазинах." },
+                { icon: "🍎", text: "Организация закупки овощей и фруктов напрямую от фермера в район." },
+                { icon: "💵", text: "Сохранение права на наличные и оптимизация их использования." }
             ],
             membersCount: "Участников в группе",
             ourPurchases: "Наши группы закупок:",

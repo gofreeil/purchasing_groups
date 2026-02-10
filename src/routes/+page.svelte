@@ -35,8 +35,8 @@
         <ul class="feature-list">
             {#each $t.homepage.features as feature}
                 <li>
-                    <span class="check">✓</span>
-                    {feature}
+                    <span class="check">{feature.icon}</span>
+                    {feature.text}
                 </li>
             {/each}
         </ul>
