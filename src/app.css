@@ -411,21 +411,19 @@ a {
     letter-spacing: 1px;
 }
 
-.fly-in-right {
-    animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+.fade-scale-in {
+    animation: fadeScaleIn 1s ease-out both;
 }
 
-@keyframes flyFromRight {
+@keyframes fadeScaleIn {
     0% {
         opacity: 0;
-        transform: translateX(50vw) scale(1.5);
-        filter: blur(15px);
+        transform: scale(0.95);
     }
 
     100% {
         opacity: 1;
-        transform: translateX(0) scale(1);
-        filter: blur(0);
+        transform: scale(1);
     }
 }
 

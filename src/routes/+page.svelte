@@ -44,7 +44,7 @@
 </div>
 
 <div class="whatsapp-counter-final">
-    <div class="counter-merge-wrapper fly-in-right">
+    <div class="counter-merge-wrapper fade-scale-in">
         <div class="count-big-number">{Math.floor($count)}</div>
         <div class="count-label-text">
             {$t.homepage.membersCount}
