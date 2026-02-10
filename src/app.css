@@ -223,6 +223,11 @@ a {
     background-size: 100% 100%;
 }
 
+.investments-community-ad {
+    background-image: url('/assets/השקעות קבוצתיות.png');
+    background-size: 100% 100%;
+}
+
 .ad-content-whatsapp {
     position: absolute;
     bottom: 0;

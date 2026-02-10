@@ -163,6 +163,17 @@
 				</div>
 			</a>
 
+			<!-- Community Investment Ad (New) -->
+			<a
+				href="https://www.melecshop.com/page/investment"
+				target="_blank"
+				class="ad-card investments-community-ad"
+			>
+				<div class="ad-content-whatsapp">
+					<p>{$t.sidebar.investmentsCommunity}</p>
+				</div>
+			</a>
+
 			<div class="ad-status">
 				{$t.sidebar.sponsored}
 			</div>
