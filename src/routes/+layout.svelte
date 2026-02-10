@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from "svelte";
 	import favicon from "$lib/assets/favicon.svg";
 	import "../app.css";
 	import { lang, t } from "$lib/i18n.js";
@@ -16,6 +17,14 @@
 			document.documentElement.dir = newLang === "he" ? "rtl" : "ltr";
 		}
 	}
+
+	// Set direction on initial load
+	onMount(() => {
+		if (typeof document !== "undefined") {
+			document.documentElement.lang = $lang;
+			document.documentElement.dir = $lang === "he" ? "rtl" : "ltr";
+		}
+	});
 
 	let showLangMenu = $state(false);
 </script>

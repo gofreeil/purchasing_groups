@@ -39,12 +39,12 @@ export const translations = readable({
         },
         purchases: {
             cellular: {
-                title: "קו הסלולר הזול במדינה בהתחייבות!",
+                title: "קו הסלולר הזול במדינה!",
                 desc: "החל מ-15 ש\"ח לחודש. השאר את הפרטים בטופס ותהנה מהנחה ייחודית רק לנו!",
                 alt: "סלולר"
             },
             internet: {
-                title: "אינטרנט ביתי הזול במדינה בהתחייבות!",
+                title: "אינטרנט ביתי הזול במדינה!",
                 desc: "צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.",
                 alt: "אינטרנט"
             },
@@ -54,7 +54,7 @@ export const translations = readable({
                 alt: "דלק"
             },
             carInsurance: {
-                title: "ביטוח רכב הזול במדינה בהתחייבות!",
+                title: "ביטוח רכב הזול במדינה!",
                 desc: "צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.",
                 alt: "ביטוח רכב"
             },
@@ -114,12 +114,12 @@ export const translations = readable({
         },
         purchases: {
             cellular: {
-                title: "Cheapest mobile line in the country guaranteed!",
+                title: "Cheapest mobile line in the country!",
                 desc: "Starting from 15 ILS per month. Leave details in the form and enjoy a unique discount just for us!",
                 alt: "Cellular"
             },
             internet: {
-                title: "Cheapest home internet in the country guaranteed!",
+                title: "Cheapest home internet in the country!",
                 desc: "Our team is working to find the most profitable deal for us.",
                 alt: "Internet"
             },
@@ -129,7 +129,7 @@ export const translations = readable({
                 alt: "Fuel"
             },
             carInsurance: {
-                title: "Cheapest car insurance in the country guaranteed!",
+                title: "Cheapest car insurance in the country!",
                 desc: "Our team is working to find the most profitable deal for us.",
                 alt: "Car Insurance"
             },
@@ -189,12 +189,12 @@ export const translations = readable({
         },
         purchases: {
             cellular: {
-                title: "Самая дешевая мобильная связь в стране гарантирована!",
+                title: "Самая дешевая мобильная связь в стране!",
                 desc: "От 15 шекелей в месяц. Оставьте данные в форме и получите уникальную скидку только для нас!",
                 alt: "Мобильная связь"
             },
             internet: {
-                title: "Самый дешевый домашний интернет в стране гарантирован!",
+                title: "Самый дешевый домашний интернет в стране!",
                 desc: "Наша команда работает над поиском наиболее выгодного предложения для нас.",
                 alt: "Интернет"
             },
@@ -204,7 +204,7 @@ export const translations = readable({
                 alt: "Топливо"
             },
             carInsurance: {
-                title: "Самая дешевая страховка автомобиля в стране гарантирована!",
+                title: "Самая дешевая страховка автомобиля в стране!",
                 desc: "Наша команда работает над поиском наиболее выгодного предложения для нас.",
                 alt: "Страховка авто"
             },
