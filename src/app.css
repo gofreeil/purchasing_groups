@@ -298,7 +298,7 @@ a {
 
 .features-grid {
     display: grid;
-    grid-template-columns: 1fr 1.5fr 1fr;
+    grid-template-columns: 1fr 1.5fr;
     gap: 2rem;
     margin-bottom: 4rem;
 }
@@ -608,18 +608,6 @@ a {
     color: var(--border-color);
 }
 
-.footer-dedication {
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.footer-dedication p {
-    margin: 0;
-    color: var(--text-gray);
-    font-size: 0.75rem;
-    opacity: 0.7;
-}
 
 @media (max-width: 768px) {
     .main-layout {

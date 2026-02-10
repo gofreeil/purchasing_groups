@@ -88,6 +88,17 @@
 				</div>
 			</a>
 
+			<!-- Investment Ad (Fourth) -->
+			<a
+				href="https://www.melecshop.com/page/investment"
+				target="_blank"
+				class="ad-card investment-ad"
+			>
+				<div class="ad-content-whatsapp">
+					<p>השקעות קבוצתיות בעסקים ונדל"ן</p>
+				</div>
+			</a>
+
 			<div class="ad-status">תוכן שיווקי</div>
 
 			<div class="promo-placeholder">
@@ -105,25 +116,18 @@
 	<footer class="main-footer">
 		<div class="footer-container">
 			<div class="footer-top">
-				<span>לכלל פעילות התנועה החברתית יוצאים לחירות הקלק:</span>
 				<a
 					href="https://www.melecshop.com/"
 					target="_blank"
 					class="liberty-link">יוצאים לחירות בונים עולם חדש!</a
 				>
+				<span>לכלל פעילות התנועה החברתית יוצאים לחירות הקלק:</span>
 			</div>
 
 			<div class="footer-links">
 				<a href="mailto:support@melecshop.com">צור קשר</a>
 				<span class="dot">·</span>
 				<a href="/privacy">מדיניות פרטיות</a>
-			</div>
-
-			<div class="footer-dedication">
-				<p>
-					אינדקס בעלי העסקים תחת 7 מצוות בני נח לעילוי נשמת קלמן
-					אליעזר בן יוסף צדוק
-				</p>
 			</div>
 		</div>
 	</footer>

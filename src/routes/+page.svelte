@@ -35,19 +35,6 @@
             allowfullscreen
         ></iframe>
     </div>
-
-    <div class="cta-box">
-        <a
-            href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
-            target="_blank"
-        >
-            <img
-                src="/assets/whatsapp_cta.png"
-                alt="הצטרפו לקבוצה"
-                class="whatsapp-cta-img"
-            />
-        </a>
-    </div>
 </div>
 
 <div class="section-title">
@@ -166,64 +153,4 @@
     >
         עסקאות נוספות יצטרפו לפי ההצבעה בקבוצת הווצאפ, מי שנוכח קובע!
     </h2>
-</div>
-
-<hr
-    style="border: 0; border-top: 1px solid var(--border-color); margin: 3rem 0;"
-/>
-
-<div class="secondary-title">
-    <h2>חנויות בהנחה קבועה לחבריי יוצאים לחירות</h2>
-</div>
-
-<div class="shops-grid">
-    <!-- Hukuk -->
-    <div class="shop-card">
-        <div class="shop-img-container">
-            <a href="https://www.melecshop.com/page/hukuk">
-                <img src="/assets/hukuk.png" alt="חוות חוקוק" />
-            </a>
-        </div>
-        <div class="shop-details">
-            <h3>חוות חוקוק</h3>
-            <p>
-                מוצרי בריאות מגידולים אקוופונים עד הבית. סדרה של עלים טריים
-                להכנת שייקים, פטריות ועוד.
-            </p>
-        </div>
-        <div class="shop-benefit">
-            <span class="benefit-text">הנחה קבועה בשווי 10%</span>
-            <a href="https://www.melecshop.com/page/hukuk" class="shop-link-btn"
-                >לעוד פרטים</a
-            >
-        </div>
-    </div>
-
-    <!-- Go Nuts -->
-    <div class="shop-card">
-        <div class="shop-img-container">
-            <a href="https://gonuts.co.il/" target="_blank">
-                <img src="/assets/gonuts.jpg" alt="GO NUTS" />
-            </a>
-        </div>
-        <div class="shop-details">
-            <h3>GO NUTS - פיצוחים טריים</h3>
-            <p>
-                מוצרים משגעים, טריות ואיכות ללא פשרה, רמת פרימיום בלבד! בקליית
-                בוטיק, מוצרי בריאות הביתה, מתנות בריאות: מארזים או מגשים למי
-                שאוהבים.
-            </p>
-        </div>
-        <div class="shop-benefit">
-            <span class="benefit-text">מתנה בשווי 10% מהקנייה</span>
-            <p style="font-size: 0.9rem; color: #facc15; margin-bottom: 1rem;">
-                יש לכתוב בהערה את הקוד "יוצאים לחירות"
-            </p>
-            <a
-                href="https://gonuts.co.il/"
-                target="_blank"
-                class="shop-link-btn">לחנות</a
-            >
-        </div>
-    </div>
 </div>
