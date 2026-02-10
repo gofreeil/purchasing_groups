@@ -212,6 +212,13 @@ a {
     background-size: 100% 100%;
 }
 
+.investment-ad {
+    background-color: #1e293b;
+    /* Placeholder color until image is provided */
+    background-image: url('/assets/investment.png');
+    background-size: 100% 100%;
+}
+
 .ad-content-whatsapp {
     position: absolute;
     bottom: 0;
@@ -566,33 +573,47 @@ a {
     margin: 0 auto;
     text-align: center;
     display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .footer-top {
-    font-size: 0.9rem;
-    color: var(--text-gray);
+    font-size: 0.95rem;
+    color: var(--text-white);
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
 .liberty-link {
-    color: var(--primary-blue);
+    background: #525fe1;
+    color: white !important;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
     font-weight: bold;
-    text-decoration: underline;
+    text-decoration: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+}
+
+.liberty-link:hover {
+    background: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(82, 95, 225, 0.3);
 }
 
 .footer-links {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     gap: 0.8rem;
     flex-wrap: wrap;
     font-size: 0.85rem;
+    margin-right: auto;
 }
 
 .footer-links a {

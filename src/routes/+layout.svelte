@@ -116,12 +116,14 @@
 	<footer class="main-footer">
 		<div class="footer-container">
 			<div class="footer-top">
+				<span>לכלל פעילות התנועה החברתית יוצאים לחירות הקלק:</span>
 				<a
 					href="https://www.melecshop.com/"
 					target="_blank"
-					class="liberty-link">יוצאים לחירות בונים עולם חדש!</a
+					class="liberty-link"
 				>
-				<span>לכלל פעילות התנועה החברתית יוצאים לחירות הקלק:</span>
+					יוצאים לחירות בונים עולם חדש!
+				</a>
 			</div>
 
 			<div class="footer-links">

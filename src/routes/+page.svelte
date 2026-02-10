@@ -2,10 +2,6 @@
     <title>רכישות קבוצתיות - עוצמה בצרכנות</title>
 </svelte:head>
 
-<section class="hero-banner">
-    <h1>רכישות קבוצתיות והטבות לחברי התנועה החברתית יוצאים לחירות!</h1>
-</section>
-
 <div class="features-grid">
     <div class="feature-box">
         <ul class="feature-list">
