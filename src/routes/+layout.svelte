@@ -100,6 +100,38 @@
 			</div>
 		</aside>
 	</div>
+
+	<!-- Footer -->
+	<footer class="main-footer">
+		<div class="footer-container">
+			<div class="footer-top">
+				<p>לכלל פעילות התנועה החברתית יוצאים לחירות הקלק:</p>
+				<a
+					href="https://www.melecshop.com/"
+					target="_blank"
+					class="liberty-btn">יוצאים לחירות בונים עולם חדש!</a
+				>
+			</div>
+
+			<div class="footer-middle">
+				<a
+					href="https://docs.google.com/forms/d/e/1FAIpQLScwLo3V6wBwv-PcZYNGx9TDsVAQUvsRuQw5wUeuO_h_90C1tQ/viewform?usp=header"
+					target="_blank">דווח על עסק המפר את מדיניות הקהילה</a
+				>
+				<span class="separator">|</span>
+				<a href="mailto:support@melecshop.com">צור קשר</a>
+				<span class="separator">|</span>
+				<a href="/privacy">מדיניות פרטיות</a>
+			</div>
+
+			<div class="footer-bottom">
+				<p>
+					אינדקס בעלי העסקים תחת 7 מצוות בני נח לעילוי נשמת קלמן
+					אליעזר בן יוסף צדוק
+				</p>
+			</div>
+		</div>
+	</footer>
 </div>
 
 <style>
