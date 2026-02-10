@@ -1,3 +1,20 @@
+<script>
+    import { onMount } from "svelte";
+    import { tweened } from "svelte/motion";
+    import { cubicOut } from "svelte/easing";
+
+    // הגדר כאן את מספר החברים הנוכחי בקבוצה
+    let targetCount = 475;
+    const count = tweened(0, {
+        duration: 2000,
+        easing: cubicOut,
+    });
+
+    onMount(() => {
+        count.set(targetCount);
+    });
+</script>
+
 <svelte:head>
     <title>רכישות קבוצתיות - עוצמה בצרכנות</title>
 </svelte:head>
@@ -22,14 +39,21 @@
         </ul>
     </div>
 
-    <div class="video-placeholder">
-        <iframe
-            src="https://www.youtube.com/embed/pl7kV6-aTEw"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-        ></iframe>
+    <div class="video-section">
+        <div class="video-placeholder">
+            <iframe
+                src="https://www.youtube.com/embed/pl7kV6-aTEw"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+            ></iframe>
+        </div>
+
+        <div class="whatsapp-counter">
+            <div class="counter-number">{Math.floor($count)}</div>
+            <div class="counter-text">חברים בקבוצה</div>
+        </div>
     </div>
 </div>
 
