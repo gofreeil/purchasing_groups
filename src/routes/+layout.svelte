@@ -1,13 +1,28 @@
 <script>
 	import favicon from "$lib/assets/favicon.svg";
 	import "../app.css";
+	import { lang, t } from "$lib/i18n.js";
 
 	let { children } = $props();
+
+	/**
+	 * @param {string} newLang
+	 */
+	function toggleLang(newLang) {
+		$lang = newLang;
+		// Update HTML lang attribute for accessibility and RTL
+		if (typeof document !== "undefined") {
+			document.documentElement.lang = newLang;
+			document.documentElement.dir = newLang === "he" ? "rtl" : "ltr";
+		}
+	}
+
+	let showLangMenu = $state(false);
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>רכישות קבוצתיות יוצאים לחירות</title>
+	<title>{$t.title}</title>
 </svelte:head>
 
 <div class="app-wrapper">
@@ -16,12 +31,16 @@
 		<div class="header-container">
 			<a href="/" class="right-branding">
 				<div class="logo-container">
-					<img src="/assets/logo.png" alt="לוגו" class="main-logo" />
+					<img
+						src="/assets/logo.png"
+						alt={$t.logoAlt}
+						class="main-logo"
+					/>
 				</div>
 				<div class="titles">
-					<h1 class="main-title">רכישות קבוצתיות יוצאים לחירות</h1>
+					<h1 class="main-title">{$t.title}</h1>
 					<p class="sub-title">
-						הצטרף והוזל עכשיו את ההוצאות החודשיות שלך
+						{$t.subtitle}
 					</p>
 				</div>
 			</a>
@@ -30,12 +49,54 @@
 				<a
 					href="https://docs.google.com/forms/d/e/1FAIpQLSe2wvCp484_PyoJyDZ_n8GupIQVy00ozt5rxOhsWklr7UPkXQ/viewform?usp=header"
 					target="_blank"
-					class="add-business-btn">+ הוסף הצעה</a
+					class="add-business-btn">{$t.addOffer}</a
 				>
 
-				<a href="/auth/login" class="login-link">התחברות</a>
-				<div class="lang-selector">
-					עברית IL <span class="chevron">⌄</span>
+				<a href="/auth/login" class="login-link">{$t.login}</a>
+
+				<div class="lang-selector-container">
+					<button
+						class="lang-selector-btn"
+						onclick={() => (showLangMenu = !showLangMenu)}
+					>
+						{#if $lang === "he"}
+							<span class="flag">🇮🇱</span> עברית
+						{:else if $lang === "en"}
+							<span class="flag">🇺🇸</span> English
+						{:else}
+							<span class="flag">🇷🇺</span> Русский
+						{/if}
+						<span class="chevron">⌄</span>
+					</button>
+
+					{#if showLangMenu}
+						<div class="lang-dropdown">
+							<button
+								onclick={() => {
+									toggleLang("he");
+									showLangMenu = false;
+								}}
+							>
+								<span class="flag">🇮🇱</span> עברית
+							</button>
+							<button
+								onclick={() => {
+									toggleLang("en");
+									showLangMenu = false;
+								}}
+							>
+								<span class="flag">🇺🇸</span> English
+							</button>
+							<button
+								onclick={() => {
+									toggleLang("ru");
+									showLangMenu = false;
+								}}
+							>
+								<span class="flag">🇷🇺</span> Русский
+							</button>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -56,10 +117,7 @@
 				class="ad-card groups-ad"
 			>
 				<div class="ad-content-whatsapp">
-					<p>
-						הצטרף עכשיו לקבוצת הווצאפ השקטה שלנו כדי להיות שותף
-						בהנחות החודשיות
-					</p>
+					<p>{$t.sidebar.whatsapp}</p>
 				</div>
 			</a>
 
@@ -70,10 +128,7 @@
 				class="ad-card neighborhoods-ad"
 			>
 				<div class="ad-content-whatsapp">
-					<p>
-						הצטרף לפרוייקט ועדי השכונות לקידום חברה מתוקנת שבה העם
-						שולט על מוסדותיו
-					</p>
+					<p>{$t.sidebar.neighborhoods}</p>
 				</div>
 			</a>
 
@@ -84,7 +139,7 @@
 				class="ad-card special-ad"
 			>
 				<div class="ad-content-whatsapp">
-					<p>רוצה הנחה אצל בעלי מקצוע כשירים?</p>
+					<p>{$t.sidebar.craftsmen}</p>
 				</div>
 			</a>
 
@@ -95,18 +150,26 @@
 				class="ad-card investment-ad"
 			>
 				<div class="ad-content-whatsapp">
-					<p>השקעות קבוצתיות בעסקים ונדל"ן</p>
+					<p>{$t.sidebar.investments}</p>
 				</div>
 			</a>
 
-			<div class="ad-status">תוכן שיווקי</div>
+			<div class="ad-status">
+				{$t.sidebar.sponsored}
+			</div>
 
 			<div class="promo-placeholder">
 				<div class="plus-icon">+</div>
-				<p class="promo-text">מקום פרסום זה יכול להיות שלך</p>
+				<p class="promo-text">
+					{$t.sidebar.yourAdHere}
+				</p>
 				<div class="contact-links">
-					<a href="mailto:support@melecshop.com">רוצים לפרסם כאן?</a>
-					<a href="mailto:support@melecshop.com">צור קשר</a>
+					<a href="mailto:support@melecshop.com"
+						>{$t.sidebar.advertise}</a
+					>
+					<a href="mailto:support@melecshop.com"
+						>{$t.sidebar.contact}</a
+					>
 				</div>
 			</div>
 		</aside>
@@ -116,26 +179,98 @@
 	<footer class="main-footer">
 		<div class="footer-container">
 			<div class="footer-top">
-				<span>לכלל פעילות התנועה החברתית יוצאים לחירות הקלק:</span>
+				<span>{$t.footer.clickForActivity}</span>
 				<a
 					href="https://www.melecshop.com/"
 					target="_blank"
 					class="liberty-link"
 				>
-					יוצאים לחירות בונים עולם חדש!
+					{$t.footer.libertyLink}
 				</a>
 			</div>
 
 			<div class="footer-links">
-				<a href="mailto:support@melecshop.com">צור קשר</a>
+				<a href="mailto:support@melecshop.com">{$t.footer.contactUs}</a>
 				<span class="dot">|</span>
-				<a href="/privacy">מדיניות פרטיות</a>
+				<a href="/privacy">{$t.footer.privacy}</a>
 			</div>
 		</div>
 	</footer>
 </div>
 
 <style>
-	/* Styles will be moved to app.css for better organization, 
-	   but basic layout logic stays here */
+	.lang-selector-container {
+		position: relative;
+	}
+
+	.lang-selector-btn {
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid var(--border-color);
+		color: var(--text-white);
+		padding: 0.5rem 1rem;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		font-size: 0.9rem;
+		transition: all 0.2s;
+	}
+
+	.lang-selector-btn:hover {
+		background: rgba(255, 255, 255, 0.15);
+	}
+
+	.lang-dropdown {
+		position: absolute;
+		top: calc(100% + 0.5rem);
+		left: 0;
+		background: var(--bg-header);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+		display: flex;
+		flex-direction: column;
+		width: 140px;
+		z-index: 1001;
+		animation: slideDown 0.2s ease-out;
+	}
+
+	@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.lang-dropdown button {
+		background: none;
+		border: none;
+		color: var(--text-white);
+		padding: 0.8rem 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.8rem;
+		cursor: pointer;
+		text-align: right;
+		font-size: 0.9rem;
+		transition: background 0.2s;
+	}
+
+	.lang-dropdown button:hover {
+		background: rgba(255, 255, 255, 0.05);
+	}
+
+	.flag {
+		font-size: 1.2rem;
+	}
+
+	.chevron {
+		font-size: 0.8rem;
+		opacity: 0.7;
+	}
 </style>

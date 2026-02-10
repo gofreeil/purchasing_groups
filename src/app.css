@@ -52,13 +52,13 @@ a {
 
 .main-layout {
     display: grid;
-    grid-template-columns: var(--sidebar-width) 1fr;
+    grid-template-columns: 1fr var(--sidebar-width);
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
     padding-top: 150px;
     /* Space for the fixed header */
-    gap: 2rem;
+    gap: 3rem;
     width: 100%;
     box-sizing: border-box;
 }
@@ -352,11 +352,11 @@ a {
 }
 
 .top-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
     margin-bottom: 2rem;
-    align-items: stretch;
+    align-items: center;
 }
 
 .video-container-large {
