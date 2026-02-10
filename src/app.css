@@ -385,7 +385,7 @@ a {
 }
 
 .count-big-number {
-    font-size: 6rem;
+    font-size: 4rem;
     font-weight: 950;
     color: #4ade80;
     line-height: 1;
@@ -393,7 +393,7 @@ a {
 }
 
 .count-label-text {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
     color: var(--text-white);
     font-weight: 700;
     letter-spacing: 1px;
@@ -403,29 +403,11 @@ a {
     animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
-.fly-in-left {
-    animation: flyFromLeft 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-}
-
 @keyframes flyFromRight {
     0% {
         opacity: 0;
-        transform: translateX(100vw) scale(2);
-        filter: blur(20px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-        filter: blur(0);
-    }
-}
-
-@keyframes flyFromLeft {
-    0% {
-        opacity: 0;
-        transform: translateX(-100vw) scale(2);
-        filter: blur(20px);
+        transform: translateX(50vw) scale(1.5);
+        filter: blur(15px);
     }
 
     100% {

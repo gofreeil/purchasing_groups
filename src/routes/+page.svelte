@@ -51,9 +51,9 @@
 </div>
 
 <div class="whatsapp-counter-final">
-    <div class="counter-merge-wrapper">
-        <div class="count-big-number fly-in-right">{Math.floor($count)}</div>
-        <div class="count-label-text fly-in-left">חברים בקבוצה</div>
+    <div class="counter-merge-wrapper fly-in-right">
+        <div class="count-big-number">{Math.floor($count)}</div>
+        <div class="count-label-text">חברים בקבוצה</div>
     </div>
 </div>
 
