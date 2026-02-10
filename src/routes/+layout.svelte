@@ -77,6 +77,9 @@
 				target="_blank"
 				class="ad-card special-ad"
 			>
+				<div class="ad-content-whatsapp">
+					<p>רוצה הנחה אצל בעלי מקצוע כשירים?</p>
+				</div>
 			</a>
 
 			<div class="ad-status">תוכן שיווקי</div>

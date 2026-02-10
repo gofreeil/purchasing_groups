@@ -13,6 +13,6 @@
             הצטרפו למהפכת הרכישה המשותפת. יחד אנחנו חזקים יותר, משפיעים יותר
             וחוסכים יותר.
         </p>
-        <button class="cta-button">גלה קבוצות פעילות</button>
+        <button class="cta-button">צפו בקבוצות הרכישה</button>
     </section>
 </main>
