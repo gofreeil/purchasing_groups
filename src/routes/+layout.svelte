@@ -154,7 +154,7 @@
 
 			<!-- Community Investment Ad (New) -->
 			<a
-				href="https://www.melecshop.com/page/investment"
+				href="https://chat.whatsapp.com/ECzrpGuufdd1ODIwO4YPWM"
 				target="_blank"
 				class="ad-card investments-community-ad"
 			>
