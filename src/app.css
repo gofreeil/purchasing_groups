@@ -316,7 +316,7 @@ a {
 
 .feature-box {
     background: var(--card-bg);
-    padding: 3rem;
+    padding: 1.5rem;
     border-radius: 20px;
     border: 1px solid var(--border-color);
     width: 100%;
@@ -329,7 +329,7 @@ a {
     margin: 0;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .feature-list li {

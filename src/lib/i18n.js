@@ -24,7 +24,7 @@ export const translations = readable({
             features: [
                 { icon: "💰", text: "ההנחה משמעותית בכל ההוצאות החודשיות." },
                 { icon: "🛒", text: "התארגנות לכרטיס מועדון עם הנחות בחנויות המותגים." },
-                { icon: "🍎", text: "התארגנות לרכישת ירקות ופירות היישר מהחקלאי עד לשכונה." },
+                { icon: "🥬🥕🍅", text: "התארגנות לרכישת ירקות ופירות היישר מהחקלאי עד לשכונה." },
                 { icon: "💵", text: "שמירה על זכות המזומן וייעול השימוש בו." }
             ],
             membersCount: "חברים בקבוצה",
@@ -99,7 +99,7 @@ export const translations = readable({
             features: [
                 { icon: "💰", text: "Significant discount on all monthly expenses." },
                 { icon: "🛒", text: "Organizing a club card with discounts at brand stores." },
-                { icon: "🍎", text: "Organizing for purchasing vegetables and fruits directly from the farmer to the neighborhood." },
+                { icon: "🥬🥕🍅", text: "Organizing for purchasing vegetables and fruits directly from the farmer to the neighborhood." },
                 { icon: "💵", text: "Preserving the right to cash and optimizing its use." }
             ],
             membersCount: "Group Members",
@@ -174,7 +174,7 @@ export const translations = readable({
             features: [
                 { icon: "💰", text: "Значительная скидка на все ежемесячные расходы." },
                 { icon: "🛒", text: "Организация клубной карты со скидками в брендовых магазинах." },
-                { icon: "🍎", text: "Организация закупки овощей и фруктов напрямую от фермера в район." },
+                { icon: "🥬🥕🍅", text: "Организация закупки овощей и фруктов напрямую от фермера в район." },
                 { icon: "💵", text: "Сохранение права на наличные и оптимизация их использования." }
             ],
             membersCount: "Участников в группе",
