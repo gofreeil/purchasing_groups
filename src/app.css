@@ -774,7 +774,7 @@ a {
 
     .sidebar-ads {
         width: 100%;
-        order: -1;
+        order: 2;
     }
 
     .content-area {
