@@ -128,7 +128,7 @@
 
 			<div class="footer-links">
 				<a href="mailto:support@melecshop.com">צור קשר</a>
-				<span class="dot">·</span>
+				<span class="dot">|</span>
 				<a href="/privacy">מדיניות פרטיות</a>
 			</div>
 		</div>

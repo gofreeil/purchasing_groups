@@ -20,6 +20,16 @@
 </svelte:head>
 
 <div class="top-content">
+    <div class="video-container-large">
+        <iframe
+            src="https://www.youtube.com/embed/pl7kV6-aTEw"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+        ></iframe>
+    </div>
+
     <div class="feature-box">
         <ul class="feature-list">
             <li>
@@ -37,16 +47,6 @@
                 <span class="check">✓</span> שמירה על זכות המזומן וייעול השימוש בו.
             </li>
         </ul>
-    </div>
-
-    <div class="video-container-large">
-        <iframe
-            src="https://www.youtube.com/embed/pl7kV6-aTEw"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-        ></iframe>
     </div>
 </div>
 
