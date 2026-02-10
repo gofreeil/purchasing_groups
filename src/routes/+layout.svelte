@@ -27,7 +27,22 @@
 	});
 
 	let showLangMenu = $state(false);
+
+	/**
+	 * @param {MouseEvent} event
+	 */
+	function handleClickOutside(event) {
+		if (
+			showLangMenu &&
+			event.target instanceof Element &&
+			!event.target.closest(".lang-selector")
+		) {
+			showLangMenu = false;
+		}
+	}
 </script>
+
+<svelte:window onclick={handleClickOutside} />
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
