@@ -55,7 +55,7 @@ a {
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
-    padding-top: 120px;
+    padding-top: 150px;
     /* Space for the fixed header */
     gap: 2rem;
     width: 100%;
@@ -347,35 +347,79 @@ a {
     justify-content: center;
 }
 
-.video-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+.top-content {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    align-items: center;
 }
 
-.whatsapp-counter {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-color);
-    border-radius: 15px;
-    padding: 1rem;
+.video-container-large {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.video-container-large iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.whatsapp-counter-standalone {
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    min-height: 100px;
+    margin: 3rem 0;
+    overflow: hidden;
+}
+
+.counter-content {
+    text-align: center;
+    animation: convergeFast 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
 .counter-number {
-    font-size: 2.5rem;
-    font-weight: 800;
+    font-size: 4.5rem;
+    font-weight: 900;
     color: #4ade80;
     line-height: 1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 30px rgba(74, 222, 128, 0.3);
 }
 
 .counter-text {
-    font-size: 1.1rem;
-    color: var(--text-gray);
-    margin-top: 0.5rem;
+    font-size: 1.5rem;
+    color: var(--text-white);
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+@keyframes convergeFast {
+    0% {
+        opacity: 0;
+        transform: scale(3);
+        filter: blur(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+    }
+}
+
+@media (max-width: 1024px) {
+    .top-content {
+        grid-template-columns: 1fr;
+    }
+
+    .counter-number {
+        font-size: 3rem;
+    }
 }
 
 .cta-box {

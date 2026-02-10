@@ -6,7 +6,7 @@
     // הגדר כאן את מספר החברים הנוכחי בקבוצה
     let targetCount = 475;
     const count = tweened(0, {
-        duration: 2000,
+        duration: 800,
         easing: cubicOut,
     });
 
@@ -19,7 +19,7 @@
     <title>רכישות קבוצתיות - עוצמה בצרכנות</title>
 </svelte:head>
 
-<div class="features-grid">
+<div class="top-content">
     <div class="feature-box">
         <ul class="feature-list">
             <li>
@@ -39,8 +39,7 @@
         </ul>
     </div>
 
-    <div class="video-section">
-        <div class="video-placeholder">
+    <div class="video-container-large">
             <iframe
                 src="https://www.youtube.com/embed/pl7kV6-aTEw"
                 title="YouTube video player"
@@ -50,10 +49,13 @@
             ></iframe>
         </div>
 
-        <div class="whatsapp-counter">
-            <div class="counter-number">{Math.floor($count)}</div>
-            <div class="counter-text">חברים בקבוצה</div>
-        </div>
+    </div>
+</div>
+
+<div class="whatsapp-counter-standalone">
+    <div class="counter-content">
+        <div class="counter-number">{Math.floor($count)}</div>
+        <div class="counter-text">חברים בקבוצה</div>
     </div>
 </div>
 
