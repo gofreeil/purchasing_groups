@@ -65,7 +65,7 @@
 
 			<!-- Neighborhoods Ad (Second) -->
 			<a
-				href="https://www.melecshop.com/"
+				href="https://www.melecshop.com/page/peace-on-earth_VRHH"
 				target="_blank"
 				class="ad-card neighborhoods-ad"
 			>

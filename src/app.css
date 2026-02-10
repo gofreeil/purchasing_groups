@@ -198,7 +198,8 @@ a {
 
 /* Backgrounds for ads - will use your images */
 .neighborhoods-ad {
-    background-image: url('/assets/ad_neighborhoods.png');
+    background-image: url('/assets/ועדי שכונות.png');
+    background-size: 100% 100%;
 }
 
 .groups-ad {
