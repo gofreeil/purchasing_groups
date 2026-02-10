@@ -51,7 +51,8 @@ a {
 }
 
 .main-layout {
-    display: flex;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
@@ -59,6 +60,7 @@ a {
     /* Space for the fixed header */
     gap: 2rem;
     width: 100%;
+    box-sizing: border-box;
 }
 
 /* Header Sections */
@@ -149,6 +151,8 @@ a {
 /* Sidebar Advertising */
 .sidebar-ads {
     width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
