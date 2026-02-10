@@ -163,6 +163,16 @@
 				</div>
 			</a>
 
+			<!-- Grow Food Ad (Fifth) -->
+			<div class="ad-card grow-food-ad">
+				<div class="ribbon-wrapper">
+					<div class="ribbon">{$t.sidebar.soonTag}</div>
+				</div>
+				<div class="ad-content-whatsapp">
+					<p>{$t.sidebar.growFood}</p>
+				</div>
+			</div>
+
 			<div class="ad-status">
 				{$t.sidebar.sponsored}
 			</div>
