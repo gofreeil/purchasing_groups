@@ -61,6 +61,12 @@
 				target="_blank"
 				class="ad-card groups-ad"
 			>
+				<div class="ad-content-whatsapp">
+					<p>
+						הצטרף עכשיו לקבוצת הווצאפ השקטה שלנו כדי להיות שותף
+						בהנחות החודשיות
+					</p>
+				</div>
 			</a>
 
 			<div class="ad-status">תוכן שיווקי</div>
