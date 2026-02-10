@@ -206,6 +206,30 @@ a {
     background-size: 100% 100%;
 }
 
+.special-ad {
+    background-image: url('/assets/צילום מסך 2025-01-09 230951.png');
+    background-size: 100% 100%;
+}
+
+.ad-content-whatsapp {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 0.8rem;
+    text-align: center;
+}
+
+.ad-content-whatsapp p {
+    color: white;
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: bold;
+    line-height: 1.4;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
 .ad-status {
     text-align: center;
     font-size: 0.75rem;

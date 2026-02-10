@@ -49,13 +49,7 @@
 
 		<!-- Sidebar for Ads -->
 		<aside class="sidebar-ads">
-			<a
-				href="https://www.melecshop.com/"
-				target="_blank"
-				class="ad-card neighborhoods-ad"
-			>
-			</a>
-
+			<!-- WhatsApp Ad (First) -->
 			<a
 				href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
 				target="_blank"
@@ -67,6 +61,22 @@
 						בהנחות החודשיות
 					</p>
 				</div>
+			</a>
+
+			<!-- Neighborhoods Ad (Second) -->
+			<a
+				href="https://www.melecshop.com/"
+				target="_blank"
+				class="ad-card neighborhoods-ad"
+			>
+			</a>
+
+			<!-- New Special Ad (Third) -->
+			<a
+				href="https://index-chi-sage.vercel.app/"
+				target="_blank"
+				class="ad-card special-ad"
+			>
 			</a>
 
 			<div class="ad-status">תוכן שיווקי</div>
