@@ -69,11 +69,23 @@
 						onclick={() => (showLangMenu = !showLangMenu)}
 					>
 						{#if $lang === "he"}
-							<span class="flag">🇮🇱</span> עברית
+							<img
+								src="https://flagcdn.com/24x18/il.png"
+								alt="IL"
+								class="flag-icon"
+							/> עברית
 						{:else if $lang === "en"}
-							<span class="flag">🇺🇸</span> English
+							<img
+								src="https://flagcdn.com/24x18/us.png"
+								alt="US"
+								class="flag-icon"
+							/> English
 						{:else}
-							<span class="flag">🇷🇺</span> Русский
+							<img
+								src="https://flagcdn.com/24x18/ru.png"
+								alt="RU"
+								class="flag-icon"
+							/> Русский
 						{/if}
 						<span class="chevron">⌄</span>
 					</button>
@@ -86,7 +98,11 @@
 									showLangMenu = false;
 								}}
 							>
-								<span class="flag">🇮🇱</span> עברית
+								<img
+									src="https://flagcdn.com/24x18/il.png"
+									alt="IL"
+									class="flag-icon"
+								/> עברית
 							</button>
 							<button
 								onclick={() => {
@@ -94,7 +110,11 @@
 									showLangMenu = false;
 								}}
 							>
-								<span class="flag">🇺🇸</span> English
+								<img
+									src="https://flagcdn.com/24x18/us.png"
+									alt="US"
+									class="flag-icon"
+								/> English
 							</button>
 							<button
 								onclick={() => {
@@ -102,7 +122,11 @@
 									showLangMenu = false;
 								}}
 							>
-								<span class="flag">🇷🇺</span> Русский
+								<img
+									src="https://flagcdn.com/24x18/ru.png"
+									alt="RU"
+									class="flag-icon"
+								/> Русский
 							</button>
 						</div>
 					{/if}
@@ -282,10 +306,6 @@
 
 	.lang-dropdown button:hover {
 		background: rgba(255, 255, 255, 0.05);
-	}
-
-	.flag {
-		font-size: 1.2rem;
 	}
 
 	.chevron {

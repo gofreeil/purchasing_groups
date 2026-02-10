@@ -148,6 +148,15 @@ a {
     cursor: pointer;
 }
 
+.flag-icon {
+    width: 20px;
+    height: auto;
+    border-radius: 2px;
+    margin-inline-end: 0.5rem;
+    vertical-align: middle;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
 /* Sidebar Advertising */
 .sidebar-ads {
     width: var(--sidebar-width);
