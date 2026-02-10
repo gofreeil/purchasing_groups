@@ -56,7 +56,7 @@
 
 			<div class="left-actions">
 				<a
-					href="https://docs.google.com/forms/d/e/1FAIpQLSe2wvCp484_PyoJyDZ_n8GupIQVy00ozt5rxOhsWklr7UPkXQ/viewform?usp=header"
+					href="https://docs.google.com/forms/d/e/1FAIpQLSeK7H6wdZnAddeD7TuQwutsEYAT3AKkMh6L82gX797DVw8sRQ/viewform?usp=dialog"
 					target="_blank"
 					class="add-business-btn">{$t.addOffer}</a
 				>
