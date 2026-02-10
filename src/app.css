@@ -768,7 +768,8 @@ a {
     .main-layout {
         grid-template-columns: 1fr;
         padding: 1rem;
-        padding-top: 100px;
+        padding-top: 130px;
+        /* Adjusted for new header height */
     }
 
     .sidebar-ads {
@@ -780,10 +781,79 @@ a {
         order: 1;
     }
 
+    /* Optimized Mobile Header */
     .main-header {
-        padding: 1rem;
+        padding: 0.5rem;
+        backdrop-filter: blur(15px);
+        /* Ensure blur is strong */
     }
 
+    .header-container {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .right-branding {
+        justify-content: center;
+        width: 100%;
+        gap: 0.8rem;
+        text-align: center;
+    }
+
+    .main-logo {
+        width: 45px;
+        height: 45px;
+        border-width: 1.5px;
+    }
+
+    .titles {
+        text-align: right;
+        flex: 1;
+    }
+
+    .main-title {
+        font-size: 1.1rem;
+        line-height: 1.1;
+        margin: 0;
+    }
+
+    .sub-title {
+        display: none;
+        /* Hide subtitle on mobile to save space */
+    }
+
+    .left-actions {
+        width: 100%;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+        /* Keep in one line if possible */
+    }
+
+    .add-business-btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.85rem;
+        flex-grow: 1;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .login-link {
+        font-size: 0.85rem;
+        padding: 0 0.4rem;
+    }
+
+    .lang-selector {
+        padding: 0.3rem 0.5rem;
+    }
+
+    .flag-icon {
+        width: 16px;
+        margin-inline-end: 4px;
+    }
+
+    /* Content adjustments */
     .feature-list {
         grid-template-columns: 1fr;
     }
@@ -796,15 +866,70 @@ a {
     .footer-top,
     .footer-links {
         flex-direction: column;
-        gap: 0.4rem;
+        gap: 0.5rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-links {
+        margin-right: 0;
+        /* Center footer links */
     }
 
     .dot {
         display: none;
     }
-
-    .left-actions {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
 }
+/* Mobile Optimization - Part 2 */
+@media (max-width: 768px) {
+    /* Counter */
+    .whatsapp-counter-final { margin: 1rem 0 2rem; }
+    .counter-merge-wrapper { gap: 0.8rem; justify-content: center; } 
+    .count-big-number { font-size: 2.5rem; text-shadow: 0 0 15px rgba(74, 222, 128, 0.4); }
+    .count-label-text { font-size: 1rem; line-height: 1.2; }
+
+    /* Section Titles */
+    .section-title { margin: 2rem 0 1rem; }
+    .section-title h2 { font-size: 1.6rem; }
+
+    /* Features */
+    .feature-list { gap: 0.8rem; }
+    .feature-box { padding: 1rem; border-radius: 12px; }
+    .feature-list li { font-size: 0.95rem; padding: 0; gap: 0.6rem; }
+    .feature-list .check { font-size: 1.2rem; }
+
+    /* Video */
+    .video-container-large { border-radius: 12px; }
+
+    /* Purchase Cards */
+    .purchase-card {
+        padding: 1rem;
+        gap: 1rem;
+        border-radius: 12px;
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .purchase-img { width: 60px; height: 60px; margin: 0 auto; }
+    .purchase-info h3 { font-size: 1.2rem; text-align: center; }
+    .purchase-info p { font-size: 0.9rem; text-align: center; }
+
+    .purchase-status {
+        padding: 0.5rem 0 0;
+        text-align: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        align-items: center;
+    }
+    
+    /* Hero Banner fix if exists */
+    .hero-banner { padding: 2rem 1rem; }
+    .hero-banner h1 { font-size: 2rem; }
+
+    /* Ensure purchase list stack */
+    .purchases-list { gap: 1rem; }
+}
+
