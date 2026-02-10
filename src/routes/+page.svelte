@@ -1,18 +1,10 @@
 <svelte:head>
-    <title>רכישות קבוציות - עוצמה בצרכנות</title>
-    <meta
-        name="description"
-        content="פלטפורמה מתקדמת לרכישות קבוציות והטבות בלעדיות לקהילה"
-    />
+    <title>הוזלה להוצאות חודשיות</title>
 </svelte:head>
 
-<main class="premium-container">
-    <section class="hero">
-        <h1 class="title-gradient">הוזלה להוצאות חודשיות</h1>
-        <p class="subtitle">
-            הצטרפו למהפכת הרכישה המשותפת. יחד אנחנו חזקים יותר, משפיעים יותר
-            וחוסכים יותר.
-        </p>
-        <button class="cta-button">צפו בקבוצות הרכישה</button>
-    </section>
-</main>
+<div style="padding: 2rem; text-align: center;">
+    <h1 style="font-size: 3rem; color: white;">הוזלה להוצאות חודשיות</h1>
+    <p style="font-size: 1.5rem; color: #ccc;">
+        ברוכים הבאים לדף הבית של רכישות קבוצתיות.
+    </p>
+</div>
