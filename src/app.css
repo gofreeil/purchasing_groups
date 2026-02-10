@@ -280,7 +280,7 @@ a {
 }
 
 .grow-food-ad {
-    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+    background: url("/assets/מערכת לגידול ביתי.png") center/cover no-repeat;
     position: relative;
     overflow: hidden;
 }
@@ -880,26 +880,63 @@ a {
         display: none;
     }
 }
+
 /* Mobile Optimization - Part 2 */
 @media (max-width: 768px) {
+
     /* Counter */
-    .whatsapp-counter-final { margin: 1rem 0 2rem; }
-    .counter-merge-wrapper { gap: 0.8rem; justify-content: center; } 
-    .count-big-number { font-size: 2.5rem; text-shadow: 0 0 15px rgba(74, 222, 128, 0.4); }
-    .count-label-text { font-size: 1rem; line-height: 1.2; }
+    .whatsapp-counter-final {
+        margin: 1rem 0 2rem;
+    }
+
+    .counter-merge-wrapper {
+        gap: 0.8rem;
+        justify-content: center;
+    }
+
+    .count-big-number {
+        font-size: 2.5rem;
+        text-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+    }
+
+    .count-label-text {
+        font-size: 1rem;
+        line-height: 1.2;
+    }
 
     /* Section Titles */
-    .section-title { margin: 2rem 0 1rem; }
-    .section-title h2 { font-size: 1.6rem; }
+    .section-title {
+        margin: 2rem 0 1rem;
+    }
+
+    .section-title h2 {
+        font-size: 1.6rem;
+    }
 
     /* Features */
-    .feature-list { gap: 0.8rem; }
-    .feature-box { padding: 1rem; border-radius: 12px; }
-    .feature-list li { font-size: 0.95rem; padding: 0; gap: 0.6rem; }
-    .feature-list .check { font-size: 1.2rem; }
+    .feature-list {
+        gap: 0.8rem;
+    }
+
+    .feature-box {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .feature-list li {
+        font-size: 0.95rem;
+        padding: 0;
+        gap: 0.6rem;
+    }
+
+    .feature-list .check {
+        font-size: 1.2rem;
+    }
 
     /* Video */
-    .video-container-large { border-radius: 12px; }
+    .video-container-large {
+        border-radius: 12px;
+    }
 
     /* Purchase Cards */
     .purchase-card {
@@ -909,10 +946,22 @@ a {
         grid-template-columns: 1fr;
         text-align: center;
     }
-    
-    .purchase-img { width: 60px; height: 60px; margin: 0 auto; }
-    .purchase-info h3 { font-size: 1.2rem; text-align: center; }
-    .purchase-info p { font-size: 0.9rem; text-align: center; }
+
+    .purchase-img {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto;
+    }
+
+    .purchase-info h3 {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    .purchase-info p {
+        font-size: 0.9rem;
+        text-align: center;
+    }
 
     .purchase-status {
         padding: 0.5rem 0 0;
@@ -924,12 +973,18 @@ a {
         gap: 0.2rem;
         align-items: center;
     }
-    
+
     /* Hero Banner fix if exists */
-    .hero-banner { padding: 2rem 1rem; }
-    .hero-banner h1 { font-size: 2rem; }
+    .hero-banner {
+        padding: 2rem 1rem;
+    }
+
+    .hero-banner h1 {
+        font-size: 2rem;
+    }
 
     /* Ensure purchase list stack */
-    .purchases-list { gap: 1rem; }
+    .purchases-list {
+        gap: 1rem;
+    }
 }
-
