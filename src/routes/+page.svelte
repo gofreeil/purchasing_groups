@@ -71,16 +71,6 @@
         </div>
     </div>
 
-    <!-- WhatsApp Counter -->
-    <div class="whatsapp-counter-final" bind:this={membersCounterRef}>
-        <div class="counter-merge-wrapper fade-scale-in">
-            <div class="count-big-number">{Math.floor($count)}</div>
-            <div class="count-label-text">
-                {$t.homepage.membersCount}
-            </div>
-        </div>
-    </div>
-
     <div class="feature-box">
         <ul class="feature-list">
             {#each $t.homepage.features as feature}
@@ -90,6 +80,16 @@
                 </li>
             {/each}
         </ul>
+    </div>
+
+    <!-- WhatsApp Counter -->
+    <div class="whatsapp-counter-final" bind:this={membersCounterRef}>
+        <div class="counter-merge-wrapper fade-scale-in">
+            <div class="count-big-number">{Math.floor($count)}</div>
+            <div class="count-label-text">
+                {$t.homepage.membersCount}
+            </div>
+        </div>
     </div>
 </div>
 
