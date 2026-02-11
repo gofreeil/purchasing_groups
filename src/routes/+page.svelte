@@ -21,23 +21,13 @@
 </svelte:head>
 
 <div class="top-content">
-    <!-- WhatsApp Counter - Moved above video -->
+    <!-- WhatsApp Counter - Under banner with 4 tabs -->
     <div class="whatsapp-counter-final">
         <div class="counter-merge-wrapper fade-scale-in">
             <div class="count-big-number">{Math.floor($count)}</div>
             <div class="count-label-text">
                 {$t.homepage.membersCount}
             </div>
-        </div>
-    </div>
-
-    <!-- Annual Savings Counter - Moved above video -->
-    <div class="savings-counter-final">
-        <div class="counter-merge-wrapper fade-scale-in">
-            <div class="count-label-text">
-                {$t.homepage.annualSavings}
-            </div>
-            <div class="count-big-number savings-number">15,227 ש"ח</div>
         </div>
     </div>
 
@@ -49,6 +39,16 @@
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
         ></iframe>
+    </div>
+
+    <!-- Annual Savings Counter - Under video -->
+    <div class="savings-counter-final">
+        <div class="counter-merge-wrapper fade-scale-in">
+            <div class="count-label-text">
+                {$t.homepage.annualSavings}
+            </div>
+            <div class="count-big-number savings-number">15,227 ש"ח</div>
+        </div>
     </div>
 
     <div class="feature-box">
