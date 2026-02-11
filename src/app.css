@@ -799,7 +799,7 @@ a {
 
     /* --- Header (Symmetrical & Beautiful) --- */
     .main-header {
-        padding: 0.8rem 1rem;
+        padding: 1rem 1rem;
         backdrop-filter: blur(20px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
@@ -966,6 +966,8 @@ a {
     .video-container-large {
         border-radius: 16px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        width: 85%;
+        max-width: 950px;
     }
 
     /* Purchase Cards */

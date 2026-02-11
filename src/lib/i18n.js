@@ -31,7 +31,7 @@ export const translations = readable({
                 { icon: "💵", text: "שמירה על זכות המזומן וייעול השימוש בו." }
             ],
             membersCount: "חברים שחוסכים כל חודש",
-            annualSavings: "הקבוצה שלנו חוסכת בשנה:",
+            annualSavings: "הקבוצה שלנו חוסכת השנה:",
             ourPurchases: "הרכישות הקבוצתיות שלנו:",
             nextPurchases: "עסקאות נוספות יצטרפו לפי ההצבעה בקבוצת הווצאפ, מי שנוכח קובע!"
         },
