@@ -21,16 +21,6 @@
 </svelte:head>
 
 <div class="top-content">
-    <!-- WhatsApp Counter - Under banner with 4 tabs -->
-    <div class="whatsapp-counter-final">
-        <div class="counter-merge-wrapper fade-scale-in">
-            <div class="count-big-number">{Math.floor($count)}</div>
-            <div class="count-label-text">
-                {$t.homepage.membersCount}
-            </div>
-        </div>
-    </div>
-
     <div class="video-container-large">
         <iframe
             src="https://www.youtube.com/embed/pl7kV6-aTEw"
@@ -41,13 +31,28 @@
         ></iframe>
     </div>
 
-    <!-- Annual Savings Counter - Under video -->
+    <!-- Annual Savings Counter -->
     <div class="savings-counter-final">
         <div class="counter-merge-wrapper fade-scale-in">
             <div class="count-label-text">
                 {$t.homepage.annualSavings}
             </div>
             <div class="count-big-number savings-number">15,227 ש"ח</div>
+        </div>
+    </div>
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <h1>{$t.homepage.heroTitle || "הצטרף לרכישות קבוצתיות וחסוך אלפי שקלים בשנה"}</h1>
+    </div>
+
+    <!-- WhatsApp Counter -->
+    <div class="whatsapp-counter-final">
+        <div class="counter-merge-wrapper fade-scale-in">
+            <div class="count-big-number">{Math.floor($count)}</div>
+            <div class="count-label-text">
+                {$t.homepage.membersCount}
+            </div>
         </div>
     </div>
 
