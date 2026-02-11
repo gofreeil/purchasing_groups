@@ -21,16 +21,7 @@
 </svelte:head>
 
 <div class="top-content">
-    <div class="video-container-large">
-        <iframe
-            src="https://www.youtube.com/embed/pl7kV6-aTEw"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-        ></iframe>
-    </div>
-
+    <!-- WhatsApp Counter - Moved above video -->
     <div class="whatsapp-counter-final">
         <div class="counter-merge-wrapper fade-scale-in">
             <div class="count-big-number">{Math.floor($count)}</div>
@@ -40,14 +31,24 @@
         </div>
     </div>
 
-    <!-- Annual Savings Counter -->
+    <!-- Annual Savings Counter - Moved above video -->
     <div class="savings-counter-final">
         <div class="counter-merge-wrapper fade-scale-in">
-            <div class="count-big-number savings-number">15,227</div>
             <div class="count-label-text">
                 {$t.homepage.annualSavings}
             </div>
+            <div class="count-big-number savings-number">15,227 ש"ח</div>
         </div>
+    </div>
+
+    <div class="video-container-large">
+        <iframe
+            src="https://www.youtube.com/embed/pl7kV6-aTEw"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+        ></iframe>
     </div>
 
     <div class="feature-box">
