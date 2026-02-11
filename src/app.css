@@ -409,7 +409,7 @@ a {
 .top-content {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 2rem;
     margin-bottom: 1rem;
     align-items: center;
     width: 100%;
@@ -434,7 +434,7 @@ a {
 .whatsapp-counter-final {
     display: flex;
     justify-content: center;
-    margin: 1rem 0 2rem 0;
+    margin: 0.8rem 0 1.5rem 0;
     overflow: hidden;
 }
 
