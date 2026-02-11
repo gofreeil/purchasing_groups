@@ -51,31 +51,36 @@
 </svelte:head>
 
 <div class="top-content">
+    <!-- Main Heading - H1 for accessibility -->
+    <h1 class="main-page-title">{$t.homepage.title || "קבוצת רכישות חוסכונית"}</h1>
+    
     <div class="video-container-large">
         <iframe
             src="https://www.youtube.com/embed/pl7kV6-aTEw"
-            title="YouTube video player"
+            title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
+            tabindex="0"
         ></iframe>
     </div>
 
     <!-- Annual Savings Counter -->
-    <div class="savings-counter-final">
+    <div class="savings-counter-final" role="region" aria-label="חיסכון שנתי">
         <div class="counter-merge-wrapper fade-scale-in">
             <div class="count-label-text">
                 {$t.homepage.annualSavings}
             </div>
-            <div class="count-big-number savings-number">{Math.floor($savings).toLocaleString('he-IL')} ש"ח</div>
+            <div class="count-big-number savings-number" aria-live="polite">{Math.floor($savings).toLocaleString('he-IL')} ש"ח</div>
         </div>
     </div>
 
     <div class="feature-box">
+        <h2 class="features-title">יתרונות הקבוצה</h2>
         <ul class="feature-list">
             {#each $t.homepage.features as feature}
                 <li>
-                    <span class="check">{feature.icon}</span>
+                    <span class="check" aria-hidden="true">{feature.icon}</span>
                     {feature.text}
                 </li>
             {/each}
@@ -83,9 +88,9 @@
     </div>
 
     <!-- WhatsApp Counter -->
-    <div class="whatsapp-counter-final" bind:this={membersCounterRef}>
+    <div class="whatsapp-counter-final" bind:this={membersCounterRef} role="region" aria-label="מספר חברים">
         <div class="counter-merge-wrapper fade-scale-in">
-            <div class="count-big-number">{Math.floor($count)}</div>
+            <div class="count-big-number" aria-live="polite">{Math.floor($count)}</div>
             <div class="count-label-text">
                 {$t.homepage.membersCount}
             </div>
@@ -102,14 +107,14 @@
     <div class="purchase-card">
         <img
             src="/assets/cellular.jpg"
-            alt={$t.purchases.cellular.alt}
+            alt="תמונה המייצגת קבוצה סלולרית עם חברי הקבוצה חוסכים כסף"
             class="purchase-img"
         />
         <div class="purchase-info">
             <h3>
                 <a
                     href="https://docs.google.com/forms/d/e/1FAIpQLSfRCs5W7HUuc5vcOuMGqsqaDubzNBn4YuC4UDbvoFmSCdJAiQ/viewform?usp=header"
-                    target="_blank">{$t.purchases.cellular.title}</a
+                    target="_blank" aria-label="הצטרף לקבוצה הסלולרית">{$t.purchases.cellular.title}</a
                 >
             </h3>
             <p>
@@ -134,7 +139,7 @@
     <div class="purchase-card">
         <img
             src="/assets/internet.jpg"
-            alt={$t.purchases.internet.alt}
+            alt="תמונה המייצגת קבוצת אינטרנט מהירה עם חיסכון לחברי הקבוצה"
             class="purchase-img"
         />
         <div class="purchase-info">
@@ -155,7 +160,7 @@
     <div class="purchase-card">
         <img
             src="/assets/fuel.jpg"
-            alt={$t.purchases.fuel.alt}
+            alt="תמונה המייצגת תחנת דלק עם מחירי דלק מוזלים לחברי הקבוצה"
             class="purchase-img"
         />
         <div class="purchase-info">
@@ -174,7 +179,7 @@
     <div class="purchase-card">
         <img
             src="/assets/car_insurance.png"
-            alt={$t.purchases.carInsurance.alt}
+            alt="תמונה המייצגת ביטוח חברות לרכב עם הנחות לחברי הקבוצה"
             class="purchase-img"
         />
         <div class="purchase-info">
@@ -193,7 +198,7 @@
     <div class="purchase-card">
         <img
             src="/assets/electricity.jpg"
-            alt={$t.purchases.electricity.alt}
+            alt="תמונה המייצגת חשמל חשמוני עם הנחות קבוצתית לחברי הקבוצה"
             class="purchase-img"
         />
         <div class="purchase-info">
@@ -212,7 +217,7 @@
     <div class="purchase-card">
         <img
             src="/assets/coupons.jpg"
-            alt={$t.purchases.coupons.alt}
+            alt="תמונה המייצגת קופונים והנחות לחברי הקבוצה"
             class="purchase-img"
         />
         <div class="purchase-info">
