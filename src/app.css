@@ -782,7 +782,7 @@ a {
     .main-layout {
         grid-template-columns: 1fr;
         padding: 1rem;
-        padding-top: 140px;
+        padding-top: 160px;
         /* Space for the header */
         gap: 2rem;
     }

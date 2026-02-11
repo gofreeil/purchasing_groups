@@ -11,8 +11,38 @@
         easing: cubicOut,
     });
 
+    // הגדרת מונה חיסכון שנתי עם אפקט ספירה
+    let targetSavings = 15227;
+    const savings = tweened(0, {
+        duration: 2000,
+        easing: cubicOut,
+    });
+
+    // Intersection Observer להתחלת ספירת חברים בגלילה
+    let membersCounterRef;
+    let membersCounterVisible = false;
+
+    const handleIntersection = (entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !membersCounterVisible) {
+                membersCounterVisible = true;
+                count.set(targetCount);
+            }
+        });
+    };
+
     onMount(() => {
-        count.set(targetCount);
+        // התחלת ספירת חיסכון מיד
+        savings.set(targetSavings);
+        
+        // הגדרת Intersection Observer לחברים
+        const observer = new IntersectionObserver(handleIntersection, {
+            threshold: 0.5
+        });
+        
+        if (membersCounterRef) {
+            observer.observe(membersCounterRef);
+        }
     });
 </script>
 
@@ -37,17 +67,12 @@
             <div class="count-label-text">
                 {$t.homepage.annualSavings}
             </div>
-            <div class="count-big-number savings-number">15,227 ש"ח</div>
+            <div class="count-big-number savings-number">{Math.floor($savings).toLocaleString('he-IL')} ש"ח</div>
         </div>
     </div>
 
-    <!-- Hero Banner -->
-    <div class="hero-banner">
-        <h1>{$t.homepage.heroTitle || "הצטרף לרכישות קבוצתיות וחסוך אלפי שקלים בשנה"}</h1>
-    </div>
-
     <!-- WhatsApp Counter -->
-    <div class="whatsapp-counter-final">
+    <div class="whatsapp-counter-final" bind:this={membersCounterRef}>
         <div class="counter-merge-wrapper fade-scale-in">
             <div class="count-big-number">{Math.floor($count)}</div>
             <div class="count-label-text">
