@@ -977,10 +977,6 @@ a {
         text-align: center;
         margin: 1rem 0 2rem 0;
         font-weight: 700;
-        background: linear-gradient(to right, #facc15, #fb923c);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
     }
 
     /* Features Title - Accessibility */
