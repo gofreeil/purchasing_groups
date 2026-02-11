@@ -40,6 +40,16 @@
         </div>
     </div>
 
+    <!-- Annual Savings Counter -->
+    <div class="savings-counter-final">
+        <div class="counter-merge-wrapper fade-scale-in">
+            <div class="count-big-number savings-number">15,227</div>
+            <div class="count-label-text">
+                {$t.homepage.annualSavings}
+            </div>
+        </div>
+    </div>
+
     <div class="feature-box">
         <ul class="feature-list">
             {#each $t.homepage.features as feature}

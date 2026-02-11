@@ -31,6 +31,7 @@ export const translations = readable({
                 { icon: "💵", text: "שמירה על זכות המזומן וייעול השימוש בו." }
             ],
             membersCount: "חברים שחוסכים כל חודש",
+            annualSavings: "הקבוצה שלנו חוסכת בשנה:",
             ourPurchases: "הרכישות הקבוצתיות שלנו:",
             nextPurchases: "עסקאות נוספות יצטרפו לפי ההצבעה בקבוצת הווצאפ, מי שנוכח קובע!"
         },
@@ -109,6 +110,7 @@ export const translations = readable({
                 { icon: "💵", text: "Preserving the right to cash and optimizing its use." }
             ],
             membersCount: "Members saving every month",
+            annualSavings: "Our group saves per year:",
             ourPurchases: "Our Purchasing Groups:",
             nextPurchases: "More deals will be added according to the WhatsApp group vote, those who are present decide!"
         },
@@ -187,6 +189,7 @@ export const translations = readable({
                 { icon: "💵", text: "Сохранение права на наличные и оптимизация их использования." }
             ],
             membersCount: "Участников экономят каждый месяц",
+            annualSavings: "Наша группа экономит в год:",
             ourPurchases: "Наши группы закупок:",
             nextPurchases: "Новые сделки будут добавлены по результатам голосования в WhatsApp, присутствующие решают!"
         },

@@ -434,7 +434,14 @@ a {
 .whatsapp-counter-final {
     display: flex;
     justify-content: center;
-    margin: 1rem 0 4rem 0;
+    margin: 1rem 0 2rem 0;
+    overflow: hidden;
+}
+
+.savings-counter-final {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0 2.5rem 0;
     overflow: hidden;
 }
 
@@ -451,6 +458,11 @@ a {
     color: #4ade80;
     line-height: 1;
     text-shadow: 0 0 40px rgba(74, 222, 128, 0.4);
+}
+
+.savings-number {
+    color: #facc15 !important;
+    text-shadow: 0 0 40px rgba(250, 204, 21, 0.4);
 }
 
 .count-label-text {
@@ -867,20 +879,17 @@ a {
     .footer-container {
         flex-direction: column;
         align-items: center;
-        gap: 0.8rem;
-        /* Reduced from 1.5rem */
-        padding: 1.5rem 1rem;
-        /* Reduced from 2rem */
+        gap: 0.4rem;
+        padding: 1rem 0.8rem;
         text-align: center;
     }
 
     .footer-top {
         flex-direction: column;
-        gap: 0.5rem;
-        /* Reduced from 1rem */
+        gap: 0.3rem;
         align-items: center;
         width: 100%;
-        font-size: 0.95rem;
+        font-size: 0.85rem;
     }
 
     .liberty-link {
@@ -890,17 +899,18 @@ a {
         justify-content: center;
         display: flex;
         align-items: center;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
     }
 
     .footer-links {
         flex-direction: row;
-        /* Horizontal Links with Separator */
-        gap: 1rem;
+        gap: 0.6rem;
         align-items: center;
         justify-content: center;
         width: 100%;
         margin: 0;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         opacity: 0.8;
     }
 
