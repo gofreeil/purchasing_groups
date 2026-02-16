@@ -23,7 +23,7 @@
     let membersCounterVisible = false;
 
     const handleIntersection = (entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
             if (entry.isIntersecting && !membersCounterVisible) {
                 membersCounterVisible = true;
                 count.set(targetCount);
@@ -31,15 +31,47 @@
         });
     };
 
+    async function fetchSavingsFromSheet() {
+        try {
+            const sheetId = "18V5IdtRiN3dKo7habggKP5e55_xJPci158aJVuuWXVw";
+            const gid = "2146350168";
+            const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+
+            const response = await fetch(url);
+            const csvText = await response.text();
+
+            // פיצול השורה הראשונה ולקחת את העמודה ה-22 (V)
+            const rows = csvText.split("\n");
+            if (rows.length > 0) {
+                const firstRow = rows[0].split(",");
+                // עמודה V היא אינדקס 21 (A=0, B=1... V=21)
+                const value = firstRow[21];
+
+                if (value) {
+                    // ניקוי תווים שהם לא מספרים (כמו ש"ח או פסיקים)
+                    const numericValue = parseInt(value.replace(/[^\d]/g, ""));
+                    if (!isNaN(numericValue)) {
+                        targetSavings = numericValue;
+                        savings.set(targetSavings);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching savings from sheet:", error);
+            // במקרה של שגיאה, נשתמש בערך ברירת המחדל שכבר מוגדר
+            savings.set(targetSavings);
+        }
+    }
+
     onMount(() => {
-        // התחלת ספירת חיסכון מיד
-        savings.set(targetSavings);
-        
+        // משיכת נתונים מהגיליון
+        fetchSavingsFromSheet();
+
         // הגדרת Intersection Observer לחברים
         const observer = new IntersectionObserver(handleIntersection, {
-            threshold: 0.5
+            threshold: 0.5,
         });
-        
+
         if (membersCounterRef) {
             observer.observe(membersCounterRef);
         }
@@ -52,8 +84,10 @@
 
 <div class="top-content">
     <!-- Main Heading - H1 for accessibility -->
-    <h1 class="main-page-title">{$t.homepage.title || "קבוצת רכישות חוסכונית"}</h1>
-    
+    <h1 class="main-page-title">
+        {$t.homepage.title || "קבוצת רכישות חוסכונית"}
+    </h1>
+
     <div class="video-container-large">
         <iframe
             src="https://www.youtube.com/embed/pl7kV6-aTEw"
@@ -71,7 +105,9 @@
             <div class="count-label-text">
                 {$t.homepage.annualSavings}
             </div>
-            <div class="count-big-number savings-number" aria-live="polite">{Math.floor($savings).toLocaleString('he-IL')} ש"ח</div>
+            <div class="count-big-number savings-number" aria-live="polite">
+                {Math.floor($savings).toLocaleString("he-IL")} ש"ח
+            </div>
         </div>
     </div>
 
@@ -88,9 +124,16 @@
     </div>
 
     <!-- WhatsApp Counter -->
-    <div class="whatsapp-counter-final" bind:this={membersCounterRef} role="region" aria-label="מספר חברים">
+    <div
+        class="whatsapp-counter-final"
+        bind:this={membersCounterRef}
+        role="region"
+        aria-label="מספר חברים"
+    >
         <div class="counter-merge-wrapper fade-scale-in">
-            <div class="count-big-number" aria-live="polite">{Math.floor($count)}</div>
+            <div class="count-big-number" aria-live="polite">
+                {Math.floor($count)}
+            </div>
             <div class="count-label-text">
                 {$t.homepage.membersCount}
             </div>
@@ -114,7 +157,9 @@
             <h3>
                 <a
                     href="https://docs.google.com/forms/d/e/1FAIpQLSfRCs5W7HUuc5vcOuMGqsqaDubzNBn4YuC4UDbvoFmSCdJAiQ/viewform?usp=header"
-                    target="_blank" aria-label="הצטרף לקבוצה הסלולרית">{$t.purchases.cellular.title}</a
+                    target="_blank"
+                    aria-label="הצטרף לקבוצה הסלולרית"
+                    >{$t.purchases.cellular.title}</a
                 >
             </h3>
             <p>
