@@ -40,15 +40,16 @@
             const response = await fetch(url);
             const csvText = await response.text();
 
-            // פיצול השורה הראשונה ולקחת את העמודה ה-22 (V)
+            // פיצול השורות ולקחת את השורה השנייה (V2)
             const rows = csvText.split("\n");
-            if (rows.length > 0) {
-                const firstRow = rows[0].split(",");
+            if (rows.length > 1) {
+                // שורה שנייה (אינדקס 1) היא V2 בגיליון
+                const secondRow = rows[1].split(",");
                 // עמודה V היא אינדקס 21 (A=0, B=1... V=21)
-                const value = firstRow[21];
+                const value = secondRow[21];
 
                 if (value) {
-                    // ניקוי תווים שהם לא מספרים (כמו ש"ח או פסיקים)
+                    // ניקוי תווים שהם לא מספרים
                     const numericValue = parseInt(value.replace(/[^\d]/g, ""));
                     if (!isNaN(numericValue)) {
                         targetSavings = numericValue;
