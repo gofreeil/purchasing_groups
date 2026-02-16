@@ -23,7 +23,7 @@ export const translations = readable({
             contact: "צור קשר"
         },
         homepage: {
-            title: "עמוד הבית | רכישות קבוצתיות יוצאים לחירות",
+            title: "רכישות קבוצתיות יוצאים לחירות",
             features: [
                 { icon: "💰", text: "הנחה משמעותית בכל ההוצאות החודשיות!" },
                 { icon: "🥬🥕🍅", text: "התארגנות לרכישת ירקות ופירות היישר מהחקלאי עד לשכונה." },
@@ -102,7 +102,7 @@ export const translations = readable({
             contact: "Contact us"
         },
         homepage: {
-            title: "Home | Liberty Purchasing Groups",
+            title: "Liberty Purchasing Groups",
             features: [
                 { icon: "💰", text: "Significant discount on all monthly expenses!" },
                 { icon: "🥬🥕🍅", text: "Organizing for purchasing vegetables and fruits directly from the farmer to the neighborhood." },
@@ -181,7 +181,7 @@ export const translations = readable({
             contact: "Связаться с нами"
         },
         homepage: {
-            title: "Главная | Группы Закупок Свобода",
+            title: "Группы Закупок Свобода",
             features: [
                 { icon: "💰", text: "Значительная скидка на все ежемесячные расходы!" },
                 { icon: "🥬🥕🍅", text: "Организация закупки овощей и фруктов напрямую от фермера в район." },
