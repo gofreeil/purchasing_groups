@@ -846,7 +846,7 @@ a {
 }
 
 .footer-banner-img {
-    max-width: 280px;
+    max-width: 220px;
     height: auto;
     border-radius: 12px;
     border: 1px solid var(--border-color);
@@ -860,7 +860,7 @@ a {
     }
 
     .footer-banner-img {
-        max-width: 220px;
+        max-width: 160px;
     }
 }
 
