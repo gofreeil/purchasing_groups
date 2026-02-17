@@ -79,10 +79,6 @@
     });
 </script>
 
-<svelte:head>
-    <title>{$t.homepage.title}</title>
-</svelte:head>
-
 <div class="top-content">
     <!-- Main Heading - H1 for accessibility -->
     <h1 class="main-page-title">
