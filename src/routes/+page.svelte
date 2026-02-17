@@ -142,17 +142,19 @@
     </div>
 </div>
 
-<!-- Center Ad Banner -->
 <div class="centered-ad-wrapper">
-    <a
-        href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
-        target="_blank"
-        class="centered-ad-banner"
-    >
-        <div class="ad-content-whatsapp-centered">
-            <span class="join-btn">👈 {$t.sidebar.whatsapp} 👉</span>
-        </div>
-    </a>
+    <p class="ad-text-top">{$t.sidebar.whatsapp}</p>
+    <div class="banner-container-with-hands">
+        <span class="side-hand">👈</span>
+        <a
+            href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
+            target="_blank"
+            class="centered-ad-banner"
+            aria-label="הצטרף לקבוצת הוואטסאפ"
+        >
+        </a>
+        <span class="side-hand">👉</span>
+    </div>
 </div>
 
 <div class="section-title">
@@ -313,60 +315,76 @@
     /* Centered Ad Banner */
     .centered-ad-wrapper {
         display: flex;
-        justify-content: center;
-        margin: 2rem 0;
+        flex-direction: column;
+        align-items: center;
+        margin: 2.5rem 0;
         width: 100%;
+        gap: 1rem;
+    }
+
+    .ad-text-top {
+        color: #4ade80;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-align: center;
+        margin: 0;
+        max-width: 800px;
+        text-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+    }
+
+    .banner-container-with-hands {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .side-hand {
+        font-size: 2.5rem;
+        animation: pointing 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pointing {
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+        50% {
+            transform: translateX(10px);
+        }
+    }
+
+    .side-hand:first-child {
+        animation: pointing-reverse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pointing-reverse {
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+        50% {
+            transform: translateX(-10px);
+        }
     }
 
     .centered-ad-banner {
-        width: 100%;
-        max-width: 600px;
-        height: 150px;
-        border-radius: 20px;
+        width: 320px; /* הקטנה משמעותית */
+        height: 90px;
+        border-radius: 15px;
         background-image: url("/assets/צילום מסך 2025-12-02 122846.png");
         background-size: cover;
         background-position: center;
-        position: relative;
-        overflow: hidden;
         display: block;
         text-decoration: none;
-        border: 2px solid rgba(74, 222, 128, 0.3);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .centered-ad-banner:hover {
-        transform: scale(1.03);
-    }
-
-    .ad-content-whatsapp-centered {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(0, 0, 0, 0.5);
-        padding: 1.2rem;
-        text-align: center;
-        backdrop-filter: blur(5px);
-    }
-
-    .join-btn {
-        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        color: white;
-        padding: 0.8rem 1.5rem;
-        border-radius: 50px;
-        font-size: 1.2rem;
-        font-weight: 800;
-        display: inline-block;
-        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-        border: 2px solid rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(74, 222, 128, 0.4);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
         transition: all 0.3s ease;
     }
 
-    .centered-ad-banner:hover .join-btn {
+    .centered-ad-banner:hover {
         transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
-        background: linear-gradient(135deg, #2cfc7a 0%, #17ad9b 100%);
+        border-color: #4ade80;
+        box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
     }
 
     /* Soon Separator */
@@ -387,16 +405,22 @@
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: none; /* Shadow doesn't work well with text-fill-color: transparent */
     }
 
     @media (max-width: 768px) {
         .centered-ad-banner {
-            height: 120px;
-            max-width: 90%;
+            width: 240px;
+            height: 70px;
         }
-        .soon-text {
-            font-size: 1.8rem;
+        .ad-text-top {
+            font-size: 0.95rem;
+            padding: 0 1rem;
+        }
+        .side-hand {
+            font-size: 1.5rem;
+        }
+        .banner-container-with-hands {
+            gap: 0.8rem;
         }
     }
 </style>
