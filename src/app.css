@@ -822,13 +822,15 @@ a {
     flex-wrap: wrap;
 }
 
-.footer-top {
-    font-size: 0.95rem;
-    color: var(--text-white);
+.footer-banner-link {
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.footer-banner-link:hover {
+    transform: scale(1.02);
 }
 
 .liberty-link {
