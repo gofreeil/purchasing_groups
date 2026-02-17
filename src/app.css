@@ -16,7 +16,6 @@ body {
     font-family: 'Assistant', sans-serif;
     background-color: var(--bg-dark);
     color: var(--text-white);
-    direction: rtl;
     min-height: 100vh;
 }
 

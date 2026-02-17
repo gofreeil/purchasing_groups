@@ -107,13 +107,20 @@
                 {$t.homepage.annualSavings}
             </div>
             <div class="count-big-number savings-number" aria-live="polite">
-                {Math.floor($savings).toLocaleString("he-IL")} ש"ח
+                {Math.floor($savings).toLocaleString(
+                    $lang === "he"
+                        ? "he-IL"
+                        : $lang === "ru"
+                          ? "ru-RU"
+                          : "en-US",
+                )}
+                {$t.currency}
             </div>
         </div>
     </div>
 
     <div class="feature-box">
-        <h2 class="features-title">יתרונות הקבוצה</h2>
+        <h2 class="features-title">{$t.homepage.featuresTitle}</h2>
         <ul class="feature-list">
             {#each $t.homepage.features as feature}
                 <li>
@@ -199,7 +206,7 @@
 
     <!-- Soon Separator -->
     <div class="soon-separator">
-        <span class="soon-text">בקרוב:</span>
+        <span class="soon-text">{$t.homepage.soonColon}</span>
         <div class="separator-line"></div>
     </div>
 
