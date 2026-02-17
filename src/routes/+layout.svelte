@@ -238,16 +238,17 @@
 	<!-- Footer -->
 	<footer class="main-footer">
 		<div class="footer-container">
-			<div class="footer-top">
-				<span>{$t.footer.clickForActivity}</span>
-				<a
-					href="https://www.melecshop.com/"
-					target="_blank"
-					class="liberty-link"
-				>
-					{$t.footer.libertyLink}
-				</a>
-			</div>
+			<a
+				href="https://www.melecshop.com/"
+				target="_blank"
+				class="footer-banner-link"
+			>
+				<img
+					src="/assets/יוצאים לחירות תמונה ויקיפדיה.png"
+					alt="יוצאים לחירות"
+					class="footer-banner-img"
+				/>
+			</a>
 
 			<div class="footer-links">
 				<a href="mailto:freedomhasbegun@gmail.com"
