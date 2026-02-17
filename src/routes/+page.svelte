@@ -175,8 +175,11 @@
             <span class="status-label">{$t.purchases.canJoin}</span>
             <span class="status-value">{$t.purchases.yes}</span>
             <span class="status-label">{$t.purchases.saved}</span>
-            <span class="status-value savings"
-                >7,275 {$t.purchases.currencyPerYear}</span
+            <span
+                class="status-value savings"
+                style="color: #ff4444; font-weight: bold;"
+                >{Math.floor($savings).toLocaleString("he-IL")}
+                {$t.purchases.currencyPerYear}</span
             >
         </div>
     </div>
