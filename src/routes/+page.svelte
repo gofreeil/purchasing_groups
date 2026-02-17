@@ -163,21 +163,19 @@
 
 <div class="purchases-list">
     <!-- Cellular -->
-    <div class="purchase-card">
+    <a
+        href="https://docs.google.com/forms/d/e/1FAIpQLSfRCs5W7HUuc5vcOuMGqsqaDubzNBn4YuC4UDbvoFmSCdJAiQ/viewform?usp=header"
+        target="_blank"
+        class="purchase-card"
+        style="text-decoration: none; color: inherit;"
+    >
         <img
             src="/assets/cellular.jpg"
             alt="תמונה המייצגת קבוצה סלולרית עם חברי הקבוצה חוסכים כסף"
             class="purchase-img"
         />
         <div class="purchase-info">
-            <h3>
-                <a
-                    href="https://docs.google.com/forms/d/e/1FAIpQLSfRCs5W7HUuc5vcOuMGqsqaDubzNBn4YuC4UDbvoFmSCdJAiQ/viewform?usp=header"
-                    target="_blank"
-                    aria-label="הצטרף לקבוצה הסלולרית"
-                    >{$t.purchases.cellular.title}</a
-                >
-            </h3>
+            <h3>{$t.purchases.cellular.title}</h3>
             <p>
                 {$t.purchases.cellular.desc}
             </p>
@@ -197,7 +195,7 @@
                 {$t.purchases.currencyPerYear}</span
             >
         </div>
-    </div>
+    </a>
 
     <!-- Soon Separator -->
     <div class="soon-separator">
