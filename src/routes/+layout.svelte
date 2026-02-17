@@ -257,14 +257,6 @@
 				<span class="dot">|</span>
 				<a href="/privacy">{$t.footer.privacy}</a>
 			</div>
-
-			<div class="footer-banner-container">
-				<img
-					src="/assets/יוצאים לחירות תמונה ויקיפדיה.png"
-					alt="יוצאים לחירות"
-					class="footer-banner-img"
-				/>
-			</div>
 		</div>
 	</footer>
 </div>
