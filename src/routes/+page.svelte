@@ -12,7 +12,7 @@
     });
 
     // הגדרת מונה חיסכון שנתי עם אפקט ספירה
-    let targetSavings = 15227;
+    let targetSavings = $state(15227);
     const savings = tweened(0, {
         duration: 2000,
         easing: cubicOut,
@@ -193,7 +193,7 @@
             <span
                 class="status-value savings"
                 style="color: #ff4444; font-weight: bold;"
-                >{Math.floor($savings).toLocaleString("he-IL")}
+                >{targetSavings.toLocaleString("he-IL")}
                 {$t.purchases.currencyPerYear}</span
             >
         </div>
