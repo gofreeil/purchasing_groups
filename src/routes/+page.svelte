@@ -150,7 +150,7 @@
         class="centered-ad-banner"
     >
         <div class="ad-content-whatsapp-centered">
-            <p>{$t.sidebar.whatsapp}</p>
+            <span class="join-btn">👈 {$t.sidebar.whatsapp} 👉</span>
         </div>
     </a>
 </div>
@@ -344,17 +344,29 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 0.8rem;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 1.2rem;
         text-align: center;
         backdrop-filter: blur(5px);
     }
 
-    .ad-content-whatsapp-centered p {
+    .join-btn {
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
         color: white;
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: bold;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .centered-ad-banner:hover .join-btn {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        background: linear-gradient(135deg, #2cfc7a 0%, #17ad9b 100%);
     }
 
     /* Soon Separator */
@@ -368,11 +380,14 @@
     }
 
     .soon-text {
-        color: #facc15;
         font-size: 2.5rem;
         font-weight: 900;
         white-space: nowrap;
-        text-shadow: 0 0 30px rgba(250, 204, 21, 0.5);
+        background: linear-gradient(to right, #facc15, #fb923c);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none; /* Shadow doesn't work well with text-fill-color: transparent */
     }
 
     @media (max-width: 768px) {
