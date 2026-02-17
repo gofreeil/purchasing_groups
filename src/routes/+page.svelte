@@ -368,12 +368,13 @@
     }
 
     .centered-ad-banner {
-        width: 320px; /* הקטנה משמעותית */
-        height: 90px;
+        width: 380px;
+        height: 110px;
         border-radius: 15px;
         background-image: url("/assets/צילום מסך 2025-12-02 122846.png");
-        background-size: cover;
+        background-size: contain;
         background-position: center;
+        background-repeat: no-repeat;
         display: block;
         text-decoration: none;
         border: 2px solid rgba(74, 222, 128, 0.4);
@@ -409,8 +410,8 @@
 
     @media (max-width: 768px) {
         .centered-ad-banner {
-            width: 240px;
-            height: 70px;
+            width: 280px;
+            height: 90px;
         }
         .ad-text-top {
             font-size: 0.95rem;

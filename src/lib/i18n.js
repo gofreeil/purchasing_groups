@@ -10,7 +10,7 @@ export const translations = readable({
         login: "התחברות",
         logoAlt: "לוגו",
         sidebar: {
-            whatsapp: "הצטרף עכשיו לקבוצת הווצאפ השקטה שלנו כדי להיות שותף בהנחות החודשיות",
+            whatsapp: "הצטרף עכשיו לקבוצת הווצאפ המשותפת שלנו והיה חלק מהמהפכה הצרכנית",
             neighborhoods: "הצטרף לפרוייקט ועדי השכונות לקידום חברה מתוקנת שבה העם שולט על מוסדותיו",
             craftsmen: "רוצה הנחה אצל בעלי מקצוע כשירים?",
             investments: "השקעות קבוצתיות בעסקים ונדל\"ן",
@@ -89,7 +89,7 @@ export const translations = readable({
         login: "Login",
         logoAlt: "Logo",
         sidebar: {
-            whatsapp: "Join our silent WhatsApp group now to participate in monthly discounts",
+            whatsapp: "Join our shared WhatsApp group now and be part of the consumer revolution",
             neighborhoods: "Join the Neighborhood Committees project to promote a corrected society where the people control their institutions",
             craftsmen: "Want a discount with qualified professionals?",
             investments: "Group investments in business and real estate",
@@ -168,7 +168,7 @@ export const translations = readable({
         login: "Войти",
         logoAlt: "Логотип",
         sidebar: {
-            whatsapp: "Присоединяйтесь к нашей тихой группе в WhatsApp сейчас, чтобы участвовать в ежемесячных скидках",
+            whatsapp: "Присоединяйтесь к нашей общей группе в WhatsApp сейчас и станьте частью потребительской революции",
             neighborhoods: "Присоединяйтесь к проекту Районных комитетов для продвижения исправленного общества, где народ контролирует свои институты",
             craftsmen: "Хотите скидку у квалифицированных специалистов?",
             investments: "Групповые инвестиции в бизнес и недвижимость",
