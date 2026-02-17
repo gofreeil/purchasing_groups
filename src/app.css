@@ -167,6 +167,10 @@ a {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    position: sticky;
+    top: 150px;
+    /* Space for the fixed header */
+    height: fit-content;
 }
 
 .ad-card {

@@ -217,6 +217,21 @@
 					>
 				</div>
 			</div>
+
+			<div class="promo-placeholder">
+				<div class="plus-icon">+</div>
+				<p class="promo-text">
+					{$t.sidebar.yourAdHere}
+				</p>
+				<div class="contact-links">
+					<a href="mailto:support@melecshop.com"
+						>{$t.sidebar.advertise}</a
+					>
+					<a href="mailto:support@melecshop.com"
+						>{$t.sidebar.contact}</a
+					>
+				</div>
+			</div>
 		</aside>
 	</div>
 
