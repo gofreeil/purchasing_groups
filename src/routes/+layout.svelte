@@ -209,10 +209,10 @@
 					{$t.sidebar.yourAdHere}
 				</p>
 				<div class="contact-links">
-					<a href="mailto:support@melecshop.com"
+					<a href="mailto:freedomhasbegun@gmail.com"
 						>{$t.sidebar.advertise}</a
 					>
-					<a href="mailto:support@melecshop.com"
+					<a href="mailto:freedomhasbegun@gmail.com"
 						>{$t.sidebar.contact}</a
 					>
 				</div>
@@ -224,10 +224,10 @@
 					{$t.sidebar.yourAdHere}
 				</p>
 				<div class="contact-links">
-					<a href="mailto:support@melecshop.com"
+					<a href="mailto:freedomhasbegun@gmail.com"
 						>{$t.sidebar.advertise}</a
 					>
-					<a href="mailto:support@melecshop.com"
+					<a href="mailto:freedomhasbegun@gmail.com"
 						>{$t.sidebar.contact}</a
 					>
 				</div>
@@ -250,7 +250,9 @@
 			</div>
 
 			<div class="footer-links">
-				<a href="mailto:support@melecshop.com">{$t.footer.contactUs}</a>
+				<a href="mailto:freedomhasbegun@gmail.com"
+					>{$t.footer.contactUs}</a
+				>
 				<span class="dot">|</span>
 				<a href="/privacy">{$t.footer.privacy}</a>
 			</div>

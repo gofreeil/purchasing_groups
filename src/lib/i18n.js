@@ -86,7 +86,7 @@ export const translations = readable({
                 },
                 {
                     title: "7. יצירת קשר",
-                    content: "בכל שאלה או בקשה הנוגעת למדיניות הפרטיות, ניתן לפנות אלינו במייל: support@melecshop.com"
+                    content: "בכל שאלה או בקשה הנוגעת למדיניות הפרטיות, ניתן לפנות אלינו במייל: freedomhasbegun@gmail.com"
                 }
             ]
         },
@@ -214,7 +214,7 @@ export const translations = readable({
                 },
                 {
                     title: "7. Contact Us",
-                    content: "For any questions or requests regarding the privacy policy, you can contact us via email: support@melecshop.com"
+                    content: "For any questions or requests regarding the privacy policy, you can contact us via email: freedomhasbegun@gmail.com"
                 }
             ]
         },
@@ -342,7 +342,7 @@ export const translations = readable({
                 },
                 {
                     title: "7. Контакты",
-                    content: "По любым вопросам или запросам относительно политики конфиденциальности вы можете связаться с нами по электронной почте: support@melecshop.com"
+                    content: "По любым вопросам или запросам относительно политики конфиденциальности вы можете связаться с нами по электронной почте: freedomhasbegun@gmail.com"
                 }
             ]
         },
