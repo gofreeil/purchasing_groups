@@ -32,7 +32,7 @@ export const translations = readable({
             ],
             membersCount: "חברים שחוסכים כל חודש",
             annualSavings: "הקבוצה שלנו חוסכת השנה:",
-            ourPurchases: "הרכישות הקבוצתיות שלנו:",
+            ourPurchases: "הרכישות הקבוצתיות הפעילות שלנו:",
             nextPurchases: "עסקאות נוספות יצטרפו לפי ההצבעה בקבוצת הווצאפ, מי שנוכח קובע!"
         },
         footer: {
