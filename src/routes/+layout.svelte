@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import favicon from "$lib/assets/favicon.svg";
-	import "../app.css";
+	import "../app.css?v=1.0.1";
 	import { lang, t } from "$lib/i18n.js";
 
 	let { children } = $props();
@@ -156,17 +156,6 @@
 
 		<!-- Sidebar for Ads -->
 		<aside class="sidebar-ads">
-			<!-- WhatsApp Ad (First) -->
-			<a
-				href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
-				target="_blank"
-				class="ad-card groups-ad"
-			>
-				<div class="ad-content-whatsapp">
-					<p>{$t.sidebar.whatsapp}</p>
-				</div>
-			</a>
-
 			<!-- Neighborhoods Ad (Second) -->
 			<a
 				href="https://www.melecshop.com/page/peace-on-earth_VRHH"

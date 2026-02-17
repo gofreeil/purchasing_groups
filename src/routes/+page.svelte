@@ -19,7 +19,7 @@
     });
 
     // Intersection Observer להתחלת ספירת חברים בגלילה
-    let membersCounterRef;
+    let membersCounterRef = $state();
     let membersCounterVisible = false;
 
     const handleIntersection = (entries) => {
@@ -142,6 +142,19 @@
     </div>
 </div>
 
+<!-- Center Ad Banner -->
+<div class="centered-ad-wrapper">
+    <a
+        href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
+        target="_blank"
+        class="centered-ad-banner"
+    >
+        <div class="ad-content-whatsapp-centered">
+            <p>{$t.sidebar.whatsapp}</p>
+        </div>
+    </a>
+</div>
+
 <div class="section-title">
     <h2>{$t.homepage.ourPurchases}</h2>
 </div>
@@ -182,6 +195,12 @@
                 {$t.purchases.currencyPerYear}</span
             >
         </div>
+    </div>
+
+    <!-- Soon Separator -->
+    <div class="soon-separator">
+        <span class="soon-text">בקרוב:</span>
+        <div class="separator-line"></div>
     </div>
 
     <!-- Internet -->
@@ -289,3 +308,80 @@
         {$t.homepage.nextPurchases}
     </h2>
 </div>
+
+<style>
+    /* Centered Ad Banner */
+    .centered-ad-wrapper {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+        width: 100%;
+    }
+
+    .centered-ad-banner {
+        width: 100%;
+        max-width: 600px;
+        height: 150px;
+        border-radius: 20px;
+        background-image: url("/assets/צילום מסך 2025-12-02 122846.png");
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        overflow: hidden;
+        display: block;
+        text-decoration: none;
+        border: 2px solid rgba(74, 222, 128, 0.3);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .centered-ad-banner:hover {
+        transform: scale(1.03);
+    }
+
+    .ad-content-whatsapp-centered {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 0.8rem;
+        text-align: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .ad-content-whatsapp-centered p {
+        color: white;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    /* Soon Separator */
+    .soon-separator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 4rem 0 2rem;
+        width: 100%;
+        position: relative;
+    }
+
+    .soon-text {
+        color: #facc15;
+        font-size: 2.5rem;
+        font-weight: 900;
+        white-space: nowrap;
+        text-shadow: 0 0 30px rgba(250, 204, 21, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .centered-ad-banner {
+            height: 120px;
+            max-width: 90%;
+        }
+        .soon-text {
+            font-size: 1.8rem;
+        }
+    }
+</style>
