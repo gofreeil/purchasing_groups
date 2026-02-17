@@ -56,9 +56,9 @@
 			<a href="/" class="right-branding">
 				<div class="logo-container">
 					<img
-						src="/assets/logo.png"
-						alt={$t.logoAlt}
-						class="main-logo"
+						src="/assets/יוצאים לחירות תמונה ויקיפדיה.png"
+						alt="יוצאים לחירות"
+						class="header-banner-logo"
 					/>
 				</div>
 				<div class="titles">
