@@ -107,7 +107,7 @@ a {
 }
 
 .footer-banner-img {
-    max-width: 450px;
+    max-width: 280px;
     height: auto;
     border-radius: 12px;
     border: 1px solid var(--border-color);
@@ -116,7 +116,7 @@ a {
 
 @media (max-width: 768px) {
     .footer-banner-img {
-        max-width: 300px;
+        max-width: 200px;
     }
 }
 
@@ -822,33 +822,46 @@ a {
     flex-wrap: wrap;
 }
 
+.footer-action-area {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-action-area span {
+    font-size: 0.95rem;
+    color: var(--text-white);
+}
+
 .footer-banner-link {
-    flex: 1;
     display: flex;
     justify-content: center;
     transition: transform 0.3s ease;
 }
 
 .footer-banner-link:hover {
-    transform: scale(1.02);
+    transform: scale(1.05);
 }
 
-.liberty-link {
-    background: #525fe1;
-    color: white !important;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    font-weight: bold;
-    text-decoration: none !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 0.9rem;
+.footer-banner-img {
+    max-width: 280px;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-.liberty-link:hover {
-    background: #3b82f6;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(82, 95, 225, 0.3);
+@media (max-width: 768px) {
+    .footer-action-area {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .footer-banner-img {
+        max-width: 220px;
+    }
 }
 
 .footer-links {
