@@ -109,7 +109,7 @@ a {
 }
 
 /* Hide titles when using the banner logo since it includes text */
-.header-banner-logo+.titles {
+.logo-container:has(.header-banner-logo)+.titles {
     display: none;
 }
 
