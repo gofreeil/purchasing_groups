@@ -4,7 +4,7 @@ export const lang = writable('he');
 
 export const translations = readable({
     he: {
-        title: "מהפכת הוזלת יוקר המחיה צומחת מהעם",
+        title: "רכישות קבוצתיות יוצאים לחירות",
         subtitle: "הצטרף והוזל עכשיו את ההוצאות החודשיות שלך",
         addOffer: "+ הוסף הצעה",
         login: "התחברות",
@@ -132,7 +132,7 @@ export const translations = readable({
         }
     },
     en: {
-        title: "The revolution to lower the cost of living grows from the people",
+        title: "Group Purchases Liberty",
         subtitle: "Join and reduce your monthly expenses now",
         addOffer: "+ Add Offer",
         login: "Login",
@@ -260,7 +260,7 @@ export const translations = readable({
         }
     },
     ru: {
-        title: "Революция по снижению стоимости жизни растет из народа",
+        title: "Групповые закупки Свобода",
         subtitle: "Присоединяйтесь и сократите свои ежемесячные расходы сейчас",
         addOffer: "+ Добавить предложение",
         login: "Войти",

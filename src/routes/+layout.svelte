@@ -56,9 +56,9 @@
 			<a href="/" class="right-branding">
 				<div class="logo-container">
 					<img
-						src="/assets/יוצאים לחירות תמונה ויקיפדיה.png"
-						alt="יוצאים לחירות"
-						class="header-banner-logo"
+						src="/assets/logo.png"
+						alt={$t.logoAlt}
+						class="main-logo"
 					/>
 				</div>
 				<div class="titles">
@@ -255,6 +255,14 @@
 				>
 				<span class="dot">|</span>
 				<a href="/privacy">{$t.footer.privacy}</a>
+			</div>
+
+			<div class="footer-banner-container">
+				<img
+					src="/assets/יוצאים לחירות תמונה ויקיפדיה.png"
+					alt="יוצאים לחירות"
+					class="footer-banner-img"
+				/>
 			</div>
 		</div>
 	</footer>

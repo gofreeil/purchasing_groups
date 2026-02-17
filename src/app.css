@@ -99,23 +99,24 @@ a {
     border: 2px solid var(--border-color);
 }
 
-.header-banner-logo {
-    height: 90px;
-    width: auto;
+/* Footer Banner Image */
+.footer-banner-container {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.footer-banner-img {
+    max-width: 450px;
+    height: auto;
     border-radius: 12px;
-    object-fit: contain;
     border: 1px solid var(--border-color);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Hide titles when using the banner logo since it includes text */
-.logo-container:has(.header-banner-logo)+.titles {
-    display: none;
-}
-
 @media (max-width: 768px) {
-    .header-banner-logo {
-        height: 60px;
+    .footer-banner-img {
+        max-width: 300px;
     }
 }
 
