@@ -4,7 +4,7 @@ export const lang = writable('he');
 
 export const translations = readable({
     he: {
-        title: "רכישות קבוצתיות יוצאים לחירות",
+        title: "מהפכת הוזלת יוקר המחיה צומחת מהעם",
         subtitle: "הצטרף והוזל עכשיו את ההוצאות החודשיות שלך",
         addOffer: "+ הוסף הצעה",
         login: "התחברות",
@@ -23,7 +23,7 @@ export const translations = readable({
             contact: "צור קשר"
         },
         homepage: {
-            title: "רכישות קבוצתיות יוצאים לחירות",
+            title: "מהפכת הוזלת יוקר המחיה צומחת מהעם",
             features: [
                 { icon: "💰", text: "הנחה משמעותית בכל ההוצאות החודשיות!" },
                 { icon: "🥬🥕🍅", text: "התארגנות לרכישת ירקות ופירות היישר מהחקלאי עד לשכונה." },
@@ -83,7 +83,7 @@ export const translations = readable({
         }
     },
     en: {
-        title: "Liberty Purchasing Groups",
+        title: "The revolution to lower the cost of living grows from the people",
         subtitle: "Join and reduce your monthly expenses now",
         addOffer: "+ Add Offer",
         login: "Login",
@@ -102,7 +102,7 @@ export const translations = readable({
             contact: "Contact us"
         },
         homepage: {
-            title: "Liberty Purchasing Groups",
+            title: "The cost of living reduction revolution grows from the people",
             features: [
                 { icon: "💰", text: "Significant discount on all monthly expenses!" },
                 { icon: "🥬🥕🍅", text: "Organizing for purchasing vegetables and fruits directly from the farmer to the neighborhood." },
@@ -162,7 +162,7 @@ export const translations = readable({
         }
     },
     ru: {
-        title: "Группы Закупок Свобода",
+        title: "Революция по снижению стоимости жизни растет из народа",
         subtitle: "Присоединяйтесь и сократите свои ежемесячные расходы сейчас",
         addOffer: "+ Добавить предложение",
         login: "Войти",
@@ -181,7 +181,7 @@ export const translations = readable({
             contact: "Связаться с нами"
         },
         homepage: {
-            title: "Группы Закупок Свобода",
+            title: "Революция по снижению цен на проживание растет из народа",
             features: [
                 { icon: "💰", text: "Значительная скидка на все ежемесячные расходы!" },
                 { icon: "🥬🥕🍅", text: "Организация закупки овощей и фруктов напрямую от фермера в район." },
