@@ -107,7 +107,7 @@ a {
 }
 
 .footer-banner-img {
-    max-width: 280px;
+    max-width: 140px;
     height: auto;
     border-radius: 12px;
     border: 1px solid var(--border-color);
@@ -116,7 +116,7 @@ a {
 
 @media (max-width: 768px) {
     .footer-banner-img {
-        max-width: 200px;
+        max-width: 100px;
     }
 }
 
@@ -846,7 +846,7 @@ a {
 }
 
 .footer-banner-img {
-    max-width: 220px;
+    max-width: 140px;
     height: auto;
     border-radius: 12px;
     border: 1px solid var(--border-color);
@@ -860,7 +860,7 @@ a {
     }
 
     .footer-banner-img {
-        max-width: 160px;
+        max-width: 100px;
     }
 }
 
