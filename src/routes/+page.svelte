@@ -40,13 +40,13 @@
             const response = await fetch(url);
             const csvText = await response.text();
 
-            // פיצול השורות ולקחת את השורה השנייה (V2)
+            // פיצול השורות ולקחת את השורה השלישית (X3)
             const rows = csvText.split("\n");
-            if (rows.length > 1) {
-                // שורה שנייה (אינדקס 1) היא V2 בגיליון
-                const secondRow = rows[1].split(",");
-                // עמודה V היא אינדקס 21 (A=0, B=1... V=21)
-                const value = secondRow[21];
+            if (rows.length > 2) {
+                // שורה שלישית (אינדקס 2) היא X3 בגיליון
+                const targetRow = rows[2].split(",");
+                // עמודה X היא אינדקס 23 (A=0, B=1... X=23)
+                const value = targetRow[23];
 
                 if (value) {
                     // ניקוי תווים שהם לא מספרים
