@@ -177,7 +177,7 @@
 
 <div class="purchases-list">
     <!-- Cellular -->
-    <div class="purchase-card">
+    <div class="purchase-card" style="margin-bottom: 3rem;">
         <a
             href="https://docs.google.com/forms/d/e/1FAIpQLSfRCs5W7HUuc5vcOuMGqsqaDubzNBn4YuC4UDbvoFmSCdJAiQ/viewform?usp=header"
             target="_blank"
@@ -436,7 +436,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 1rem 0;
+        margin: 0;
         width: 100%;
         position: relative;
     }
