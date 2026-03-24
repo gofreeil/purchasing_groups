@@ -198,11 +198,17 @@
                 >{targetSavings.toLocaleString("he-IL")}
                 {$t.purchases.currencyPerYear}</span
             >
-        </div>
 
-        <a href="/satisfaction" class="satisfaction-circle-link">
-            {$t.satisfaction.title}
-        </a>
+            <div class="survey-badge-container">
+                <div class="survey-rating-summary">
+                    <span class="stars-gold">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-val">4.9/5</span>
+                </div>
+                <a href="/satisfaction" class="satisfaction-circle-link">
+                    {$t.satisfaction.title}
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Soon Separator -->
@@ -441,11 +447,52 @@
         z-index: 1;
     }
 
-    .satisfaction-circle-link {
+    .purchase-status {
+        position: relative;
+    }
+
+    .survey-badge-container {
         position: absolute;
         bottom: -40px;
         left: 50%;
         transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        z-index: 10;
+        white-space: nowrap;
+    }
+
+    .survey-rating-summary {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(10, 17, 40, 0.9);
+        backdrop-filter: blur(10px);
+        padding: 5px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(250, 204, 21, 0.4);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        animation: slideInRight 0.5s ease-out;
+    }
+
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .stars-gold {
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
+    .rating-val {
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: #facc15;
+    }
+
+    .satisfaction-circle-link {
         width: 80px;
         height: 80px;
         background: linear-gradient(135deg, #facc15, #fb923c);
@@ -458,7 +505,6 @@
         font-size: 0.8rem;
         font-weight: 850;
         text-decoration: none;
-        z-index: 10;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
         border: 4px solid var(--bg-dark);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
