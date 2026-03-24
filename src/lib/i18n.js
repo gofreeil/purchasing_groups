@@ -123,14 +123,14 @@ export const translations = readable({
             },
             status: "סטטוס:",
             canJoin: "האם ניתן להצטרף?",
-            saved: "חסכנו מהעסקה:",
-            savedMonthly: "הקבוצה חוסכת כל חודש מתוכנית זו:",
+            saved: "הקבוצה חוסכת מהעסקה:",
+            perMonth: 'כל חודש',
+            perYear: 'בשנה',
             done: "בוצע",
             yes: "כן",
             no: "לא",
             soon: "בקרוב...",
-            currencyPerYear: 'ש"ח לשנה',
-            currencyPerMonth: 'ש"ח לחודש'
+            currency: 'ש"ח'
         },
         satisfaction: {
             title: "סקר שביעות רצון",
@@ -265,14 +265,14 @@ export const translations = readable({
             },
             status: "Status:",
             canJoin: "Can I join?",
-            saved: "Saved from deal:",
-            savedMonthly: "The group saves each month from this plan:",
+            saved: "The group saves from the deal:",
+            perMonth: 'per month',
+            perYear: 'per year',
             done: "Done",
             yes: "Yes",
             no: "No",
             soon: "Soon...",
-            currencyPerYear: "ILS/year",
-            currencyPerMonth: "ILS/month"
+            currency: "ILS"
         },
         satisfaction: {
             title: "Satisfaction Survey",

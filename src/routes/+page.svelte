@@ -206,19 +206,18 @@
             <span class="status-value">{$t.purchases.yes}</span>
             <span class="status-label">{$t.purchases.saved}</span>
             <span
-                class="status-value savings"
-                style="color: #ff4444; font-weight: bold;"
-                >{targetSavings.toLocaleString("he-IL")}
-                {$t.purchases.currencyPerYear}</span
-            >
-
-            <span class="status-label">{$t.purchases.savedMonthly}</span>
-            <span
-                class="status-value"
+                class="status-value highlight-monthly"
                 style="color: #4ade80; font-weight: bold;"
             >
                 {monthlySavings.toLocaleString("he-IL")}
-                {$t.purchases.currencyPerMonth}
+                {$t.currency} {$t.purchases.perMonth}
+            </span>
+            <span
+                class="status-value highlight-yearly"
+                style="color: #ff4444; font-weight: bold;"
+            >
+                {targetSavings.toLocaleString("he-IL")}
+                {$t.currency} {$t.purchases.perYear}
             </span>
 
             <div class="survey-badge-container">
