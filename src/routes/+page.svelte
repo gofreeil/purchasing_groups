@@ -166,12 +166,13 @@
 
 <div class="purchases-list">
     <!-- Cellular -->
-    <a
-        href="https://docs.google.com/forms/d/e/1FAIpQLSfRCs5W7HUuc5vcOuMGqsqaDubzNBn4YuC4UDbvoFmSCdJAiQ/viewform?usp=header"
-        target="_blank"
-        class="purchase-card"
-        style="text-decoration: none; color: inherit;"
-    >
+    <div class="purchase-card">
+        <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSfRCs5W7HUuc5vcOuMGqsqaDubzNBn4YuC4UDbvoFmSCdJAiQ/viewform?usp=header"
+            target="_blank"
+            class="purchase-link-overlay"
+            aria-label={$t.purchases.cellular.title}
+        ></a>
         <img
             src="/assets/cellular.jpg"
             alt="תמונה המייצגת קבוצה סלולרית עם חברי הקבוצה חוסכים כסף"
@@ -197,13 +198,36 @@
                 >{targetSavings.toLocaleString("he-IL")}
                 {$t.purchases.currencyPerYear}</span
             >
+
+            <a href="/satisfaction" class="satisfaction-mini-link">
+                {$t.satisfaction.title} »
+            </a>
         </div>
-    </a>
+    </div>
 
     <!-- Soon Separator -->
     <div class="soon-separator">
         <span class="soon-text">{$t.homepage.soonColon}</span>
         <div class="separator-line"></div>
+    </div>
+
+    <!-- Fuel -->
+    <div class="purchase-card">
+        <img
+            src="/assets/fuel.jpg"
+            alt="תמונה המייצגת תחנת דלק עם מחירי דלק מוזלים לחברי הקבוצה"
+            class="purchase-img"
+        />
+        <div class="purchase-info">
+            <h3>{$t.purchases.fuel.title}</h3>
+            <p>{$t.purchases.fuel.desc}</p>
+        </div>
+        <div class="purchase-status">
+            <span class="status-label">{$t.purchases.status}</span>
+            <span class="status-value">{$t.purchases.no}</span>
+            <span class="status-label">{$t.purchases.canJoin}</span>
+            <span class="status-value">{$t.purchases.no}</span>
+        </div>
     </div>
 
     <!-- Internet -->
@@ -224,25 +248,6 @@
             <span class="status-value" style="color: #facc15;"
                 >{$t.purchases.soon}</span
             >
-        </div>
-    </div>
-
-    <!-- Fuel -->
-    <div class="purchase-card">
-        <img
-            src="/assets/fuel.jpg"
-            alt="תמונה המייצגת תחנת דלק עם מחירי דלק מוזלים לחברי הקבוצה"
-            class="purchase-img"
-        />
-        <div class="purchase-info">
-            <h3>{$t.purchases.fuel.title}</h3>
-            <p>{$t.purchases.fuel.desc}</p>
-        </div>
-        <div class="purchase-status">
-            <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.no}</span>
-            <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value">{$t.purchases.no}</span>
         </div>
     </div>
 
@@ -424,5 +429,37 @@
         .banner-container-with-hands {
             gap: 0.8rem;
         }
+    }
+
+    .purchase-card {
+        position: relative;
+    }
+
+    .purchase-link-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+    }
+
+    .satisfaction-mini-link {
+        position: relative;
+        z-index: 2;
+        display: inline-block;
+        margin-top: 1rem;
+        color: #facc15;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-size: 0.85rem;
+        background: rgba(250, 204, 21, 0.1);
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        border: 1px solid rgba(250, 204, 21, 0.2);
+    }
+
+    .satisfaction-mini-link:hover {
+        background: #facc15;
+        color: #1a1a1a;
+        transform: translateX(-3px);
     }
 </style>
