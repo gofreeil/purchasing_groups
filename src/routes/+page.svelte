@@ -11,8 +11,9 @@
         easing: cubicOut,
     });
 
-    // הגדרת מונה חיסכון שנתי עם אפקט ספירה
+    // הגדרת מוני חיסכון (שנתי וחודשי) עם אפקט ספירה
     let targetSavings = $state(15227);
+    let monthlySavings = $state(4385); // ערך ברירת מחדל אם הטעינה נכשלת
     const savings = tweened(0, {
         duration: 2000,
         easing: cubicOut,
@@ -41,26 +42,36 @@
             const response = await fetch(url);
             const csvText = await response.text();
 
-            // פיצול השורות ולקחת את השורה השלישית (X3)
+            // פיצול השורות
             const rows = csvText.split("\n");
             if (rows.length > 2) {
-                // שורה שלישית (אינדקס 2) היא X3 בגיליון
+                // שורה שלישית (אינדקס 2) היא X3 בגיליון (שנתי)
                 const targetRow = rows[2].split(",");
                 // עמודה X היא אינדקס 23 (A=0, B=1... X=23)
                 const value = targetRow[23];
 
                 if (value) {
-                    // ניקוי תווים שהם לא מספרים
                     const numericValue = parseInt(value.replace(/[^\d]/g, ""));
                     if (!isNaN(numericValue)) {
                         targetSavings = numericValue;
                         savings.set(targetSavings);
                     }
                 }
+
+                // שורה שנייה (אינדקס 1) היא X2 בגיליון (חודשי)
+                const monthlyRow = rows[1].split(",");
+                const monthlyValText = monthlyRow[23];
+                if (monthlyValText) {
+                    const numericMonthly = parseInt(
+                        monthlyValText.replace(/[^\d]/g, ""),
+                    );
+                    if (!isNaN(numericMonthly)) {
+                        monthlySavings = numericMonthly;
+                    }
+                }
             }
         } catch (error) {
             console.error("Error fetching savings from sheet:", error);
-            // במקרה של שגיאה, נשתמש בערך ברירת המחדל שכבר מוגדר
             savings.set(targetSavings);
         }
     }
@@ -200,6 +211,15 @@
                 >{targetSavings.toLocaleString("he-IL")}
                 {$t.purchases.currencyPerYear}</span
             >
+
+            <span class="status-label">{$t.purchases.savedMonthly}</span>
+            <span
+                class="status-value"
+                style="color: #4ade80; font-weight: bold;"
+            >
+                {monthlySavings.toLocaleString("he-IL")}
+                {$t.purchases.currencyPerMonth}
+            </span>
 
             <div class="survey-badge-container">
                 <div class="survey-rating-summary">
