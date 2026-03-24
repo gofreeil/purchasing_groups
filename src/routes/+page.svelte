@@ -509,9 +509,9 @@
         white-space: nowrap;
     }
 
-    @media (min-width: 769px) {
+    @media (min-width: 1025px) {
         .survey-badge-container {
-            left: 75%; /* Moved right to avoid hiding data */
+            left: 85% !important; /* Move it further right on desktop to avoid hiding data */
         }
     }
 
