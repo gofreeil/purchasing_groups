@@ -579,7 +579,7 @@
         text-decoration: none;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
         border: 4px solid var(--bg-dark);
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: all 0.3s ease-out;
         line-height: 1.1;
         padding: 8px;
         box-sizing: border-box;
@@ -588,7 +588,7 @@
     .satisfaction-circle-link:hover {
         background: linear-gradient(135deg, #4ade80, #22c55e);
         color: white;
-        transform: translateX(-50%) scale(1.1);
-        box-shadow: 0 8px 25px rgba(74, 222, 128, 0.3);
+        transform: translateX(-50%) translateY(-5px);
+        box-shadow: 0 10px 25px rgba(74, 222, 128, 0.4);
     }
 </style>
