@@ -509,6 +509,12 @@
         white-space: nowrap;
     }
 
+    @media (min-width: 769px) {
+        .survey-badge-container {
+            left: 75%; /* Moved right to avoid hiding data */
+        }
+    }
+
     .survey-rating-summary {
         display: flex;
         flex-direction: column;
