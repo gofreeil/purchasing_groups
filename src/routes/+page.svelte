@@ -198,11 +198,11 @@
                 >{targetSavings.toLocaleString("he-IL")}
                 {$t.purchases.currencyPerYear}</span
             >
-
-            <a href="/satisfaction" class="satisfaction-mini-link">
-                {$t.satisfaction.title} »
-            </a>
         </div>
+
+        <a href="/satisfaction" class="satisfaction-circle-link">
+            {$t.satisfaction.title}
+        </a>
     </div>
 
     <!-- Soon Separator -->
@@ -441,25 +441,36 @@
         z-index: 1;
     }
 
-    .satisfaction-mini-link {
-        position: relative;
-        z-index: 2;
-        display: inline-block;
-        margin-top: 1rem;
-        color: #facc15;
-        font-weight: bold;
+    .satisfaction-circle-link {
+        position: absolute;
+        bottom: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #facc15, #fb923c);
+        color: #1a1a1a;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 0.8rem;
+        font-weight: 850;
         text-decoration: none;
-        transition: all 0.2s;
-        font-size: 0.85rem;
-        background: rgba(250, 204, 21, 0.1);
-        padding: 0.3rem 0.8rem;
-        border-radius: 6px;
-        border: 1px solid rgba(250, 204, 21, 0.2);
+        z-index: 10;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        border: 4px solid var(--bg-dark);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        line-height: 1.1;
+        padding: 8px;
+        box-sizing: border-box;
     }
 
-    .satisfaction-mini-link:hover {
-        background: #facc15;
-        color: #1a1a1a;
-        transform: translateX(-3px);
+    .satisfaction-circle-link:hover {
+        background: linear-gradient(135deg, #4ade80, #22c55e);
+        color: white;
+        transform: translateX(-50%) scale(1.1);
+        box-shadow: 0 8px 25px rgba(74, 222, 128, 0.3);
     }
 </style>
