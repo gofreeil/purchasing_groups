@@ -22,6 +22,7 @@
     let membersCounterRef = $state();
     let membersCounterVisible = false;
 
+    /** @param {IntersectionObserverEntry[]} entries */
     const handleIntersection = (entries) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting && !membersCounterVisible) {
@@ -92,7 +93,6 @@
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
-            tabindex="0"
         ></iframe>
     </div>
 
@@ -173,11 +173,13 @@
             class="purchase-link-overlay"
             aria-label={$t.purchases.cellular.title}
         ></a>
-        <img
-            src="/assets/cellular.jpg"
-            alt="תמונה המייצגת קבוצה סלולרית עם חברי הקבוצה חוסכים כסף"
-            class="purchase-img"
-        />
+        <div class="purchase-img-frame">
+            <img
+                src="/assets/cellular.jpg"
+                alt="תמונה המייצגת קבוצה סלולרית עם חברי הקבוצה חוסכים כסף"
+                class="purchase-img"
+            />
+        </div>
         <div class="purchase-info">
             <h3>{$t.purchases.cellular.title}</h3>
             <p>
@@ -219,11 +221,13 @@
 
     <!-- Fuel -->
     <div class="purchase-card">
-        <img
-            src="/assets/fuel.jpg"
-            alt="תמונה המייצגת תחנת דלק עם מחירי דלק מוזלים לחברי הקבוצה"
-            class="purchase-img"
-        />
+        <div class="purchase-img-frame fuel-zoom">
+            <img
+                src="/assets/fuel.jpg"
+                alt="תמונה המייצגת תחנת דלק עם מחירי דלק מוזלים לחברי הקבוצה"
+                class="purchase-img"
+            />
+        </div>
         <div class="purchase-info">
             <h3>{$t.purchases.fuel.title}</h3>
             <p>{$t.purchases.fuel.desc}</p>
@@ -238,11 +242,13 @@
 
     <!-- Internet -->
     <div class="purchase-card">
-        <img
-            src="/assets/internet.jpg"
-            alt="תמונה המייצגת קבוצת אינטרנט מהירה עם חיסכון לחברי הקבוצה"
-            class="purchase-img"
-        />
+        <div class="purchase-img-frame">
+            <img
+                src="/assets/internet.jpg"
+                alt="תמונה המייצגת קבוצת אינטרנט מהירה עם חיסכון לחברי הקבוצה"
+                class="purchase-img"
+            />
+        </div>
         <div class="purchase-info">
             <h3>{$t.purchases.internet.title}</h3>
             <p>{$t.purchases.internet.desc}</p>
@@ -259,11 +265,13 @@
 
     <!-- Car Insurance -->
     <div class="purchase-card">
-        <img
-            src="/assets/car_insurance.png"
-            alt="תמונה המייצגת ביטוח חברות לרכב עם הנחות לחברי הקבוצה"
-            class="purchase-img"
-        />
+        <div class="purchase-img-frame">
+            <img
+                src="/assets/car_insurance.png"
+                alt="תמונה המייצגת ביטוח חברות לרכב עם הנחות לחברי הקבוצה"
+                class="purchase-img"
+            />
+        </div>
         <div class="purchase-info">
             <h3>{$t.purchases.carInsurance.title}</h3>
             <p>{$t.purchases.carInsurance.desc}</p>
@@ -278,11 +286,13 @@
 
     <!-- Electricity -->
     <div class="purchase-card">
-        <img
-            src="/assets/electricity.jpg"
-            alt="תמונה המייצגת חשמל חשמוני עם הנחות קבוצתית לחברי הקבוצה"
-            class="purchase-img"
-        />
+        <div class="purchase-img-frame">
+            <img
+                src="/assets/electricity.jpg"
+                alt="תמונה המייצגת חשמל חשמוני עם הנחות קבוצתית לחברי הקבוצה"
+                class="purchase-img"
+            />
+        </div>
         <div class="purchase-info">
             <h3>{$t.purchases.electricity.title}</h3>
             <p>{$t.purchases.electricity.desc}</p>
@@ -297,11 +307,13 @@
 
     <!-- Coupons -->
     <div class="purchase-card">
-        <img
-            src="/assets/coupons.jpg"
-            alt="תמונה המייצגת קופונים והנחות לחברי הקבוצה"
-            class="purchase-img"
-        />
+        <div class="purchase-img-frame">
+            <img
+                src="/assets/coupons.jpg"
+                alt="תמונה המייצגת קופונים והנחות לחברי הקבוצה"
+                class="purchase-img"
+            />
+        </div>
         <div class="purchase-info">
             <h3>{$t.purchases.coupons.title}</h3>
             <p>{$t.purchases.coupons.desc}</p>
@@ -434,6 +446,40 @@
         }
         .banner-container-with-hands {
             gap: 0.8rem;
+        }
+    }
+
+    .purchase-img-frame {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: #000;
+    }
+
+    .purchase-img-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border: none;
+        border-radius: 0;
+    }
+
+    .fuel-zoom img {
+        transform: scale(1.6);
+        transform-origin: center;
+    }
+
+    @media (max-width: 768px) {
+        .purchase-img-frame {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
         }
     }
 
