@@ -335,7 +335,7 @@ a {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 4rem 0 2rem;
+    margin: 1rem 0;
     width: 100%;
     position: relative;
 }
@@ -626,7 +626,7 @@ a {
 .purchases-list {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 3.5rem;
 }
 
 .purchase-card {
@@ -639,7 +639,6 @@ a {
     padding: 1.5rem 2.5rem;
     gap: 2.5rem;
     transition: background 0.3s;
-    margin-bottom: 50px; /* Space for the absolute badge if present */
 }
 
 .purchase-card:hover {

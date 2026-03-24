@@ -207,7 +207,7 @@
                     <span class="rating-val">5.0/5</span>
                 </div>
                 <a href="/satisfaction" class="satisfaction-circle-link">
-                    {$t.satisfaction.title}
+                    {@html $t.satisfaction.title.replace(" ", "<br />")}
                 </a>
             </div>
         </div>
@@ -417,7 +417,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 4rem 0 2rem;
+        margin: 1rem 0;
         width: 100%;
         position: relative;
     }
@@ -430,6 +430,7 @@
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 30px rgba(250, 204, 21, 0.4);
     }
 
     @media (max-width: 768px) {
