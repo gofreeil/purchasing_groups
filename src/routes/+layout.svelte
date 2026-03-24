@@ -3,6 +3,7 @@
 	import favicon from "$lib/assets/favicon.svg";
 	import "../app.css?v=1.0.1";
 	import { lang, t } from "$lib/i18n.js";
+	import { isLoggedIn } from "$lib/user.js";
 
 	let { children } = $props();
 
@@ -139,6 +140,21 @@
 					{/if}
 				</div>
 
+				<button
+					class="login-header-btn"
+					onclick={() => ($isLoggedIn = !$isLoggedIn)}
+				>
+					{#if $isLoggedIn}
+						{$lang === "he"
+							? "התנתק"
+							: $lang === "ru"
+								? "Выйти"
+								: "Logout"}
+					{:else}
+						{$t.login}
+					{/if}
+				</button>
+
 				<a
 					href="https://docs.google.com/forms/d/e/1FAIpQLSeK7H6wdZnAddeD7TuQwutsEYAT3AKkMh6L82gX797DVw8sRQ/viewform?usp=dialog"
 					target="_blank"
@@ -258,6 +274,8 @@
 					>{$t.footer.contactUs}</a
 				>
 				<span class="dot">|</span>
+				<a href="/satisfaction">{$t.satisfaction.title}</a>
+				<span class="dot">|</span>
 				<a href="/privacy">{$t.footer.privacy}</a>
 			</div>
 		</div>
@@ -285,6 +303,24 @@
 
 	.lang-selector-btn:hover {
 		background: rgba(255, 255, 255, 0.15);
+	}
+
+	.login-header-btn {
+		background: transparent;
+		border: 1px solid var(--border-color);
+		color: var(--text-white);
+		padding: 0.5rem 1.2rem;
+		border-radius: 8px;
+		cursor: pointer;
+		font-size: 0.9rem;
+		font-weight: 600;
+		transition: all 0.2s;
+	}
+
+	.login-header-btn:hover {
+		background: rgba(250, 204, 21, 0.1);
+		border-color: #facc15;
+		color: #facc15;
 	}
 
 	.lang-dropdown {

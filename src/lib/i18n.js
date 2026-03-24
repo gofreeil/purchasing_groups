@@ -129,6 +129,18 @@ export const translations = readable({
             no: "לא",
             soon: "בקרוב...",
             currencyPerYear: 'ש"ח לשנה'
+        },
+        satisfaction: {
+            title: "סקר שביעות רצון",
+            restrictedTitle: "גישה מוגבלת",
+            restrictedMessage: "הסקר מיועד ללקוחות רשומים בלבד. אנא התחבר כדי להשתתף.",
+            loginToParticipate: "התחבר להשתתפות",
+            question1: "מהי מידת שביעות הרצון שלך מרכישות קבוצתיות?",
+            question2: "אילו מוצרים או שירותים נוספים היית רוצה לראות?",
+            question3: "הערות נוספות:",
+            submit: "שלח סקר",
+            thankYou: "תודה על השתתפותך!",
+            backToHome: "חזרה לדף הבית"
         }
     },
     en: {
@@ -257,6 +269,18 @@ export const translations = readable({
             no: "No",
             soon: "Soon...",
             currencyPerYear: "ILS/year"
+        },
+        satisfaction: {
+            title: "Satisfaction Survey",
+            restrictedTitle: "Restricted Access",
+            restrictedMessage: "The survey is for registered customers only. Please login to participate.",
+            loginToParticipate: "Login to Participate",
+            question1: "How satisfied are you with the group purchases?",
+            question2: "What other products or services would you like to see?",
+            question3: "Additional comments:",
+            submit: "Submit Survey",
+            thankYou: "Thank you for participating!",
+            backToHome: "Back to Home"
         }
     },
     ru: {
