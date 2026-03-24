@@ -204,7 +204,7 @@
             <div class="survey-badge-container">
                 <div class="survey-rating-summary">
                     <span class="stars-gold">⭐⭐⭐⭐⭐</span>
-                    <span class="rating-val">4.9/5</span>
+                    <span class="rating-val">5.0/5</span>
                 </div>
                 <a href="/satisfaction" class="satisfaction-circle-link">
                     {$t.satisfaction.title}
@@ -511,7 +511,7 @@
 
     @media (min-width: 1025px) {
         .survey-badge-container {
-            left: 85% !important; /* Move it further right on desktop to avoid hiding data */
+            left: 140% !important; /* Move even further right to avoid hiding savings data */
         }
     }
 
