@@ -414,7 +414,7 @@
         width: 380px;
         height: 110px;
         border-radius: 15px;
-        background-image: url("/assets/צילום מסך 2025-12-02 122846.png");
+        background-image: url("/assets/screenshot-2.png");
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;

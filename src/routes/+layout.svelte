@@ -262,7 +262,7 @@
 					class="footer-banner-link"
 				>
 					<img
-						src="/assets/יוצאים לחירות תמונה ויקיפדיה.png"
+						src="/assets/yotzim-lecherut.png"
 						alt="יוצאים לחירות"
 						class="footer-banner-img"
 					/>
