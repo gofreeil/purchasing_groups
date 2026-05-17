@@ -131,6 +131,7 @@ export const translations = readable({
             no: "לא",
             soon: "בקרוב...",
             fuelListOpens: "הרשימה תיפתח ביום רביעי 20/5",
+            newBadge: "חדש",
             currency: 'ש"ח'
         },
         satisfaction: {
@@ -274,6 +275,7 @@ export const translations = readable({
             no: "No",
             soon: "Soon...",
             fuelListOpens: "List opens Wednesday 20/5",
+            newBadge: "New",
             currency: "ILS"
         },
         satisfaction: {
@@ -415,6 +417,7 @@ export const translations = readable({
             no: "Нет",
             soon: "Скоро...",
             fuelListOpens: "Список откроется в среду 20/5",
+            newBadge: "Новинка",
             currencyPerYear: "шекелей/год"
         }
     }

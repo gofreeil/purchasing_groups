@@ -240,6 +240,7 @@
 
     <!-- Fuel -->
     <div class="purchase-card">
+        <div class="new-burst">{$t.purchases.newBadge}</div>
         <div class="purchase-img-frame fuel-zoom">
             <img
                 src="/assets/fuel.jpg"
@@ -255,7 +256,9 @@
             <span class="status-label">{$t.purchases.status}</span>
             <span class="status-value">{$t.purchases.no}</span>
             <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value">{$t.purchases.fuelListOpens}</span>
+            <span class="status-value" style="color: #facc15;"
+                >{$t.purchases.fuelListOpens}</span
+            >
         </div>
     </div>
 
@@ -503,6 +506,41 @@
 
     .purchase-card {
         position: relative;
+    }
+
+    .new-burst {
+        position: absolute;
+        top: -22px;
+        left: -22px;
+        z-index: 3;
+        width: 74px;
+        height: 74px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #facc15;
+        color: #1a1a2e;
+        font-weight: 800;
+        font-size: 1.05rem;
+        transform: rotate(-15deg);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        clip-path: polygon(
+            50% 0%, 61% 13%, 78% 6%, 78% 25%, 95% 25%,
+            85% 40%, 100% 50%, 85% 60%, 95% 75%, 78% 75%,
+            78% 94%, 61% 87%, 50% 100%, 39% 87%, 22% 94%,
+            22% 75%, 5% 75%, 15% 60%, 0% 50%, 15% 40%,
+            5% 25%, 22% 25%, 22% 6%, 39% 13%
+        );
+    }
+
+    @media (max-width: 768px) {
+        .new-burst {
+            width: 60px;
+            height: 60px;
+            font-size: 0.9rem;
+            top: -16px;
+            left: -16px;
+        }
     }
 
     .purchase-link-overlay {
