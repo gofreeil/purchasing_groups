@@ -163,7 +163,7 @@
         <div class="purchase-status">
             <span class="status-label">{$t.purchases.status}</span>
             <span class="status-value" style="color: #4ade80;"
-                >{$t.purchases.done}</span
+                >{$t.purchases.active}</span
             >
             <span class="status-label">{$t.purchases.canJoin}</span>
             <span class="status-value">{$t.purchases.yes}</span>
@@ -540,8 +540,8 @@
         }
     }
 
-    /* במובייל תג הסקר זורם בתוך הכרטיס ולא חופף את נתוני החיסכון */
-    @media (max-width: 768px) {
+    /* במובייל/טאבלט תג הסקר זורם בתוך הכרטיס ולא חופף את נתוני החיסכון */
+    @media (max-width: 1024px) {
         .survey-badge-container {
             position: static;
             transform: none;
