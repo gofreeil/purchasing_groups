@@ -133,13 +133,13 @@
 
 	.right-ad-vtext {
 		position: absolute;
-		inset: 0;
+		top: 50%;
+		left: 50%;
 		display: flex;
 		align-items: center;
-		justify-content: center;
 		gap: 0.75rem;
 		pointer-events: none;
-		transform: rotate(-90deg);
+		transform: translate(-50%, -50%) rotate(-90deg);
 		white-space: nowrap;
 	}
 
