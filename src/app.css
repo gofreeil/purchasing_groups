@@ -1231,7 +1231,7 @@ a {
         padding: 0.85rem 1rem;
         gap: 0.35rem 0.85rem;
         border-radius: 14px;
-        grid-template-columns: 58px 1fr;
+        grid-template-columns: 80px 1fr;
         grid-template-areas:
             "img info"
             "status status";
