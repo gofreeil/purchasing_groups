@@ -13,7 +13,7 @@
 				aria-label="{ad.title} – {ad.description} (נפתח בחלון חדש)"
 				class="ad-item"
 			>
-				<div class="ad-image-wrap" style="height: {ad.imageHeight ?? '160px'}">
+				<div class="ad-image-wrap">
 					<img src={ad.image} alt={ad.title} class="ad-image" />
 					<div class="ad-image-overlay">
 						<h3>{ad.title}</h3>
@@ -78,8 +78,7 @@
 
 	.ad-image {
 		width: 100%;
-		height: 100%;
-		object-fit: cover;
+		height: auto;
 		display: block;
 		transition: opacity 1.5s;
 	}

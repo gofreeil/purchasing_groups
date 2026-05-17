@@ -38,7 +38,6 @@ export const ads = [
 		href: "https://right-to-live.vercel.app/",
 		image: "/assets/mevaker-rashuyot.png",
 		color: "linear-gradient(90deg, #1d4ed8, #4338ca)",
-		imageHeight: "120px",
 	},
 	{
 		id: 10,
@@ -48,7 +47,6 @@ export const ads = [
 		href: "https://public-rating-il.vercel.app/",
 		image: "/assets/public-rating.jpeg",
 		color: "linear-gradient(90deg, #4f46e5, #2563eb)",
-		imageHeight: "200px",
 	},
 	{
 		id: 8,
