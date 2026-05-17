@@ -439,6 +439,8 @@ a {
 /* Main Content Area */
 .content-area {
     flex: 1;
+    /* מונע מפריט הגריד/פלקס לכפות רוחב גדול מהמסך (grid/flex blowout) */
+    min-width: 0;
 }
 
 /* Home Page Styles */
@@ -905,7 +907,7 @@ a {
 
     /* --- Layout & Structure --- */
     .main-layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         padding: 1rem;
         padding-top: 160px;
         /* Space for the header */
@@ -914,6 +916,7 @@ a {
 
     .sidebar-ads {
         width: 100%;
+        min-width: 0;
         order: 2;
         /* Ads at bottom */
     }
