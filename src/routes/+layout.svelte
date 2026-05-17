@@ -4,6 +4,8 @@
 	import "../app.css?v=1.0.1";
 	import { lang, t } from "$lib/i18n.js";
 	import { isLoggedIn } from "$lib/user.js";
+	import AdsSidebar from "$lib/components/AdsSidebar.svelte";
+	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
 
 	let { children } = $props();
 
@@ -170,86 +172,12 @@
 			{@render children()}
 		</main>
 
-		<!-- Sidebar for Ads -->
-		<aside class="sidebar-ads">
-			<!-- Neighborhoods Ad (Second) -->
-			<a
-				href="https://www.melecshop.com/page/peace-on-earth_VRHH"
-				target="_blank"
-				class="ad-card neighborhoods-ad"
-			>
-				<div class="ad-content-whatsapp">
-					<p>{$t.sidebar.neighborhoods}</p>
-				</div>
-			</a>
-
-			<!-- New Special Ad (Third) -->
-			<a
-				href="https://index-chi-sage.vercel.app/"
-				target="_blank"
-				class="ad-card special-ad"
-			>
-				<div class="ad-content-whatsapp">
-					<p>{$t.sidebar.craftsmen}</p>
-				</div>
-			</a>
-
-			<!-- Community Investment Ad (New) -->
-			<a
-				href="https://chat.whatsapp.com/ECzrpGuufdd1ODIwO4YPWM"
-				target="_blank"
-				class="ad-card investments-community-ad"
-			>
-				<div class="ad-content-whatsapp">
-					<p>{$t.sidebar.investmentsCommunity}</p>
-				</div>
-			</a>
-
-			<!-- Grow Food Ad (Fifth) -->
-			<div class="ad-card grow-food-ad">
-				<div class="ribbon-wrapper">
-					<div class="ribbon">{$t.sidebar.soonTag}</div>
-				</div>
-				<div class="ad-content-whatsapp">
-					<p>{$t.sidebar.growFood}</p>
-				</div>
-			</div>
-
-			<div class="ad-status">
-				{$t.sidebar.sponsored}
-			</div>
-
-			<div class="promo-placeholder">
-				<div class="plus-icon">+</div>
-				<p class="promo-text">
-					{$t.sidebar.yourAdHere}
-				</p>
-				<div class="contact-links">
-					<a href="mailto:freedomhasbegun@gmail.com"
-						>{$t.sidebar.advertise}</a
-					>
-					<a href="mailto:freedomhasbegun@gmail.com"
-						>{$t.sidebar.contact}</a
-					>
-				</div>
-			</div>
-
-			<div class="promo-placeholder">
-				<div class="plus-icon">+</div>
-				<p class="promo-text">
-					{$t.sidebar.yourAdHere}
-				</p>
-				<div class="contact-links">
-					<a href="mailto:freedomhasbegun@gmail.com"
-						>{$t.sidebar.advertise}</a
-					>
-					<a href="mailto:freedomhasbegun@gmail.com"
-						>{$t.sidebar.contact}</a
-					>
-				</div>
-			</div>
-		</aside>
+		<!-- Sidebar for Ads (desktop) -->
+		<AdsSidebar />
 	</div>
+
+	<!-- Mobile ads drawer + tab -->
+	<MobileAdsDrawer />
 
 	<!-- Footer -->
 	<footer class="main-footer">
