@@ -536,7 +536,7 @@ a {
     position: relative;
 }
 
-.feature-list li:not(:first-child)::after {
+.feature-list li::after {
     content: "";
     position: absolute;
     inset-inline-start: 0;
