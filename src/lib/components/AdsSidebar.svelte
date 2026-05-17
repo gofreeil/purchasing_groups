@@ -19,6 +19,7 @@
 						alt={ad.title}
 						class="ad-image"
 						class:ad-image-short={ad.id === 5 || ad.id === 10}
+						class:ad-image-trim={ad.id === 1 || ad.id === 3}
 					/>
 					<div class="ad-image-overlay">
 						<h3>{ad.title}</h3>
@@ -96,6 +97,13 @@
 		height: 200px;
 		object-fit: cover;
 		object-position: center;
+	}
+
+	/* קיצוץ מעט מתחתית התמונה — פרסומת "בתי הפיוס" */
+	.ad-image-trim {
+		object-fit: cover;
+		object-position: top;
+		aspect-ratio: 1 / 0.82;
 	}
 
 	.ad-image-overlay {
