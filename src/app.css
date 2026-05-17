@@ -240,30 +240,6 @@ a {
     height: fit-content;
 }
 
-.ad-card {
-    height: 200px;
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border: 1px solid var(--border-color);
-}
-
-.ad-card:hover {
-    transform: scale(1.02);
-}
-
-.ad-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
-
 .ad-content {
     position: relative;
     z-index: 1;
