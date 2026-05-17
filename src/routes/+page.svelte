@@ -4,17 +4,21 @@
     import { cubicOut } from "svelte/easing";
     import { lang, t } from "$lib/i18n.js";
 
+    let { data } = $props();
+
     // הגדר כאן את מספר החברים הנוכחי בקבוצה
     let targetCount = 475;
-    const count = tweened(0, {
-        duration: 2500, // הגדלת זמן הספירה כדי שתמשיך גם אחרי הטעינה
+    // המונה מאותחל לערך הסופי כך שיוצג גם בלי JS; אנימציית הספירה רצה בגלילה
+    const count = tweened(targetCount, {
+        duration: 2500,
         easing: cubicOut,
     });
 
-    // הגדרת מוני חיסכון (שנתי וחודשי) עם אפקט ספירה
-    let targetSavings = $state(15227);
-    let monthlySavings = $state(4385); // ערך ברירת מחדל אם הטעינה נכשלת
-    const savings = tweened(0, {
+    // מוני חיסכון (שנתי וחודשי) - הנתונים נטענים בצד השרת מגיליון Google
+    let targetSavings = $state(data.annualSavings);
+    let monthlySavings = $state(data.monthlySavings);
+    // התween מאותחל לערך האמיתי כך שהמספר מוצג מיד (גם ב-SSR וגם בלי JS)
+    const savings = tweened(data.annualSavings, {
         duration: 2000,
         easing: cubicOut,
     });
@@ -28,57 +32,16 @@
         entries.forEach((entry) => {
             if (entry.isIntersecting && !membersCounterVisible) {
                 membersCounterVisible = true;
+                count.set(0, { duration: 0 });
                 count.set(targetCount);
             }
         });
     };
 
-    async function fetchSavingsFromSheet() {
-        try {
-            const sheetId = "18V5IdtRiN3dKo7habggKP5e55_xJPci158aJVuuWXVw";
-            const gid = "2146350168";
-            const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-
-            const response = await fetch(url);
-            const csvText = await response.text();
-
-            // פיצול השורות
-            const rows = csvText.split("\n");
-            if (rows.length > 2) {
-                // שורה שלישית (אינדקס 2) היא X3 בגיליון (שנתי)
-                const targetRow = rows[2].split(",");
-                // עמודה X היא אינדקס 23 (A=0, B=1... X=23)
-                const value = targetRow[23];
-
-                if (value) {
-                    const numericValue = parseInt(value.replace(/[^\d]/g, ""));
-                    if (!isNaN(numericValue)) {
-                        targetSavings = numericValue;
-                        savings.set(targetSavings);
-                    }
-                }
-
-                // שורה שנייה (אינדקס 1) היא X2 בגיליון (חודשי)
-                const monthlyRow = rows[1].split(",");
-                const monthlyValText = monthlyRow[23];
-                if (monthlyValText) {
-                    const numericMonthly = parseInt(
-                        monthlyValText.replace(/[^\d]/g, ""),
-                    );
-                    if (!isNaN(numericMonthly)) {
-                        monthlySavings = numericMonthly;
-                    }
-                }
-            }
-        } catch (error) {
-            console.error("Error fetching savings from sheet:", error);
-            savings.set(targetSavings);
-        }
-    }
-
     onMount(() => {
-        // משיכת נתונים מהגיליון
-        fetchSavingsFromSheet();
+        // אפקט ספירה למונה החיסכון: איפוס מיידי ל-0 ואז ספירה לערך האמיתי
+        savings.set(0, { duration: 0 });
+        savings.set(targetSavings);
 
         // הגדרת Intersection Observer לחברים
         const observer = new IntersectionObserver(handleIntersection, {
