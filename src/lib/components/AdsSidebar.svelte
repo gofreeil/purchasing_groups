@@ -33,7 +33,8 @@
 
 <style>
 	.ads-sidebar {
-		width: 100%;
+		width: 280px;
+		flex-shrink: 0;
 		position: sticky;
 		top: 150px;
 		height: fit-content;

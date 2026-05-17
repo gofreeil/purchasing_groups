@@ -183,8 +183,8 @@
 		}
 	}
 
-	/* מוצג רק במסכים רחבים מאוד */
-	@media (max-width: 1279px) {
+	/* מוצג בדסקטופ */
+	@media (max-width: 1023px) {
 		.right-ad-banner {
 			display: none;
 		}
