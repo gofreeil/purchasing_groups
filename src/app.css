@@ -1060,13 +1060,22 @@ a {
     /* --- Content Adjustments --- */
     /* Counter */
     .whatsapp-counter-final {
-        margin: 1.5rem 0 2.5rem;
+        margin: 0.4rem 0 0.6rem;
     }
 
     .counter-merge-wrapper {
         gap: 1rem;
         justify-content: center;
         flex-direction: column;
+    }
+
+    /* מונה החברים - צמצום רווחים, מספר וכותרת קטנים יותר */
+    .whatsapp-counter-final .counter-merge-wrapper {
+        gap: 0.1rem;
+    }
+
+    .whatsapp-counter-final .count-big-number {
+        font-size: 2.5rem;
     }
 
     .count-big-number {
@@ -1080,7 +1089,7 @@ a {
     }
 
     .whatsapp-counter-final .count-label-text {
-        font-size: 0.95rem;
+        font-size: 0.8rem;
     }
 
     /* Features */
