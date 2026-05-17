@@ -232,14 +232,8 @@
         </div>
     </div>
 
-    <!-- Soon Separator -->
-    <div class="soon-separator">
-        <span class="soon-text">{$t.homepage.soonColon}</span>
-        <div class="separator-line"></div>
-    </div>
-
     <!-- Fuel -->
-    <div class="purchase-card">
+    <div class="purchase-card" style="margin-bottom: 3rem;">
         <div class="new-burst">{$t.purchases.newBadge}</div>
         <div class="purchase-img-frame fuel-zoom">
             <img
@@ -260,6 +254,12 @@
                 >{$t.purchases.fuelListOpens}</span
             >
         </div>
+    </div>
+
+    <!-- Soon Separator -->
+    <div class="soon-separator">
+        <span class="soon-text">{$t.homepage.soonColon}</span>
+        <div class="separator-line"></div>
     </div>
 
     <!-- Internet -->
@@ -511,7 +511,7 @@
     .new-burst {
         position: absolute;
         top: -22px;
-        left: -22px;
+        right: -22px;
         z-index: 3;
         width: 74px;
         height: 74px;
@@ -539,7 +539,7 @@
             height: 60px;
             font-size: 0.9rem;
             top: -16px;
-            left: -16px;
+            right: -16px;
         }
     }
 
