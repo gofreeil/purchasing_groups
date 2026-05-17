@@ -247,7 +247,7 @@
         </div>
         <div class="purchase-status">
             <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.no}</span>
+            <span class="status-value">{$t.purchases.notStarted}</span>
             <span class="status-label">{$t.purchases.canJoin}</span>
             <span class="status-value">{$t.purchases.no}</span>
         </div>
@@ -268,7 +268,7 @@
         </div>
         <div class="purchase-status">
             <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.no}</span>
+            <span class="status-value">{$t.purchases.notStarted}</span>
             <span class="status-label">{$t.purchases.canJoin}</span>
             <span class="status-value">{$t.purchases.no}</span>
         </div>
@@ -289,7 +289,7 @@
         </div>
         <div class="purchase-status">
             <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.no}</span>
+            <span class="status-value">{$t.purchases.notStarted}</span>
             <span class="status-label">{$t.purchases.canJoin}</span>
             <span class="status-value">{$t.purchases.no}</span>
         </div>
@@ -310,7 +310,7 @@
         </div>
         <div class="purchase-status">
             <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.no}</span>
+            <span class="status-value">{$t.purchases.notStarted}</span>
             <span class="status-label">{$t.purchases.canJoin}</span>
             <span class="status-value">{$t.purchases.no}</span>
         </div>
