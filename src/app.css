@@ -588,8 +588,8 @@ a {
 }
 
 .video-container-large {
-    width: 56%;
-    max-width: 720px;
+    width: 66%;
+    max-width: 860px;
     aspect-ratio: 16 / 9;
     background: #000;
     border-radius: 20px;
