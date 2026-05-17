@@ -164,4 +164,11 @@
 			display: none;
 		}
 	}
+
+	/* בטאבלט — מעט צר יותר כדי להשאיר מקום לתוכן */
+	@media (max-width: 1100px) and (min-width: 769px) {
+		.ads-sidebar {
+			width: 212px;
+		}
+	}
 </style>

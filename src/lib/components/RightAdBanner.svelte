@@ -183,10 +183,17 @@
 		}
 	}
 
-	/* מוצג בדסקטופ */
-	@media (max-width: 1023px) {
+	/* מוצג בדסקטופ/טאבלט — יחד עם סיידבר הפרסומות השמאלי */
+	@media (max-width: 768px) {
 		.right-ad-banner {
 			display: none;
+		}
+	}
+
+	/* בטאבלט — מעט צר יותר כדי להשאיר מקום לתוכן */
+	@media (max-width: 1100px) and (min-width: 769px) {
+		.right-ad-banner {
+			width: 116px;
 		}
 	}
 </style>

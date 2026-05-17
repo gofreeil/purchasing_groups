@@ -71,6 +71,15 @@ a {
     box-sizing: border-box;
 }
 
+/* Tablet: tighter gaps/padding so both ad rails + content fit */
+@media (max-width: 1100px) and (min-width: 769px) {
+    .main-layout {
+        gap: 1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
 /* Header Sections */
 .right-branding {
     display: flex;
