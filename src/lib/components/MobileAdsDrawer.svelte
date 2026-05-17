@@ -300,6 +300,7 @@
 		transition: background 0.2s, border-color 0.2s, transform 0.15s;
 		padding: 0.75rem;
 		align-items: stretch;
+		flex-shrink: 0;
 	}
 
 	.ad-card:hover {
