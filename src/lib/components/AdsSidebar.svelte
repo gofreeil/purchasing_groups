@@ -14,7 +14,12 @@
 				class="ad-item"
 			>
 				<div class="ad-image-wrap">
-					<img src={ad.image} alt={ad.title} class="ad-image" />
+					<img
+						src={ad.image}
+						alt={ad.title}
+						class="ad-image"
+						class:ad-image-short={ad.id === 5 || ad.id === 10}
+					/>
 					<div class="ad-image-overlay">
 						<h3>{ad.title}</h3>
 						<p>{ad.description}</p>
@@ -85,6 +90,12 @@
 
 	.ad-item:hover .ad-image {
 		opacity: 0;
+	}
+
+	.ad-image-short {
+		height: 200px;
+		object-fit: cover;
+		object-position: center;
 	}
 
 	.ad-image-overlay {
