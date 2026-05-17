@@ -130,6 +130,7 @@ export const translations = readable({
             yes: "כן",
             no: "לא",
             soon: "בקרוב...",
+            fuelListOpens: "הרשימה תיפתח ביום רביעי 20/5",
             currency: 'ש"ח'
         },
         satisfaction: {
@@ -272,6 +273,7 @@ export const translations = readable({
             yes: "Yes",
             no: "No",
             soon: "Soon...",
+            fuelListOpens: "List opens Wednesday 20/5",
             currency: "ILS"
         },
         satisfaction: {
@@ -412,6 +414,7 @@ export const translations = readable({
             yes: "Да",
             no: "Нет",
             soon: "Скоро...",
+            fuelListOpens: "Список откроется в среду 20/5",
             currencyPerYear: "шекелей/год"
         }
     }
