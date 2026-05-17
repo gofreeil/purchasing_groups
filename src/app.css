@@ -284,29 +284,28 @@ a {
 
 /* Backgrounds for ads - will use your images */
 .neighborhoods-ad {
-    background-image: url('/assets/ועדי שכונות.png');
+    background-image: url('/assets/news/ועדי שכונות.png');
     background-size: 100% 100%;
 }
 
 .groups-ad {
-    background-image: url('/assets/צילום מסך 2025-12-02 122846.png');
+    background-image: url('/assets/screenshot-2.png');
     background-size: 100% 100%;
 }
 
 .special-ad {
-    background-image: url('/assets/צילום מסך 2025-01-09 230951.png');
+    background-image: url('/assets/screenshot-2.png');
     background-size: 100% 100%;
 }
 
 .investment-ad {
     background-color: #1e293b;
-    /* Placeholder color until image is provided */
-    background-image: url('/assets/investment.png');
+    background-image: url('/assets/partners/investments.png');
     background-size: 100% 100%;
 }
 
 .investments-community-ad {
-    background-image: url('/assets/השקעות קבוצתיות.png');
+    background-image: url('/assets/partners/השקעות קבוצתיות.png');
     background-size: 100% 100%;
 }
 
@@ -343,7 +342,7 @@ a {
     /* המרה מקטן יותר מהצד */
     height: 150px;
     border-radius: 20px;
-    background-image: url('/assets/צילום מסך 2025-12-02 122846.png');
+    background-image: url('/assets/screenshot-2.png');
     background-size: cover;
     background-position: center;
     position: relative;
@@ -421,12 +420,6 @@ a {
     font-size: 2rem;
     color: #f97316;
     margin-bottom: 0.5rem;
-}
-
-.grow-food-ad {
-    background: url("/assets/מערכת לגידול ביתי.png") center/cover no-repeat;
-    position: relative;
-    overflow: hidden;
 }
 
 .ribbon-wrapper {
