@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import favicon from "$lib/assets/favicon.svg";
-	import "../app.css?v=1.0.1";
+	import "../app.css?v=1.0.2";
 	import { lang, t } from "$lib/i18n.js";
 	import { isLoggedIn } from "$lib/user.js";
 	import AdsSidebar from "$lib/components/AdsSidebar.svelte";

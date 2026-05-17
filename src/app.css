@@ -519,6 +519,7 @@ a {
 
 .features-title {
     margin: 0 0 0.6rem 0;
+    text-align: center;
 }
 
 .feature-list {
@@ -526,17 +527,45 @@ a {
     padding: 0;
     margin: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
 }
 
 .feature-list li {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.8rem;
+    text-align: center;
+    gap: 0.45rem;
     font-size: 0.9rem;
     color: var(--text-white);
-    padding: 0.15rem;
+    padding: 0.3rem 0.7rem;
+    position: relative;
+}
+
+.feature-list li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 62%;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, transparent, #4ade80 50%, transparent);
+    box-shadow: 0 0 8px #4ade80;
+    animation: divider-glow 2s ease-in-out infinite;
+}
+
+@keyframes divider-glow {
+    0%, 100% {
+        opacity: 0.35;
+        box-shadow: 0 0 4px #4ade80;
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 14px #4ade80, 0 0 22px rgba(74, 222, 128, 0.6);
+    }
 }
 
 .feature-list .check {
@@ -738,15 +767,26 @@ a {
 
 .status-label {
     color: var(--text-gray);
-    display: block;
-    margin-top: 0.5rem;
+    display: inline;
 }
 
 .status-value {
     font-weight: bold;
     color: #ffffff;
+    display: inline;
+    margin: 0 0.35rem 0 0;
+}
+
+.status-value.highlight-monthly,
+.status-value.highlight-yearly {
     display: block;
-    margin-bottom: 0.5rem;
+    margin: 0.15rem 0 0 0;
+}
+
+.status-label:not(:first-child)::before {
+    content: "";
+    display: block;
+    height: 0.4rem;
 }
 
 .savings {
@@ -1124,6 +1164,7 @@ a {
 
     /* Features */
     .feature-list {
+        grid-template-columns: repeat(2, 1fr);
         gap: 0.8rem;
     }
 
@@ -1134,8 +1175,18 @@ a {
 
     .feature-list li {
         font-size: 1rem;
-        padding: 0.2rem;
-        gap: 0.8rem;
+        padding: 0.4rem 0.6rem;
+        gap: 0.5rem;
+    }
+
+    .feature-list li:not(:last-child)::after {
+        display: none;
+    }
+
+    .feature-list li:nth-child(odd):not(:last-child)::after {
+        display: block;
+        inset-inline-start: auto;
+        inset-inline-end: calc(-0.4rem - 1px);
     }
 
     .feature-list .check {
