@@ -36,11 +36,14 @@ a {
 }
 
 .main-header {
-    background-color: rgba(10, 17, 40, 0.85);
+    background: linear-gradient(to bottom,
+            rgba(17, 24, 39, 0.92) 0%,
+            rgba(17, 24, 39, 0.92) 66%,
+            rgba(17, 24, 39, 0.12) 100%);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    padding: 1rem 4rem;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0.4rem 2rem;
+    border-bottom: 4px solid #2563eb;
     position: fixed;
     top: 0;
     left: 0;
@@ -49,7 +52,7 @@ a {
 }
 
 .header-container {
-    max-width: 1400px;
+    max-width: 1280px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -57,14 +60,13 @@ a {
 }
 
 .main-layout {
-    display: grid;
-    grid-template-columns: 1fr var(--sidebar-width);
+    display: flex;
+    gap: 2rem;
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
     padding-top: 150px;
     /* Space for the fixed header */
-    gap: 3rem;
     width: 100%;
     box-sizing: border-box;
 }
@@ -73,7 +75,35 @@ a {
 .right-branding {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
+}
+
+.logo-container {
+    width: 112px;
+    height: 112px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.3s;
+    animation: logoPulse 11s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.right-branding:hover .logo-container {
+    transform: scale(1.05);
+}
+
+@keyframes logoPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    36% {
+        opacity: 0.75;
+    }
 }
 
 .titles {
@@ -81,9 +111,9 @@ a {
 }
 
 .main-title {
-    font-size: 2rem;
-    font-weight: 800;
-    background: linear-gradient(to right, #6366f1, #3b82f6);
+    font-size: 1.875rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #60a5fa, #c084fc);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -91,17 +121,18 @@ a {
 }
 
 .sub-title {
-    color: var(--text-white);
-    font-size: 0.9rem;
-    margin-top: 4px;
+    color: #f3f4f6;
+    font-size: 1.125rem;
+    font-weight: 800;
+    margin-top: 2px;
 }
 
 .main-logo {
-    width: 80px;
-    height: 80px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--border-color);
+    transform: scale(1.2);
 }
 
 /* Footer Banner Image */
@@ -437,6 +468,7 @@ a {
 /* Main Content Area */
 .content-area {
     flex: 1;
+    min-width: 0;
 }
 
 /* Home Page Styles */
@@ -816,16 +848,15 @@ a {
 
 /* Footer Section */
 .main-footer {
-    background-color: var(--bg-header);
+    background-color: #0d1117;
     border-top: 1px solid var(--border-color);
-    padding: 1.5rem 1rem;
+    padding: 0.5rem 1rem;
     margin-top: auto;
 }
 
 .footer-container {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
-    text-align: center;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -833,69 +864,70 @@ a {
     flex-wrap: wrap;
 }
 
-.footer-action-area {
+.footer-brand {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    transition: opacity 0.2s;
 }
 
-.footer-action-area span {
-    font-size: 0.95rem;
-    color: var(--text-white);
+.footer-brand:hover {
+    opacity: 0.8;
 }
 
-.footer-banner-link {
-    display: flex;
-    justify-content: center;
-    transition: transform 0.3s ease;
+.footer-brand-img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 8px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
 }
 
-.footer-banner-link:hover {
+.footer-brand:hover .footer-brand-img {
     transform: scale(1.05);
 }
 
-.footer-banner-img {
-    max-width: 140px;
-    height: auto;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-@media (max-width: 768px) {
-    .footer-action-area {
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-
-    .footer-banner-img {
-        max-width: 100px;
-    }
+.footer-brand-text {
+    color: #fbbf24;
+    font-weight: 900;
+    font-size: 0.95rem;
+    text-align: right;
+    max-width: 240px;
+    line-height: 1.4;
 }
 
 .footer-links {
     display: flex;
-    justify-content: flex-start;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1rem;
     flex-wrap: wrap;
-    font-size: 0.85rem;
-    margin-right: auto;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
 }
 
 .footer-links a {
-    color: var(--text-gray);
+    color: #d1d5db;
     transition: color 0.2s;
 }
 
 .footer-links a:hover {
-    color: var(--text-white);
+    color: #ffffff;
+}
+
+.footer-copy {
+    color: #9ca3af;
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: left;
+    margin: 0;
 }
 
 .dot {
-    color: var(--border-color);
+    color: #4b5563;
+    font-weight: 900;
 }
 
 
@@ -903,17 +935,11 @@ a {
 
     /* --- Layout & Structure --- */
     .main-layout {
-        grid-template-columns: 1fr;
+        flex-direction: column;
         padding: 1rem;
-        padding-top: 160px;
+        padding-top: 168px;
         /* Space for the header */
         gap: 2rem;
-    }
-
-    .sidebar-ads {
-        width: 100%;
-        order: 2;
-        /* Ads at bottom */
     }
 
     .content-area {
@@ -922,14 +948,14 @@ a {
 
     /* --- Header (Symmetrical & Beautiful) --- */
     .main-header {
-        padding: 1rem 1rem;
+        padding: 0.6rem 1rem;
         backdrop-filter: blur(20px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
     .header-container {
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.8rem;
         align-items: center;
     }
 
@@ -942,10 +968,15 @@ a {
         text-align: center;
     }
 
+    .logo-container {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+    }
+
     .main-logo {
-        width: 48px;
-        height: 48px;
-        border-width: 2px;
+        width: 44px;
+        height: 44px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
@@ -1002,45 +1033,37 @@ a {
     .footer-container {
         flex-direction: column;
         align-items: center;
-        gap: 0.4rem;
-        padding: 1rem 0.8rem;
+        gap: 0.5rem;
+        padding: 0.5rem 0.8rem;
         text-align: center;
     }
 
-    .footer-top {
-        flex-direction: column;
-        gap: 0.3rem;
-        align-items: center;
+    .footer-brand {
+        gap: 0.6rem;
+    }
+
+    .footer-brand-img {
+        width: 88px;
+        height: 88px;
+    }
+
+    .footer-brand-text {
+        font-size: 0.8rem;
+        max-width: 200px;
+    }
+
+    .footer-links {
+        gap: 0.6rem;
         width: 100%;
         font-size: 0.85rem;
     }
 
-    .liberty-link {
-        width: 100%;
-        max-width: 300px;
-        text-align: center;
-        justify-content: center;
-        display: flex;
-        align-items: center;
-        padding: 0.4rem 0.8rem;
+    .footer-copy {
         font-size: 0.8rem;
-    }
-
-    .footer-links {
-        flex-direction: row;
-        gap: 0.6rem;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        margin: 0;
-        font-size: 0.8rem;
-        opacity: 0.8;
     }
 
     .dot {
-        display: inline-block;
-        color: rgba(255, 255, 255, 0.3);
-        margin: 0 0.5rem;
+        margin: 0 0.25rem;
     }
 
     /* --- Content Adjustments --- */

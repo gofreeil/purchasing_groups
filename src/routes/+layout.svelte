@@ -5,6 +5,7 @@
 	import { lang, t } from "$lib/i18n.js";
 	import { isLoggedIn } from "$lib/user.js";
 	import AdsSidebar from "$lib/components/AdsSidebar.svelte";
+	import RightAdBanner from "$lib/components/RightAdBanner.svelte";
 	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
 
 	let { children } = $props();
@@ -167,6 +168,9 @@
 	</header>
 
 	<div class="main-layout">
+		<!-- Right Ad Banner (wide screens) -->
+		<RightAdBanner />
+
 		<!-- Main Content Area -->
 		<main class="content-area">
 			{@render children()}
@@ -182,30 +186,33 @@
 	<!-- Footer -->
 	<footer class="main-footer">
 		<div class="footer-container">
-			<div class="footer-action-area">
-				<span>{$t.footer.clickForActivity}</span>
-				<a
-					href="https://www.melecshop.com/"
-					target="_blank"
-					class="footer-banner-link"
-				>
-					<img
-						src="/assets/yotzim-lecherut.png"
-						alt="יוצאים לחירות"
-						class="footer-banner-img"
-					/>
-				</a>
-			</div>
+			<a
+				href="https://www.melecshop.com/"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="footer-brand"
+			>
+				<img
+					src="/assets/yotzim-lecherut.png"
+					alt="יוצאים לחירות"
+					class="footer-brand-img"
+				/>
+				<span class="footer-brand-text">{$t.footer.clickForActivity}</span>
+			</a>
 
-			<div class="footer-links">
+			<nav class="footer-links" aria-label="ניווט תחתון">
+				<a href="/privacy">{$t.footer.privacy}</a>
+				<span class="dot">|</span>
 				<a href="mailto:freedomhasbegun@gmail.com"
 					>{$t.footer.contactUs}</a
 				>
 				<span class="dot">|</span>
 				<a href="/satisfaction">{$t.satisfaction.title}</a>
-				<span class="dot">|</span>
-				<a href="/privacy">{$t.footer.privacy}</a>
-			</div>
+			</nav>
+
+			<p class="footer-copy">
+				&copy; {new Date().getFullYear()} {$t.title}
+			</p>
 		</div>
 	</footer>
 </div>
