@@ -606,7 +606,7 @@ a {
 .whatsapp-counter-final {
     display: flex;
     justify-content: center;
-    margin: 0.5rem 0 1rem 0;
+    margin: 0.15rem 0 1rem 0;
     overflow: hidden;
 }
 
@@ -644,9 +644,13 @@ a {
     letter-spacing: 1px;
 }
 
-/* כותרת מונה החברים קטנה יותר מכותרת מונה החיסכון */
+/* מונה החברים - מספר קטן מעט יותר וכותרת גדולה מעט יותר */
+.whatsapp-counter-final .count-big-number {
+    font-size: 2.8rem;
+}
+
 .whatsapp-counter-final .count-label-text {
-    font-size: 1.15rem;
+    font-size: 1.35rem;
 }
 
 .fade-scale-in {
@@ -1123,7 +1127,7 @@ a {
     /* --- Content Adjustments --- */
     /* Counter */
     .whatsapp-counter-final {
-        margin: 0.4rem 0 0.6rem;
+        margin: 0.1rem 0 0.6rem;
     }
 
     .counter-merge-wrapper {
@@ -1138,7 +1142,7 @@ a {
     }
 
     .whatsapp-counter-final .count-big-number {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
     }
 
     .count-big-number {
@@ -1152,7 +1156,7 @@ a {
     }
 
     .whatsapp-counter-final .count-label-text {
-        font-size: 0.8rem;
+        font-size: 0.98rem;
     }
 
     /* Features */
