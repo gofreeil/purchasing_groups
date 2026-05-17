@@ -1,0 +1,1265 @@
+:root {
+    --bg-dark: #050a18;
+    --bg-header: #0a1128;
+    --primary-blue: #3b82f6;
+    --accent-yellow: #facc15;
+    --text-white: #ffffff;
+    --text-gray: #94a3b8;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --sidebar-width: 320px;
+}
+
+html,
+body {
+    /* מונע גלילה אופקית / תזוזת המסך ימינה-שמאלה */
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Assistant', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    min-height: 100vh;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* Layout Structure */
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-header {
+    background: linear-gradient(to bottom,
+            rgba(17, 24, 39, 0.92) 0%,
+            rgba(17, 24, 39, 0.92) 66%,
+            rgba(17, 24, 39, 0.12) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0.4rem 2rem;
+    border-bottom: 4px solid #2563eb;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-layout {
+    display: flex;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    padding-top: 150px;
+    /* Space for the fixed header */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Tablet: tighter gaps/padding so both ad rails + content fit */
+@media (max-width: 1100px) and (min-width: 769px) {
+    .main-layout {
+        gap: 1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Header Sections */
+.right-branding {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-container {
+    width: 112px;
+    height: 112px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.3s;
+    animation: logoPulse 11s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.right-branding:hover .logo-container {
+    transform: scale(1.05);
+}
+
+@keyframes logoPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    36% {
+        opacity: 0.75;
+    }
+}
+
+.titles {
+    text-align: right;
+}
+
+.main-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #60a5fa, #c084fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.sub-title {
+    color: #f3f4f6;
+    font-size: 1.125rem;
+    font-weight: 800;
+    margin-top: 2px;
+}
+
+.main-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    transform: scale(1.2);
+}
+
+/* Footer Banner Image */
+.footer-banner-container {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.footer-banner-img {
+    max-width: 140px;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+    .footer-banner-img {
+        max-width: 100px;
+    }
+}
+
+/* Header Buttons */
+.left-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.add-business-btn {
+    background-color: #2563eb;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.policy-btn {
+    background-color: var(--accent-yellow);
+    color: #000;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.login-link {
+    color: var(--text-gray);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    text-decoration: none;
+}
+
+.lang-selector {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.flag-icon {
+    width: 20px;
+    height: auto;
+    border-radius: 2px;
+    margin-inline-end: 0.5rem;
+    vertical-align: middle;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Sidebar Advertising */
+.sidebar-ads {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: sticky;
+    top: 150px;
+    /* Space for the fixed header */
+    height: fit-content;
+}
+
+.ad-card {
+    height: 200px;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid var(--border-color);
+}
+
+.ad-card:hover {
+    transform: scale(1.02);
+}
+
+.ad-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.ad-content {
+    position: relative;
+    z-index: 1;
+}
+
+.ad-content h3 {
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem 0;
+    color: white;
+}
+
+.ad-content p {
+    font-size: 0.8rem;
+    color: #cbd5e1;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Backgrounds for ads - will use your images */
+.neighborhoods-ad {
+    background-image: url('/assets/ועדי שכונות.png');
+    background-size: 100% 100%;
+}
+
+.groups-ad {
+    background-image: url('/assets/צילום מסך 2025-12-02 122846.png');
+    background-size: 100% 100%;
+}
+
+.special-ad {
+    background-image: url('/assets/צילום מסך 2025-01-09 230951.png');
+    background-size: 100% 100%;
+}
+
+.investment-ad {
+    background-color: #1e293b;
+    /* Placeholder color until image is provided */
+    background-image: url('/assets/investment.png');
+    background-size: 100% 100%;
+}
+
+.investments-community-ad {
+    background-image: url('/assets/השקעות קבוצתיות.png');
+    background-size: 100% 100%;
+}
+
+.ad-content-whatsapp {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 0.8rem;
+    text-align: center;
+}
+
+.ad-content-whatsapp p {
+    color: white;
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: bold;
+    line-height: 1.4;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Centered Ad Banner */
+.centered-ad-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 2rem 0;
+    width: 100%;
+}
+
+.centered-ad-banner {
+    width: 100%;
+    max-width: 600px;
+    /* המרה מקטן יותר מהצד */
+    height: 150px;
+    border-radius: 20px;
+    background-image: url('/assets/צילום מסך 2025-12-02 122846.png');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    text-decoration: none;
+    border: 2px solid rgba(74, 222, 128, 0.3);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.centered-ad-banner:hover {
+    transform: scale(1.03);
+}
+
+.ad-content-whatsapp-centered {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.8rem;
+    text-align: center;
+    backdrop-filter: blur(5px);
+}
+
+.ad-content-whatsapp-centered p {
+    color: white;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* Soon Separator */
+.soon-separator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    width: 100%;
+    position: relative;
+}
+
+.soon-text {
+    color: #facc15;
+    font-size: 2.5rem;
+    /* הגדלה לפי הציור */
+    font-weight: 900;
+    white-space: nowrap;
+    text-shadow: 0 0 30px rgba(250, 204, 21, 0.5);
+    font-family: 'Assistant', sans-serif;
+}
+
+.separator-line {
+    display: none;
+    /* נוריד את הקו כדי שיהיה נקי כמו בציור */
+}
+
+.ad-status {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-gray);
+    margin: -0.5rem 0;
+}
+
+.promo-placeholder {
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.plus-icon {
+    font-size: 2rem;
+    color: #f97316;
+    margin-bottom: 0.5rem;
+}
+
+.grow-food-ad {
+    background: url("/assets/מערכת לגידול ביתי.png") center/cover no-repeat;
+    position: relative;
+    overflow: hidden;
+}
+
+.ribbon-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 85px;
+    height: 85px;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.ribbon {
+    font-family: sans-serif;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    transform: rotate(45deg);
+    position: relative;
+    padding: 5px 0;
+    background-color: #ef4444;
+    width: 120px;
+    top: 15px;
+    right: -30px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.promo-text {
+    font-size: 0.9rem;
+    color: #f97316;
+    font-weight: bold;
+}
+
+.contact-links {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.contact-links a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+
+
+/* Main Content Area */
+.content-area {
+    flex: 1;
+    /* מונע מפריט הגריד/פלקס לכפות רוחב גדול מהמסך (grid/flex blowout) */
+    min-width: 0;
+}
+
+/* Home Page Styles */
+.hero-banner {
+    background: linear-gradient(135deg, #525fe1 0%, #3b82f6 100%);
+    padding: 4rem 2rem;
+    border-radius: 20px;
+    text-align: center;
+    margin-bottom: 3rem;
+    box-shadow: 0 10px 30px rgba(82, 95, 225, 0.2);
+}
+
+.hero-banner h1 {
+    font-size: 3.5rem;
+    color: white;
+    margin: 0;
+    line-height: 1.2;
+    text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.feature-box {
+    background: var(--card-bg);
+    padding: 0.85rem 1.1rem;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.features-title {
+    margin: 0 0 0.6rem 0;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.5rem;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.9rem;
+    color: var(--text-white);
+    padding: 0.15rem;
+}
+
+.feature-list .check {
+    color: #4ade80;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    letter-spacing: -0.2em;
+}
+
+.video-placeholder {
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.top-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin-bottom: 1rem;
+    align-items: center;
+    width: 100%;
+}
+
+.video-container-large {
+    width: 56%;
+    max-width: 720px;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.video-container-large iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.whatsapp-counter-final {
+    display: flex;
+    justify-content: center;
+    margin: 0.5rem 0 1rem 0;
+    overflow: hidden;
+}
+
+.savings-counter-final {
+    display: flex;
+    justify-content: center;
+    margin: 0.3rem 0 0.5rem 0;
+    overflow: hidden;
+}
+
+.counter-merge-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    white-space: nowrap;
+}
+
+.count-big-number {
+    font-size: 3.2rem;
+    font-weight: 950;
+    color: #4ade80;
+    line-height: 1;
+    text-shadow: 0 0 40px rgba(74, 222, 128, 0.4);
+}
+
+.savings-number {
+    color: #facc15 !important;
+    text-shadow: 0 0 40px rgba(250, 204, 21, 0.4);
+}
+
+.count-label-text {
+    font-size: 1.8rem;
+    color: var(--text-white);
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* כותרת מונה החברים קטנה יותר מכותרת מונה החיסכון */
+.whatsapp-counter-final .count-label-text {
+    font-size: 1.15rem;
+}
+
+.fade-scale-in {
+    animation: fadeScaleIn 1s ease-out both;
+}
+
+@keyframes fadeScaleIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 1024px) {
+    .top-content {
+        grid-template-columns: 1fr;
+    }
+
+    .counter-number {
+        font-size: 3rem;
+    }
+}
+
+.cta-box {
+    text-align: center;
+}
+
+.whatsapp-cta-img {
+    width: 100%;
+    border-radius: 15px;
+    transition: transform 0.3s;
+}
+
+.whatsapp-cta-img:hover {
+    transform: translateY(-5px);
+}
+
+.section-title {
+    text-align: center;
+    margin: 4rem 0 2rem;
+}
+
+.section-title h2 {
+    font-size: 2.5rem;
+    color: #facc15;
+    background: linear-gradient(to right, #facc15, #fb923c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.purchases-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.purchase-card {
+    display: grid;
+    grid-template-columns: 120px 1fr 200px;
+    align-items: center;
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem 2.5rem;
+    gap: 2.5rem;
+    transition: background 0.3s;
+}
+
+.purchase-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.purchase-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+}
+
+.purchase-info h3 {
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+    color: #4ade80;
+}
+
+.purchase-info a {
+    color: #4ade80;
+    text-decoration: none;
+}
+
+.purchase-info p {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.purchase-status {
+    text-align: left;
+    font-size: 0.9rem;
+    border-right: 1px solid var(--border-color);
+    padding-right: 1.5rem;
+}
+
+.status-label {
+    color: var(--text-gray);
+    display: block;
+    margin-top: 0.5rem;
+}
+
+.status-value {
+    font-weight: bold;
+    color: #ffffff;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.savings {
+    color: #ef4444 !important;
+    font-weight: 800;
+}
+
+@media (max-width: 1024px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .purchase-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+        gap: 1.5rem;
+    }
+
+    .purchase-status {
+        border-right: none;
+        border-top: 1px solid var(--border-color);
+        padding: 1.5rem 0 0;
+    }
+
+    .purchase-img {
+        margin: 0 auto;
+    }
+}
+
+/* Shops Section Styles */
+.secondary-title {
+    text-align: center;
+    margin: 3rem 0;
+    color: #4ade80;
+    font-size: 2rem;
+}
+
+.shops-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.shop-card {
+    display: grid;
+    grid-template-columns: 200px 1fr 250px;
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    gap: 2rem;
+    align-items: center;
+}
+
+.shop-img-container img {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.shop-details h3 {
+    font-size: 1.8rem;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+}
+
+.shop-details p {
+    color: var(--text-gray);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.shop-benefit {
+    text-align: center;
+    border-right: 1px solid var(--border-color);
+    padding-right: 1.5rem;
+}
+
+.benefit-text {
+    font-size: 1.2rem;
+    color: #4ade80;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.shop-link-btn {
+    display: inline-block;
+    background: #525fe1;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.shop-link-btn:hover {
+    background: #3b82f6;
+}
+
+@media (max-width: 1024px) {
+    .shop-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .shop-benefit {
+        border-right: none;
+        border-top: 1px solid var(--border-color);
+        padding: 1.5rem 0 0;
+    }
+}
+
+
+/* Footer Section */
+.main-footer {
+    background-color: #0d1117;
+    border-top: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.footer-brand:hover {
+    opacity: 0.8;
+}
+
+.footer-brand-img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 8px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.footer-brand:hover .footer-brand-img {
+    transform: scale(1.05);
+}
+
+.footer-brand-text {
+    color: #fbbf24;
+    font-weight: 900;
+    font-size: 0.95rem;
+    text-align: right;
+    max-width: 240px;
+    line-height: 1.4;
+}
+
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.footer-links a {
+    color: #d1d5db;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: #ffffff;
+}
+
+.footer-copy {
+    color: #9ca3af;
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: left;
+    margin: 0;
+}
+
+.dot {
+    color: #4b5563;
+    font-weight: 900;
+}
+
+
+@media (max-width: 768px) {
+
+    /* --- Layout & Structure --- */
+    .main-layout {
+        flex-direction: column;
+        padding: 1rem;
+        padding-top: 168px;
+        /* Space for the header */
+        gap: 2rem;
+    }
+
+    .content-area {
+        order: 1;
+    }
+
+    /* --- Header (Symmetrical & Beautiful) --- */
+    .main-header {
+        padding: 0.6rem 1rem;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-container {
+        flex-direction: column;
+        gap: 0.8rem;
+        align-items: center;
+    }
+
+    /* Branding: Logo + Title centered */
+    .right-branding {
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        gap: 0.8rem;
+        text-align: center;
+    }
+
+    .logo-container {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+    }
+
+    .main-logo {
+        width: 44px;
+        height: 44px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .titles {
+        text-align: center;
+        flex: unset;
+    }
+
+    .main-title {
+        font-size: 1.3rem;
+        line-height: 1.1;
+        margin: 0;
+        text-align: center;
+    }
+
+    .sub-title {
+        display: none;
+    }
+
+    /* Actions: Buttons centered and balanced */
+    .left-actions {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        gap: 0.8rem;
+    }
+
+    .add-business-btn {
+        flex-grow: 1;
+        text-align: center;
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        max-width: none;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+
+    .lang-selector {
+        height: auto;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+    }
+
+    .flag-icon {
+        width: 20px;
+        margin-inline-end: 6px;
+    }
+
+    /* --- Footer (Symmetrical) --- */
+    .footer-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.8rem;
+        text-align: center;
+    }
+
+    .footer-brand {
+        gap: 0.6rem;
+    }
+
+    .footer-brand-img {
+        width: 88px;
+        height: 88px;
+    }
+
+    .footer-brand-text {
+        font-size: 0.8rem;
+        max-width: 200px;
+    }
+
+    .footer-links {
+        gap: 0.6rem;
+        width: 100%;
+        font-size: 0.85rem;
+    }
+
+    .footer-copy {
+        font-size: 0.8rem;
+    }
+
+    .dot {
+        margin: 0 0.25rem;
+    }
+
+    /* --- Content Adjustments --- */
+    /* Counter */
+    .whatsapp-counter-final {
+        margin: 0.4rem 0 0.6rem;
+    }
+
+    .counter-merge-wrapper {
+        gap: 1rem;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    /* מונה החברים - צמצום רווחים, מספר וכותרת קטנים יותר */
+    .whatsapp-counter-final .counter-merge-wrapper {
+        gap: 0.1rem;
+    }
+
+    .whatsapp-counter-final .count-big-number {
+        font-size: 2.5rem;
+    }
+
+    .count-big-number {
+        font-size: 3.5rem;
+        line-height: 1;
+    }
+
+    .count-label-text {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    .whatsapp-counter-final .count-label-text {
+        font-size: 0.8rem;
+    }
+
+    /* Features */
+    .feature-list {
+        gap: 0.8rem;
+    }
+
+    .feature-box {
+        padding: 1.2rem;
+        border-radius: 16px;
+    }
+
+    .feature-list li {
+        font-size: 1rem;
+        padding: 0.2rem;
+        gap: 0.8rem;
+    }
+
+    .feature-list .check {
+        font-size: 1.3rem;
+    }
+
+    /* Video */
+    .video-container-large {
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        width: 85%;
+        max-width: 950px;
+    }
+
+    /* Main Page Title - Accessibility */
+    .main-page-title {
+        font-size: 2.5rem;
+        color: #facc15;
+        text-align: center;
+        margin: 1rem 0 2rem 0;
+        font-weight: 700;
+    }
+
+    /* Features Title - Accessibility */
+    .features-title {
+        font-size: 1.5rem;
+        color: #4ade80;
+        text-align: center;
+        margin: 0 0 1rem 0;
+        font-weight: 600;
+    }
+
+    /* Purchase Cards - compact mobile layout */
+    .purchase-card {
+        padding: 0.85rem 1rem;
+        gap: 0.35rem 0.85rem;
+        border-radius: 14px;
+        grid-template-columns: 58px 1fr;
+        grid-template-areas:
+            "img info"
+            "status status";
+        align-items: center;
+        text-align: center;
+    }
+
+    .purchase-img-frame {
+        grid-area: img;
+    }
+
+    .purchase-info {
+        grid-area: info;
+    }
+
+    .purchase-status {
+        grid-area: status;
+    }
+
+    .purchase-img {
+        width: 58px;
+        height: 58px;
+        margin: 0;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .purchase-info h3 {
+        font-size: 1rem;
+        margin: 0 0 0.2rem 0;
+        justify-content: center;
+    }
+
+    .purchase-info p {
+        font-size: 0.78rem;
+        line-height: 1.35;
+        opacity: 0.85;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .purchase-status {
+        padding: 0.5rem 0 0;
+        margin-top: 0.25rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: none;
+        width: 100%;
+        display: block;
+        text-align: center;
+        font-size: 0.78rem;
+        line-height: 1.4;
+    }
+
+    /* התווית והערך באותה שורה; רווח מעל כל קבוצה מפריד ביניהן */
+    .purchase-status .status-label {
+        display: inline;
+        margin: 0;
+    }
+
+    .purchase-status .status-value {
+        display: inline;
+        margin: 0 0.35rem 0 0;
+    }
+
+    .purchase-status .status-label:not(:first-child)::before {
+        content: "";
+        display: block;
+        height: 0.4rem;
+    }
+
+    .purchase-status .survey-badge-container {
+        margin-top: 0.6rem;
+    }
+
+    /* Section Titles */
+    .section-title {
+        margin: 2rem 0;
+    }
+
+    .section-title h2 {
+        font-size: 1.8rem;
+    }
+
+    .hero-banner h1 {
+        font-size: 2.2rem;
+    }
+}
