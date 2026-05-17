@@ -101,6 +101,22 @@
         </ul>
     </div>
 
+</div>
+
+<div class="centered-ad-wrapper">
+    <p class="ad-text-top">{$t.sidebar.whatsapp}</p>
+    <div class="banner-container-with-hands">
+        <span class="side-hand">👈</span>
+        <a
+            href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
+            target="_blank"
+            class="centered-ad-banner"
+            aria-label="הצטרף לקבוצת הוואטסאפ"
+        >
+        </a>
+        <span class="side-hand">👉</span>
+    </div>
+
     <!-- WhatsApp Counter -->
     <div
         class="whatsapp-counter-final"
@@ -116,21 +132,6 @@
                 {$t.homepage.membersCount}
             </div>
         </div>
-    </div>
-</div>
-
-<div class="centered-ad-wrapper">
-    <p class="ad-text-top">{$t.sidebar.whatsapp}</p>
-    <div class="banner-container-with-hands">
-        <span class="side-hand">👈</span>
-        <a
-            href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
-            target="_blank"
-            class="centered-ad-banner"
-            aria-label="הצטרף לקבוצת הוואטסאפ"
-        >
-        </a>
-        <span class="side-hand">👉</span>
     </div>
 </div>
 

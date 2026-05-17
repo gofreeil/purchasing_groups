@@ -578,6 +578,11 @@ a {
     letter-spacing: 1px;
 }
 
+/* כותרת מונה החברים קטנה יותר מכותרת מונה החיסכון */
+.whatsapp-counter-final .count-label-text {
+    font-size: 1.15rem;
+}
+
 .fade-scale-in {
     animation: fadeScaleIn 1s ease-out both;
 }
@@ -1068,6 +1073,10 @@ a {
     .count-label-text {
         font-size: 1.2rem;
         text-align: center;
+    }
+
+    .whatsapp-counter-final .count-label-text {
+        font-size: 0.95rem;
     }
 
     /* Features */
