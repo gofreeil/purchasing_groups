@@ -540,6 +540,37 @@
         }
     }
 
+    /* במובייל תג הסקר זורם בתוך הכרטיס ולא חופף את נתוני החיסכון */
+    @media (max-width: 768px) {
+        .survey-badge-container {
+            position: static;
+            transform: none;
+            left: auto;
+            bottom: auto;
+            justify-content: center;
+            white-space: normal;
+            gap: 0.5rem;
+        }
+
+        .satisfaction-circle-link {
+            width: 48px;
+            height: 48px;
+            font-size: 0.55rem;
+        }
+
+        .satisfaction-circle-link:hover {
+            transform: translateY(-3px);
+        }
+
+        .survey-rating-summary {
+            padding: 3px 8px;
+        }
+
+        .stars-gold {
+            font-size: 0.75rem;
+        }
+    }
+
     .survey-rating-summary {
         display: flex;
         flex-direction: column;
