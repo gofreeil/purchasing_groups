@@ -1161,25 +1161,31 @@ a {
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         border-right: none;
         width: 100%;
-        display: grid;
-        grid-template-columns: auto auto;
-        justify-content: center;
-        align-items: baseline;
-        column-gap: 0.5rem;
-        row-gap: 0.1rem;
-        font-size: 0.75rem;
-    }
-
-    .purchase-status .status-label,
-    .purchase-status .status-value {
-        margin: 0;
         display: block;
         text-align: center;
+        font-size: 0.78rem;
+        line-height: 1.4;
+    }
+
+    /* התווית והערך באותה שורה; רווח מעל כל קבוצה מפריד ביניהן */
+    .purchase-status .status-label {
+        display: inline;
+        margin: 0;
+    }
+
+    .purchase-status .status-value {
+        display: inline;
+        margin: 0 0.35rem 0 0;
+    }
+
+    .purchase-status .status-label:not(:first-child)::before {
+        content: "";
+        display: block;
+        height: 0.4rem;
     }
 
     .purchase-status .survey-badge-container {
-        grid-column: 1 / -1;
-        margin-top: 0.2rem;
+        margin-top: 0.6rem;
     }
 
     /* Section Titles */
