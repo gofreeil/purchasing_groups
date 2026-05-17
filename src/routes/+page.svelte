@@ -101,6 +101,22 @@
         </ul>
     </div>
 
+</div>
+
+<div class="centered-ad-wrapper">
+    <p class="ad-text-top">{$t.sidebar.whatsapp}</p>
+    <div class="banner-container-with-hands">
+        <span class="side-hand">👈</span>
+        <a
+            href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
+            target="_blank"
+            class="centered-ad-banner"
+            aria-label="הצטרף לקבוצת הוואטסאפ"
+        >
+        </a>
+        <span class="side-hand">👉</span>
+    </div>
+
     <!-- WhatsApp Counter -->
     <div
         class="whatsapp-counter-final"
@@ -116,21 +132,6 @@
                 {$t.homepage.membersCount}
             </div>
         </div>
-    </div>
-</div>
-
-<div class="centered-ad-wrapper">
-    <p class="ad-text-top">{$t.sidebar.whatsapp}</p>
-    <div class="banner-container-with-hands">
-        <span class="side-hand">👈</span>
-        <a
-            href="https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI"
-            target="_blank"
-            class="centered-ad-banner"
-            aria-label="הצטרף לקבוצת הוואטסאפ"
-        >
-        </a>
-        <span class="side-hand">👉</span>
     </div>
 </div>
 
@@ -504,11 +505,11 @@
 
     @media (max-width: 768px) {
         .new-burst {
-            width: 60px;
-            height: 60px;
-            font-size: 0.9rem;
-            top: -16px;
-            right: -16px;
+            width: 56px;
+            height: 56px;
+            font-size: 0.85rem;
+            top: -14px;
+            right: 2px;
         }
     }
 
@@ -537,37 +538,6 @@
     @media (min-width: 1025px) {
         .survey-badge-container {
             left: 140% !important; /* Move even further right to avoid hiding savings data */
-        }
-    }
-
-    /* במובייל/טאבלט תג הסקר זורם בתוך הכרטיס ולא חופף את נתוני החיסכון */
-    @media (max-width: 1024px) {
-        .survey-badge-container {
-            position: static;
-            transform: none;
-            left: auto;
-            bottom: auto;
-            justify-content: center;
-            white-space: normal;
-            gap: 0.5rem;
-        }
-
-        .satisfaction-circle-link {
-            width: 48px;
-            height: 48px;
-            font-size: 0.55rem;
-        }
-
-        .satisfaction-circle-link:hover {
-            transform: translateY(-3px);
-        }
-
-        .survey-rating-summary {
-            padding: 3px 8px;
-        }
-
-        .stars-gold {
-            font-size: 0.75rem;
         }
     }
 
@@ -626,5 +596,53 @@
         color: white;
         transform: translateX(-50%) translateY(-5px);
         box-shadow: 0 10px 25px rgba(74, 222, 128, 0.4);
+    }
+
+    /* במובייל/טאבלט תג הסקר מרחף בתחתית הכרטיס - חצי בפנים חצי בחוץ.
+       הבלוק ממוקם בסוף ה-style כדי לדרוס את כללי הבסיס שמעליו */
+    @media (max-width: 1024px) {
+        /* כדי שהתג ימוקם יחסית לכרטיס ולא למקטע הסטטוס */
+        .purchase-status {
+            position: static;
+        }
+
+        .survey-badge-container {
+            position: absolute;
+            left: 50%;
+            bottom: -34px;
+            transform: translateX(-50%);
+            justify-content: center;
+            white-space: nowrap;
+            gap: 0.45rem;
+        }
+
+        /* מרווח תחתון בכרטיס כדי שהתג לא יחפוף את הטקסט */
+        .purchase-card:has(.survey-badge-container) {
+            padding-bottom: 2.6rem;
+        }
+
+        .survey-rating-summary {
+            padding: 3px 8px;
+        }
+
+        .stars-gold {
+            font-size: 0.7rem;
+        }
+
+        .rating-val {
+            font-size: 0.7rem;
+        }
+
+        .satisfaction-circle-link {
+            width: 60px;
+            height: 60px;
+            font-size: 0.5rem;
+            border-width: 3px;
+            padding: 4px;
+        }
+
+        .satisfaction-circle-link:hover {
+            transform: translateX(-50%);
+        }
     }
 </style>
