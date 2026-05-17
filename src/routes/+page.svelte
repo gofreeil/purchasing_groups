@@ -197,6 +197,12 @@
 
     <!-- Fuel -->
     <div class="purchase-card" style="margin-bottom: 3rem;">
+        <a
+            href="https://forms.gle/2Y9SdUfqkJd5mPaS7"
+            target="_blank"
+            class="purchase-link-overlay"
+            aria-label={$t.purchases.fuel.title}
+        ></a>
         <div class="new-burst">{$t.purchases.newBadge}</div>
         <div class="purchase-img-frame fuel-zoom">
             <img
