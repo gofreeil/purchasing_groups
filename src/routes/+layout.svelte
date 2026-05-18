@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from "svelte";
-	import favicon from "$lib/assets/favicon.svg";
+	const favicon = "/assets/קבוצות-רכישה.png";
 	import "../app.css?v=1.0.2";
 	import { lang, t } from "$lib/i18n.js";
 	import { isLoggedIn } from "$lib/user.js";
@@ -60,7 +60,7 @@
 			<a href="/" class="right-branding">
 				<div class="logo-container">
 					<img
-						src="/assets/logo.png"
+						src="/assets/קבוצות-רכישה.png"
 						alt={$t.logoAlt}
 						class="main-logo"
 					/>
@@ -187,7 +187,7 @@
 	<footer class="main-footer">
 		<div class="footer-container">
 			<a
-				href="https://www.melecshop.com/"
+				href="https://freedom-gamma-five.vercel.app/"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="footer-brand"
