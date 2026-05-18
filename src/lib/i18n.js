@@ -32,7 +32,7 @@ export const translations = readable({
                 { icon: "🛒", text: "התארגנות לכרטיס מועדון עם הנחות בחנויות המותגים." },
                 { icon: "💵", text: "שמירה על זכות המזומן וייעול השימוש בו." }
             ],
-            membersCount: "חברים שחוסכים כל חודש",
+            membersCount: "חברים שחוסכים כל חודש!",
             annualSavings: "הקבוצה שלנו חוסכת השנה:",
             ourPurchases: "הרכישות הקבוצתיות הפעילות שלנו:",
             soonColon: "הבאים בתור:",
@@ -138,10 +138,16 @@ export const translations = readable({
         },
         satisfaction: {
             title: "סקר שביעות רצון",
+            chooseTitle: "סקרי שביעות רצון",
+            chooseSubtitle: "לכל מבצע סקר משלו – בחרו מבצע כדי לדרג אותו",
+            forCampaign: "סקר שביעות רצון:",
+            backToSurveys: "חזרה לרשימת הסקרים",
+            notFound: "המבצע המבוקש לא נמצא",
             restrictedTitle: "גישה מוגבלת",
             restrictedMessage: "הסקר מיועד ללקוחות רשומים בלבד. אנא התחבר כדי להשתתף.",
             loginToParticipate: "התחבר להשתתפות",
             question1: "מהי מידת שביעות הרצון שלך מרכישות קבוצתיות?",
+            q1Campaign: "מהי מידת שביעות הרצון שלך ממבצע זה?",
             question2: "אילו מוצרים או שירותים נוספים היית רוצה לראות?",
             question3: "הערות נוספות:",
             submit: "שלח סקר",
@@ -284,10 +290,16 @@ export const translations = readable({
         },
         satisfaction: {
             title: "Satisfaction Survey",
+            chooseTitle: "Satisfaction Surveys",
+            chooseSubtitle: "Each campaign has its own survey – pick a campaign to rate it",
+            forCampaign: "Satisfaction Survey:",
+            backToSurveys: "Back to surveys list",
+            notFound: "The requested campaign was not found",
             restrictedTitle: "Restricted Access",
             restrictedMessage: "The survey is for registered customers only. Please login to participate.",
             loginToParticipate: "Login to Participate",
             question1: "How satisfied are you with the group purchases?",
+            q1Campaign: "How satisfied are you with this campaign?",
             question2: "What other products or services would you like to see?",
             question3: "Additional comments:",
             submit: "Submit Survey",
@@ -425,6 +437,24 @@ export const translations = readable({
             fuelListOpens: "Список откроется в среду 20/5",
             newBadge: "Новинка",
             currencyPerYear: "шекелей/год"
+        },
+        satisfaction: {
+            title: "Опрос удовлетворённости",
+            chooseTitle: "Опросы удовлетворённости",
+            chooseSubtitle: "У каждого предложения свой опрос – выберите предложение для оценки",
+            forCampaign: "Опрос удовлетворённости:",
+            backToSurveys: "Назад к списку опросов",
+            notFound: "Запрашиваемое предложение не найдено",
+            restrictedTitle: "Ограниченный доступ",
+            restrictedMessage: "Опрос доступен только зарегистрированным клиентам. Пожалуйста, войдите, чтобы участвовать.",
+            loginToParticipate: "Войти для участия",
+            question1: "Насколько вы довольны групповыми закупками?",
+            q1Campaign: "Насколько вы довольны этим предложением?",
+            question2: "Какие ещё продукты или услуги вы хотели бы видеть?",
+            question3: "Дополнительные комментарии:",
+            submit: "Отправить опрос",
+            thankYou: "Спасибо за участие!",
+            backToHome: "На главную"
         }
     }
 });
