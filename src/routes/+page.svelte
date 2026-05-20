@@ -218,9 +218,9 @@
         </div>
         <div class="purchase-status">
             <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.active}</span>
+            <span class="status-value" style="color: #22c55e;">{$t.purchases.active}</span>
             <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value" style="color: #facc15;"
+            <span class="status-value" style="color: #22c55e;"
                 >{$t.purchases.yes}</span
             >
         </div>
