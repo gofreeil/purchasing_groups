@@ -167,7 +167,7 @@
                 >{$t.purchases.active}</span
             >
             <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value">{$t.purchases.yes}</span>
+            <span class="status-value" style="color: #4ade80;">{$t.purchases.yes}</span>
             <span class="status-label">{$t.purchases.saved}</span>
             <span
                 class="status-value highlight-monthly"
