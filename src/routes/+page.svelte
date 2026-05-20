@@ -218,10 +218,10 @@
         </div>
         <div class="purchase-status">
             <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.closed}</span>
+            <span class="status-value">{$t.purchases.active}</span>
             <span class="status-label">{$t.purchases.canJoin}</span>
             <span class="status-value" style="color: #facc15;"
-                >{$t.purchases.fuelListOpens}</span
+                >{$t.purchases.yes}</span
             >
         </div>
     </div>
