@@ -3,6 +3,15 @@
 
 export const ads = [
 	{
+		id: 11,
+		title: "החנות החברתית",
+		description: "מוצרים נבחרים לבריאות טבעית, חקלאות ביתית, טכנולוגיה ועוד",
+		cta: "כנסו לחנות לחיים טובים יותר",
+		href: "https://heirut-shop.vercel.app/",
+		image: "/assets/freedom-store.png",
+		color: "linear-gradient(90deg, #059669, #0d9488)",
+	},
+	{
 		id: 1,
 		title: "בתי הפיוס",
 		description: "מתנדבים לתת לך עזרה מלאה בדין / פיוס בכל סיכסוך",
