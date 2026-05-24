@@ -16,7 +16,7 @@ export const ads = [
 		title: "בתי הפיוס",
 		description: "מתנדבים לתת לך עזרה מלאה בדין / פיוס בכל סיכסוך",
 		cta: "יש לך סיכסוך? לחץ לפתרון",
-		href: "https://chachmei-haeda.vercel.app/",
+		href: "https://chachmim.vercel.app/",
 		image: "/assets/bati-hapius.png",
 		color: "linear-gradient(90deg, #ea580c, #dc2626)",
 	},
