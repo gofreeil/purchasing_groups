@@ -220,7 +220,7 @@
                     <span class="stars-gold">⭐⭐⭐⭐⭐</span>
                     <span class="rating-val">5.0/5</span>
                 </div>
-                <a href="/satisfaction" class="satisfaction-circle-link">
+                <a href="/details/cellular" class="satisfaction-circle-link">
                     {@html $t.satisfaction.title.replace(" ", "<br />")}
                 </a>
             </div>
