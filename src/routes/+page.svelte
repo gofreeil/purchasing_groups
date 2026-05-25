@@ -131,7 +131,7 @@
 </div>
 
 <div class="centered-ad-wrapper">
-    <p class="ad-text-top">{$t.sidebar.whatsapp}</p>
+    <p class="ad-text-top">{@html $t.sidebar.whatsapp}</p>
     <div class="banner-container-with-hands">
         <span class="side-hand">👈</span>
         <a
@@ -369,6 +369,16 @@
 </div>
 
 <style>
+    :global(.hl-whatsapp) {
+        display: inline-block;
+        font-size: 1.35em;
+        font-weight: 900;
+        color: #fde047;
+        text-shadow: 0 0 12px rgba(253, 224, 71, 0.65), 0 2px 4px rgba(0, 0, 0, 0.4);
+        padding: 0 0.15em;
+        letter-spacing: 0.02em;
+    }
+
     .cellular-title {
         display: inline-block;
         transform-origin: center;
@@ -380,22 +390,14 @@
         0% {
             transform: scale(1);
             text-shadow: none;
-            color: inherit;
         }
-        35% {
-            transform: scale(1.28);
-            color: #fde047;
-            text-shadow: 0 0 18px rgba(253, 224, 71, 0.85), 0 2px 8px rgba(0, 0, 0, 0.45);
-        }
-        70% {
-            transform: scale(1.08);
-            color: #fde047;
-            text-shadow: 0 0 10px rgba(253, 224, 71, 0.55);
+        40% {
+            transform: scale(1.12);
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         }
         100% {
             transform: scale(1);
             text-shadow: none;
-            color: inherit;
         }
     }
     @media (prefers-reduced-motion: reduce) {
