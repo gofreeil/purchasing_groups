@@ -373,8 +373,6 @@
         display: inline-block;
         font-size: 1.35em;
         font-weight: 900;
-        color: #fde047;
-        text-shadow: 0 0 12px rgba(253, 224, 71, 0.65), 0 2px 4px rgba(0, 0, 0, 0.4);
         padding: 0 0.15em;
         letter-spacing: 0.02em;
     }
