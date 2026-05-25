@@ -130,6 +130,29 @@
         </section>
     {/if}
 
+    <!-- Coverage check (cellular only) -->
+    {#if campaign === 'cellular'}
+        <section class="section coverage-section">
+            <h2>בדוק את הקליטה בשכונה שלך או בעבודה</h2>
+            <div class="coverage-frame-wrap">
+                <iframe
+                    src="https://tiber.co.il/Home/Antenna"
+                    title="בדיקת קליטה סלולרית"
+                    class="coverage-frame"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <a
+                href="https://tiber.co.il/Home/Antenna"
+                target="_blank"
+                rel="noopener"
+                class="coverage-open-link"
+            >
+                לפתיחה בחלון מלא ↗
+            </a>
+        </section>
+    {/if}
+
     <!-- How it works -->
     <section class="section">
         <h2>{$t.details.howItWorks}</h2>
@@ -440,6 +463,58 @@
         color: #facc15;
         text-align: center;
         margin: 0 0 2rem;
+    }
+
+    /* Coverage iframe */
+    .coverage-section {
+        text-align: center;
+    }
+
+    .coverage-frame-wrap {
+        position: relative;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        height: 640px;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(250, 204, 21, 0.3);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        background: #fff;
+    }
+
+    .coverage-frame {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+    }
+
+    .coverage-open-link {
+        display: inline-block;
+        margin-top: 1rem;
+        color: #facc15;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: opacity 0.2s ease;
+    }
+
+    .coverage-open-link:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+        .coverage-frame-wrap {
+            height: 560px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .coverage-frame-wrap {
+            height: 480px;
+        }
     }
 
     /* Steps */
