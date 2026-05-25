@@ -328,7 +328,7 @@
 <div class="boycott-banner">
     <span class="boycott-icon">✊</span>
     <p class="boycott-text">
-        כשנגיע ל-10,000 חברים נחל הליך של החרמות קבוצתיות למשווקים שמפקיעים מחירים!
+        כשנגיע ל-10,000 חברים נחל הליך של חרם כנגד משווקים שמפקיעים מחירים!
     </p>
     <span class="boycott-icon">✊</span>
 </div>
