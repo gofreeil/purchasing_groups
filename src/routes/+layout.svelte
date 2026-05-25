@@ -187,7 +187,7 @@
 	<footer class="main-footer">
 		<div class="footer-container">
 			<a
-				href="https://freedom-gamma-five.vercel.app/"
+				href="https://freedom-il.vercel.app/"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="footer-brand"
