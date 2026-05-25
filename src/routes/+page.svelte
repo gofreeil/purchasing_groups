@@ -27,6 +27,31 @@
     let membersCounterRef = $state();
     let membersCounterVisible = false;
 
+    // אנימציית הבלטה לכותרות בגלילה
+    let cellularPop = $state(false);
+    let fuelPop = $state(false);
+    /** @param {HTMLElement} node @param {() => void} onSeen */
+    function popOnView(node, onSeen) {
+        const check = () => {
+            const r = node.getBoundingClientRect();
+            const vh = window.innerHeight || document.documentElement.clientHeight;
+            if (r.top < vh * 0.85 && r.bottom > vh * 0.15) {
+                onSeen();
+                window.removeEventListener("scroll", check);
+                window.removeEventListener("resize", check);
+            }
+        };
+        window.addEventListener("scroll", check, { passive: true });
+        window.addEventListener("resize", check);
+        check();
+        return {
+            destroy: () => {
+                window.removeEventListener("scroll", check);
+                window.removeEventListener("resize", check);
+            },
+        };
+    }
+
     /** @param {IntersectionObserverEntry[]} entries */
     const handleIntersection = (entries) => {
         entries.forEach((entry) => {
@@ -51,6 +76,7 @@
         if (membersCounterRef) {
             observer.observe(membersCounterRef);
         }
+
     });
 </script>
 
@@ -62,9 +88,10 @@
 
     <div class="video-container-large">
         <iframe
-            src="https://www.youtube.com/embed/pl7kV6-aTEw"
+            src="https://www.youtube-nocookie.com/embed/pl7kV6-aTEw?rel=0"
             title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
             frameborder="0"
+            loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
         ></iframe>
@@ -156,7 +183,11 @@
             />
         </div>
         <div class="purchase-info">
-            <h3>{$t.purchases.cellular.title}</h3>
+            <h3
+                use:popOnView={() => (cellularPop = true)}
+                class="cellular-title"
+                class:pop={cellularPop}
+            >{$t.purchases.cellular.title}</h3>
             <p>
                 {$t.purchases.cellular.desc}
             </p>
@@ -213,7 +244,11 @@
             />
         </div>
         <div class="purchase-info">
-            <h3>{$t.purchases.fuel.title}</h3>
+            <h3
+                use:popOnView={() => (fuelPop = true)}
+                class="cellular-title"
+                class:pop={fuelPop}
+            >{$t.purchases.fuel.title}</h3>
             <p>{$t.purchases.fuel.desc}</p>
         </div>
         <div class="purchase-status">
@@ -334,6 +369,39 @@
 </div>
 
 <style>
+    .cellular-title {
+        display: inline-block;
+        transform-origin: center;
+    }
+    .cellular-title.pop {
+        animation: cellular-pop 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+    }
+    @keyframes cellular-pop {
+        0% {
+            transform: scale(1);
+            text-shadow: none;
+            color: inherit;
+        }
+        35% {
+            transform: scale(1.28);
+            color: #fde047;
+            text-shadow: 0 0 18px rgba(253, 224, 71, 0.85), 0 2px 8px rgba(0, 0, 0, 0.45);
+        }
+        70% {
+            transform: scale(1.08);
+            color: #fde047;
+            text-shadow: 0 0 10px rgba(253, 224, 71, 0.55);
+        }
+        100% {
+            transform: scale(1);
+            text-shadow: none;
+            color: inherit;
+        }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .cellular-title.pop { animation: none; }
+    }
+
     /* Boycott banner */
     .boycott-banner {
         display: flex;
