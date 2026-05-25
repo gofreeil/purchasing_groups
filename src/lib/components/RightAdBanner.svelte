@@ -37,32 +37,34 @@
 </script>
 
 <aside class="right-ad-banner" aria-label="פרסומות">
-	<h4 class="right-ad-title">תוכן שיווקי</h4>
-	<div class="right-ad-list">
-		{#each displayed as slot, index (currentGroup * 4 + index)}
-			<div
-				class="right-ad-card"
-				style="border-color: {slot.border}; background: {slot.bg};"
-			>
-				<div class="right-ad-num">{currentGroup * 4 + index + 1}</div>
-				<div class="right-ad-emoji">📢</div>
-				<div class="right-ad-vtext">
-					<span class="right-ad-vmain" style="color: {slot.text}">
-						מקום פרסום זה
-					</span>
-					<span class="right-ad-vsub" style="color: {slot.text}">
-						— יכול להיות שלך
-					</span>
-				</div>
-				<a
-					href="mailto:freedomhasbegun@gmail.com"
-					class="right-ad-btn"
-					style="background: {slot.btn}"
+	<div class="right-ad-sticky">
+		<h4 class="right-ad-title">תוכן שיווקי</h4>
+		<div class="right-ad-list">
+			{#each displayed as slot, index (currentGroup * 4 + index)}
+				<div
+					class="right-ad-card"
+					style="border-color: {slot.border}; background: {slot.bg};"
 				>
-					לפרטים
-				</a>
-			</div>
-		{/each}
+					<div class="right-ad-num">{currentGroup * 4 + index + 1}</div>
+					<div class="right-ad-emoji">📢</div>
+					<div class="right-ad-vtext">
+						<span class="right-ad-vmain" style="color: {slot.text}">
+							מקום פרסום זה
+						</span>
+						<span class="right-ad-vsub" style="color: {slot.text}">
+							— יכול להיות שלך
+						</span>
+					</div>
+					<a
+						href="mailto:freedomhasbegun@gmail.com"
+						class="right-ad-btn"
+						style="background: {slot.btn}"
+					>
+						לפרטים
+					</a>
+				</div>
+			{/each}
+		</div>
 	</div>
 </aside>
 
@@ -70,11 +72,14 @@
 	.right-ad-banner {
 		width: 144px;
 		flex-shrink: 0;
-		position: sticky;
-		top: 150px;
-		height: fit-content;
+		align-self: stretch;
 		text-align: center;
 		padding-bottom: 2rem;
+	}
+
+	.right-ad-sticky {
+		position: sticky;
+		top: 150px;
 	}
 
 	.right-ad-title {
