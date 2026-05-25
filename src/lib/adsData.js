@@ -54,7 +54,7 @@ export const ads = [
 		description: "הבע דעתך על הסוגיות האקטואליות",
 		cta: "הבע דעתך על הסוגיות האקטואליות",
 		hover: "הבע דעתך על הסוגיות האקטואליות",
-		href: "https://referendum-azure.vercel.app/",
+		href: "https://referendum-il.vercel.app/",
 		image: "/assets/referendum.png",
 		color: "linear-gradient(90deg, #9333ea, #4338ca)",
 	},
