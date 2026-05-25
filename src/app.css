@@ -10,10 +10,12 @@
     --sidebar-width: 320px;
 }
 
-html,
-body {
+html {
     /* מונע גלילה אופקית / תזוזת המסך ימינה-שמאלה */
     overflow-x: hidden;
+}
+
+body {
     max-width: 100%;
 }
 

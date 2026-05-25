@@ -70,7 +70,6 @@
 	.right-ad-banner {
 		width: 144px;
 		flex-shrink: 0;
-		align-self: flex-end;
 		position: sticky;
 		top: 150px;
 		height: fit-content;
