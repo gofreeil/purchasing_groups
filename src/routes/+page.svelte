@@ -325,7 +325,59 @@
     </h2>
 </div>
 
+<div class="boycott-banner">
+    <span class="boycott-icon">✊</span>
+    <p class="boycott-text">
+        כשנגיע ל-10,000 חברים נחל הליך של החרמות קבוצתיות למשווקים שמפקיעים מחירים!
+    </p>
+    <span class="boycott-icon">✊</span>
+</div>
+
 <style>
+    /* Boycott banner */
+    .boycott-banner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        margin: 3rem auto 2rem;
+        padding: 1.5rem 2rem;
+        max-width: 900px;
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.18) 0%, rgba(234, 88, 12, 0.18) 100%);
+        border: 2px solid rgba(248, 113, 113, 0.55);
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.25);
+    }
+
+    .boycott-text {
+        color: #fecaca;
+        font-size: 1.25rem;
+        font-weight: 800;
+        line-height: 1.5;
+        text-align: center;
+        margin: 0;
+        text-shadow: 0 0 12px rgba(248, 113, 113, 0.3);
+    }
+
+    .boycott-icon {
+        font-size: 2.2rem;
+        animation: boycottPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes boycottPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+    }
+
+    @media (max-width: 600px) {
+        .boycott-banner {
+            padding: 1.1rem 1rem;
+            gap: 0.75rem;
+        }
+        .boycott-text { font-size: 1rem; }
+        .boycott-icon { font-size: 1.7rem; }
+    }
+
     /* Centered Ad Banner */
     .centered-ad-wrapper {
         display: flex;
