@@ -29,12 +29,12 @@
     };
 
     const stats = {
-        cellular: { members: 312, rating: 5.0, savings: 25, reviews: 47 },
-        fuel: { members: 198, rating: 4.9, savings: 60, reviews: 21 },
-        internet: { members: 0, rating: 0, savings: 0, reviews: 0 },
-        carInsurance: { members: 0, rating: 0, savings: 0, reviews: 0 },
-        electricity: { members: 0, rating: 0, savings: 0, reviews: 0 },
-        coupons: { members: 0, rating: 0, savings: 0, reviews: 0 },
+        cellular: { rating: 5.0, savings: 25, reviews: 47 },
+        fuel: { rating: 4.9, savings: 60, reviews: 21 },
+        internet: { rating: 0, savings: 0, reviews: 0 },
+        carInsurance: { rating: 0, savings: 0, reviews: 0 },
+        electricity: { rating: 0, savings: 0, reviews: 0 },
+        coupons: { rating: 0, savings: 0, reviews: 0 },
     };
 
     let satisfactionLevel = $state(0);
@@ -48,7 +48,7 @@
     let campaignDesc = $derived($t.purchases[campaign].desc);
     let campaignIcon = $derived(icons[campaign] ?? "📋");
     let campaignImage = $derived(images[campaign]);
-    let campaignStats = $derived(stats[campaign]);
+    let campaignStats = $derived({ ...stats[campaign], members: data.activeMembers });
     let joinLink = $derived(joinLinks[campaign]);
 
     const levels = [
