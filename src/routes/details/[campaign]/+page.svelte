@@ -44,6 +44,8 @@
     let additionalComments = $state("");
     let submitted = $state(false);
     let openFaq = $state(-1);
+    let joinCtaEl = $state(null);
+    let joinCtaClicked = $state(false);
 
     let campaign = $derived(data.campaign);
     let campaignTitle = $derived($t.purchases[campaign].title);
@@ -78,6 +80,35 @@
 
     function toggleFaq(i) {
         openFaq = openFaq === i ? -1 : i;
+    }
+
+    function smoothScrollTo(targetY, duration) {
+        return new Promise((resolve) => {
+            const startY = window.scrollY;
+            const distance = targetY - startY;
+            const startTime = Date.now();
+            function tick() {
+                const t = Math.min((Date.now() - startTime) / duration, 1);
+                const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                window.scrollTo(0, startY + distance * eased);
+                if (t < 1) setTimeout(tick, 16);
+                else resolve();
+            }
+            tick();
+        });
+    }
+
+    async function handleStep1Click(e) {
+        if (!joinLink) return;
+        e.preventDefault();
+        if (joinCtaEl) {
+            const targetY = joinCtaEl.getBoundingClientRect().top + window.scrollY - 100;
+            await smoothScrollTo(targetY, 1600);
+            joinCtaClicked = true;
+            await new Promise((r) => setTimeout(r, 500));
+            joinCtaClicked = false;
+        }
+        window.open(joinLink, "_blank", "noopener");
     }
 </script>
 
@@ -134,9 +165,16 @@
         <h2>{$t.details.howItWorks}</h2>
         <div class="steps">
             {#each $t.details.steps as step, i}
-                {@const stepHref = i === 0 ? joinLink : i === 2 ? whatsappLink : null}
+                {@const isFormStep = i === 0 && joinLink}
+                {@const stepHref = isFormStep ? joinLink : i === 2 ? whatsappLink : null}
                 {#if stepHref}
-                    <a class="step step-link" href={stepHref} target="_blank" rel="noopener">
+                    <a
+                        class="step step-link"
+                        href={stepHref}
+                        target={isFormStep ? null : "_blank"}
+                        rel={isFormStep ? null : "noopener"}
+                        onclick={isFormStep ? handleStep1Click : null}
+                    >
                         <div class="step-num">{i + 1}</div>
                         <div class="step-icon">{step.icon}</div>
                         <h3>{step.title}</h3>
@@ -196,6 +234,24 @@
         <section class="section">
             {@render faqContent()}
         </section>
+    {/if}
+
+    {#if joinLink}
+        <a
+            href={joinLink}
+            target="_blank"
+            rel="noopener"
+            class="join-cta-banner"
+            class:clicked={joinCtaClicked}
+            bind:this={joinCtaEl}
+            aria-label={$t.details.joinCta}
+        >
+            <div class="join-cta-content">
+                <h3>{campaignTitle}</h3>
+                <p>{campaignDesc}</p>
+            </div>
+            <span class="join-cta-btn">{$t.details.joinCta} →</span>
+        </a>
     {/if}
 
     <!-- Survey -->
@@ -463,6 +519,79 @@
         color: #facc15;
         text-align: center;
         margin: 0 0 2rem;
+    }
+
+    /* Join CTA banner (form link) */
+    .join-cta-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 1.4rem 1.8rem;
+        margin: 0 0 1.5rem;
+        background: linear-gradient(135deg, rgba(250, 204, 21, 0.12), rgba(251, 146, 60, 0.10));
+        border: 2px solid rgba(250, 204, 21, 0.45);
+        border-radius: 20px;
+        text-decoration: none;
+        color: white;
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .join-cta-banner:hover {
+        transform: translateY(-2px);
+        border-color: rgba(250, 204, 21, 0.75);
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38);
+    }
+
+    .join-cta-banner.clicked {
+        animation: cta-press 0.5s ease;
+    }
+
+    .join-cta-banner.clicked .join-cta-btn {
+        animation: cta-btn-press 0.5s ease;
+    }
+
+    @keyframes cta-press {
+        0%   { transform: translateY(0) scale(1); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3); border-color: rgba(250, 204, 21, 0.45); }
+        45%  { transform: translateY(3px) scale(0.97); box-shadow: 0 4px 10px rgba(250, 204, 21, 0.55); border-color: rgba(250, 204, 21, 1); background: linear-gradient(135deg, rgba(250, 204, 21, 0.28), rgba(251, 146, 60, 0.22)); }
+        100% { transform: translateY(0) scale(1); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3); border-color: rgba(250, 204, 21, 0.45); }
+    }
+
+    @keyframes cta-btn-press {
+        0%   { transform: scale(1); box-shadow: 0 4px 12px rgba(250, 204, 21, 0.35); }
+        45%  { transform: scale(0.92); box-shadow: 0 1px 4px rgba(250, 204, 21, 0.6); }
+        100% { transform: scale(1); box-shadow: 0 4px 12px rgba(250, 204, 21, 0.35); }
+    }
+
+    .join-cta-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .join-cta-content h3 {
+        margin: 0 0 0.35rem;
+        font-size: 1.35rem;
+        color: #facc15;
+    }
+
+    .join-cta-content p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.98rem;
+        line-height: 1.4;
+    }
+
+    .join-cta-btn {
+        flex-shrink: 0;
+        padding: 0.7rem 1.3rem;
+        background: linear-gradient(135deg, #facc15, #fb923c);
+        color: #1a1a1a;
+        font-weight: 800;
+        border-radius: 12px;
+        font-size: 1rem;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(250, 204, 21, 0.35);
     }
 
     /* Coverage + FAQ unified banner (cellular) */
@@ -874,6 +1003,12 @@
         .info-section {
             grid-template-columns: 1fr;
             gap: 1.5rem;
+        }
+
+        .join-cta-banner {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem 1.2rem;
         }
 
         .info-section::before {
