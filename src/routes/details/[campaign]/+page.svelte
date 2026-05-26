@@ -29,12 +29,12 @@
     };
 
     const stats = {
-        cellular: { rating: 5.0, savings: 25, reviews: 47 },
-        fuel: { rating: 4.9, savings: 60, reviews: 21 },
-        internet: { rating: 0, savings: 0, reviews: 0 },
-        carInsurance: { rating: 0, savings: 0, reviews: 0 },
-        electricity: { rating: 0, savings: 0, reviews: 0 },
-        coupons: { rating: 0, savings: 0, reviews: 0 },
+        cellular: { rating: 5.0, savings: 25, annualSavings: 300, reviews: 47 },
+        fuel: { rating: 4.9, savings: 60, annualSavings: 720, reviews: 21 },
+        internet: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
+        carInsurance: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
+        electricity: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
+        coupons: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
     };
 
     let satisfactionLevel = $state(0);
@@ -119,6 +119,9 @@
                 <div class="stat-icon">💰</div>
                 <div class="stat-value">{campaignStats.savings} {$t.currency}</div>
                 <div class="stat-label">{$t.details.statsSavings}</div>
+                {#if campaignStats.annualSavings > 0}
+                    <div class="stat-sub">{campaignStats.annualSavings} {$t.currency} בשנה</div>
+                {/if}
             </div>
             <div class="stat-card">
                 <div class="stat-icon">💬</div>
@@ -442,6 +445,13 @@
     .stat-label {
         font-size: 0.9rem;
         color: rgba(255, 255, 255, 0.7);
+    }
+
+    .stat-sub {
+        margin-top: 0.4rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #4ade80;
     }
 
     /* Sections */
