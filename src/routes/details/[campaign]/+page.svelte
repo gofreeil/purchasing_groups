@@ -28,6 +28,8 @@
         fuel: "https://forms.gle/2Y9SdUfqkJd5mPaS7",
     };
 
+    const whatsappLink = "https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI";
+
     const stats = {
         cellular: { rating: 5.0, savings: 25, annualSavings: 300, reviews: 47 },
         fuel: { rating: 4.9, savings: 60, annualSavings: 720, reviews: 21 },
@@ -95,11 +97,6 @@
             <div class="hero-content">
                 <h1>{campaignTitle}</h1>
                 <p class="hero-desc">{campaignDesc}</p>
-                {#if joinLink}
-                    <a href={joinLink} target="_blank" class="hero-cta">
-                        {$t.details.joinCta} →
-                    </a>
-                {/if}
             </div>
         </div>
 
@@ -137,12 +134,22 @@
         <h2>{$t.details.howItWorks}</h2>
         <div class="steps">
             {#each $t.details.steps as step, i}
-                <div class="step">
-                    <div class="step-num">{i + 1}</div>
-                    <div class="step-icon">{step.icon}</div>
-                    <h3>{step.title}</h3>
-                    <p>{step.desc}</p>
-                </div>
+                {@const stepHref = i === 0 ? joinLink : i === 2 ? whatsappLink : null}
+                {#if stepHref}
+                    <a class="step step-link" href={stepHref} target="_blank" rel="noopener">
+                        <div class="step-num">{i + 1}</div>
+                        <div class="step-icon">{step.icon}</div>
+                        <h3>{step.title}</h3>
+                        <p>{step.desc}</p>
+                    </a>
+                {:else}
+                    <div class="step">
+                        <div class="step-num">{i + 1}</div>
+                        <div class="step-icon">{step.icon}</div>
+                        <h3>{step.title}</h3>
+                        <p>{step.desc}</p>
+                    </div>
+                {/if}
             {/each}
         </div>
     </section>
@@ -163,19 +170,6 @@
             </a>
         </section>
     {/if}
-
-    <!-- Benefits -->
-    <section class="section">
-        <h2>{$t.details.benefitsTitle}</h2>
-        <div class="benefits">
-            {#each $t.details.benefits as benefit}
-                <div class="benefit">
-                    <span class="benefit-icon">{benefit.icon}</span>
-                    <span class="benefit-text">{benefit.text}</span>
-                </div>
-            {/each}
-        </div>
-    </section>
 
     <!-- Reviews -->
     {#if campaignStats.reviews > 0}
@@ -416,16 +410,23 @@
     }
 
     .stat-card {
+        position: relative;
         padding: 1.1rem 1rem;
         background: transparent;
         border: none;
-        border-inline-start: 1px solid rgba(255, 255, 255, 0.08);
         text-align: center;
         transition: background 0.25s ease;
     }
 
-    .stat-card:first-child {
-        border-inline-start: none;
+    .stat-card + .stat-card::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: 0;
+        top: 22%;
+        bottom: 22%;
+        width: 2px;
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 2px;
     }
 
     .stat-card:hover {
@@ -537,6 +538,19 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px;
         text-align: center;
+    }
+
+    .step-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .step-link:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(250, 204, 21, 0.45);
     }
 
     .step-num {
