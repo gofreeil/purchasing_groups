@@ -86,50 +86,51 @@
 <div class="details-page" in:fade={{ duration: 300 }}>
     <a href="/" class="top-back">{$t.details.backToHome}</a>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="hero-image">
-            <img src={campaignImage} alt={campaignTitle} />
-        </div>
-        <div class="hero-content">
-            <h1>{campaignTitle}</h1>
-            <p class="hero-desc">{campaignDesc}</p>
-            {#if joinLink}
-                <a href={joinLink} target="_blank" class="hero-cta">
-                    {$t.details.joinCta} →
-                </a>
-            {/if}
-        </div>
-    </section>
-
-    <!-- Stats -->
-    {#if campaignStats.members > 0}
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-value">{campaignStats.members}</div>
-                <div class="stat-label">{$t.details.statsMembers}</div>
+    <!-- Hero + Stats unified banner -->
+    <section class="hero-card">
+        <div class="hero">
+            <div class="hero-image">
+                <img src={campaignImage} alt={campaignTitle} />
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">⭐</div>
-                <div class="stat-value">{campaignStats.rating.toFixed(1)}/5</div>
-                <div class="stat-label">{$t.details.statsRating}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💰</div>
-                <div class="stat-value">{campaignStats.savings} {$t.currency}</div>
-                <div class="stat-label">{$t.details.statsSavings}</div>
-                {#if campaignStats.annualSavings > 0}
-                    <div class="stat-sub">{campaignStats.annualSavings} {$t.currency} בשנה</div>
+            <div class="hero-content">
+                <h1>{campaignTitle}</h1>
+                <p class="hero-desc">{campaignDesc}</p>
+                {#if joinLink}
+                    <a href={joinLink} target="_blank" class="hero-cta">
+                        {$t.details.joinCta} →
+                    </a>
                 {/if}
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">💬</div>
-                <div class="stat-value">{campaignStats.reviews}</div>
-                <div class="stat-label">{$t.details.statsReviews}</div>
+        </div>
+
+        {#if campaignStats.members > 0}
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value">{campaignStats.members}</div>
+                    <div class="stat-label">{$t.details.statsMembers}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value">{campaignStats.rating.toFixed(1)}/5</div>
+                    <div class="stat-label">{$t.details.statsRating}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value">{campaignStats.savings} {$t.currency}</div>
+                    <div class="stat-label">{$t.details.statsSavings}</div>
+                    {#if campaignStats.annualSavings > 0}
+                        <div class="stat-sub">{campaignStats.annualSavings} {$t.currency} בשנה</div>
+                    {/if}
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-value">{campaignStats.reviews}</div>
+                    <div class="stat-label">{$t.details.statsReviews}</div>
+                </div>
             </div>
-        </section>
-    {/if}
+        {/if}
+    </section>
 
     <!-- Coverage check (cellular only) -->
     {#if campaign === 'cellular'}
@@ -305,13 +306,8 @@
         color: #facc15;
     }
 
-    /* Hero */
-    .hero {
-        display: grid;
-        grid-template-columns: 220px 1fr;
-        gap: 1.8rem;
-        align-items: center;
-        padding: 1.5rem 1.8rem;
+    /* Unified hero + stats banner */
+    .hero-card {
         background: rgba(26, 26, 26, 0.7);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
@@ -319,6 +315,16 @@
         border-radius: 24px;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
         margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    /* Hero */
+    .hero {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 1.8rem;
+        align-items: center;
+        padding: 1.5rem 1.8rem;
     }
 
     .hero-image {
@@ -402,26 +408,29 @@
         box-shadow: 0 12px 24px rgba(250, 204, 21, 0.35);
     }
 
-    /* Stats */
+    /* Stats — integrated as bottom strip of the hero-card */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .stat-card {
-        padding: 1.5rem 1rem;
-        background: rgba(26, 26, 26, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
+        padding: 1.1rem 1rem;
+        background: transparent;
+        border: none;
+        border-inline-start: 1px solid rgba(255, 255, 255, 0.08);
         text-align: center;
-        transition: transform 0.3s ease;
+        transition: background 0.25s ease;
+    }
+
+    .stat-card:first-child {
+        border-inline-start: none;
     }
 
     .stat-card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(250, 204, 21, 0.4);
+        background: rgba(250, 204, 21, 0.06);
     }
 
     .stat-icon {
