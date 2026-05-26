@@ -102,7 +102,9 @@
         if (!joinLink) return;
         e.preventDefault();
         if (joinCtaEl) {
-            const targetY = joinCtaEl.getBoundingClientRect().top + window.scrollY - 100;
+            const rect = joinCtaEl.getBoundingClientRect();
+            const bannerCenter = rect.top + window.scrollY + rect.height / 2;
+            const targetY = bannerCenter - window.innerHeight / 2;
             await smoothScrollTo(targetY, 1600);
             joinCtaClicked = true;
             await new Promise((r) => setTimeout(r, 500));
@@ -259,15 +261,12 @@
 
     <!-- Survey -->
     <section class="section survey-section-wrap">
-        <h2>{$t.details.surveyTitle}</h2>
+        <h2>דרגו וכיתבו את החוויה שלכם</h2>
 
         {#if !$isLoggedIn}
             <div class="restricted-box">
                 <div class="restriction-icon">🔒</div>
-                <p>{$t.satisfaction.restrictedMessage}</p>
-                <button class="primary-btn" onclick={mockLogin}>
-                    {$t.satisfaction.loginToParticipate}
-                </button>
+                <p>הפיצר יהיה זמין בהמשך</p>
             </div>
         {:else if submitted}
             <div class="thank-you" in:fade={{ duration: 400 }}>
