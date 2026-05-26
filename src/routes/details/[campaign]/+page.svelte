@@ -237,21 +237,24 @@
     {/if}
 
     {#if joinLink}
-        <a
-            href={joinLink}
-            target="_blank"
-            rel="noopener"
-            class="join-cta-banner"
-            class:clicked={joinCtaClicked}
-            bind:this={joinCtaEl}
-            aria-label={$t.details.joinCta}
-        >
-            <div class="join-cta-content">
-                <h3>{campaignTitle}</h3>
-                <p>{campaignDesc}</p>
-            </div>
-            <span class="join-cta-btn">{$t.details.joinCta} →</span>
-        </a>
+        <div class="join-cta-wrap">
+            <span class="join-cta-hand">👈</span>
+            <a
+                href={joinLink}
+                target="_blank"
+                rel="noopener"
+                class="join-cta-banner"
+                class:clicked={joinCtaClicked}
+                bind:this={joinCtaEl}
+                aria-label={$t.details.joinCta}
+            >
+                <div class="join-cta-content">
+                    <h3>{campaignTitle}</h3>
+                    <p>לחבילות ומילוי הטופס - חברת רמי לוי או חברת וויקום</p>
+                </div>
+            </a>
+            <span class="join-cta-hand">👉</span>
+        </div>
     {/if}
 
     <!-- Survey -->
@@ -522,18 +525,44 @@
     }
 
     /* Join CTA banner (form link) */
-    .join-cta-banner {
+    .join-cta-wrap {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 1.5rem;
-        padding: 1.4rem 1.8rem;
+        gap: 1rem;
         margin: 0 0 1.5rem;
+    }
+
+    .join-cta-hand {
+        font-size: 2.5rem;
+        flex-shrink: 0;
+        line-height: 1;
+        animation: join-cta-hand-point 1.4s ease-in-out infinite;
+    }
+
+    .join-cta-hand:first-child {
+        animation-name: join-cta-hand-point-reverse;
+    }
+
+    @keyframes join-cta-hand-point {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(-8px); }
+    }
+
+    @keyframes join-cta-hand-point-reverse {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(8px); }
+    }
+
+    .join-cta-banner {
+        flex: 1;
+        display: block;
+        padding: 1.4rem 1.8rem;
         background: linear-gradient(135deg, rgba(250, 204, 21, 0.12), rgba(251, 146, 60, 0.10));
         border: 2px solid rgba(250, 204, 21, 0.45);
         border-radius: 20px;
         text-decoration: none;
         color: white;
+        text-align: center;
         box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
         transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
     }
@@ -548,50 +577,24 @@
         animation: cta-press 0.5s ease;
     }
 
-    .join-cta-banner.clicked .join-cta-btn {
-        animation: cta-btn-press 0.5s ease;
-    }
-
     @keyframes cta-press {
         0%   { transform: translateY(0) scale(1); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3); border-color: rgba(250, 204, 21, 0.45); }
         45%  { transform: translateY(3px) scale(0.97); box-shadow: 0 4px 10px rgba(250, 204, 21, 0.55); border-color: rgba(250, 204, 21, 1); background: linear-gradient(135deg, rgba(250, 204, 21, 0.28), rgba(251, 146, 60, 0.22)); }
         100% { transform: translateY(0) scale(1); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3); border-color: rgba(250, 204, 21, 0.45); }
     }
 
-    @keyframes cta-btn-press {
-        0%   { transform: scale(1); box-shadow: 0 4px 12px rgba(250, 204, 21, 0.35); }
-        45%  { transform: scale(0.92); box-shadow: 0 1px 4px rgba(250, 204, 21, 0.6); }
-        100% { transform: scale(1); box-shadow: 0 4px 12px rgba(250, 204, 21, 0.35); }
-    }
-
-    .join-cta-content {
-        flex: 1;
-        min-width: 0;
-    }
-
     .join-cta-content h3 {
-        margin: 0 0 0.35rem;
-        font-size: 1.35rem;
+        margin: 0 0 0.4rem;
+        font-size: 1.45rem;
         color: #facc15;
     }
 
     .join-cta-content p {
         margin: 0;
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 0.98rem;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 1.05rem;
+        font-weight: 600;
         line-height: 1.4;
-    }
-
-    .join-cta-btn {
-        flex-shrink: 0;
-        padding: 0.7rem 1.3rem;
-        background: linear-gradient(135deg, #facc15, #fb923c);
-        color: #1a1a1a;
-        font-weight: 800;
-        border-radius: 12px;
-        font-size: 1rem;
-        white-space: nowrap;
-        box-shadow: 0 4px 12px rgba(250, 204, 21, 0.35);
     }
 
     /* Coverage + FAQ unified banner (cellular) */
@@ -1005,10 +1008,24 @@
             gap: 1.5rem;
         }
 
+        .join-cta-wrap {
+            gap: 0.5rem;
+        }
+
+        .join-cta-hand {
+            font-size: 1.6rem;
+        }
+
         .join-cta-banner {
-            flex-direction: column;
-            text-align: center;
-            padding: 1.5rem 1.2rem;
+            padding: 1.4rem 1rem;
+        }
+
+        .join-cta-content h3 {
+            font-size: 1.2rem;
+        }
+
+        .join-cta-content p {
+            font-size: 0.95rem;
         }
 
         .info-section::before {
