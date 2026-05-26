@@ -154,60 +154,47 @@
         </div>
     </section>
 
-    <!-- Coverage check (cellular only) -->
-    {#if campaign === 'cellular'}
-        <section class="section coverage-section">
-            <h2>בדוק את הקליטה בשכונה שלך או בעבודה</h2>
-            <a
-                href="https://tiber.co.il/Home/Antenna"
-                target="_blank"
-                rel="noopener"
-                class="coverage-banner"
-                aria-label="לבדיקת קליטה ב-tiber.co.il"
-            >
-                <img src="/assets/coverage-banner.png" alt="בדיקת קליטה סלולרית" />
-                <span class="coverage-banner-label">לבדיקת קליטה ↗</span>
-            </a>
-        </section>
-    {/if}
-
-    <!-- Reviews -->
-    {#if campaignStats.reviews > 0}
+    {#snippet faqSection()}
         <section class="section">
-            <h2>{$t.details.reviewsTitle}</h2>
-            <div class="reviews">
-                {#each $t.details.sampleReviews as review}
-                    <div class="review">
-                        <div class="review-stars">
-                            {'⭐'.repeat(review.stars)}
-                        </div>
-                        <p class="review-text">"{review.text}"</p>
-                        <div class="review-author">— {review.name}</div>
+            <h2>{$t.details.faqTitle}</h2>
+            <div class="faq-list">
+                {#each $t.details.faq as item, i}
+                    <div class="faq-item" class:open={openFaq === i}>
+                        <button class="faq-q" onclick={() => toggleFaq(i)}>
+                            <span>{item.q}</span>
+                            <span class="faq-arrow">{openFaq === i ? '−' : '+'}</span>
+                        </button>
+                        {#if openFaq === i}
+                            <div class="faq-a" transition:slide={{ duration: 200 }}>
+                                {item.a}
+                            </div>
+                        {/if}
                     </div>
                 {/each}
             </div>
         </section>
-    {/if}
+    {/snippet}
 
-    <!-- FAQ -->
-    <section class="section">
-        <h2>{$t.details.faqTitle}</h2>
-        <div class="faq-list">
-            {#each $t.details.faq as item, i}
-                <div class="faq-item" class:open={openFaq === i}>
-                    <button class="faq-q" onclick={() => toggleFaq(i)}>
-                        <span>{item.q}</span>
-                        <span class="faq-arrow">{openFaq === i ? '−' : '+'}</span>
-                    </button>
-                    {#if openFaq === i}
-                        <div class="faq-a" transition:slide={{ duration: 200 }}>
-                            {item.a}
-                        </div>
-                    {/if}
-                </div>
-            {/each}
+    {#if campaign === 'cellular'}
+        <div class="info-row">
+            <section class="section coverage-section">
+                <h2>בדוק את הקליטה בשכונה שלך או בעבודה</h2>
+                <a
+                    href="https://tiber.co.il/Home/Antenna"
+                    target="_blank"
+                    rel="noopener"
+                    class="coverage-banner"
+                    aria-label="לבדיקת קליטה ב-tiber.co.il"
+                >
+                    <img src="/assets/coverage-banner.png" alt="בדיקת קליטה סלולרית" />
+                    <span class="coverage-banner-label">לבדיקת קליטה ↗</span>
+                </a>
+            </section>
+            {@render faqSection()}
         </div>
-    </section>
+    {:else}
+        {@render faqSection()}
+    {/if}
 
     <!-- Survey -->
     <section class="section survey-section-wrap">
@@ -474,6 +461,19 @@
         color: #facc15;
         text-align: center;
         margin: 0 0 2rem;
+    }
+
+    /* Coverage + FAQ side-by-side row (cellular) */
+    .info-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.4rem;
+        align-items: stretch;
+    }
+
+    .info-row > .section {
+        margin: 0;
+        height: 100%;
     }
 
     /* Coverage banner */
@@ -854,6 +854,10 @@
 
         .steps,
         .reviews {
+            grid-template-columns: 1fr;
+        }
+
+        .info-row {
             grid-template-columns: 1fr;
         }
 
