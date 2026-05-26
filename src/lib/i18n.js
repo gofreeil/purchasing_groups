@@ -187,7 +187,7 @@ export const translations = readable({
                 { name: "אבי ש.", stars: 5, text: "שירות מצוין, התמיכה זמינה ואדיבה." }
             ],
             surveyTitle: "ספרו לנו על החוויה שלכם",
-            joinCta: "הצטרפו לקבוצה",
+            joinCta: "למילוי הטופס",
             backToHome: "← חזרה לדף הבית"
         }
     },

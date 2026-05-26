@@ -703,19 +703,34 @@
         font-size: 0.8rem;
         font-weight: 850;
         text-decoration: none;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(250, 204, 21, 0.55);
         border: 4px solid var(--bg-dark);
-        transition: all 0.3s ease-out;
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease-out;
         line-height: 1.1;
         padding: 8px;
         box-sizing: border-box;
+        animation: satisfactionGlow 2.6s ease-in-out infinite;
+    }
+
+    @keyframes satisfactionGlow {
+        0%, 100% {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(250, 204, 21, 0.55);
+        }
+        50% {
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.4), 0 0 0 10px rgba(250, 204, 21, 0);
+        }
     }
 
     .satisfaction-circle-link:hover {
-        background: linear-gradient(135deg, #4ade80, #22c55e);
-        color: white;
-        transform: translateX(-50%) translateY(-5px);
-        box-shadow: 0 10px 25px rgba(74, 222, 128, 0.4);
+        transform: translateX(-50%) translateY(-4px) scale(1.06);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45), 0 0 25px rgba(250, 204, 21, 0.55);
+        animation-play-state: paused;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .satisfaction-circle-link {
+            animation: none;
+        }
     }
 
     /* במובייל/טאבלט תג הסקר מרחף בתחתית הכרטיס - חצי בפנים חצי בחוץ.

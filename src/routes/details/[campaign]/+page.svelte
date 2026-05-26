@@ -29,7 +29,7 @@
     };
 
     const stats = {
-        cellular: { members: 312, rating: 5.0, savings: 85, reviews: 47 },
+        cellular: { members: 312, rating: 5.0, savings: 25, reviews: 47 },
         fuel: { members: 198, rating: 4.9, savings: 60, reviews: 21 },
         internet: { members: 0, rating: 0, savings: 0, reviews: 0 },
         carInsurance: { members: 0, rating: 0, savings: 0, reviews: 0 },
@@ -93,7 +93,6 @@
             <div class="hero-icon-badge">{campaignIcon}</div>
         </div>
         <div class="hero-content">
-            <span class="hero-badge">{$t.details.badge}</span>
             <h1>{campaignTitle}</h1>
             <p class="hero-desc">{campaignDesc}</p>
             {#if joinLink}
