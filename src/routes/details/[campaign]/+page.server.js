@@ -30,9 +30,9 @@ export async function load({ params, fetch }) {
             const response = await fetch(url);
             if (response.ok) {
                 const rows = (await response.text()).split("\n");
-                // תא X2 = שורה 2 (אינדקס 1), עמודה X (אינדקס 23) - מספר מנויים
+                // תא Y2 = שורה 2 (אינדקס 1), עמודה Y (אינדקס 24) - מספר קווים
                 const value = parseInt(
-                    (rows[1]?.split(",")[23] || "").replace(/[^\d]/g, ""),
+                    (rows[1]?.split(",")[24] || "").replace(/[^\d]/g, ""),
                 );
                 if (!isNaN(value) && value > 0) activeMembers = value;
             }
