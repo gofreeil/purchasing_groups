@@ -413,7 +413,6 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .stat-card {
