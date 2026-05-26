@@ -90,7 +90,6 @@
     <section class="hero">
         <div class="hero-image">
             <img src={campaignImage} alt={campaignTitle} />
-            <div class="hero-icon-badge">{campaignIcon}</div>
         </div>
         <div class="hero-content">
             <h1>{campaignTitle}</h1>
