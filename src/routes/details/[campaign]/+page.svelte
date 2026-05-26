@@ -132,6 +132,21 @@
         {/if}
     </section>
 
+    <!-- How it works -->
+    <section class="section">
+        <h2>{$t.details.howItWorks}</h2>
+        <div class="steps">
+            {#each $t.details.steps as step, i}
+                <div class="step">
+                    <div class="step-num">{i + 1}</div>
+                    <div class="step-icon">{step.icon}</div>
+                    <h3>{step.title}</h3>
+                    <p>{step.desc}</p>
+                </div>
+            {/each}
+        </div>
+    </section>
+
     <!-- Coverage check (cellular only) -->
     {#if campaign === 'cellular'}
         <section class="section coverage-section">
@@ -148,21 +163,6 @@
             </a>
         </section>
     {/if}
-
-    <!-- How it works -->
-    <section class="section">
-        <h2>{$t.details.howItWorks}</h2>
-        <div class="steps">
-            {#each $t.details.steps as step, i}
-                <div class="step">
-                    <div class="step-num">{i + 1}</div>
-                    <div class="step-icon">{step.icon}</div>
-                    <h3>{step.title}</h3>
-                    <p>{step.desc}</p>
-                </div>
-            {/each}
-        </div>
-    </section>
 
     <!-- Benefits -->
     <section class="section">
