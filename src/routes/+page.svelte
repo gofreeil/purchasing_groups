@@ -221,7 +221,7 @@
                     <span class="rating-val">5.0/5</span>
                 </div>
                 <a href="/details/cellular" class="satisfaction-circle-link">
-                    {@html $t.satisfaction.title.replace(" ", "<br />")}
+                    לפרטים<br />נוספים
                 </a>
             </div>
         </div>
@@ -712,12 +712,13 @@
     }
 
     .satisfaction-circle-link:hover {
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+        transform: scale(1.08);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.5);
     }
 
     .satisfaction-circle-link:active {
-        transform: translateX(-50%) scale(0.94);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
     }
 
     /* במובייל/טאבלט תג הסקר מרחף בתחתית הכרטיס - חצי בפנים חצי בחוץ.
