@@ -154,31 +154,29 @@
         </div>
     </section>
 
-    {#snippet faqSection()}
-        <section class="section">
-            <h2>{$t.details.faqTitle}</h2>
-            <div class="faq-list">
-                {#each $t.details.faq as item, i}
-                    <div class="faq-item" class:open={openFaq === i}>
-                        <button class="faq-q" onclick={() => toggleFaq(i)}>
-                            <span>{item.q}</span>
-                            <span class="faq-arrow">{openFaq === i ? '−' : '+'}</span>
-                        </button>
-                        {#if openFaq === i}
-                            <div class="faq-a" transition:slide={{ duration: 200 }}>
-                                {item.a}
-                            </div>
-                        {/if}
-                    </div>
-                {/each}
-            </div>
-        </section>
+    {#snippet faqContent()}
+        <h2>{$t.details.faqTitle}</h2>
+        <div class="faq-list">
+            {#each $t.details.faq as item, i}
+                <div class="faq-item" class:open={openFaq === i}>
+                    <button class="faq-q" onclick={() => toggleFaq(i)}>
+                        <span>{item.q}</span>
+                        <span class="faq-arrow">{openFaq === i ? '−' : '+'}</span>
+                    </button>
+                    {#if openFaq === i}
+                        <div class="faq-a" transition:slide={{ duration: 200 }}>
+                            {item.a}
+                        </div>
+                    {/if}
+                </div>
+            {/each}
+        </div>
     {/snippet}
 
     {#if campaign === 'cellular'}
-        <div class="info-row">
-            <section class="section coverage-section">
-                <h2>בדוק את הקליטה בשכונה שלך או בעבודה</h2>
+        <section class="section info-section">
+            <div class="info-pane coverage-section">
+                <h2>בדוק את הרשתות המומלצות בשכונה/ עבודה שלך</h2>
                 <a
                     href="https://tiber.co.il/Home/Antenna"
                     target="_blank"
@@ -189,11 +187,15 @@
                     <img src="/assets/coverage-banner.png" alt="בדיקת קליטה סלולרית" />
                     <span class="coverage-banner-label">לבדיקת קליטה ↗</span>
                 </a>
-            </section>
-            {@render faqSection()}
-        </div>
+            </div>
+            <div class="info-pane">
+                {@render faqContent()}
+            </div>
+        </section>
     {:else}
-        {@render faqSection()}
+        <section class="section">
+            {@render faqContent()}
+        </section>
     {/if}
 
     <!-- Survey -->
@@ -463,17 +465,29 @@
         margin: 0 0 2rem;
     }
 
-    /* Coverage + FAQ side-by-side row (cellular) */
-    .info-row {
+    /* Coverage + FAQ unified banner (cellular) */
+    .info-section {
+        position: relative;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1.4rem;
-        align-items: stretch;
+        gap: 2rem;
+        align-items: center;
     }
 
-    .info-row > .section {
-        margin: 0;
-        height: 100%;
+    .info-section::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 12%;
+        bottom: 12%;
+        width: 2px;
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 2px;
+        transform: translateX(-50%);
+    }
+
+    .info-pane {
+        min-width: 0;
     }
 
     /* Coverage banner */
@@ -857,8 +871,19 @@
             grid-template-columns: 1fr;
         }
 
-        .info-row {
+        .info-section {
             grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .info-section::before {
+            left: 12%;
+            right: 12%;
+            top: 50%;
+            bottom: auto;
+            width: auto;
+            height: 2px;
+            transform: translateY(-50%);
         }
 
         .benefits {
