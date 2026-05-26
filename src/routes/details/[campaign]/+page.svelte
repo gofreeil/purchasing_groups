@@ -135,21 +135,21 @@
     {#if campaign === 'cellular'}
         <section class="section coverage-section">
             <h2>בדוק את הקליטה בשכונה שלך או בעבודה</h2>
-            <div class="coverage-frame-wrap">
-                <iframe
-                    src="https://tiber.co.il/Home/Antenna"
-                    title="בדיקת קליטה סלולרית"
-                    class="coverage-frame"
-                    loading="lazy"
-                ></iframe>
-            </div>
+            <p class="coverage-desc">
+                כלי בדיקת האנטנות של tiber.co.il מאפשר לבדוק את עוצמת הקליטה לפי כתובת מדויקת,
+                עבור כל אחת מרשתות התקשורת בישראל.
+            </p>
             <a
                 href="https://tiber.co.il/Home/Antenna"
                 target="_blank"
                 rel="noopener"
-                class="coverage-open-link"
+                class="coverage-cta"
             >
-                לפתיחה בחלון מלא ↗
+                <span class="coverage-cta-icon">📡</span>
+                <span class="coverage-cta-text">
+                    <span class="coverage-cta-title">לבדיקת קליטה</span>
+                    <span class="coverage-cta-sub">tiber.co.il נפתח בלשונית חדשה ↗</span>
+                </span>
             </a>
         </section>
     {/if}
@@ -473,56 +473,63 @@
         margin: 0 0 2rem;
     }
 
-    /* Coverage iframe */
+    /* Coverage CTA */
     .coverage-section {
         text-align: center;
     }
 
-    .coverage-frame-wrap {
-        position: relative;
-        width: 100%;
-        max-width: 900px;
-        margin: 0 auto;
-        height: 640px;
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid rgba(250, 204, 21, 0.3);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-        background: #fff;
+    .coverage-desc {
+        max-width: 640px;
+        margin: 0 auto 1.6rem;
+        color: rgba(255, 255, 255, 0.78);
+        line-height: 1.6;
+        font-size: 1rem;
     }
 
-    .coverage-frame {
-        width: 100%;
-        height: 100%;
-        border: none;
-        display: block;
-    }
-
-    .coverage-open-link {
-        display: inline-block;
-        margin-top: 1rem;
-        color: #facc15;
+    .coverage-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.6rem;
+        background: linear-gradient(135deg, #facc15, #fb923c);
+        color: #1a1a1a;
+        border-radius: 14px;
         text-decoration: none;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+        transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+    }
+
+    .coverage-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+    }
+
+    .coverage-cta:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .coverage-cta-icon {
+        font-size: 1.8rem;
+        line-height: 1;
+    }
+
+    .coverage-cta-text {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: right;
+    }
+
+    .coverage-cta-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+    }
+
+    .coverage-cta-sub {
+        font-size: 0.8rem;
+        opacity: 0.75;
         font-weight: 600;
-        font-size: 0.95rem;
-        transition: opacity 0.2s ease;
-    }
-
-    .coverage-open-link:hover {
-        opacity: 0.8;
-        text-decoration: underline;
-    }
-
-    @media (max-width: 900px) {
-        .coverage-frame-wrap {
-            height: 560px;
-        }
-    }
-
-    @media (max-width: 600px) {
-        .coverage-frame-wrap {
-            height: 480px;
-        }
     }
 
     /* Steps */
