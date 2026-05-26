@@ -314,24 +314,24 @@
     /* Hero */
     .hero {
         display: grid;
-        grid-template-columns: 280px 1fr;
-        gap: 2.5rem;
+        grid-template-columns: 220px 1fr;
+        gap: 1.8rem;
         align-items: center;
-        padding: 2.5rem;
+        padding: 1.5rem 1.8rem;
         background: rgba(26, 26, 26, 0.7);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 24px;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .hero-image {
         position: relative;
-        width: 280px;
-        height: 280px;
-        border-radius: 24px;
+        width: 220px;
+        height: 220px;
+        border-radius: 20px;
         overflow: hidden;
         border: 2px solid rgba(250, 204, 21, 0.4);
     }
@@ -374,9 +374,9 @@
     }
 
     .hero-content h1 {
-        font-size: 2.4rem;
+        font-size: 2.1rem;
         font-weight: 800;
-        margin: 0 0 1rem;
+        margin: 0 0 0.6rem;
         background: linear-gradient(to right, #facc15, #fb923c);
         -webkit-background-clip: text;
         background-clip: text;
@@ -385,16 +385,16 @@
     }
 
     .hero-desc {
-        font-size: 1.15rem;
+        font-size: 1.05rem;
         color: rgba(255, 255, 255, 0.85);
-        line-height: 1.6;
-        margin-bottom: 1.8rem;
+        line-height: 1.5;
+        margin: 0 0 1rem;
     }
 
     .hero-cta {
         display: inline-block;
-        padding: 1rem 2.2rem;
-        font-size: 1.1rem;
+        padding: 0.7rem 1.6rem;
+        font-size: 1rem;
         font-weight: 700;
         background: linear-gradient(135deg, #facc15, #fb923c);
         color: #1a1a1a;
