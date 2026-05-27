@@ -908,22 +908,22 @@
             background: linear-gradient(135deg, rgba(250, 204, 21, 0.22), rgba(251, 146, 60, 0.16));
             color: #facc15;
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.92rem;
             text-align: right;
-            padding: 0.55rem 5rem 0.55rem 0.8rem;
+            padding: 0.55rem 0.8rem 0.55rem 5rem;
             border-bottom: 2px solid rgba(250, 204, 21, 0.6);
+            line-height: 1.2;
         }
 
         .plans-table tbody tr[data-company]::after {
             content: attr(data-company);
             position: absolute;
-            top: 0;
-            left: 0;
-            padding: 0.55rem 0.8rem;
+            top: 0.55rem;
+            left: 0.8rem;
             color: rgba(255, 255, 255, 0.95);
             font-weight: 700;
-            font-size: 0.95rem;
-            line-height: 1;
+            font-size: 0.9rem;
+            line-height: 1.2;
         }
 
         .plans-table tbody td[data-label="שם התוכנית"],
