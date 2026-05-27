@@ -274,7 +274,7 @@
                             <th>שם חברה</th>
                             <th>הערות</th>
                             <th>רשת בדור</th>
-                            <th>דקות/סמסים</th>
+                            <th>דקות/<br />סמסים</th>
                             <th>חבילת גלישה ג'יגה</th>
                             <th>עלות ממוצעת לקו לשנה</th>
                             <th>עלות סים</th>
@@ -346,8 +346,8 @@
                 aria-label={$t.details.joinCta}
             >
                 <div class="join-cta-content">
-                    <h3>{campaignTitle}</h3>
-                    <p>לחבילות וטופס ההצטרפות- רמי לוי / אקס פון / וויקום</p>
+                    <h3>טופס ההצטרפות</h3>
+                    <p>לקו הסלולר הזול במדינה - חברות רמי לוי / אקס פון / וויקום</p>
                 </div>
             </a>
             <span class="join-cta-hand">👉</span>
@@ -659,8 +659,8 @@
 
     .plans-table-scroll {
         overflow-x: auto;
-        border-radius: 14px;
-        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-radius: 16px;
+        border: 2px solid rgba(250, 204, 21, 0.6);
         box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
         background: rgba(10, 17, 40, 0.6);
     }
@@ -670,7 +670,7 @@
         border-collapse: collapse;
         text-align: center;
         color: rgba(255, 255, 255, 0.95);
-        font-size: 0.9rem;
+        font-size: 1.02rem;
         table-layout: fixed;
     }
 
@@ -678,26 +678,26 @@
         background: linear-gradient(135deg, rgba(250, 204, 21, 0.18), rgba(251, 146, 60, 0.14));
         color: #facc15;
         font-weight: 800;
-        padding: 0.65rem 0.35rem;
-        border-bottom: 2px solid rgba(250, 204, 21, 0.5);
+        padding: 0.85rem 0.5rem;
+        border-bottom: 3px solid rgba(250, 204, 21, 0.7);
         white-space: normal;
-        line-height: 1.2;
-        font-size: 0.82rem;
-        word-break: break-word;
+        line-height: 1.25;
+        font-size: 0.95rem;
+        overflow-wrap: break-word;
     }
 
     .plans-table tbody td {
-        padding: 0.6rem 0.35rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        word-break: break-word;
+        padding: 0.8rem 0.5rem;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+        overflow-wrap: break-word;
     }
 
     .plan-note {
         display: block;
-        font-size: 0.72rem;
-        color: rgba(255, 255, 255, 0.7);
-        margin-top: 2px;
-        line-height: 1.2;
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.72);
+        margin-top: 3px;
+        line-height: 1.25;
     }
 
     .plans-table tbody tr:nth-child(even) {
@@ -714,17 +714,17 @@
 
     @media (max-width: 768px) {
         .plans-table {
-            font-size: 0.72rem;
+            font-size: 0.82rem;
         }
         .plans-table thead th {
-            font-size: 0.68rem;
-            padding: 0.4rem 0.2rem;
+            font-size: 0.78rem;
+            padding: 0.55rem 0.3rem;
         }
         .plans-table tbody td {
-            padding: 0.4rem 0.2rem;
+            padding: 0.55rem 0.3rem;
         }
         .plan-note {
-            font-size: 0.62rem;
+            font-size: 0.68rem;
         }
     }
 
