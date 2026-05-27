@@ -317,7 +317,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        <tr data-title="תוכנית א'">
                             <td data-label="שם חברה">רמי לוי</td>
                             <td data-label="שם התוכנית">תוכנית א'</td>
                             <td data-label="רשת בדור">4/5</td>
@@ -328,7 +328,7 @@
                             <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
                             <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
-                        <tr>
+                        <tr data-title="תוכנית ב' (עד 8 קווים)">
                             <td data-label="שם חברה">רמי לוי</td>
                             <td data-label="שם התוכנית">תוכנית ב' (עד 8 קווים)</td>
                             <td data-label="רשת בדור">4/5</td>
@@ -339,7 +339,7 @@
                             <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
                             <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
-                        <tr>
+                        <tr data-title="תוכנית ג'">
                             <td data-label="שם חברה">wecom</td>
                             <td data-label="שם התוכנית">תוכנית ג'</td>
                             <td data-label="רשת בדור">4 (דור 5 בתוספת 7.9 ש"ח)</td>
@@ -350,7 +350,7 @@
                             <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
                             <td data-label="רובץ על רשת"><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
                         </tr>
-                        <tr>
+                        <tr data-title="תוכנית ד'">
                             <td data-label="שם חברה">Xphone</td>
                             <td data-label="שם התוכנית">תוכנית ד'</td>
                             <td data-label="רשת בדור">4/5</td>
@@ -864,11 +864,36 @@
         .plans-table tbody tr {
             display: block;
             margin-bottom: 1rem;
-            padding: 0.6rem 0.4rem;
+            padding: 0;
             background: rgba(10, 17, 40, 0.6);
             border: 2px solid rgba(250, 204, 21, 0.6);
             border-radius: 14px;
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .plans-table tbody tr[data-title]::before {
+            content: attr(data-title);
+            display: block;
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.22), rgba(251, 146, 60, 0.16));
+            color: #facc15;
+            font-weight: 800;
+            font-size: 1rem;
+            text-align: center;
+            padding: 0.55rem 0.5rem;
+            border-bottom: 2px solid rgba(250, 204, 21, 0.6);
+        }
+
+        .plans-table tbody td[data-label="שם התוכנית"] {
+            display: none;
+        }
+
+        .plans-table tbody tr > td:first-of-type {
+            padding-top: 0.7rem;
+        }
+
+        .plans-table tbody td {
+            margin: 0 0.4rem;
         }
 
         .plans-table tbody tr:nth-child(even) {
@@ -1372,9 +1397,73 @@
             grid-template-columns: repeat(2, 1fr);
         }
 
-        .steps,
+        .stat-card {
+            padding: 0.55rem 0.4rem;
+        }
+
+        .stat-icon {
+            font-size: 1.35rem;
+            margin-bottom: 0.15rem;
+            line-height: 1;
+        }
+
+        .stat-value {
+            font-size: 1.15rem;
+            margin-bottom: 0.05rem;
+            line-height: 1.1;
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            line-height: 1.15;
+        }
+
+        .stat-sub {
+            margin-top: 0.15rem;
+            font-size: 0.68rem;
+            line-height: 1.15;
+        }
+
+        .stat-card + .stat-card::before {
+            top: 15%;
+            bottom: 15%;
+        }
+
         .reviews {
             grid-template-columns: 1fr;
+        }
+
+        .steps {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .step {
+            padding: 1.2rem 0.4rem 0.7rem;
+            border-radius: 12px;
+        }
+
+        .step-num {
+            top: -12px;
+            width: 24px;
+            height: 24px;
+            font-size: 0.78rem;
+        }
+
+        .step-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .step h3 {
+            font-size: 0.82rem;
+            margin: 0 0 0.25rem;
+            line-height: 1.2;
+        }
+
+        .step p {
+            font-size: 0.7rem;
+            line-height: 1.3;
         }
 
         .info-section {
