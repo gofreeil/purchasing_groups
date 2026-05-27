@@ -102,6 +102,18 @@
 
     async function handlePlansTableClick(e) {
         e.preventDefault();
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        if (isMobile) {
+            const firstRow = document.querySelector('.plans-table tbody tr');
+            if (!firstRow) return;
+            const rect = firstRow.getBoundingClientRect();
+            const targetY = rect.top + window.scrollY - 24;
+            await smoothScrollTo(targetY, 1500);
+            firstRow.classList.add('plan-row-highlight');
+            await new Promise((r) => setTimeout(r, 1400));
+            firstRow.classList.remove('plan-row-highlight');
+            return;
+        }
         const target = document.getElementById('plans-table');
         if (!target) return;
         const rect = target.getBoundingClientRect();
@@ -872,6 +884,23 @@
             overflow: hidden;
         }
 
+        .plans-table tbody tr.plan-row-highlight {
+            animation: plan-row-glow 1.4s ease;
+        }
+
+        @keyframes plan-row-glow {
+            0%, 100% {
+                border-color: rgba(250, 204, 21, 0.6);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+                transform: scale(1);
+            }
+            30% {
+                border-color: #facc15;
+                box-shadow: 0 0 24px 4px rgba(250, 204, 21, 0.9), 0 6px 16px rgba(0, 0, 0, 0.3);
+                transform: scale(1.02);
+            }
+        }
+
         .plans-table tbody tr[data-title]::before {
             content: attr(data-title);
             display: block;
@@ -894,6 +923,14 @@
 
         .plans-table tbody td {
             margin: 0 0.4rem;
+        }
+
+        .plans-table tbody td br {
+            display: none;
+        }
+
+        .plans-table tbody td .no-cost-icon {
+            margin: 0 0 0 4px;
         }
 
         .plans-table tbody tr:nth-child(even) {

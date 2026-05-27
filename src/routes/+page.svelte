@@ -191,28 +191,32 @@
                 {$t.purchases.cellular.desc}
             </p>
         </div>
-        <div class="purchase-status">
-            <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value" style="color: #4ade80;"
-                >{$t.purchases.active}</span
-            >
-            <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value" style="color: #4ade80;">{$t.purchases.yes}</span>
-            <span class="status-label">{$t.purchases.saved}</span>
-            <span
-                class="status-value highlight-monthly"
-                style="color: #4ade80; font-weight: bold;"
-            >
-                {monthlySavings.toLocaleString("he-IL")}
-                {$t.currency} {$t.purchases.perMonth}
-            </span>
-            <span
-                class="status-value highlight-yearly"
-                style="color: #ff4444; font-weight: bold;"
-            >
-                {targetSavings.toLocaleString("he-IL")}
-                {$t.currency} {$t.purchases.perYear}
-            </span>
+        <div class="purchase-status purchase-status-2col">
+            <div class="status-col">
+                <span class="status-label">{$t.purchases.status}</span>
+                <span class="status-value" style="color: #4ade80;"
+                    >{$t.purchases.active}</span
+                >
+                <span class="status-label">{$t.purchases.canJoin}</span>
+                <span class="status-value" style="color: #4ade80;">{$t.purchases.yes}</span>
+            </div>
+            <div class="status-col">
+                <span class="status-label">{$t.purchases.saved}</span>
+                <span
+                    class="status-value highlight-monthly"
+                    style="color: #4ade80; font-weight: bold;"
+                >
+                    {monthlySavings.toLocaleString("he-IL")}
+                    {$t.currency} {$t.purchases.perMonth}
+                </span>
+                <span
+                    class="status-value highlight-yearly"
+                    style="color: #ff4444; font-weight: bold;"
+                >
+                    {targetSavings.toLocaleString("he-IL")}
+                    {$t.currency} {$t.purchases.perYear}
+                </span>
+            </div>
 
             <div class="survey-badge-container">
                 <div class="survey-rating-summary">
@@ -637,6 +641,40 @@
 
     .purchase-status {
         position: relative;
+    }
+
+    .status-col {
+        display: contents;
+    }
+
+    @media (max-width: 768px) {
+        .purchase-status-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 0.6rem;
+            row-gap: 0.15rem;
+            align-items: start;
+        }
+
+        .purchase-status-2col .status-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .purchase-status-2col .status-col .status-label {
+            font-size: 0.78rem;
+            line-height: 1.2;
+        }
+
+        .purchase-status-2col .status-col .status-value {
+            font-size: 0.85rem;
+            line-height: 1.25;
+        }
+
+        .purchase-status-2col .survey-badge-container {
+            grid-column: 1 / -1;
+        }
     }
 
     .survey-badge-container {
