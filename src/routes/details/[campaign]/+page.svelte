@@ -100,6 +100,17 @@
         });
     }
 
+    function getHeaderHeight() {
+        return document.querySelector('.main-header')?.getBoundingClientRect().height ?? 0;
+    }
+
+    function centerInVisibleViewport(rect) {
+        const headerHeight = getHeaderHeight();
+        const visibleHeight = window.innerHeight - headerHeight;
+        const elementCenter = rect.top + window.scrollY + rect.height / 2;
+        return elementCenter - headerHeight - visibleHeight / 2;
+    }
+
     async function handlePlansTableClick(e) {
         e.preventDefault();
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
@@ -107,7 +118,7 @@
             const firstRow = document.querySelector('.plans-table tbody tr');
             if (!firstRow) return;
             const rect = firstRow.getBoundingClientRect();
-            const targetY = rect.top + window.scrollY - 24;
+            const targetY = rect.top + window.scrollY - getHeaderHeight() - 12;
             await smoothScrollTo(targetY, 1500);
             firstRow.classList.add('plan-row-highlight');
             await new Promise((r) => setTimeout(r, 1400));
@@ -116,9 +127,7 @@
         }
         const target = document.getElementById('plans-table');
         if (!target) return;
-        const rect = target.getBoundingClientRect();
-        const center = rect.top + window.scrollY + rect.height / 2;
-        const targetY = center - window.innerHeight / 2;
+        const targetY = centerInVisibleViewport(target.getBoundingClientRect());
         await smoothScrollTo(targetY, 1800);
         plansTableHighlight = true;
         await new Promise((r) => setTimeout(r, 1400));
@@ -129,9 +138,7 @@
         e.preventDefault();
         if (!joinLink) return;
         if (joinCtaEl) {
-            const rect = joinCtaEl.getBoundingClientRect();
-            const bannerCenter = rect.top + window.scrollY + rect.height / 2;
-            const targetY = bannerCenter - window.innerHeight / 2;
+            const targetY = centerInVisibleViewport(joinCtaEl.getBoundingClientRect());
             await smoothScrollTo(targetY, 1600);
             joinCtaClicked = true;
             await new Promise((r) => setTimeout(r, 500));
@@ -168,9 +175,7 @@
         if (!joinLink) return;
         e.preventDefault();
         if (joinCtaEl) {
-            const rect = joinCtaEl.getBoundingClientRect();
-            const bannerCenter = rect.top + window.scrollY + rect.height / 2;
-            const targetY = bannerCenter - window.innerHeight / 2;
+            const targetY = centerInVisibleViewport(joinCtaEl.getBoundingClientRect());
             await smoothScrollTo(targetY, 1600);
             joinCtaClicked = true;
             await new Promise((r) => setTimeout(r, 500));
