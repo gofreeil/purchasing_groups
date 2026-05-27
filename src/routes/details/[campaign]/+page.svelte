@@ -46,6 +46,7 @@
     let openFaq = $state(-1);
     let joinCtaEl = $state(null);
     let joinCtaClicked = $state(false);
+    let plansTableHighlight = $state(false);
 
     let campaign = $derived(data.campaign);
     let campaignTitle = $derived($t.purchases[campaign].title);
@@ -103,20 +104,27 @@
         const target = document.getElementById('plans-table');
         if (!target) return;
         const rect = target.getBoundingClientRect();
-        const targetY = rect.top + window.scrollY - 24;
-        await smoothScrollTo(targetY, 900);
+        const center = rect.top + window.scrollY + rect.height / 2;
+        const targetY = center - window.innerHeight / 2;
+        await smoothScrollTo(targetY, 1800);
+        plansTableHighlight = true;
+        await new Promise((r) => setTimeout(r, 1400));
+        plansTableHighlight = false;
     }
 
     async function handleScrollToFormClick(e) {
         e.preventDefault();
-        if (!joinCtaEl) return;
-        const rect = joinCtaEl.getBoundingClientRect();
-        const bannerCenter = rect.top + window.scrollY + rect.height / 2;
-        const targetY = bannerCenter - window.innerHeight / 2;
-        await smoothScrollTo(targetY, 1600);
-        joinCtaClicked = true;
-        await new Promise((r) => setTimeout(r, 500));
-        joinCtaClicked = false;
+        if (!joinLink) return;
+        if (joinCtaEl) {
+            const rect = joinCtaEl.getBoundingClientRect();
+            const bannerCenter = rect.top + window.scrollY + rect.height / 2;
+            const targetY = bannerCenter - window.innerHeight / 2;
+            await smoothScrollTo(targetY, 1600);
+            joinCtaClicked = true;
+            await new Promise((r) => setTimeout(r, 500));
+            joinCtaClicked = false;
+        }
+        window.open(joinLink, "_blank", "noopener");
     }
 
     async function handleStep1Click(e) {
@@ -267,7 +275,7 @@
     {#if campaign === 'cellular'}
         <section id="plans-table" class="section plans-table-section">
             <h2>השוואת מסלולים</h2>
-            <div class="plans-table-scroll">
+            <div class="plans-table-scroll" class:highlight={plansTableHighlight}>
                 <table class="plans-table">
                     <thead>
                         <tr>
@@ -663,6 +671,38 @@
         border: 2px solid rgba(250, 204, 21, 0.6);
         box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
         background: rgba(10, 17, 40, 0.6);
+        transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+    }
+
+    .plans-table-scroll.highlight {
+        animation: plans-table-glow 1.4s ease;
+    }
+
+    @keyframes plans-table-glow {
+        0% {
+            border-color: rgba(250, 204, 21, 0.6);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+            transform: scale(1);
+        }
+        25% {
+            border-color: #facc15;
+            box-shadow: 0 0 28px 4px rgba(250, 204, 21, 0.9), 0 10px 30px rgba(0, 0, 0, 0.45);
+            transform: scale(1.012);
+        }
+        60% {
+            border-color: #facc15;
+            box-shadow: 0 0 22px 2px rgba(250, 204, 21, 0.6), 0 10px 26px rgba(0, 0, 0, 0.4);
+            transform: scale(1.006);
+        }
+        100% {
+            border-color: rgba(250, 204, 21, 0.6);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+            transform: scale(1);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .plans-table-scroll.highlight { animation: none; }
     }
 
     .plans-table {
