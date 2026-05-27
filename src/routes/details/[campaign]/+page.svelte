@@ -230,7 +230,7 @@
     </section>
 
     <!-- How it works -->
-    <section class="section">
+    <section class="section steps-section">
         <h2>{$t.details.howItWorks}</h2>
         <div class="steps">
             {#each $t.details.steps as step, i}
@@ -1452,12 +1452,13 @@
 
         .hero-desc {
             font-size: 1.1rem;
-            line-height: 1.35;
-            margin: 0 0 0.3rem;
+            line-height: 1.15;
+            margin: 0 0 0.25rem;
         }
 
         .hero-desc-providers {
             font-size: 1.05rem;
+            line-height: 1.15;
             margin-bottom: 0;
         }
 
@@ -1501,36 +1502,51 @@
             grid-template-columns: 1fr;
         }
 
+        .section.steps-section {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            padding: 0.5rem 0;
+            margin-inline: -1.5rem;
+            border-radius: 0;
+        }
+
+        .section.steps-section h2 {
+            padding: 0 1rem;
+        }
+
         .steps {
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
+            gap: 0.4rem;
+            padding: 0 0.4rem;
         }
 
         .step {
-            padding: 1.2rem 0.4rem 0.7rem;
+            padding: 1.4rem 0.5rem 0.9rem;
             border-radius: 12px;
         }
 
         .step-num {
-            top: -12px;
-            width: 24px;
-            height: 24px;
-            font-size: 0.78rem;
+            top: -14px;
+            width: 28px;
+            height: 28px;
+            font-size: 0.9rem;
         }
 
         .step-icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.35rem;
+            font-size: 1.9rem;
+            margin-bottom: 0.45rem;
         }
 
         .step h3 {
-            font-size: 0.82rem;
-            margin: 0 0 0.25rem;
+            font-size: 1rem;
+            margin: 0 0 0.3rem;
             line-height: 1.2;
         }
 
         .step p {
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             line-height: 1.3;
         }
 
