@@ -252,7 +252,7 @@
             >
                 <div class="join-cta-content">
                     <h3>{campaignTitle}</h3>
-                    <p>לחבילות ומילוי הטופס - חברת רמי לוי או חברת וויקום</p>
+                    <p>לחבילות וטופס ההצטרפות- רמי לוי / אקס פון / וויקום</p>
                 </div>
             </a>
             <span class="join-cta-hand">👉</span>

@@ -170,8 +170,7 @@
     <!-- Cellular -->
     <div class="purchase-card" style="margin-bottom: 3rem;">
         <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSfRCs5W7HUuc5vcOuMGqsqaDubzNBn4YuC4UDbvoFmSCdJAiQ/viewform?usp=header"
-            target="_blank"
+            href="/details/cellular"
             class="purchase-link-overlay"
             aria-label={$t.purchases.cellular.title}
         ></a>
@@ -220,9 +219,6 @@
                     <span class="stars-gold">⭐⭐⭐⭐⭐</span>
                     <span class="rating-val">5.0/5</span>
                 </div>
-                <a href="/details/cellular" class="satisfaction-circle-link">
-                    לפרטים<br />נוספים
-                </a>
             </div>
         </div>
     </div>

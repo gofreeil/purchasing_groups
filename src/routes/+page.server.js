@@ -2,8 +2,8 @@ const SHEET_ID = "18V5IdtRiN3dKo7habggKP5e55_xJPci158aJVuuWXVw";
 const GID = "2146350168";
 
 // ערכי ברירת מחדל אם טעינת הגיליון נכשלת
-const DEFAULT_ANNUAL = 15227;
-const DEFAULT_MONTHLY = 4385;
+const DEFAULT_ANNUAL = 79854;
+const DEFAULT_MONTHLY = 465;
 
 export async function load({ fetch }) {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
