@@ -324,8 +324,8 @@
                             <td data-label="דקות/סמסים">2500</td>
                             <td data-label="חבילת גלישה ג'יגה">150</td>
                             <td data-label="עלות ממוצעת לקו לשנה">14.9</td>
-                            <td data-label="עלות סים">🚫 ללא עלות</td>
-                            <td data-label="עלות משלוח">🚫 ללא עלות</td>
+                            <td data-label="עלות סים"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
+                            <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
                             <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
                         <tr>
@@ -335,8 +335,8 @@
                             <td data-label="דקות/סמסים">5000</td>
                             <td data-label="חבילת גלישה ג'יגה">300</td>
                             <td data-label="עלות ממוצעת לקו לשנה">16.4 <span class="plan-note">(עלות קו ל-2 מכשירים 15 ש"ח כל אחד)</span></td>
-                            <td data-label="עלות סים">🚫 ללא עלות</td>
-                            <td data-label="עלות משלוח">🚫 ללא עלות</td>
+                            <td data-label="עלות סים"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
+                            <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
                             <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
                         <tr>
@@ -346,8 +346,8 @@
                             <td data-label="דקות/סמסים">5000</td>
                             <td data-label="חבילת גלישה ג'יגה">ללא הגבלה</td>
                             <td data-label="עלות ממוצעת לקו לשנה">מחיר קבוע 19.9</td>
-                            <td data-label="עלות סים">🚫 ללא עלות</td>
-                            <td data-label="עלות משלוח">🚫 ללא עלות</td>
+                            <td data-label="עלות סים"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
+                            <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
                             <td data-label="רובץ על רשת"><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
                         </tr>
                         <tr>
@@ -803,6 +803,13 @@
         height: auto;
         object-fit: contain;
         border-radius: 4px;
+    }
+
+    .no-cost-icon {
+        display: inline-block;
+        font-size: 1.15em;
+        line-height: 1;
+        margin-bottom: 2px;
     }
 
     @media (max-width: 768px) {
