@@ -185,8 +185,6 @@
 </svelte:head>
 
 <div class="details-page" in:fade={{ duration: 300 }}>
-    <a href="/" class="top-back">{$t.details.backToHome}</a>
-
     <!-- Hero + Stats unified banner -->
     <section class="hero-card">
         <div class="hero">
@@ -471,6 +469,8 @@
             ✅ הקישור הועתק — אפשר להדביק בכל מקום
         </div>
     {/if}
+
+    <a href="/" class="bottom-back">{$t.details.backToHome}</a>
 </div>
 
 <style>
@@ -481,16 +481,16 @@
         color: white;
     }
 
-    .top-back {
+    .bottom-back {
         display: inline-block;
-        margin-bottom: 1.5rem;
+        margin-top: 2rem;
         color: rgba(255, 255, 255, 0.7);
         text-decoration: none;
         font-size: 0.95rem;
         transition: color 0.3s ease;
     }
 
-    .top-back:hover {
+    .bottom-back:hover {
         color: #facc15;
     }
 
@@ -967,11 +967,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
             padding: 0.55rem 0.5rem;
             border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
             text-align: left;
             font-size: 0.9rem;
+            white-space: nowrap;
         }
 
         .plans-table tbody tr td:last-child {
@@ -982,9 +983,10 @@
             content: attr(data-label);
             color: #facc15;
             font-weight: 700;
-            font-size: 0.82rem;
+            font-size: 0.75rem;
             text-align: right;
-            flex: 0 0 45%;
+            flex: 0 0 auto;
+            white-space: nowrap;
         }
 
         .plans-table tbody td > * {
