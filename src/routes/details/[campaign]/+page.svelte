@@ -254,7 +254,6 @@
                             <th>דקות/סמסים</th>
                             <th>חבילת גלישה ג'יגה</th>
                             <th>עלות ממוצעת לקו לשנה</th>
-                            <th>עלות ממוצעת לקו מעל 2 קווים לשנה</th>
                             <th>עלות סים</th>
                             <th>עלות משלוח</th>
                             <th>רובץ על רשת</th>
@@ -268,7 +267,6 @@
                             <td>2500</td>
                             <td>150</td>
                             <td>14.9</td>
-                            <td>X</td>
                             <td>ללא עלות</td>
                             <td>ללא עלות</td>
                             <td>פלאפון</td>
@@ -279,8 +277,7 @@
                             <td>4/5</td>
                             <td>5000</td>
                             <td>300</td>
-                            <td>16.4</td>
-                            <td>15</td>
+                            <td>16.4 <span class="plan-note">(עלות קו ל-2 מכשירים 15 ש"ח כל אחד)</span></td>
                             <td>ללא עלות</td>
                             <td>ללא עלות</td>
                             <td>פלאפון</td>
@@ -292,7 +289,6 @@
                             <td>5000</td>
                             <td>ללא הגבלה</td>
                             <td>מחיר קבוע 19.9</td>
-                            <td>X</td>
                             <td>ללא עלות</td>
                             <td>ללא עלות</td>
                             <td>סלקום</td>
@@ -304,7 +300,6 @@
                             <td>5000</td>
                             <td>500</td>
                             <td>18.9</td>
-                            <td>X</td>
                             <td>4.9 ש"ח</td>
                             <td>14.9 ש"ח</td>
                             <td>סלקום</td>
@@ -652,22 +647,34 @@
         border-collapse: collapse;
         text-align: center;
         color: rgba(255, 255, 255, 0.95);
-        font-size: 0.95rem;
-        min-width: 720px;
+        font-size: 0.9rem;
+        table-layout: fixed;
     }
 
     .plans-table thead th {
         background: linear-gradient(135deg, rgba(250, 204, 21, 0.18), rgba(251, 146, 60, 0.14));
         color: #facc15;
         font-weight: 800;
-        padding: 0.75rem 0.6rem;
+        padding: 0.65rem 0.35rem;
         border-bottom: 2px solid rgba(250, 204, 21, 0.5);
-        white-space: nowrap;
+        white-space: normal;
+        line-height: 1.2;
+        font-size: 0.82rem;
+        word-break: break-word;
     }
 
     .plans-table tbody td {
-        padding: 0.65rem 0.6rem;
+        padding: 0.6rem 0.35rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        word-break: break-word;
+    }
+
+    .plan-note {
+        display: block;
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-top: 2px;
+        line-height: 1.2;
     }
 
     .plans-table tbody tr:nth-child(even) {
@@ -684,11 +691,17 @@
 
     @media (max-width: 768px) {
         .plans-table {
-            font-size: 0.82rem;
+            font-size: 0.72rem;
         }
-        .plans-table thead th,
+        .plans-table thead th {
+            font-size: 0.68rem;
+            padding: 0.4rem 0.2rem;
+        }
         .plans-table tbody td {
-            padding: 0.5rem 0.45rem;
+            padding: 0.4rem 0.2rem;
+        }
+        .plan-note {
+            font-size: 0.62rem;
         }
     }
 
