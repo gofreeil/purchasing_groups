@@ -193,12 +193,16 @@
         </div>
         <div class="purchase-status purchase-status-2col">
             <div class="status-col">
-                <span class="status-label">{$t.purchases.status}</span>
-                <span class="status-value" style="color: #4ade80;"
-                    >{$t.purchases.active}</span
-                >
-                <span class="status-label">{$t.purchases.canJoin}</span>
-                <span class="status-value" style="color: #4ade80;">{$t.purchases.yes}</span>
+                <span class="status-line">
+                    <span class="status-label">{$t.purchases.status}</span>
+                    <span class="status-value" style="color: #4ade80;"
+                        >{$t.purchases.active}</span
+                    >
+                </span>
+                <span class="status-line">
+                    <span class="status-label">{$t.purchases.canJoin}</span>
+                    <span class="status-value" style="color: #4ade80;">{$t.purchases.yes}</span>
+                </span>
             </div>
             <div class="status-col">
                 <span class="status-label">{$t.purchases.saved}</span>
@@ -643,7 +647,8 @@
         position: relative;
     }
 
-    .status-col {
+    .status-col,
+    .status-line {
         display: contents;
     }
 
@@ -659,7 +664,19 @@
         .purchase-status-2col .status-col {
             display: flex;
             flex-direction: column;
-            gap: 0.15rem;
+            gap: 0.2rem;
+        }
+
+        .purchase-status-2col .status-col .status-line {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+
+        .purchase-status-2col .status-col:nth-child(2) .status-label {
+            display: none;
         }
 
         .purchase-status-2col .status-col .status-label {
