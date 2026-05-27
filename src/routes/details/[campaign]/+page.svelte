@@ -47,6 +47,7 @@
     let joinCtaEl = $state(null);
     let joinCtaClicked = $state(false);
     let plansTableHighlight = $state(false);
+    let shareToast = $state(false);
 
     let campaign = $derived(data.campaign);
     let campaignTitle = $derived($t.purchases[campaign].title);
@@ -127,6 +128,30 @@
         window.open(joinLink, "_blank", "noopener");
     }
 
+    async function handleShareClick(e) {
+        e.preventDefault();
+        const url = `${window.location.origin}/`;
+        const shareData = {
+            title: 'רכישות קבוצתיות יוצאים לחירות',
+            text: 'הצטרפו לקבוצת הרכישות שלנו והוזילו את ההוצאות החודשיות',
+            url,
+        };
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+                return;
+            }
+        } catch (err) {
+            if (err && err.name === 'AbortError') return;
+        }
+        try {
+            await navigator.clipboard.writeText(url);
+        } catch {}
+        shareToast = true;
+        await new Promise((r) => setTimeout(r, 2200));
+        shareToast = false;
+    }
+
     async function handleStep1Click(e) {
         if (!joinLink) return;
         e.preventDefault();
@@ -201,15 +226,16 @@
             {#each $t.details.steps as step, i}
                 {@const isPlansTableStep = i === 0 && campaign === 'cellular'}
                 {@const isScrollToFormStep = i === 1 && campaign === 'cellular' && joinLink}
+                {@const isShareStep = i === 2 && campaign === 'cellular'}
                 {@const isFormStep = i === 0 && joinLink && !isPlansTableStep}
-                {@const stepHref = isPlansTableStep ? '#plans-table' : isScrollToFormStep ? '#join-cta' : isFormStep ? joinLink : i === 2 ? whatsappLink : null}
+                {@const stepHref = isPlansTableStep ? '#plans-table' : isScrollToFormStep ? '#join-cta' : isShareStep ? '/' : isFormStep ? joinLink : i === 2 ? whatsappLink : null}
                 {#if stepHref}
                     <a
                         class="step step-link"
                         href={stepHref}
-                        target={isFormStep || isPlansTableStep || isScrollToFormStep ? null : "_blank"}
-                        rel={isFormStep || isPlansTableStep || isScrollToFormStep ? null : "noopener"}
-                        onclick={isPlansTableStep ? handlePlansTableClick : isScrollToFormStep ? handleScrollToFormClick : isFormStep ? handleStep1Click : null}
+                        target={isFormStep || isPlansTableStep || isScrollToFormStep || isShareStep ? null : "_blank"}
+                        rel={isFormStep || isPlansTableStep || isScrollToFormStep || isShareStep ? null : "noopener"}
+                        onclick={isPlansTableStep ? handlePlansTableClick : isScrollToFormStep ? handleScrollToFormClick : isShareStep ? handleShareClick : isFormStep ? handleStep1Click : null}
                     >
                         <div class="step-num">{i + 1}</div>
                         <div class="step-icon">{step.icon}</div>
@@ -427,6 +453,12 @@
             </div>
         {/if}
     </section>
+
+    {#if shareToast}
+        <div class="share-toast" role="status" aria-live="polite">
+            ✅ הקישור הועתק — אפשר להדביק בכל מקום
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -653,6 +685,28 @@
     @keyframes join-cta-hand-point-reverse {
         0%, 100% { transform: translateX(0); }
         50% { transform: translateX(8px); }
+    }
+
+    .share-toast {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(10, 17, 40, 0.96);
+        color: #facc15;
+        padding: 0.85rem 1.3rem;
+        border-radius: 14px;
+        border: 2px solid rgba(250, 204, 21, 0.6);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 22px rgba(250, 204, 21, 0.35);
+        font-weight: 700;
+        font-size: 0.95rem;
+        z-index: 9999;
+        animation: share-toast-in 0.25s ease-out;
+    }
+
+    @keyframes share-toast-in {
+        from { opacity: 0; transform: translate(-50%, 12px); }
+        to { opacity: 1; transform: translate(-50%, 0); }
     }
 
     .plans-table-section {
