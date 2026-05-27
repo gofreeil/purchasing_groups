@@ -326,7 +326,7 @@
                             <td>14.9</td>
                             <td>🚫 ללא עלות</td>
                             <td>🚫 ללא עלות</td>
-                            <td>פלאפון</td>
+                            <td><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
                         <tr>
                             <td>רמי לוי</td>
@@ -337,7 +337,7 @@
                             <td>16.4 <span class="plan-note">(עלות קו ל-2 מכשירים 15 ש"ח כל אחד)</span></td>
                             <td>🚫 ללא עלות</td>
                             <td>🚫 ללא עלות</td>
-                            <td>פלאפון</td>
+                            <td><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
                         <tr>
                             <td>wecom</td>
@@ -348,7 +348,7 @@
                             <td>מחיר קבוע 19.9</td>
                             <td>🚫 ללא עלות</td>
                             <td>🚫 ללא עלות</td>
-                            <td>סלקום</td>
+                            <td><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
                         </tr>
                         <tr>
                             <td>Xphone</td>
@@ -359,7 +359,7 @@
                             <td>18.9</td>
                             <td>4.9 ש"ח</td>
                             <td>14.9 ש"ח</td>
-                            <td>סלקום</td>
+                            <td><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
                         </tr>
                     </tbody>
                 </table>
@@ -792,6 +792,24 @@
         color: rgba(255, 255, 255, 0.72);
         margin-top: 3px;
         line-height: 1.25;
+    }
+
+    .plans-table-logo {
+        display: block;
+        margin: 0 auto;
+        max-width: 64px;
+        max-height: 36px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+        .plans-table-logo {
+            max-width: 46px;
+            max-height: 28px;
+        }
     }
 
     .plans-table tbody tr:nth-child(even) {
