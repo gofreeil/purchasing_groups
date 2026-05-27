@@ -310,7 +310,7 @@
 
     {#if campaign === 'cellular'}
         <section id="plans-table" class="section plans-table-section">
-            <h2>השוואת מסלולים</h2>
+            <h2>בחירת מסלול</h2>
             <div class="plans-table-scroll" class:highlight={plansTableHighlight}>
                 <table class="plans-table">
                     <thead>
