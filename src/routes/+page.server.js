@@ -16,9 +16,9 @@ export async function load({ fetch }) {
         if (response.ok) {
             const rows = (await response.text()).split("\n");
             if (rows.length > 2) {
-                // שורה 3 (אינדקס 2), עמודה X (אינדקס 23) - חיסכון שנתי
+                // תא Z3: שורה 3 (אינדקס 2), עמודה Z (אינדקס 25) - חיסכון שנתי
                 const annual = parseInt(
-                    (rows[2].split(",")[23] || "").replace(/[^\d]/g, ""),
+                    (rows[2].split(",")[25] || "").replace(/[^\d]/g, ""),
                 );
                 if (!isNaN(annual)) annualSavings = annual;
 
