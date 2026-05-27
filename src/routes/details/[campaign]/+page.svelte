@@ -667,10 +667,10 @@
     }
 
     .join-cta-hand {
-        font-size: 2.5rem;
+        font-size: 2.1rem;
         flex-shrink: 0;
         line-height: 1;
-        animation: join-cta-hand-point 1.4s ease-in-out infinite;
+        animation: join-cta-hand-point 2.6s ease-in-out infinite;
     }
 
     .join-cta-hand:first-child {
@@ -679,12 +679,12 @@
 
     @keyframes join-cta-hand-point {
         0%, 100% { transform: translateX(0); }
-        50% { transform: translateX(-8px); }
+        50% { transform: translateX(-4px); }
     }
 
     @keyframes join-cta-hand-point-reverse {
         0%, 100% { transform: translateX(0); }
-        50% { transform: translateX(8px); }
+        50% { transform: translateX(4px); }
     }
 
     .share-toast {
@@ -1282,7 +1282,7 @@
         }
 
         .join-cta-hand {
-            font-size: 1.6rem;
+            font-size: 1.35rem;
         }
 
         .join-cta-banner {
