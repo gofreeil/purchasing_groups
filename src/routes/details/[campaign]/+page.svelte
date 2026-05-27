@@ -98,6 +98,27 @@
         });
     }
 
+    async function handlePlansTableClick(e) {
+        e.preventDefault();
+        const target = document.getElementById('plans-table');
+        if (!target) return;
+        const rect = target.getBoundingClientRect();
+        const targetY = rect.top + window.scrollY - 24;
+        await smoothScrollTo(targetY, 900);
+    }
+
+    async function handleScrollToFormClick(e) {
+        e.preventDefault();
+        if (!joinCtaEl) return;
+        const rect = joinCtaEl.getBoundingClientRect();
+        const bannerCenter = rect.top + window.scrollY + rect.height / 2;
+        const targetY = bannerCenter - window.innerHeight / 2;
+        await smoothScrollTo(targetY, 1600);
+        joinCtaClicked = true;
+        await new Promise((r) => setTimeout(r, 500));
+        joinCtaClicked = false;
+    }
+
     async function handleStep1Click(e) {
         if (!joinLink) return;
         e.preventDefault();
@@ -170,15 +191,17 @@
         <h2>{$t.details.howItWorks}</h2>
         <div class="steps">
             {#each $t.details.steps as step, i}
-                {@const isFormStep = i === 0 && joinLink}
-                {@const stepHref = isFormStep ? joinLink : i === 2 ? whatsappLink : null}
+                {@const isPlansTableStep = i === 0 && campaign === 'cellular'}
+                {@const isScrollToFormStep = i === 1 && campaign === 'cellular' && joinLink}
+                {@const isFormStep = i === 0 && joinLink && !isPlansTableStep}
+                {@const stepHref = isPlansTableStep ? '#plans-table' : isScrollToFormStep ? '#join-cta' : isFormStep ? joinLink : i === 2 ? whatsappLink : null}
                 {#if stepHref}
                     <a
                         class="step step-link"
                         href={stepHref}
-                        target={isFormStep ? null : "_blank"}
-                        rel={isFormStep ? null : "noopener"}
-                        onclick={isFormStep ? handleStep1Click : null}
+                        target={isFormStep || isPlansTableStep || isScrollToFormStep ? null : "_blank"}
+                        rel={isFormStep || isPlansTableStep || isScrollToFormStep ? null : "noopener"}
+                        onclick={isPlansTableStep ? handlePlansTableClick : isScrollToFormStep ? handleScrollToFormClick : isFormStep ? handleStep1Click : null}
                     >
                         <div class="step-num">{i + 1}</div>
                         <div class="step-icon">{step.icon}</div>
@@ -242,7 +265,7 @@
     {/if}
 
     {#if campaign === 'cellular'}
-        <section class="section plans-table-section">
+        <section id="plans-table" class="section plans-table-section">
             <h2>השוואת מסלולים</h2>
             <div class="plans-table-scroll">
                 <table class="plans-table">
@@ -311,7 +334,7 @@
     {/if}
 
     {#if joinLink}
-        <div class="join-cta-wrap">
+        <div id="join-cta" class="join-cta-wrap">
             <span class="join-cta-hand">👈</span>
             <a
                 href={joinLink}
