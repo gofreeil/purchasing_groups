@@ -318,48 +318,48 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>רמי לוי</td>
-                            <td>תוכנית א'</td>
-                            <td>4/5</td>
-                            <td>2500</td>
-                            <td>150</td>
-                            <td>14.9</td>
-                            <td>🚫 ללא עלות</td>
-                            <td>🚫 ללא עלות</td>
-                            <td><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
+                            <td data-label="שם חברה">רמי לוי</td>
+                            <td data-label="שם התוכנית">תוכנית א'</td>
+                            <td data-label="רשת בדור">4/5</td>
+                            <td data-label="דקות/סמסים">2500</td>
+                            <td data-label="חבילת גלישה ג'יגה">150</td>
+                            <td data-label="עלות ממוצעת לקו לשנה">14.9</td>
+                            <td data-label="עלות סים">🚫 ללא עלות</td>
+                            <td data-label="עלות משלוח">🚫 ללא עלות</td>
+                            <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
                         <tr>
-                            <td>רמי לוי</td>
-                            <td>תוכנית ב' (עד 8 קווים)</td>
-                            <td>4/5</td>
-                            <td>5000</td>
-                            <td>300</td>
-                            <td>16.4 <span class="plan-note">(עלות קו ל-2 מכשירים 15 ש"ח כל אחד)</span></td>
-                            <td>🚫 ללא עלות</td>
-                            <td>🚫 ללא עלות</td>
-                            <td><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
+                            <td data-label="שם חברה">רמי לוי</td>
+                            <td data-label="שם התוכנית">תוכנית ב' (עד 8 קווים)</td>
+                            <td data-label="רשת בדור">4/5</td>
+                            <td data-label="דקות/סמסים">5000</td>
+                            <td data-label="חבילת גלישה ג'יגה">300</td>
+                            <td data-label="עלות ממוצעת לקו לשנה">16.4 <span class="plan-note">(עלות קו ל-2 מכשירים 15 ש"ח כל אחד)</span></td>
+                            <td data-label="עלות סים">🚫 ללא עלות</td>
+                            <td data-label="עלות משלוח">🚫 ללא עלות</td>
+                            <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
                         <tr>
-                            <td>wecom</td>
-                            <td>תוכנית ג'</td>
-                            <td>4 (דור 5 בתוספת 7.9 ש"ח)</td>
-                            <td>5000</td>
-                            <td>ללא הגבלה</td>
-                            <td>מחיר קבוע 19.9</td>
-                            <td>🚫 ללא עלות</td>
-                            <td>🚫 ללא עלות</td>
-                            <td><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
+                            <td data-label="שם חברה">wecom</td>
+                            <td data-label="שם התוכנית">תוכנית ג'</td>
+                            <td data-label="רשת בדור">4 (דור 5 בתוספת 7.9 ש"ח)</td>
+                            <td data-label="דקות/סמסים">5000</td>
+                            <td data-label="חבילת גלישה ג'יגה">ללא הגבלה</td>
+                            <td data-label="עלות ממוצעת לקו לשנה">מחיר קבוע 19.9</td>
+                            <td data-label="עלות סים">🚫 ללא עלות</td>
+                            <td data-label="עלות משלוח">🚫 ללא עלות</td>
+                            <td data-label="רובץ על רשת"><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
                         </tr>
                         <tr>
-                            <td>Xphone</td>
-                            <td>תוכנית ד'</td>
-                            <td>4/5</td>
-                            <td>5000</td>
-                            <td>500</td>
-                            <td>18.9</td>
-                            <td>4.9 ש"ח</td>
-                            <td>14.9 ש"ח</td>
-                            <td><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
+                            <td data-label="שם חברה">Xphone</td>
+                            <td data-label="שם התוכנית">תוכנית ד'</td>
+                            <td data-label="רשת בדור">4/5</td>
+                            <td data-label="דקות/סמסים">5000</td>
+                            <td data-label="חבילת גלישה ג'יגה">500</td>
+                            <td data-label="עלות ממוצעת לקו לשנה">18.9</td>
+                            <td data-label="עלות סים">4.9 ש"ח</td>
+                            <td data-label="עלות משלוח">14.9 ש"ח</td>
+                            <td data-label="רובץ על רשת"><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
                         </tr>
                     </tbody>
                 </table>
@@ -825,18 +825,98 @@
     }
 
     @media (max-width: 768px) {
+        .plans-table-scroll {
+            overflow-x: visible;
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
         .plans-table {
-            font-size: 0.82rem;
+            display: block;
+            table-layout: auto;
+            font-size: 0.9rem;
         }
-        .plans-table thead th {
-            font-size: 0.78rem;
-            padding: 0.55rem 0.3rem;
+
+        .plans-table thead {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
         }
+
+        .plans-table tbody {
+            display: block;
+        }
+
+        .plans-table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            padding: 0.6rem 0.4rem;
+            background: rgba(10, 17, 40, 0.6);
+            border: 2px solid rgba(250, 204, 21, 0.6);
+            border-radius: 14px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .plans-table tbody tr:nth-child(even) {
+            background: rgba(10, 17, 40, 0.6);
+        }
+
+        .plans-table tbody tr:hover {
+            background: rgba(10, 17, 40, 0.6);
+        }
+
+        .plans-table tbody tr:last-child {
+            margin-bottom: 0;
+        }
+
+        .plans-table tbody tr:last-child td {
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+        }
+
         .plans-table tbody td {
-            padding: 0.55rem 0.3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.55rem 0.5rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+            text-align: left;
+            font-size: 0.9rem;
         }
+
+        .plans-table tbody tr td:last-child {
+            border-bottom: none;
+        }
+
+        .plans-table tbody td::before {
+            content: attr(data-label);
+            color: #facc15;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-align: right;
+            flex: 0 0 45%;
+        }
+
+        .plans-table tbody td > * {
+            text-align: left;
+        }
+
         .plan-note {
-            font-size: 0.68rem;
+            font-size: 0.72rem;
+            text-align: left;
+        }
+
+        .plans-table-logo {
+            margin: 0;
+            max-width: 56px;
+            max-height: 32px;
         }
     }
 
