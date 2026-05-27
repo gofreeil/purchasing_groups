@@ -115,14 +115,17 @@
         e.preventDefault();
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
         if (isMobile) {
-            const firstRow = document.querySelector('.plans-table tbody tr');
-            if (!firstRow) return;
-            const rect = firstRow.getBoundingClientRect();
+            const section = document.getElementById('plans-table');
+            if (!section) return;
+            const rect = section.getBoundingClientRect();
             const targetY = rect.top + window.scrollY - getHeaderHeight() - 12;
             await smoothScrollTo(targetY, 1500);
-            firstRow.classList.add('plan-row-highlight');
-            await new Promise((r) => setTimeout(r, 1400));
-            firstRow.classList.remove('plan-row-highlight');
+            const firstRow = section.querySelector('tbody tr');
+            if (firstRow) {
+                firstRow.classList.add('plan-row-highlight');
+                await new Promise((r) => setTimeout(r, 1400));
+                firstRow.classList.remove('plan-row-highlight');
+            }
             return;
         }
         const target = document.getElementById('plans-table');
