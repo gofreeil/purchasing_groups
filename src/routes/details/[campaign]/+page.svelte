@@ -1446,6 +1446,21 @@
             text-align: center;
         }
 
+        .hero-content h1 {
+            margin-bottom: 0.3rem;
+        }
+
+        .hero-desc {
+            font-size: 1.1rem;
+            line-height: 1.35;
+            margin: 0 0 0.3rem;
+        }
+
+        .hero-desc-providers {
+            font-size: 1.05rem;
+            margin-bottom: 0;
+        }
+
         .stats-grid {
             grid-template-columns: repeat(2, 1fr);
         }
