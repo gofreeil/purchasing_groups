@@ -476,7 +476,7 @@
 <style>
     .details-page {
         max-width: 1100px;
-        margin: 2rem auto 4rem;
+        margin: 0 auto 4rem;
         padding: 0 1.5rem;
         color: white;
     }
