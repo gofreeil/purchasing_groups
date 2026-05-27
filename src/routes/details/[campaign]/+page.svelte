@@ -130,6 +130,9 @@
             <div class="hero-content">
                 <h1>{campaignTitle}</h1>
                 <p class="hero-desc">{campaignDesc}</p>
+                {#if campaign === 'cellular'}
+                    <p class="hero-desc hero-desc-providers">מסלולים בחברת רמי לוי, אקס פון, וויקום</p>
+                {/if}
             </div>
         </div>
 
@@ -235,6 +238,80 @@
     {:else}
         <section class="section">
             {@render faqContent()}
+        </section>
+    {/if}
+
+    {#if campaign === 'cellular'}
+        <section class="section plans-table-section">
+            <h2>השוואת מסלולים</h2>
+            <div class="plans-table-scroll">
+                <table class="plans-table">
+                    <thead>
+                        <tr>
+                            <th>שם חברה</th>
+                            <th>הערות</th>
+                            <th>רשת בדור</th>
+                            <th>דקות/סמסים</th>
+                            <th>חבילת גלישה ג'יגה</th>
+                            <th>עלות ממוצעת לקו לשנה</th>
+                            <th>עלות ממוצעת לקו מעל 2 קווים לשנה</th>
+                            <th>עלות סים</th>
+                            <th>עלות משלוח</th>
+                            <th>רובץ על רשת</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>רמי לוי</td>
+                            <td>תוכנית א'</td>
+                            <td>4/5</td>
+                            <td>2500</td>
+                            <td>150</td>
+                            <td>14.9</td>
+                            <td>X</td>
+                            <td>ללא עלות</td>
+                            <td>ללא עלות</td>
+                            <td>פלאפון</td>
+                        </tr>
+                        <tr>
+                            <td>רמי לוי</td>
+                            <td>תוכנית ב' (עד 8 קווים)</td>
+                            <td>4/5</td>
+                            <td>5000</td>
+                            <td>300</td>
+                            <td>16.4</td>
+                            <td>15</td>
+                            <td>ללא עלות</td>
+                            <td>ללא עלות</td>
+                            <td>פלאפון</td>
+                        </tr>
+                        <tr>
+                            <td>wecom</td>
+                            <td>X</td>
+                            <td>4 (דור 5 בתוספת 7.9 ש"ח)</td>
+                            <td>5000</td>
+                            <td>ללא הגבלה</td>
+                            <td>מחיר קבוע 19.9</td>
+                            <td>X</td>
+                            <td>ללא עלות</td>
+                            <td>ללא עלות</td>
+                            <td>סלקום</td>
+                        </tr>
+                        <tr>
+                            <td>Xphone</td>
+                            <td>X</td>
+                            <td>4/5</td>
+                            <td>5000</td>
+                            <td>500</td>
+                            <td>18.9</td>
+                            <td>X</td>
+                            <td>4.9 ש"ח</td>
+                            <td>14.9 ש"ח</td>
+                            <td>סלקום</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     {/if}
 
@@ -552,24 +629,87 @@
         50% { transform: translateX(8px); }
     }
 
+    .plans-table-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .plans-table-section h2 {
+        text-align: center;
+        color: #facc15;
+        margin-bottom: 1rem;
+    }
+
+    .plans-table-scroll {
+        overflow-x: auto;
+        border-radius: 14px;
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+        background: rgba(10, 17, 40, 0.6);
+    }
+
+    .plans-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 0.95rem;
+        min-width: 720px;
+    }
+
+    .plans-table thead th {
+        background: linear-gradient(135deg, rgba(250, 204, 21, 0.18), rgba(251, 146, 60, 0.14));
+        color: #facc15;
+        font-weight: 800;
+        padding: 0.75rem 0.6rem;
+        border-bottom: 2px solid rgba(250, 204, 21, 0.5);
+        white-space: nowrap;
+    }
+
+    .plans-table tbody td {
+        padding: 0.65rem 0.6rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .plans-table tbody tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .plans-table tbody tr:hover {
+        background: rgba(250, 204, 21, 0.08);
+    }
+
+    .plans-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    @media (max-width: 768px) {
+        .plans-table {
+            font-size: 0.82rem;
+        }
+        .plans-table thead th,
+        .plans-table tbody td {
+            padding: 0.5rem 0.45rem;
+        }
+    }
+
     .join-cta-banner {
         flex: 1;
         display: block;
         padding: 1.4rem 1.8rem;
         background: linear-gradient(135deg, rgba(250, 204, 21, 0.12), rgba(251, 146, 60, 0.10));
-        border: 2px solid rgba(250, 204, 21, 0.45);
+        border: 4px solid #facc15;
         border-radius: 20px;
         text-decoration: none;
         color: white;
         text-align: center;
-        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3), 0 0 22px rgba(250, 204, 21, 0.45);
         transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
     }
 
     .join-cta-banner:hover {
         transform: translateY(-2px);
-        border-color: rgba(250, 204, 21, 0.75);
-        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38);
+        border-color: #fde047;
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38), 0 0 32px rgba(250, 204, 21, 0.65);
     }
 
     .join-cta-banner.clicked {
