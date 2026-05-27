@@ -659,12 +659,13 @@
             column-gap: 0.6rem;
             row-gap: 0.15rem;
             align-items: start;
+            padding-top: 0.45rem;
         }
 
         .purchase-status-2col .status-col {
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
+            gap: 0;
         }
 
         .purchase-status-2col .status-col .status-line {
@@ -681,12 +682,12 @@
 
         .purchase-status-2col .status-col .status-label {
             font-size: 0.78rem;
-            line-height: 1.2;
+            line-height: 1.1;
         }
 
         .purchase-status-2col .status-col .status-value {
             font-size: 0.85rem;
-            line-height: 1.25;
+            line-height: 1.1;
         }
 
         .purchase-status-2col .survey-badge-container {

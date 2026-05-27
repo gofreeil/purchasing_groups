@@ -329,7 +329,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr data-title="תוכנית א'">
+                        <tr data-title="תוכנית א'" data-company="רמי לוי">
                             <td data-label="שם חברה">רמי לוי</td>
                             <td data-label="שם התוכנית">תוכנית א'</td>
                             <td data-label="רשת בדור">4/5</td>
@@ -340,7 +340,7 @@
                             <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
                             <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
-                        <tr data-title="תוכנית ב' (עד 8 קווים)">
+                        <tr data-title="תוכנית ב' (עד 8 קווים)" data-company="רמי לוי">
                             <td data-label="שם חברה">רמי לוי</td>
                             <td data-label="שם התוכנית">תוכנית ב' (עד 8 קווים)</td>
                             <td data-label="רשת בדור">4/5</td>
@@ -351,7 +351,7 @@
                             <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
                             <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
                         </tr>
-                        <tr data-title="תוכנית ג'">
+                        <tr data-title="תוכנית ג'" data-company="wecom">
                             <td data-label="שם חברה">wecom</td>
                             <td data-label="שם התוכנית">תוכנית ג'</td>
                             <td data-label="רשת בדור">4 (דור 5 בתוספת 7.9 ש"ח)</td>
@@ -362,7 +362,7 @@
                             <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
                             <td data-label="רובץ על רשת"><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
                         </tr>
-                        <tr data-title="תוכנית ד'">
+                        <tr data-title="תוכנית ד'" data-company="Xphone">
                             <td data-label="שם חברה">Xphone</td>
                             <td data-label="שם התוכנית">תוכנית ד'</td>
                             <td data-label="רשת בדור">4/5</td>
@@ -875,6 +875,7 @@
 
         .plans-table tbody tr {
             display: block;
+            position: relative;
             margin-bottom: 1rem;
             padding: 0;
             background: rgba(10, 17, 40, 0.6);
@@ -908,12 +909,25 @@
             color: #facc15;
             font-weight: 800;
             font-size: 1rem;
-            text-align: center;
-            padding: 0.55rem 0.5rem;
+            text-align: right;
+            padding: 0.55rem 5rem 0.55rem 0.8rem;
             border-bottom: 2px solid rgba(250, 204, 21, 0.6);
         }
 
-        .plans-table tbody td[data-label="שם התוכנית"] {
+        .plans-table tbody tr[data-company]::after {
+            content: attr(data-company);
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 0.55rem 0.8rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 700;
+            font-size: 0.95rem;
+            line-height: 1;
+        }
+
+        .plans-table tbody td[data-label="שם התוכנית"],
+        .plans-table tbody td[data-label="שם חברה"] {
             display: none;
         }
 
