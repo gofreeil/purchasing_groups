@@ -734,7 +734,7 @@ a {
 }
 
 .purchase-status {
-    text-align: right;
+    text-align: left;
     font-size: 0.9rem;
     border-right: 1px solid var(--border-color);
     padding-right: 1.5rem;
@@ -782,6 +782,7 @@ a {
     }
 
     .purchase-status {
+        text-align: center;
         border-right: none;
         border-top: 1px solid var(--border-color);
         padding: 1.5rem 0 0;
