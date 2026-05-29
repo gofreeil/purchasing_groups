@@ -22,9 +22,9 @@ export async function load({ fetch }) {
                 );
                 if (!isNaN(annual)) annualSavings = annual;
 
-                // שורה 2 (אינדקס 1), עמודה X (אינדקס 23) - חיסכון חודשי
+                // תא Z2: שורה 2 (אינדקס 1), עמודה Z (אינדקס 25) - חיסכון חודשי
                 const monthly = parseInt(
-                    (rows[1].split(",")[23] || "").replace(/[^\d]/g, ""),
+                    (rows[1].split(",")[25] || "").replace(/[^\d]/g, ""),
                 );
                 if (!isNaN(monthly)) monthlySavings = monthly;
             }

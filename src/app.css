@@ -693,7 +693,7 @@ a {
 
 .purchase-card {
     display: grid;
-    grid-template-columns: 120px 1fr 200px;
+    grid-template-columns: 120px 1fr 280px;
     align-items: center;
     background: var(--card-bg);
     border-radius: 20px;

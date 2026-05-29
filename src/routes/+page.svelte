@@ -652,6 +652,26 @@
         display: contents;
     }
 
+    @media (min-width: 769px) {
+        .purchase-status-2col .status-col {
+            display: block;
+        }
+
+        .purchase-status-2col .status-line {
+            display: block;
+            margin-bottom: 0.55rem;
+        }
+
+        .purchase-status-2col .status-col + .status-col {
+            margin-top: 0.75rem;
+        }
+
+        .purchase-status-2col .status-col:nth-child(2) > .status-label {
+            display: block;
+            margin-bottom: 0.35rem;
+        }
+    }
+
     @media (max-width: 768px) {
         .purchase-status-2col {
             display: grid;
