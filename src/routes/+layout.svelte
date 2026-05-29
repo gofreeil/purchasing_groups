@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	const favicon = "/assets/קבוצות-רכישה.png";
-	import "../app.css?v=1.0.2";
+	import "../app.css?v=1.0.3";
 	import { lang, t } from "$lib/i18n.js";
 	import { isLoggedIn } from "$lib/user.js";
 	import AdsSidebar from "$lib/components/AdsSidebar.svelte";
