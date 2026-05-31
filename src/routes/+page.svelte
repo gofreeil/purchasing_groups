@@ -702,6 +702,7 @@
         .purchase-status-2col .status-line {
             display: block;
             margin-bottom: 0.55rem;
+            white-space: nowrap;
         }
 
         .purchase-status-2col .status-col + .status-col {
