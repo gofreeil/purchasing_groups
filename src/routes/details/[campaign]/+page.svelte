@@ -127,7 +127,7 @@
         },
         fuel: {
             stepsOverride: [
-                { icon: "📍", title: "בודקים תחנות בסביבה", desc: "אם יש בסביבת הבית / עבודה מהתחנות הנ\"ל ⬅️ עוברים לשלב הבא." },
+                { icon: "📍", title: "בודקים תחנות בסביבה", desc: "אם יש בסביבת הבית / עבודה מהתחנות הנ\"ל עוברים לשלב הבא ⬅️" },
                 { icon: "🤝", title: "ממלאים פרטים בטופס", desc: "אנחנו דואגים שנציג יחזור אליכם בהקדם, לתת לכם יחס אישי." },
                 { icon: "💸", title: "מתחילים לחסוך", desc: "מצרפים חברים ומשפחה ומגדילים יותר את הכח שלנו." },
             ],
@@ -162,7 +162,7 @@
                     "הנחה לליטר בנזין",
                     "בסיס ההנחה",
                     "מס׳ תחנות זמינות",
-                    "סוגי דלק",
+                    "לוגו",
                 ],
                 rows: [
                     {
@@ -172,7 +172,7 @@
                             { label: "הנחה לליטר בנזין", value: "31 אגורות" },
                             { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "מס׳ תחנות זמינות", value: "245" },
-                            { label: "סוגי דלק", value: "בנזין 95/98, סולר" },
+                            { label: "לוגו", image: { src: "/images/הורדה (3).png", alt: "סונול" } },
                         ],
                     },
                     {
@@ -182,7 +182,7 @@
                             { label: "הנחה לליטר בנזין", value: "31 אגורות" },
                             { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "מס׳ תחנות זמינות", value: "220" },
-                            { label: "סוגי דלק", value: "בנזין 95/98, סולר" },
+                            { label: "לוגו", image: { src: "/images/דור אלון לוגו.png", alt: "דור אלון" } },
                         ],
                     },
                     {
@@ -192,7 +192,7 @@
                             { label: "הנחה לליטר בנזין", value: "32 אגורות" },
                             { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "מס׳ תחנות זמינות", value: "77" },
-                            { label: "סוגי דלק", value: "בנזין 95/98, סולר" },
+                            { label: "לוגו", image: { src: "/images/טן לוגו.jfif", alt: "טן" } },
                         ],
                     },
                     {
@@ -202,7 +202,7 @@
                             { label: "הנחה לליטר בנזין", value: "32 אגורות" },
                             { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "מס׳ תחנות זמינות", value: "13" },
-                            { label: "סוגי דלק", value: "בנזין 95/98, סולר" },
+                            { label: "לוגו", image: { src: "/images/הורדה (3).jfif", alt: "תפוז" } },
                         ],
                     },
                 ],
@@ -1196,6 +1196,29 @@
         .plans-table tbody td[data-label="שם חברה"],
         .plans-table tbody td[data-label="רשת תחנות"] {
             display: none;
+        }
+
+        .plans-table tbody td[data-label="לוגו"] {
+            position: absolute;
+            top: 0.3rem;
+            left: 0.6rem;
+            display: block;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            border: none;
+            z-index: 2;
+        }
+
+        .plans-table tbody td[data-label="לוגו"]::before {
+            display: none;
+        }
+
+        .plans-table tbody td[data-label="לוגו"] img.plans-table-logo {
+            max-height: 32px;
+            max-width: 48px;
+            width: auto;
+            margin: 0;
         }
 
         .plans-table tbody tr > td:first-of-type {
