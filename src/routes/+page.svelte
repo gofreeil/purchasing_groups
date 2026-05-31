@@ -729,7 +729,7 @@
 
     @media (min-width: 1025px) {
         .survey-badge-container {
-            left: 140% !important; /* Move even further right to avoid hiding savings data */
+            left: 220% !important; /* Move even further right to avoid hiding savings data */
         }
     }
 
