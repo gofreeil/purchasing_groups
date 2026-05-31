@@ -234,8 +234,7 @@
     <!-- Fuel -->
     <div class="purchase-card" style="margin-bottom: 3rem;">
         <a
-            href="https://forms.gle/2Y9SdUfqkJd5mPaS7"
-            target="_blank"
+            href="/details/fuel"
             class="purchase-link-overlay"
             aria-label={$t.purchases.fuel.title}
         ></a>

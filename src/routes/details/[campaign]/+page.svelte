@@ -32,11 +32,182 @@
 
     const stats = {
         cellular: { rating: 5.0, savings: 25, annualSavings: 300, reviews: 47 },
-        fuel: { rating: 4.9, savings: 60, annualSavings: 720, reviews: 21 },
+        fuel: { rating: 4.9, savings: 15, annualSavings: 180, reviews: 21 },
         internet: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
         carInsurance: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
         electricity: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
         coupons: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
+    };
+
+    // תוכן ייחודי לכל קמפיין - שורת ספקים, חיפוש (קליטה/תחנות), טבלת מסלולים, כתוביות CTA, התנהגות שלבים
+    const pageConfig = {
+        cellular: {
+            providersLine: "מסלולים בחברת רמי לוי, אקס פון, וויקום",
+            findSection: {
+                title: "בדוק את הרשתות המומלצות בשכונה/ עבודה שלך",
+                href: "https://tiber.co.il/Home/Antenna",
+                image: "/assets/coverage-banner.png",
+                imageAlt: "בדיקת קליטה סלולרית",
+                ariaLabel: "לבדיקת קליטה ב-tiber.co.il",
+                label: "לבדיקת קליטה ↗",
+            },
+            plansTable: {
+                title: "בחירת מסלול",
+                headers: [
+                    "שם חברה",
+                    "שם התוכנית",
+                    "רשת בדור",
+                    'דקות/<br />סמסים',
+                    "חבילת גלישה ג'יגה",
+                    "עלות ממוצעת לקו לשנה",
+                    "עלות סים",
+                    "עלות משלוח",
+                    "רובץ על רשת",
+                ],
+                rows: [
+                    {
+                        title: "תוכנית א'", company: "רמי לוי",
+                        cells: [
+                            { label: "שם חברה", value: "רמי לוי" },
+                            { label: "שם התוכנית", value: "תוכנית א'" },
+                            { label: "רשת בדור", value: "4/5" },
+                            { label: "דקות/סמסים", value: "2500" },
+                            { label: "חבילת גלישה ג'יגה", value: "150" },
+                            { label: "עלות ממוצעת לקו לשנה", value: "14.9" },
+                            { label: "עלות סים", html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
+                            { label: "עלות משלוח", html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
+                            { label: "רובץ על רשת", image: { src: "/images/פלאפון.jfif", alt: "פלאפון" } },
+                        ],
+                    },
+                    {
+                        title: "תוכנית ב' (עד 8 קווים)", company: "רמי לוי",
+                        cells: [
+                            { label: "שם חברה", value: "רמי לוי" },
+                            { label: "שם התוכנית", value: "תוכנית ב' (עד 8 קווים)" },
+                            { label: "רשת בדור", value: "4/5" },
+                            { label: "דקות/סמסים", value: "5000" },
+                            { label: "חבילת גלישה ג'יגה", value: "300" },
+                            { label: "עלות ממוצעת לקו לשנה", html: '16.4 <span class="plan-note">(עלות קו ל-2 מכשירים 15 ש"ח כל אחד)</span>' },
+                            { label: "עלות סים", html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
+                            { label: "עלות משלוח", html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
+                            { label: "רובץ על רשת", image: { src: "/images/פלאפון.jfif", alt: "פלאפון" } },
+                        ],
+                    },
+                    {
+                        title: "תוכנית ג'", company: "wecom",
+                        cells: [
+                            { label: "שם חברה", value: "wecom" },
+                            { label: "שם התוכנית", value: "תוכנית ג'" },
+                            { label: "רשת בדור", value: ' 4 (דור 5 בתוספת 7.9 ש"ח)' },
+                            { label: "דקות/סמסים", value: "5000" },
+                            { label: "חבילת גלישה ג'יגה", value: "ללא הגבלה" },
+                            { label: "עלות ממוצעת לקו לשנה", value: "מחיר קבוע 19.9" },
+                            { label: "עלות סים", html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
+                            { label: "עלות משלוח", html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
+                            { label: "רובץ על רשת", image: { src: "/images/סלקום.jfif", alt: "סלקום" } },
+                        ],
+                    },
+                    {
+                        title: "תוכנית ד'", company: "Xphone",
+                        cells: [
+                            { label: "שם חברה", value: "Xphone" },
+                            { label: "שם התוכנית", value: "תוכנית ד'" },
+                            { label: "רשת בדור", value: "4/5" },
+                            { label: "דקות/סמסים", value: "5000" },
+                            { label: "חבילת גלישה ג'יגה", value: "500" },
+                            { label: "עלות ממוצעת לקו לשנה", value: "18.9" },
+                            { label: "עלות סים", value: '4.9 ש"ח' },
+                            { label: "עלות משלוח", value: '14.9 ש"ח' },
+                            { label: "רובץ על רשת", image: { src: "/images/סלקום.jfif", alt: "סלקום" } },
+                        ],
+                    },
+                ],
+            },
+            joinCtaSubtitle: "לקו הסלולר הזול במדינה - חברות רמי לוי / אקס פון / וויקום",
+        },
+        fuel: {
+            stepsOverride: [
+                { icon: "📍", title: "בודקים תחנות בסביבה", desc: "בודקים אם יש בסביבת ביתי / בעבודה תחנת דלק מהחברות הבאות." },
+                { icon: "🤝", title: "ממלאים פרטים בטופס", desc: "אנחנו דואגים שנציג יחזור אליכם לתת לכם יחס אישי." },
+                { icon: "💸", title: "מתחילים לחסוך", desc: "מצרפים חברים ומשפחה ומגדילים יותר את הכח שלנו." },
+            ],
+            benefits: {
+                title: "היתרונות שלך",
+                items: [
+                    { icon: "💸", text: "הנחה קבועה בכל הארץ - החל מהליטר הראשון (בתחנות הדלק סונול, דור אלון, טן ותפוז)" },
+                    { icon: "🗺️", text: "פריסה של כ-700 תחנות דלק ברחבי הארץ - ככה שתמיד יהיה לכם איפה לתדלק ובהנחה" },
+                    { icon: "✨", text: "חווית תדלוק נוחה ופשוטה - נכנסת, תדלקת 😊" },
+                    { icon: "📋", text: "חשבונית אחת מרוכזת - ניהול פשוט ונוח, בקרה על תדלוק רכבי המשפחה/העסק" },
+                    { icon: "✅", text: "ללא דמי שימוש או התחייבות" },
+                    { icon: "🛠️", text: "ללא דמי התקנה" },
+                    { icon: "📅", text: "מועד חיוב קבוע בהוראת קבע בנקאית" },
+                ],
+            },
+            faqOverride: [
+                { q: "האם יש דמי חבר?", a: "לא. ההצטרפות לקבוצה ולעסקאות חינמית לחלוטין." },
+                { q: "האם יש דמי התקנה?", a: "לחברי יוצאים לחירות אין דמי התקנה." },
+                { q: "מה קורה כשאני מוכר את רכבי?", a: "ניתן לשלוף בקלות את ההתקן ולהשליכו לאשפה,<br>או לבטלו מיידית אצלנו בחיוג לשירות<br>בטל׳ 04-659-2444." },
+            ],
+            findSection: {
+                title: "מצא את התחנות הקרובות אליך",
+                image: "/images/gas-stations.png",
+                imageAlt: "תחנות דלק",
+                stationNames: ["סונול", "דור אלון", "טן", "תפוז"],
+            },
+            plansTable: {
+                title: "פירוט ההנחה",
+                headers: [
+                    "רשת תחנות",
+                    "הנחה לליטר בנזין",
+                    "בסיס ההנחה",
+                    "מס׳ תחנות זמינות",
+                    "סוגי דלק",
+                ],
+                rows: [
+                    {
+                        title: "סונול", company: "סונול",
+                        cells: [
+                            { label: "רשת תחנות", value: "סונול" },
+                            { label: "הנחה לליטר בנזין", value: "31 אגורות" },
+                            { label: "בסיס ההנחה", value: "מהמחיר היציג" },
+                            { label: "מס׳ תחנות זמינות", value: "245" },
+                            { label: "סוגי דלק", value: "בנזין 95/98, סולר" },
+                        ],
+                    },
+                    {
+                        title: "דור אלון", company: "דור אלון",
+                        cells: [
+                            { label: "רשת תחנות", value: "דור אלון" },
+                            { label: "הנחה לליטר בנזין", value: "31 אגורות" },
+                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
+                            { label: "מס׳ תחנות זמינות", value: "220" },
+                            { label: "סוגי דלק", value: "בנזין 95/98, סולר" },
+                        ],
+                    },
+                    {
+                        title: "טן", company: "טן",
+                        cells: [
+                            { label: "רשת תחנות", value: "טן" },
+                            { label: "הנחה לליטר בנזין", value: "32 אגורות" },
+                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
+                            { label: "מס׳ תחנות זמינות", value: "77" },
+                            { label: "סוגי דלק", value: "בנזין 95/98, סולר" },
+                        ],
+                    },
+                    {
+                        title: "תפוז", company: "תפוז",
+                        cells: [
+                            { label: "רשת תחנות", value: "תפוז" },
+                            { label: "הנחה לליטר בנזין", value: "32 אגורות" },
+                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
+                            { label: "מס׳ תחנות זמינות", value: "13" },
+                            { label: "סוגי דלק", value: "בנזין 95/98, סולר" },
+                        ],
+                    },
+                ],
+            },
+            joinCtaSubtitle: "להנחה של 31 אגורות לליטר בנזין - דור אלון, טן, תפוז וסונול",
+        },
     };
 
     let satisfactionLevel = $state(0);
@@ -56,6 +227,7 @@
     let campaignImage = $derived(images[campaign]);
     let campaignStats = $derived({ ...stats[campaign], members: data.activeMembers });
     let joinLink = $derived(joinLinks[campaign]);
+    let pageData = $derived(pageConfig[campaign] ?? null);
 
     const levels = [
         { value: 1, label: "😞" },
@@ -202,8 +374,8 @@
             <div class="hero-content">
                 <h1>{campaignTitle}</h1>
                 <p class="hero-desc">{campaignDesc}</p>
-                {#if campaign === 'cellular'}
-                    <p class="hero-desc hero-desc-providers">מסלולים בחברת רמי לוי, אקס פון, וויקום</p>
+                {#if pageData?.providersLine}
+                    <p class="hero-desc hero-desc-providers">{pageData.providersLine}</p>
                 {/if}
             </div>
         </div>
@@ -237,14 +409,28 @@
         {/if}
     </section>
 
+    {#if pageData?.benefits}
+        <section class="section benefits-section">
+            <h2>{pageData.benefits.title}</h2>
+            <ul class="benefits-list">
+                {#each pageData.benefits.items as benefit}
+                    <li class="benefit-item">
+                        <span class="benefit-icon" aria-hidden="true">{benefit.icon}</span>
+                        <span class="benefit-text">{benefit.text}</span>
+                    </li>
+                {/each}
+            </ul>
+        </section>
+    {/if}
+
     <!-- How it works -->
     <section class="section steps-section">
         <h2>{$t.details.howItWorks}</h2>
         <div class="steps">
-            {#each $t.details.steps as step, i}
-                {@const isPlansTableStep = i === 0 && campaign === 'cellular'}
-                {@const isScrollToFormStep = i === 1 && campaign === 'cellular' && joinLink}
-                {@const isShareStep = i === 2 && campaign === 'cellular'}
+            {#each (pageData?.stepsOverride ?? $t.details.steps) as step, i}
+                {@const isPlansTableStep = i === 0 && !!pageData?.plansTable}
+                {@const isScrollToFormStep = i === 1 && !!pageData && joinLink}
+                {@const isShareStep = i === 2 && !!pageData}
                 {@const isFormStep = i === 0 && joinLink && !isPlansTableStep}
                 {@const stepHref = isPlansTableStep ? '#plans-table' : isScrollToFormStep ? '#join-cta' : isShareStep ? '/' : isFormStep ? joinLink : i === 2 ? whatsappLink : null}
                 {#if stepHref}
@@ -275,7 +461,7 @@
     {#snippet faqContent()}
         <h2>{$t.details.faqTitle}</h2>
         <div class="faq-list">
-            {#each $t.details.faq as item, i}
+            {#each (pageData?.faqOverride ?? $t.details.faq) as item, i}
                 <div class="faq-item" class:open={openFaq === i}>
                     <button class="faq-q" onclick={() => toggleFaq(i)}>
                         <span>{item.q}</span>
@@ -283,7 +469,7 @@
                     </button>
                     {#if openFaq === i}
                         <div class="faq-a" transition:slide={{ duration: 200 }}>
-                            {item.a}
+                            {@html item.a}
                         </div>
                     {/if}
                 </div>
@@ -291,20 +477,31 @@
         </div>
     {/snippet}
 
-    {#if campaign === 'cellular'}
+    {#if pageData?.findSection}
         <section class="section info-section">
             <div class="info-pane coverage-section">
-                <h2>בדוק את הרשתות המומלצות בשכונה/ עבודה שלך</h2>
-                <a
-                    href="https://tiber.co.il/Home/Antenna"
-                    target="_blank"
-                    rel="noopener"
-                    class="coverage-banner"
-                    aria-label="לבדיקת קליטה ב-tiber.co.il"
-                >
-                    <img src="/assets/coverage-banner.png" alt="בדיקת קליטה סלולרית" />
-                    <span class="coverage-banner-label">לבדיקת קליטה ↗</span>
-                </a>
+                <h2>{pageData.findSection.title}</h2>
+                {#if pageData.findSection.href}
+                    <a
+                        href={pageData.findSection.href}
+                        target="_blank"
+                        rel="noopener"
+                        class="coverage-banner"
+                        aria-label={pageData.findSection.ariaLabel}
+                    >
+                        <img src={pageData.findSection.image} alt={pageData.findSection.imageAlt} />
+                        <span class="coverage-banner-label">{pageData.findSection.label}</span>
+                    </a>
+                {:else}
+                    <div class="coverage-banner coverage-banner-static">
+                        <img src={pageData.findSection.image} alt={pageData.findSection.imageAlt} />
+                        {#if pageData.findSection.stationNames}
+                            <span class="coverage-banner-label">{pageData.findSection.stationNames.join(' · ')}</span>
+                        {:else if pageData.findSection.label}
+                            <span class="coverage-banner-label">{pageData.findSection.label}</span>
+                        {/if}
+                    </div>
+                {/if}
             </div>
             <div class="info-pane">
                 {@render faqContent()}
@@ -316,69 +513,34 @@
         </section>
     {/if}
 
-    {#if campaign === 'cellular'}
+    {#if pageData?.plansTable}
         <section id="plans-table" class="section plans-table-section">
-            <h2>בחירת מסלול</h2>
+            <h2>{pageData.plansTable.title}</h2>
             <div class="plans-table-scroll" class:highlight={plansTableHighlight}>
                 <table class="plans-table">
                     <thead>
                         <tr>
-                            <th>שם חברה</th>
-                            <th>שם התוכנית</th>
-                            <th>רשת בדור</th>
-                            <th>דקות/<br />סמסים</th>
-                            <th>חבילת גלישה ג'יגה</th>
-                            <th>עלות ממוצעת לקו לשנה</th>
-                            <th>עלות סים</th>
-                            <th>עלות משלוח</th>
-                            <th>רובץ על רשת</th>
+                            {#each pageData.plansTable.headers as header}
+                                <th>{@html header}</th>
+                            {/each}
                         </tr>
                     </thead>
                     <tbody>
-                        <tr data-title="תוכנית א'" data-company="רמי לוי">
-                            <td data-label="שם חברה">רמי לוי</td>
-                            <td data-label="שם התוכנית">תוכנית א'</td>
-                            <td data-label="רשת בדור">4/5</td>
-                            <td data-label="דקות/סמסים">2500</td>
-                            <td data-label="חבילת גלישה ג'יגה">150</td>
-                            <td data-label="עלות ממוצעת לקו לשנה">14.9</td>
-                            <td data-label="עלות סים"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
-                            <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
-                            <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
-                        </tr>
-                        <tr data-title="תוכנית ב' (עד 8 קווים)" data-company="רמי לוי">
-                            <td data-label="שם חברה">רמי לוי</td>
-                            <td data-label="שם התוכנית">תוכנית ב' (עד 8 קווים)</td>
-                            <td data-label="רשת בדור">4/5</td>
-                            <td data-label="דקות/סמסים">5000</td>
-                            <td data-label="חבילת גלישה ג'יגה">300</td>
-                            <td data-label="עלות ממוצעת לקו לשנה">16.4 <span class="plan-note">(עלות קו ל-2 מכשירים 15 ש"ח כל אחד)</span></td>
-                            <td data-label="עלות סים"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
-                            <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
-                            <td data-label="רובץ על רשת"><img src="/images/פלאפון.jfif" alt="פלאפון" class="plans-table-logo" /></td>
-                        </tr>
-                        <tr data-title="תוכנית ג'" data-company="wecom">
-                            <td data-label="שם חברה">wecom</td>
-                            <td data-label="שם התוכנית">תוכנית ג'</td>
-                            <td data-label="רשת בדור">4 (דור 5 בתוספת 7.9 ש"ח)</td>
-                            <td data-label="דקות/סמסים">5000</td>
-                            <td data-label="חבילת גלישה ג'יגה">ללא הגבלה</td>
-                            <td data-label="עלות ממוצעת לקו לשנה">מחיר קבוע 19.9</td>
-                            <td data-label="עלות סים"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
-                            <td data-label="עלות משלוח"><span class="no-cost-icon">🚫</span><br />ללא עלות</td>
-                            <td data-label="רובץ על רשת"><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
-                        </tr>
-                        <tr data-title="תוכנית ד'" data-company="Xphone">
-                            <td data-label="שם חברה">Xphone</td>
-                            <td data-label="שם התוכנית">תוכנית ד'</td>
-                            <td data-label="רשת בדור">4/5</td>
-                            <td data-label="דקות/סמסים">5000</td>
-                            <td data-label="חבילת גלישה ג'יגה">500</td>
-                            <td data-label="עלות ממוצעת לקו לשנה">18.9</td>
-                            <td data-label="עלות סים">4.9 ש"ח</td>
-                            <td data-label="עלות משלוח">14.9 ש"ח</td>
-                            <td data-label="רובץ על רשת"><img src="/images/סלקום.jfif" alt="סלקום" class="plans-table-logo" /></td>
-                        </tr>
+                        {#each pageData.plansTable.rows as row}
+                            <tr data-title={row.title} data-company={row.company}>
+                                {#each row.cells as cell}
+                                    <td data-label={cell.label}>
+                                        {#if cell.image}
+                                            <img src={cell.image.src} alt={cell.image.alt} class="plans-table-logo" />
+                                        {:else if cell.html}
+                                            {@html cell.html}
+                                        {:else}
+                                            {cell.value}
+                                        {/if}
+                                    </td>
+                                {/each}
+                            </tr>
+                        {/each}
                     </tbody>
                 </table>
             </div>
@@ -399,7 +561,7 @@
             >
                 <div class="join-cta-content">
                     <h3>טופס ההצטרפות</h3>
-                    <p>לקו הסלולר הזול במדינה - חברות רמי לוי / אקס פון / וויקום</p>
+                    <p>{pageData?.joinCtaSubtitle ?? campaignDesc}</p>
                 </div>
             </a>
             <span class="join-cta-hand">👉</span>
@@ -676,6 +838,54 @@
         color: #facc15;
         text-align: center;
         margin: 0 0 2rem;
+    }
+
+    /* Benefits list */
+    .benefits-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    .benefit-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        padding: 1rem 1.1rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+
+    .benefit-item:hover {
+        background: rgba(250, 204, 21, 0.08);
+        border-color: rgba(250, 204, 21, 0.35);
+        transform: translateY(-2px);
+    }
+
+    .benefit-icon {
+        font-size: 1.6rem;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+
+    .benefit-text {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    @media (max-width: 640px) {
+        .benefits-list {
+            grid-template-columns: 1fr;
+        }
+        .benefit-text {
+            font-size: 0.95rem;
+        }
     }
 
     /* Join CTA banner (form link) */
@@ -1128,6 +1338,16 @@
     .coverage-banner:active {
         transform: translateY(0);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    /* כשהבאנר אינו קישור - אין hover/cursor */
+    .coverage-banner-static {
+        cursor: default;
+    }
+
+    .coverage-banner-static:hover {
+        transform: none;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
     }
 
     /* Steps */

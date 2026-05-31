@@ -9,8 +9,11 @@ const CAMPAIGNS = [
     'coupons'
 ];
 
-const SHEET_ID = "18V5IdtRiN3dKo7habggKP5e55_xJPci158aJVuuWXVw";
-const GID = "2146350168";
+const CELLULAR_SHEET_ID = "18V5IdtRiN3dKo7habggKP5e55_xJPci158aJVuuWXVw";
+const CELLULAR_GID = "2146350168";
+
+const FUEL_SHEET_ID = "1ai8g7KRudXXXgoesfCliMqVV427pJqHxR54Avsx5Zgs";
+const FUEL_GID = "732534558";
 
 const DEFAULT_MEMBERS = {
     cellular: 312,
@@ -26,7 +29,7 @@ export async function load({ params, fetch }) {
 
     if (params.campaign === 'cellular') {
         try {
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+            const url = `https://docs.google.com/spreadsheets/d/${CELLULAR_SHEET_ID}/export?format=csv&gid=${CELLULAR_GID}`;
             const response = await fetch(url);
             if (response.ok) {
                 const rows = (await response.text()).split("\n");
@@ -38,6 +41,21 @@ export async function load({ params, fetch }) {
             }
         } catch (err) {
             console.error("Failed to load cellular members from sheet:", err);
+        }
+    } else if (params.campaign === 'fuel') {
+        try {
+            const url = `https://docs.google.com/spreadsheets/d/${FUEL_SHEET_ID}/export?format=csv&gid=${FUEL_GID}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const rows = (await response.text()).split("\n");
+                // תא F4 = שורה 4 (אינדקס 3), עמודה F (אינדקס 5) - מספר משתתפים בקבוצת הדלק
+                const value = parseInt(
+                    (rows[3]?.split(",")[5] || "").replace(/[^\d]/g, ""),
+                );
+                if (!isNaN(value) && value > 0) activeMembers = value;
+            }
+        } catch (err) {
+            console.error("Failed to load fuel members from sheet:", err);
         }
     }
 
