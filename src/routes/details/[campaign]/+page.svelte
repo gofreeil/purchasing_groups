@@ -169,7 +169,7 @@
                         cells: [
                             { label: "רשת תחנות", value: "סונול" },
                             { label: "הנחה לליטר בנזין", value: "31 אגורות" },
-                            { label: "בסיס ההנחה", value: "מהמחיר היציג" },
+                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "מס׳ תחנות זמינות", value: "245" },
                             { label: "סוגי דלק", value: "בנזין 95/98, סולר" },
                         ],
@@ -884,6 +884,15 @@
         font-size: 1rem;
         line-height: 1.5;
         color: rgba(255, 255, 255, 0.92);
+    }
+
+    /* בדסקטופ - אם מספר היתרונות אי-זוגי, מרכזים את האחרון במקום שיישאר לבד בעמודה */
+    @media (min-width: 641px) {
+        .benefit-item:last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+            max-width: calc(50% - 0.5rem);
+            margin-inline: auto;
+        }
     }
 
     @media (max-width: 640px) {
