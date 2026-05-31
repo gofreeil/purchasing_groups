@@ -262,7 +262,7 @@
                 class="cellular-title"
                 class:pop={fuelPop}
             >{$t.purchases.fuel.title}</h3>
-            <p>{$t.purchases.fuel.desc}</p>
+            <p>{@html $t.purchases.fuel.desc}</p>
         </div>
         <div class="purchase-status purchase-status-2col">
             <div class="status-col">

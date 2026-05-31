@@ -127,7 +127,7 @@
         },
         fuel: {
             stepsOverride: [
-                { icon: "📍", title: "בודקים תחנות בסביבה", desc: "בודקים אם יש בסביבת ביתי / בעבודה תחנת דלק מהחברות הבאות." },
+                { icon: "📍", title: "בודקים תחנות בסביבה", desc: "אם יש בסביבת הבית / עבודה מהתחנות הנ\"ל ⬅️ עוברים לשלב הבא." },
                 { icon: "🤝", title: "ממלאים פרטים בטופס", desc: "אנחנו דואגים שנציג יחזור אליכם לתת לכם יחס אישי." },
                 { icon: "💸", title: "מתחילים לחסוך", desc: "מצרפים חברים ומשפחה ומגדילים יותר את הכח שלנו." },
             ],
@@ -375,7 +375,7 @@
             </div>
             <div class="hero-content">
                 <h1>{campaignTitle}</h1>
-                <p class="hero-desc">{campaignDesc}</p>
+                <p class="hero-desc">{@html campaignDesc}</p>
                 {#if pageData?.providersLine}
                     <p class="hero-desc hero-desc-providers">{pageData.providersLine}</p>
                 {/if}
@@ -569,7 +569,7 @@
             >
                 <div class="join-cta-content">
                     <h3>טופס ההצטרפות</h3>
-                    <p>{pageData?.joinCtaSubtitle ?? campaignDesc}</p>
+                    <p>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</p>
                 </div>
             </a>
             <span class="join-cta-hand">👉</span>
