@@ -21,8 +21,12 @@
     // חיסכון דלק - נטען מתא I4 בגיליון Google של קבוצת הדלק (חודשי), שנתי = חודשי × 12
     let fuelMonthlySavings = $state(data.fuelMonthlySavings);
     let fuelAnnualSavings = $state(data.fuelAnnualSavings);
+
+    // סכום החיסכון השנתי הכולל (סלולר + דלק) - מוצג במונה הראשי
+    let totalAnnualSavings = data.annualSavings + data.fuelAnnualSavings;
+
     // התween מאותחל לערך האמיתי כך שהמספר מוצג מיד (גם ב-SSR וגם בלי JS)
-    const savings = tweened(data.annualSavings, {
+    const savings = tweened(totalAnnualSavings, {
         duration: 2000,
         easing: cubicOut,
     });
@@ -68,9 +72,11 @@
     };
 
     onMount(() => {
-        // אפקט ספירה למונה החיסכון: איפוס מיידי ל-0 ואז ספירה לערך האמיתי
-        savings.set(0, { duration: 0 });
-        savings.set(targetSavings);
+        // אנימציית הספירה: איפוס ל-0 ואז ספירה לסכום הכולל (סלולר + דלק) לאחר רינדור
+        requestAnimationFrame(() => {
+            savings.set(0, { duration: 0 });
+            requestAnimationFrame(() => savings.set(totalAnnualSavings));
+        });
 
         // הגדרת Intersection Observer לחברים
         const observer = new IntersectionObserver(handleIntersection, {
