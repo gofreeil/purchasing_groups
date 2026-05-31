@@ -17,6 +17,10 @@
     // מוני חיסכון (שנתי וחודשי) - הנתונים נטענים בצד השרת מגיליון Google
     let targetSavings = $state(data.annualSavings);
     let monthlySavings = $state(data.monthlySavings);
+
+    // חיסכון דלק - נטען מתא I4 בגיליון Google של קבוצת הדלק (חודשי), שנתי = חודשי × 12
+    let fuelMonthlySavings = $state(data.fuelMonthlySavings);
+    let fuelAnnualSavings = $state(data.fuelAnnualSavings);
     // התween מאותחל לערך האמיתי כך שהמספר מוצג מיד (גם ב-SSR וגם בלי JS)
     const savings = tweened(data.annualSavings, {
         duration: 2000,
@@ -254,13 +258,41 @@
             >{$t.purchases.fuel.title}</h3>
             <p>{$t.purchases.fuel.desc}</p>
         </div>
-        <div class="purchase-status">
-            <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value" style="color: #22c55e;">{$t.purchases.active}</span>
-            <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value" style="color: #22c55e;"
-                >{$t.purchases.yes}</span
-            >
+        <div class="purchase-status purchase-status-2col">
+            <div class="status-col">
+                <span class="status-line">
+                    <span class="status-label">{$t.purchases.status}</span>
+                    <span class="status-value" style="color: #4ade80;">{$t.purchases.active}</span>
+                </span>
+                <span class="status-line">
+                    <span class="status-label">{$t.purchases.canJoin}</span>
+                    <span class="status-value" style="color: #4ade80;">{$t.purchases.yes}</span>
+                </span>
+            </div>
+            <div class="status-col">
+                <span class="status-label">{$t.purchases.saved}</span>
+                <span
+                    class="status-value highlight-monthly"
+                    style="color: #4ade80; font-weight: bold;"
+                >
+                    {fuelMonthlySavings.toLocaleString("he-IL")}
+                    {$t.currency} {$t.purchases.perMonth}
+                </span>
+                <span
+                    class="status-value highlight-yearly"
+                    style="color: #ff4444; font-weight: bold;"
+                >
+                    {fuelAnnualSavings.toLocaleString("he-IL")}
+                    {$t.currency} {$t.purchases.perYear}
+                </span>
+            </div>
+
+            <div class="survey-badge-container">
+                <div class="survey-rating-summary">
+                    <span class="stars-gold">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-val">4.9/5</span>
+                </div>
+            </div>
         </div>
     </div>
 

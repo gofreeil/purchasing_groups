@@ -207,6 +207,7 @@
                 ],
             },
             joinCtaSubtitle: "להנחה של 31 אגורות לליטר בנזין - דור אלון, טן, תפוז וסונול",
+            plansTableNote: "שים לב: דלק הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
         },
     };
 
@@ -544,6 +545,12 @@
                     </tbody>
                 </table>
             </div>
+            {#if pageData.plansTableNote}
+                <p class="plans-table-note" role="note">
+                    <span class="plans-table-note-icon" aria-hidden="true">⚠️</span>
+                    {pageData.plansTableNote}
+                </p>
+            {/if}
         </section>
     {/if}
 
@@ -947,6 +954,37 @@
         text-align: center;
         color: #facc15;
         margin-bottom: 1rem;
+    }
+
+    .plans-table-note {
+        margin: 1rem 0 0;
+        padding: 0.85rem 1.1rem;
+        background: rgba(220, 38, 38, 0.12);
+        border: 1px solid rgba(248, 113, 113, 0.55);
+        border-radius: 12px;
+        color: #fecaca;
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.5;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        box-shadow: 0 6px 18px rgba(220, 38, 38, 0.18);
+    }
+
+    .plans-table-note-icon {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 640px) {
+        .plans-table-note {
+            font-size: 0.88rem;
+            padding: 0.75rem 0.9rem;
+            text-align: right;
+        }
     }
 
     .plans-table-scroll {
