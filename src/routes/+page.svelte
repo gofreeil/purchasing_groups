@@ -690,6 +690,11 @@
     }
 
     @media (min-width: 769px) {
+        /* בדסקטופ - מזיזים את בלוק הסטטוס (כולל הקו האנכי) ימינה ב-3 אותיות */
+        .purchase-status {
+            transform: translateX(3ch);
+        }
+
         .purchase-status-2col .status-col {
             display: block;
         }
@@ -730,7 +735,8 @@
             flex-direction: row;
             align-items: baseline;
             gap: 0.3rem;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            white-space: nowrap;
         }
 
         .purchase-status-2col .status-col:nth-child(2) .status-label {
