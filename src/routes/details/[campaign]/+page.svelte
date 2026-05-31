@@ -172,7 +172,7 @@
                             { label: "הנחה לליטר בנזין", value: "31 אגורות" },
                             { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "מס׳ תחנות זמינות", value: "245" },
-                            { label: "לוגו", image: { src: "/images/הורדה (3).png", alt: "סונול" } },
+                            { label: "לוגו", image: { src: "/images/sonol.png", alt: "סונול" } },
                         ],
                     },
                     {
@@ -182,7 +182,7 @@
                             { label: "הנחה לליטר בנזין", value: "31 אגורות" },
                             { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "מס׳ תחנות זמינות", value: "220" },
-                            { label: "לוגו", image: { src: "/images/דור אלון לוגו.png", alt: "דור אלון" } },
+                            { label: "לוגו", image: { src: "/images/dor-alon.png", alt: "דור אלון" } },
                         ],
                     },
                     {
@@ -192,7 +192,7 @@
                             { label: "הנחה לליטר בנזין", value: "32 אגורות" },
                             { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "מס׳ תחנות זמינות", value: "77" },
-                            { label: "לוגו", image: { src: "/images/טן לוגו.jfif", alt: "טן" } },
+                            { label: "לוגו", image: { src: "/images/ten.jfif", alt: "טן" } },
                         ],
                     },
                     {
@@ -202,7 +202,7 @@
                             { label: "הנחה לליטר בנזין", value: "32 אגורות" },
                             { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "מס׳ תחנות זמינות", value: "13" },
-                            { label: "לוגו", image: { src: "/images/הורדה (3).jfif", alt: "תפוז" } },
+                            { label: "לוגו", image: { src: "/images/tapuz.png", alt: "תפוז" } },
                         ],
                     },
                 ],
