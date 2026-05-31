@@ -1200,8 +1200,8 @@
 
         .plans-table tbody td[data-label="לוגו"] {
             position: absolute;
-            top: 0.3rem;
-            left: 0.6rem;
+            top: 0.2rem;
+            left: 0.5rem;
             display: block;
             padding: 0;
             margin: 0;
@@ -1215,8 +1215,8 @@
         }
 
         .plans-table tbody td[data-label="לוגו"] img.plans-table-logo {
-            max-height: 32px;
-            max-width: 48px;
+            max-height: 22px;
+            max-width: 32px;
             width: auto;
             margin: 0;
         }
