@@ -737,7 +737,8 @@ a {
     text-align: right;
     font-size: 0.9rem;
     border-right: 1px solid var(--border-color);
-    padding-right: 4rem;
+    padding-right: 0.75rem;
+    margin-right: 4rem;
 }
 
 .status-label {
