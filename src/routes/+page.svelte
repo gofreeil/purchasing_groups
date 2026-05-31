@@ -418,6 +418,14 @@
         letter-spacing: 0.02em;
     }
 
+    /* מסגרת דקה סביב סכום החיסכון השנתי (השורה האדומה) */
+    :global(.status-value.highlight-yearly) {
+        display: inline-block;
+        border: 1px solid rgba(255, 68, 68, 0.55);
+        border-radius: 6px;
+        padding: 2px 8px;
+    }
+
     .cellular-title {
         display: inline-block;
         transform-origin: center;
