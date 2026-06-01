@@ -47,12 +47,12 @@ export async function load({ fetch }) {
         if (response.ok) {
             const rows = (await response.text()).split("\n");
             // תא I4: שורה 4 (אינדקס 3), עמודה I (אינדקס 8) - חיסכון חודשי דלק
-            const fuelMonthly = parseInt(
-                (rows[3]?.split(",")[8] || "").replace(/[^\d]/g, ""),
+            const fuelMonthly = parseFloat(
+                (rows[3]?.split(",")[8] || "").replace(/[^\d.]/g, ""),
             );
             if (!isNaN(fuelMonthly) && fuelMonthly > 0) {
-                fuelMonthlySavings = fuelMonthly;
-                fuelAnnualSavings = fuelMonthly * 12;
+                fuelMonthlySavings = Math.round(fuelMonthly);
+                fuelAnnualSavings = Math.round(fuelMonthly * 12);
             }
         }
     } catch (error) {

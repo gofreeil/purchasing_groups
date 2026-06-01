@@ -207,7 +207,7 @@
                     },
                 ],
             },
-            joinCtaSubtitle: "להנחה של 31 אגורות לליטר בנזין - דור אלון, טן, תפוז וסונול",
+            joinCtaSubtitle: "להנחה קבועה בדלק ובסולר",
             plansTableNote: "שים לב: דלק, הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
         },
     };
@@ -568,7 +568,7 @@
                 aria-label={$t.details.joinCta}
             >
                 <div class="join-cta-content">
-                    <h3>טופס ההצטרפות</h3>
+                    <h3>טופס הצטרפות</h3>
                     <p>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</p>
                 </div>
             </a>
