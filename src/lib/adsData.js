@@ -35,7 +35,7 @@ export const ads = [
 		title: "מבקר רשויות המדינה",
 		description: "מבקרים את הרשויות, ממצים את זכות התושב",
 		cta: "מבקרים את הרשויות, ממצים את זכות התושב",
-		href: "https://right-to-live.vercel.app/",
+		href: "https://criticism.vercel.app/",
 		image: "/assets/mevaker-rashuyot.png",
 		color: "linear-gradient(90deg, #1d4ed8, #4338ca)",
 	},
