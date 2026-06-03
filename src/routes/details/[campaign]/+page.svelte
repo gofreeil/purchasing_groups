@@ -644,7 +644,7 @@
 
     {#if shareToast}
         <div class="share-toast" role="status" aria-live="polite">
-            ✅ הקישור הועתק — אפשר להדביק בכל מקום
+            ✅ הקישור הועתק - אפשר להדביק בכל מקום
         </div>
     {/if}
 
@@ -774,7 +774,7 @@
         box-shadow: 0 12px 24px rgba(250, 204, 21, 0.35);
     }
 
-    /* Stats — integrated as bottom strip of the hero-card */
+    /* Stats - integrated as bottom strip of the hero-card */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);

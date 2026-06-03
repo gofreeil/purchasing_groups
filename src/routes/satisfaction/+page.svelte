@@ -2,7 +2,7 @@
     import { t } from "$lib/i18n.js";
     import { fade } from "svelte/transition";
 
-    // Campaign list — later this will come from Strapi.
+    // Campaign list - later this will come from Strapi.
     const campaigns = [
         { key: "cellular", icon: "📱" },
         { key: "internet", icon: "🌐" },

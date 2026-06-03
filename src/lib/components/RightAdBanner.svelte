@@ -51,7 +51,7 @@
 						מקום פרסום זה
 					</span>
 					<span class="right-ad-vsub" style="color: {slot.text}">
-						— יכול להיות שלך
+						- יכול להיות שלך
 					</span>
 				</div>
 				<a
@@ -183,14 +183,14 @@
 		}
 	}
 
-	/* מוצג בדסקטופ/טאבלט — יחד עם סיידבר הפרסומות השמאלי */
+	/* מוצג בדסקטופ/טאבלט - יחד עם סיידבר הפרסומות השמאלי */
 	@media (max-width: 768px) {
 		.right-ad-banner {
 			display: none;
 		}
 	}
 
-	/* בטאבלט — מעט צר יותר כדי להשאיר מקום לתוכן */
+	/* בטאבלט - מעט צר יותר כדי להשאיר מקום לתוכן */
 	@media (max-width: 1100px) and (min-width: 769px) {
 		.right-ad-banner {
 			width: 116px;

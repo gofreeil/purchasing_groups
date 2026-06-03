@@ -99,7 +99,7 @@
 		object-position: center;
 	}
 
-	/* קיצוץ מעט מתחתית התמונה — פרסומת "בתי הפיוס" */
+	/* קיצוץ מעט מתחתית התמונה - פרסומת "בתי הפיוס" */
 	.ad-image-trim {
 		object-fit: cover;
 		object-position: top;
@@ -183,7 +183,7 @@
 		}
 	}
 
-	/* בטאבלט — מעט צר יותר כדי להשאיר מקום לתוכן */
+	/* בטאבלט - מעט צר יותר כדי להשאיר מקום לתוכן */
 	@media (max-width: 1100px) and (min-width: 769px) {
 		.ads-sidebar {
 			width: 212px;
