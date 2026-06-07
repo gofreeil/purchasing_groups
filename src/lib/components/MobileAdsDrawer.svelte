@@ -33,8 +33,8 @@
 	let tabTouchStartY = 0;
 
 	onMount(() => {
-		// ברירת מחדל: השליש התחתון של המסך
-		tabY = Math.round((window.innerHeight * 2) / 3);
+		// ברירת מחדל: החלק התחתון של המסך (4/5 מהגובה)
+		tabY = Math.round((window.innerHeight * 4) / 5);
 	});
 
 	/** @param {TouchEvent} e */
