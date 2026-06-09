@@ -28,6 +28,11 @@
         fuel: "https://forms.gle/2Y9SdUfqkJd5mPaS7",
     };
 
+    // קישור משני לטופס סולר (יוצג רק אם קיים)
+    const joinLinksDiesel = {
+        fuel: "https://docs.google.com/forms/d/e/1FAIpQLScz6iFzBwX7oGYXdh98Y9aah_RgWXINtbsJ5u05wWYE8anVUA/viewform?usp=publish-editor",
+    };
+
     const whatsappLink = "https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI";
 
     const stats = {
@@ -156,7 +161,7 @@
                 stationNames: ["סונול", "דור אלון", "טן", "תפוז"],
             },
             plansTable: {
-                title: "פירוט ההנחה",
+                title: "פירוט ההנחה בדלק (בנזין 95 או 98)",
                 headers: [
                     "רשת תחנות",
                     "הנחה לליטר בנזין",
@@ -207,7 +212,7 @@
                     },
                 ],
             },
-            joinCtaSubtitle: "להנחה קבועה בדלק ובסולר",
+            joinCtaSubtitle: "להנחה בדלק (בנזין 95 או 98)",
             plansTableNote: "שים לב: דלק, הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
         },
     };
@@ -229,6 +234,7 @@
     let campaignImage = $derived(images[campaign]);
     let campaignStats = $derived({ ...stats[campaign], members: data.activeMembers });
     let joinLink = $derived(joinLinks[campaign]);
+    let joinLinkDiesel = $derived(joinLinksDiesel[campaign]);
     let pageData = $derived(pageConfig[campaign] ?? null);
 
     const levels = [
@@ -576,6 +582,25 @@
         </div>
     {/if}
 
+    {#if joinLinkDiesel}
+        <div class="join-cta-wrap join-cta-wrap-secondary">
+            <span class="join-cta-hand">👈</span>
+            <a
+                href={joinLinkDiesel}
+                target="_blank"
+                rel="noopener"
+                class="join-cta-banner"
+                aria-label="טופס הצטרפות להנחה בסולר"
+            >
+                <div class="join-cta-content">
+                    <h3>טופס הצטרפות</h3>
+                    <p>להנחה בסולר</p>
+                </div>
+            </a>
+            <span class="join-cta-hand">👉</span>
+        </div>
+    {/if}
+
     <!-- Survey -->
     <section class="section survey-section-wrap">
         <h2>דרגו וכיתבו את החוויה שלכם</h2>
@@ -911,6 +936,10 @@
         align-items: center;
         gap: 1rem;
         margin: 0 0 1.5rem;
+    }
+
+    .join-cta-wrap-secondary {
+        margin-top: -0.5rem;
     }
 
     .join-cta-hand {
