@@ -224,32 +224,16 @@
                 ],
                 rows: [
                     {
-                        title: "סונול",
+                        title: "כל הרשתות",
                         cells: [
-                            { label: "רשת תחנות", value: "סונול" },
+                            { label: "רשת תחנות", html: 'סונול / דור אלון / טן' },
                             { label: "הנחה לליטר סולר", value: "3.76" },
-                            { label: "לוגו", image: { src: "/images/sonol.png", alt: "סונול" } },
-                        ],
-                    },
-                    {
-                        title: "דור אלון",
-                        cells: [
-                            { label: "רשת תחנות", value: "דור אלון" },
-                            { label: "הנחה לליטר סולר", value: "3.76" },
-                            { label: "לוגו", image: { src: "/images/dor-alon.png", alt: "דור אלון" } },
-                        ],
-                    },
-                    {
-                        title: "טן",
-                        cells: [
-                            { label: "רשת תחנות", value: "טן" },
-                            { label: "הנחה לליטר סולר", value: "3.76" },
-                            { label: "לוגו", image: { src: "/images/ten.jfif", alt: "טן" } },
+                            { label: "לוגו", html: '<span class="multi-logos"><img src="/images/sonol.png" alt="סונול" class="plans-table-logo" /><img src="/images/dor-alon.png" alt="דור אלון" class="plans-table-logo" /><img src="/images/ten.jfif" alt="טן" class="plans-table-logo" /></span>' },
                         ],
                     },
                 ],
             },
-            plansTableDieselNote: "אין כפל מבצעים. המשתמש מקבל את ההנחה מהמחיר היציג של סונול ללא קשר באופן שמילא את הסולר - שירות עצמי או שירות מלא.",
+            plansTableDieselNote: "אין כפל מבצעים. המשתמש מקבל את ההנחה מהמחיר היציג של סונול ללא קשר באופן שמילא את הסולר - שירות עצמי או מלא.",
         },
     };
 
@@ -1087,6 +1071,19 @@
         font-size: 0.78em;
         font-weight: 500;
         opacity: 0.85;
+    }
+
+    :global(.plans-table td .multi-logos) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    :global(.plans-table td .multi-logos .plans-table-logo) {
+        width: 40px;
+        height: 40px;
     }
 
     .plans-table-note {
