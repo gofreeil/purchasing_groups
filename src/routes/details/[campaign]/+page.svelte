@@ -214,6 +214,50 @@
             },
             joinCtaSubtitle: "הנחה בדלק (95 או 98)",
             plansTableNote: "שים לב: דלק, הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
+            plansTableDiesel: {
+                title: "פירוט ההנחה בסולר",
+                subtitle: "מחיר ההנחה משתנה בכל חודש ומתפרסם בקבוצת הוואטסאפ",
+                headers: [
+                    "רשת תחנות",
+                    "הנחה לליטר סולר",
+                    "בסיס ההנחה",
+                    "מס׳ תחנות זמינות",
+                    "לוגו",
+                ],
+                rows: [
+                    {
+                        title: "סונול",
+                        cells: [
+                            { label: "רשת תחנות", value: "סונול" },
+                            { label: "הנחה לליטר סולר", value: "3.76" },
+                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
+                            { label: "מס׳ תחנות זמינות", value: "245" },
+                            { label: "לוגו", image: { src: "/images/sonol.png", alt: "סונול" } },
+                        ],
+                    },
+                    {
+                        title: "דור אלון",
+                        cells: [
+                            { label: "רשת תחנות", value: "דור אלון" },
+                            { label: "הנחה לליטר סולר", value: "3.76" },
+                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
+                            { label: "מס׳ תחנות זמינות", value: "220" },
+                            { label: "לוגו", image: { src: "/images/dor-alon.png", alt: "דור אלון" } },
+                        ],
+                    },
+                    {
+                        title: "טן",
+                        cells: [
+                            { label: "רשת תחנות", value: "טן" },
+                            { label: "הנחה לליטר סולר", value: "3.76" },
+                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
+                            { label: "מס׳ תחנות זמינות", value: "77" },
+                            { label: "לוגו", image: { src: "/images/ten.jfif", alt: "טן" } },
+                        ],
+                    },
+                ],
+            },
+            plansTableDieselNote: "שים לב: דלק, הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
         },
     };
 
@@ -524,6 +568,9 @@
     {#if pageData?.plansTable}
         <section id="plans-table" class="section plans-table-section">
             <h2>{pageData.plansTable.title}</h2>
+            {#if pageData.plansTable.subtitle}
+                <p class="plans-table-subtitle">{pageData.plansTable.subtitle}</p>
+            {/if}
             <div class="plans-table-scroll" class:highlight={plansTableHighlight}>
                 <table class="plans-table">
                     <thead>
@@ -556,6 +603,49 @@
                 <p class="plans-table-note" role="note">
                     <span class="plans-table-note-icon" aria-hidden="true">⚠️</span>
                     {pageData.plansTableNote}
+                </p>
+            {/if}
+        </section>
+    {/if}
+
+    {#if pageData?.plansTableDiesel}
+        <section class="section plans-table-section">
+            <h2>{pageData.plansTableDiesel.title}</h2>
+            {#if pageData.plansTableDiesel.subtitle}
+                <p class="plans-table-subtitle">{pageData.plansTableDiesel.subtitle}</p>
+            {/if}
+            <div class="plans-table-scroll">
+                <table class="plans-table">
+                    <thead>
+                        <tr>
+                            {#each pageData.plansTableDiesel.headers as header}
+                                <th>{@html header}</th>
+                            {/each}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each pageData.plansTableDiesel.rows as row}
+                            <tr data-title={row.title} data-company={row.company}>
+                                {#each row.cells as cell}
+                                    <td data-label={cell.label}>
+                                        {#if cell.image}
+                                            <img src={cell.image.src} alt={cell.image.alt} class="plans-table-logo" />
+                                        {:else if cell.html}
+                                            {@html cell.html}
+                                        {:else}
+                                            {cell.value}
+                                        {/if}
+                                    </td>
+                                {/each}
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
+            {#if pageData.plansTableDieselNote}
+                <p class="plans-table-note" role="note">
+                    <span class="plans-table-note-icon" aria-hidden="true">⚠️</span>
+                    {pageData.plansTableDieselNote}
                 </p>
             {/if}
         </section>
@@ -993,6 +1083,14 @@
         text-align: center;
         color: #facc15;
         margin-bottom: 1rem;
+    }
+
+    .plans-table-subtitle {
+        text-align: center;
+        color: #ffffff;
+        font-weight: 400;
+        font-size: 1rem;
+        margin: -0.5rem 0 1rem;
     }
 
     .plans-table-note {
