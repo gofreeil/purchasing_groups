@@ -216,12 +216,10 @@
             plansTableNote: "שים לב: דלק, הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
             plansTableDiesel: {
                 title: "פירוט ההנחה בסולר",
-                subtitle: "מחיר ההנחה משתנה בכל חודש ומתפרסם בקבוצת הוואטסאפ",
+                subtitle: "מחיר ההנחה משתנה בכל חודש ומתפרסם בקבוצת הוואטסאפ (מבוסס על המחיר היציג של סונול)",
                 headers: [
                     "רשת תחנות",
                     "הנחה לליטר סולר",
-                    "בסיס ההנחה",
-                    "מס׳ תחנות זמינות",
                     "לוגו",
                 ],
                 rows: [
@@ -230,8 +228,6 @@
                         cells: [
                             { label: "רשת תחנות", value: "סונול" },
                             { label: "הנחה לליטר סולר", value: "3.76" },
-                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
-                            { label: "מס׳ תחנות זמינות", value: "245" },
                             { label: "לוגו", image: { src: "/images/sonol.png", alt: "סונול" } },
                         ],
                     },
@@ -240,8 +236,6 @@
                         cells: [
                             { label: "רשת תחנות", value: "דור אלון" },
                             { label: "הנחה לליטר סולר", value: "3.76" },
-                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
-                            { label: "מס׳ תחנות זמינות", value: "220" },
                             { label: "לוגו", image: { src: "/images/dor-alon.png", alt: "דור אלון" } },
                         ],
                     },
@@ -250,8 +244,6 @@
                         cells: [
                             { label: "רשת תחנות", value: "טן" },
                             { label: "הנחה לליטר סולר", value: "3.76" },
-                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
-                            { label: "מס׳ תחנות זמינות", value: "77" },
                             { label: "לוגו", image: { src: "/images/ten.jfif", alt: "טן" } },
                         ],
                     },
@@ -608,6 +600,27 @@
         </section>
     {/if}
 
+    {#if joinLink}
+        <div id="join-cta" class="join-cta-wrap">
+            <span class="join-cta-hand">👈</span>
+            <a
+                href={joinLink}
+                target="_blank"
+                rel="noopener"
+                class="join-cta-banner"
+                class:clicked={joinCtaClicked}
+                bind:this={joinCtaEl}
+                aria-label={$t.details.joinCta}
+            >
+                <div class="join-cta-content">
+                    <h3>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</h3>
+                    <p>טופס הצטרפות</p>
+                </div>
+            </a>
+            <span class="join-cta-hand">👉</span>
+        </div>
+    {/if}
+
     {#if pageData?.plansTableDiesel}
         <section class="section plans-table-section">
             <h2>{pageData.plansTableDiesel.title}</h2>
@@ -651,29 +664,8 @@
         </section>
     {/if}
 
-    {#if joinLink}
-        <div id="join-cta" class="join-cta-wrap">
-            <span class="join-cta-hand">👈</span>
-            <a
-                href={joinLink}
-                target="_blank"
-                rel="noopener"
-                class="join-cta-banner"
-                class:clicked={joinCtaClicked}
-                bind:this={joinCtaEl}
-                aria-label={$t.details.joinCta}
-            >
-                <div class="join-cta-content">
-                    <h3>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</h3>
-                    <p>טופס הצטרפות</p>
-                </div>
-            </a>
-            <span class="join-cta-hand">👉</span>
-        </div>
-    {/if}
-
     {#if joinLinkDiesel}
-        <div class="join-cta-wrap join-cta-wrap-secondary">
+        <div class="join-cta-wrap">
             <span class="join-cta-hand">👈</span>
             <a
                 href={joinLinkDiesel}
@@ -1028,9 +1020,6 @@
         margin: 0 0 1.5rem;
     }
 
-    .join-cta-wrap-secondary {
-        margin-top: -0.5rem;
-    }
 
     .join-cta-hand {
         font-size: 2.1rem;
