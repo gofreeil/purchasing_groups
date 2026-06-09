@@ -212,7 +212,7 @@
                     },
                 ],
             },
-            joinCtaSubtitle: "להנחה בדלק (בנזין 95 או 98)",
+            joinCtaSubtitle: "הנחה בדלק (95 או 98)",
             plansTableNote: "שים לב: דלק, הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
         },
     };
@@ -574,8 +574,8 @@
                 aria-label={$t.details.joinCta}
             >
                 <div class="join-cta-content">
-                    <h3>טופס הצטרפות</h3>
-                    <p>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</p>
+                    <h3>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</h3>
+                    <p>טופס הצטרפות</p>
                 </div>
             </a>
             <span class="join-cta-hand">👉</span>
@@ -593,8 +593,8 @@
                 aria-label="טופס הצטרפות להנחה בסולר"
             >
                 <div class="join-cta-content">
-                    <h3>טופס הצטרפות</h3>
-                    <p>להנחה בסולר</p>
+                    <h3>הנחה בסולר</h3>
+                    <p>טופס הצטרפות</p>
                 </div>
             </a>
             <span class="join-cta-hand">👉</span>
