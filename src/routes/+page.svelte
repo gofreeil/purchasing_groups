@@ -7,7 +7,7 @@
     let { data } = $props();
 
     // הגדר כאן את מספר החברים הנוכחי בקבוצה
-    let targetCount = 915;
+    let targetCount = 960;
     // המונה מאותחל לערך הסופי כך שיוצג גם בלי JS; אנימציית הספירה רצה בגלילה
     const count = tweened(targetCount, {
         duration: 2500,

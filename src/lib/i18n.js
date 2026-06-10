@@ -253,50 +253,72 @@ export const translations = readable({
             libertyLink: "Liberty building a new world!",
             contactUs: "Contact Us",
             privacy: "Privacy Policy",
-            lastUpdated: "Last updated: February 2026",
+            lastUpdated: "Last updated: 10/6/24",
             privacySections: [
                 {
                     title: "1. General",
-                    content: "Welcome to the 'Cost of Living Reduction Revolution' website (hereinafter: the 'Site'). The Site is operated by 'Liberty' and respects the privacy of its users. The purpose of this policy is to transparently explain what information is collected and how we use it, in accordance with the provisions of the Privacy Protection Law, 1981."
+                    content: "This privacy policy describes how Liberty (Yotzim LaCherut), Registered Non-Profit 580802007 (hereinafter: the \"Association\", \"we\"), collects, uses, stores, and transfers personal information of users of the purchasing groups website (the \"Service\"). Use of the Service and provision of information through it constitute consent to the terms of this policy. The policy is written in masculine form for convenience only and applies to all genders."
                 },
                 {
-                    title: "2. Information Collection",
-                    content: "When using the Site, we may collect the following information:",
+                    title: "2. What Information We Collect",
+                    content: "As part of joining the purchasing groups, we collect the following information:",
                     list: [
-                        "Voluntarily provided information: Full name, phone number, email address, and other information you enter in contact or joining forms.",
-                        "Technical information: Data collected automatically such as IP address, browser type, operating system, and access times, for proper operation and statistics."
+                        "First and last name",
+                        "Phone number",
+                        "Email address",
+                        "Israeli ID number (Teudat Zehut) - collected to enable your participation in group transactions with service providers, who require an ID number for contractual engagement and service provision",
+                        "Additional information you voluntarily provide upon joining"
                     ]
                 },
                 {
-                    title: "3. Use of Information",
-                    content: "We will use the information solely for the purposes for which it was provided:",
+                    title: "3. Providing Information Is Not a Legal Obligation",
+                    content: "You are not legally required to provide us with any information. Information is provided of your own free will and with your consent. However, without providing the required information - including the ID number - we will not be able to enroll you in some of the group transactions that require it on the provider's side."
+                },
+                {
+                    title: "4. Purposes of Information Use",
+                    content: "We will use the information only for the following purposes:",
                     list: [
-                        "Contacting you regarding services or products you were interested in.",
-                        "Improving the browsing experience and tailoring content on the site.",
-                        "Sending regular updates and marketing information, subject to your consent (which can be canceled at any time).",
-                        "Managing and ongoing operation of purchasing groups."
+                        "Enrolling you in purchasing groups and transactions with service providers",
+                        "Contacting you regarding transactions and group activities",
+                        "Transferring required details to service providers for the purpose of executing the transaction",
+                        "Proper management of the Association's activities",
+                        "We will not use the information for any purpose not specified above without your consent."
                     ]
                 },
                 {
-                    title: "4. Disclosure of Information to Third Parties",
-                    content: "We undertake not to transfer your details to third parties without your consent, except in the following cases:",
+                    title: "5. Transfer of Information to Third Parties",
+                    content: "For the purpose of executing the group transactions, we transfer information - including the ID number - to the relevant service providers with whom the group engages (such as mobile carriers, fuel companies, and so on). The transfer is made solely for the purpose of executing the transaction you have chosen to join. We make reasonable efforts to transfer information only to providers who commit to safeguard it in accordance with the law. However, once the information is provided to a provider, its use is subject to that provider's privacy policy, and we do not have full control over it. We will not sell, rent, or trade your information, and will not transfer it to any other party other than the aforementioned service providers, unless required by law, court order, or a request from a competent authority."
+                },
+                {
+                    title: "6. Information Security",
+                    content: "We take reasonable measures to secure information in accordance with the Privacy Protection Regulations (Information Security), 2017. However, we cannot guarantee complete immunity from intrusion or misuse, and we are not responsible for damage caused as a result of a security incident beyond our reasonable control."
+                },
+                {
+                    title: "7. Information Retention",
+                    content: "We will retain the information for as long as required to achieve the above purposes, or as long as required by law. At the end of the period, the information will be deleted or anonymized."
+                },
+                {
+                    title: "8. Your Legal Rights",
+                    content: "Pursuant to the Privacy Protection Law, 1981, you have the following rights:",
                     list: [
-                        "For the purpose of providing the service (for example, transferring details to a relevant supplier you requested to join).",
-                        "Requirement of law enforcement authorities or a court order.",
-                        "In the event of a legal dispute requiring the disclosure of details."
+                        "Right of access - to view the information held about you in the database.",
+                        "Right of correction - to request correction of information that is inaccurate, incomplete, unclear, or outdated.",
+                        "Right of deletion - to request deletion of information, subject to retention obligations under the law.",
+                        "Removal from mailing list - to request not to receive marketing communications.",
+                        "To exercise your rights, you may contact us at: freedomhasbegun@gmail.com and we will act in accordance with the law."
                     ]
                 },
                 {
-                    title: "5. Information Security",
-                    content: "We take technologically and organizationally accepted security measures to protect your information from unauthorized access. However, the internet is not 100% secure, and we cannot guarantee complete immunity from data breaches."
+                    title: "9. Marketing Communications",
+                    content: "Insofar as we send you marketing content, we will do so in accordance with Section 30A of the Communications Law (Telecommunications and Broadcasts), 1982 (the \"Spam Law\"), and you will be entitled to remove yourself from the mailing list at any time."
                 },
                 {
-                    title: "6. Your Rights as a User",
-                    content: "According to the Privacy Protection Law, you are entitled to view the information held about you in our database. If you find that the information is incorrect or out of date, you may request to correct or delete it."
+                    title: "10. Changes to the Policy",
+                    content: "We may update this policy from time to time. The updated policy will be published on this page and will take effect upon publication."
                 },
                 {
-                    title: "7. Contact Us",
-                    content: "For any questions or requests regarding the privacy policy, you can contact us via email: freedomhasbegun@gmail.com"
+                    title: "11. Contact",
+                    content: "For any question regarding this policy or the handling of your information, you may contact: Liberty (Yotzim LaCherut), Email: freedomhasbegun@gmail.com"
                 }
             ]
         },
@@ -405,50 +427,72 @@ export const translations = readable({
             libertyLink: "Свобода строит новый мир!",
             contactUs: "Связаться с нами",
             privacy: "Политика конфиденциальности",
-            lastUpdated: "Последнее обновление: Февраль 2026",
+            lastUpdated: "Последнее обновление: 10/6/24",
             privacySections: [
                 {
                     title: "1. Общие положения",
-                    content: "Добро пожаловать на сайт 'Революция по снижению стоимости жизни растет из народа' (далее: 'Сайт'). Сайт управляется организацией 'Свобода' и уважает конфиденциальность своих пользователей. Цель данной политики - прозрачно объяснить, какая информация собирается и как мы ее используем в соответствии с положениями Закона о защите конфиденциальности 1981 года."
+                    content: "Настоящая политика конфиденциальности описывает, как организация 'Свобода' (Yotzim LaCherut), некоммерческая организация 580802007 (далее: 'Организация', 'мы'), собирает, использует, хранит и передает персональную информацию пользователей сайта групповых закупок ('Сервис'). Использование Сервиса и предоставление информации в его рамках означают согласие с условиями данной политики. Политика написана в мужском роде исключительно для удобства и относится ко всем полам."
                 },
                 {
-                    title: "2. Сбор информации",
-                    content: "При использовании Сайта мы можем собирать следующую информацию:",
+                    title: "2. Какую информацию мы собираем",
+                    content: "В рамках присоединения к группам закупок мы собираем следующую информацию:",
                     list: [
-                        "Добровольно предоставленная информация: ФИО, номер телефона, адрес электронной почты и другая информация, которую вы вводите в формах связи или присоединения.",
-                        "Техническая информация: Данные, собираемые автоматически, такие как IP-адрес, тип браузера, операционная система и время доступа, для правильной работы и статистики."
+                        "Имя и фамилия",
+                        "Номер телефона",
+                        "Адрес электронной почты",
+                        "Номер удостоверения личности (Teudat Zehut) - собирается для вашего присоединения к групповым сделкам с поставщиками услуг, которые требуют предоставления номера удостоверения личности для заключения договора и оказания услуг",
+                        "Дополнительная информация, которую вы добровольно предоставляете при присоединении"
                     ]
                 },
                 {
-                    title: "3. Использование информации",
-                    content: "Мы будем использовать информацию исключительно в целях, для которых она была предоставлена:",
+                    title: "3. Предоставление информации не является юридической обязанностью",
+                    content: "Вы не обязаны по закону предоставлять нам какую-либо информацию. Предоставление информации осуществляется по вашей свободной воле и с вашего согласия. Однако без предоставления необходимой информации - включая номер удостоверения личности - мы не сможем присоединить вас к некоторым групповым сделкам, которые этого требуют со стороны поставщика."
+                },
+                {
+                    title: "4. Цели использования информации",
+                    content: "Мы будем использовать информацию только в следующих целях:",
                     list: [
-                        "Связь с вами по поводу услуг или продуктов, которые вас заинтересовали.",
-                        "Улучшение качества просмотра и адаптация контента на сайте.",
-                        "Рассылка регулярных обновлений и маркетинговой информации при условии вашего согласия (которое можно отозвать в любое время).",
-                        "Управление и текущая деятельность групп закупок."
+                        "Присоединение вас к группам закупок и сделкам с поставщиками услуг",
+                        "Связь с вами по вопросам сделок и деятельности группы",
+                        "Передача необходимых данных поставщикам услуг для реализации сделки",
+                        "Надлежащее управление деятельностью Организации",
+                        "Мы не будем использовать информацию в целях, не указанных выше, без вашего согласия."
                     ]
                 },
                 {
-                    title: "4. Передача информации третьим лицам",
-                    content: "Мы обязуемся не передавать ваши данные третьим лицам без вашего согласия, за исключением следующих случаев:",
+                    title: "5. Передача информации третьим лицам",
+                    content: "Для реализации групповых сделок мы передаем информацию - в том числе номер удостоверения личности - соответствующим поставщикам услуг, с которыми группа заключает договор (таким как операторы мобильной связи, топливные компании и т.д.). Передача осуществляется исключительно с целью реализации сделки, к которой вы решили присоединиться. Мы прилагаем разумные усилия, чтобы передавать информацию только поставщикам, которые обязуются хранить ее в соответствии с законом. Однако с момента передачи информации поставщику ее использование регулируется политикой конфиденциальности этого поставщика, и мы не имеем над ней полного контроля. Мы не будем продавать, сдавать в аренду или торговать вашей информацией, и не будем передавать ее другому лицу, кроме указанных поставщиков услуг, за исключением случаев, когда это требуется по закону, судебному решению или требованию уполномоченного органа."
+                },
+                {
+                    title: "6. Безопасность информации",
+                    content: "Мы принимаем разумные меры по обеспечению безопасности информации в соответствии с Положениями о защите конфиденциальности (информационная безопасность), 2017 г. Однако мы не можем гарантировать полную неуязвимость от взлома или неправомерного использования и не несем ответственности за ущерб, причиненный в результате инцидента безопасности, выходящего за пределы нашего разумного контроля."
+                },
+                {
+                    title: "7. Хранение информации",
+                    content: "Мы будем хранить информацию в течение времени, необходимого для достижения вышеуказанных целей, или столько, сколько требуется по закону. По истечении этого срока информация будет удалена или обезличена."
+                },
+                {
+                    title: "8. Ваши законные права",
+                    content: "В соответствии с Законом о защите конфиденциальности 1981 года вы имеете следующие права:",
                     list: [
-                        "Для целей предоставления услуги (например, передача данных соответствующему поставщику, к которому вы просили присоединиться).",
-                        "По требованию правоохранительных органов или по решению суда.",
-                        "В случае судебного спора, требующего раскрытия информации."
+                        "Право доступа - просматривать информацию о вас, хранящуюся в базе данных.",
+                        "Право на исправление - требовать исправления неточной, неполной, неясной или устаревшей информации.",
+                        "Право на удаление - требовать удаления информации с учетом обязательств по хранению согласно закону.",
+                        "Удаление из рассылки - просить не получать маркетинговые сообщения.",
+                        "Для реализации ваших прав вы можете связаться с нами по адресу: freedomhasbegun@gmail.com, и мы будем действовать в соответствии с законом."
                     ]
                 },
                 {
-                    title: "5. Безопасность информации",
-                    content: "Мы принимаем технологически и организационно приемлемые меры безопасности для защиты вашей информации от несанкционированного доступа. Однако интернет не защищен на 100%, и мы не можем гарантировать полную неуязвимость от взлома данных."
+                    title: "9. Рассылка и маркетинговые сообщения",
+                    content: "Если мы отправим вам маркетинговый контент, мы будем делать это в соответствии со статьей 30A Закона о связи (телекоммуникации и вещание) 1982 г. ('Закон о спаме'), и вы будете иметь право в любое время отписаться от рассылки."
                 },
                 {
-                    title: "6. Ваши права как пользователя",
-                    content: "В соответствии с Законом о защите конфиденциальности, вы имеете право просматривать информацию о вас, хранящуюся в нашей базе данных. Если вы обнаружите, что информация неверна или устарела, вы можете попросить исправить или удалить ее."
+                    title: "10. Изменения в политике",
+                    content: "Мы можем время от времени обновлять данную политику. Обновленная политика будет опубликована на этой странице и вступит в силу с момента публикации."
                 },
                 {
-                    title: "7. Контакты",
-                    content: "По любым вопросам или запросам относительно политики конфиденциальности вы можете связаться с нами по электронной почте: freedomhasbegun@gmail.com"
+                    title: "11. Контакты",
+                    content: "По любым вопросам, касающимся данной политики или обработки вашей информации, вы можете обратиться: 'Свобода' (Yotzim LaCherut), эл. почта: freedomhasbegun@gmail.com"
                 }
             ]
         },
