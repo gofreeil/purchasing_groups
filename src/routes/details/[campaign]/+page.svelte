@@ -216,10 +216,11 @@
             plansTableNote: "שים לב: דלק, הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
             plansTableDiesel: {
                 title: "פירוט ההנחה בסולר",
-                subtitle: "מחיר ההנחה משתנה בכל חודש ומתפרסם בקבוצת הוואטסאפ (מבוסס על המחיר היציג של סונול)",
+                subtitle: "מחיר ההנחה משתנה בכל חודש ומתפרסם בקבוצת הוואטסאפ",
                 headers: [
                     "רשת תחנות",
                     'הנחה לליטר סולר<br /><span class="header-sub">(הנחה לדוגמא)</span>',
+                    "בסיס ההנחה",
                     "לוגו",
                 ],
                 rows: [
@@ -228,6 +229,7 @@
                         cells: [
                             { label: "רשת תחנות", html: 'סונול / דור אלון / טן' },
                             { label: "הנחה לליטר סולר", value: "3.76" },
+                            { label: "בסיס ההנחה", value: "מהמחיר היציג של סונול" },
                             { label: "לוגו", html: '<span class="multi-logos"><img src="/images/sonol.png" alt="סונול" class="plans-table-logo" /><img src="/images/dor-alon.png" alt="דור אלון" class="plans-table-logo" /><img src="/images/ten.jfif" alt="טן" class="plans-table-logo" /></span>' },
                         ],
                     },
@@ -765,12 +767,12 @@
 
     /* Unified hero + stats banner */
     .hero-card {
-        background: rgba(26, 26, 26, 0.7);
+        background: linear-gradient(135deg, rgba(35, 45, 75, 0.88), rgba(45, 35, 65, 0.88));
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(250, 204, 21, 0.18);
         border-radius: 24px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
         margin-bottom: 1.5rem;
         overflow: hidden;
     }
@@ -923,12 +925,13 @@
     /* Sections */
     .section {
         padding: 2.5rem;
-        background: rgba(26, 26, 26, 0.7);
+        background: linear-gradient(135deg, rgba(35, 45, 75, 0.88), rgba(45, 35, 65, 0.88));
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(250, 204, 21, 0.18);
         border-radius: 24px;
         margin-bottom: 2rem;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
     }
 
     .section h2 {
@@ -1064,6 +1067,14 @@
         font-weight: 400;
         font-size: 1rem;
         margin: -0.5rem 0 1rem;
+    }
+
+    .plans-table-below {
+        text-align: center;
+        color: #ffffff;
+        font-weight: 500;
+        font-size: 1rem;
+        margin: 0.85rem 0 0;
     }
 
     :global(.plans-table th .header-sub) {
