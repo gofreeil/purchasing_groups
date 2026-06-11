@@ -407,6 +407,7 @@
 		overflow: hidden;
 		flex-shrink: 0;
 		background: #1e293b;
+		border: 2px solid #facc15;
 	}
 
 	.ad-img {

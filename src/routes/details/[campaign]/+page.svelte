@@ -212,7 +212,7 @@
                     },
                 ],
             },
-            joinCtaSubtitle: "הנחה בדלק<br />(95 או 98)",
+            joinCtaSubtitle: "הנחה בדלק <span class=\"cta-small\">(95 או 98)</span>",
             plansTableNote: "שים לב: דלק, הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
             plansTableDiesel: {
                 title: "פירוט ההנחה בסולר",
@@ -996,9 +996,21 @@
     @media (max-width: 640px) {
         .benefits-list {
             grid-template-columns: 1fr;
+            gap: 0.55rem;
+        }
+        .benefit-item {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0.55rem 0.7rem;
+            gap: 0.25rem;
+        }
+        .benefit-icon {
+            font-size: 1.4rem;
         }
         .benefit-text {
-            font-size: 0.95rem;
+            font-size: 0.92rem;
+            line-height: 1.35;
         }
     }
 
@@ -1346,9 +1358,8 @@
 
         .plans-table tbody td[data-label="לוגו"] {
             position: absolute;
-            top: 50%;
+            top: 2.4rem;
             left: 0.5rem;
-            transform: translateY(-50%);
             display: block;
             padding: 0;
             margin: 0;
@@ -1476,6 +1487,11 @@
         margin: 0 0 0.4rem;
         font-size: 1.45rem;
         color: #facc15;
+    }
+
+    :global(.join-cta-content h3 .cta-small) {
+        font-size: 0.78em;
+        font-weight: 700;
     }
 
     .join-cta-content p {

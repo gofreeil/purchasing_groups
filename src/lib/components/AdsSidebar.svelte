@@ -80,6 +80,8 @@
 	.ad-image-wrap {
 		position: relative;
 		overflow: hidden;
+		border: 2px solid #facc15;
+		border-radius: 0.5rem;
 	}
 
 	.ad-image {
