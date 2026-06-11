@@ -6,24 +6,25 @@
 
     let { data } = $props();
 
-    // הגדר כאן את מספר החברים הנוכחי בקבוצה
-    let targetCount = 960;
-    // המונה מאותחל לערך הסופי כך שיוצג גם בלי JS; אנימציית הספירה רצה בגלילה
+    // מונה החברים מגיע מהגיליון (שורת total). אנימציית הספירה רצה בגלילה.
+    let targetCount = data.members;
     const count = tweened(targetCount, {
         duration: 2500,
         easing: cubicOut,
     });
 
-    // מוני חיסכון (שנתי וחודשי) - הנתונים נטענים בצד השרת מגיליון Google
-    let targetSavings = $state(data.annualSavings);
-    let monthlySavings = $state(data.monthlySavings);
+    // מוני חיסכון לכל קמפיין - הנתונים נטענים בצד השרת מגיליון האגרגציה
+    let targetSavings = $state(data.campaigns.cellular.annual);
+    let monthlySavings = $state(data.campaigns.cellular.monthly);
 
-    // חיסכון דלק - נטען מתא I4 בגיליון Google של קבוצת הדלק (חודשי), שנתי = חודשי × 12
-    let fuelMonthlySavings = $state(data.fuelMonthlySavings);
-    let fuelAnnualSavings = $state(data.fuelAnnualSavings);
+    let fuelMonthlySavings = $state(data.campaigns.fuel.monthly);
+    let fuelAnnualSavings = $state(data.campaigns.fuel.annual);
 
-    // סכום החיסכון השנתי הכולל (סלולר + דלק) - מוצג במונה הראשי
-    let totalAnnualSavings = data.annualSavings + data.fuelAnnualSavings;
+    // סכום החיסכון השנתי הכולל - סוכם אוטומטית על כל הקמפיינים בגיליון
+    let totalAnnualSavings = Object.values(data.campaigns).reduce(
+        (sum, c) => sum + (c?.annual || 0),
+        0,
+    );
 
     // התween מאותחל לערך האמיתי כך שהמספר מוצג מיד (גם ב-SSR וגם בלי JS)
     const savings = tweened(totalAnnualSavings, {

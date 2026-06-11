@@ -37,7 +37,7 @@
 
     const stats = {
         cellular: { rating: 5.0, savings: 25, annualSavings: 300, reviews: 47 },
-        fuel: { rating: 4.9, savings: 15, annualSavings: 180, reviews: 21 },
+        fuel: { rating: 4.9, savings: 15, annualSavings: 180, reviews: 21, savingsText: "10-70 ש\"ח", annualSavingsText: "כ-420 ש\"ח בשנה" },
         internet: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
         carInsurance: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
         electricity: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
@@ -424,9 +424,11 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">💰</div>
-                    <div class="stat-value">{campaignStats.savings} {$t.currency}</div>
+                    <div class="stat-value">{campaignStats.savingsText ?? `${campaignStats.savings} ${$t.currency}`}</div>
                     <div class="stat-label">{$t.details.statsSavings}</div>
-                    {#if campaignStats.annualSavings > 0}
+                    {#if campaignStats.annualSavingsText}
+                        <div class="stat-sub">{campaignStats.annualSavingsText}</div>
+                    {:else if campaignStats.annualSavings > 0}
                         <div class="stat-sub">{campaignStats.annualSavings} {$t.currency} בשנה</div>
                     {/if}
                 </div>
@@ -1095,6 +1097,16 @@
     :global(.plans-table td .multi-logos .plans-table-logo) {
         width: 40px;
         height: 40px;
+    }
+
+    @media (max-width: 768px) {
+        :global(.plans-table td .multi-logos) {
+            gap: 0.3rem;
+        }
+        :global(.plans-table td .multi-logos .plans-table-logo) {
+            width: 26px;
+            height: 26px;
+        }
     }
 
     .plans-table-note {
