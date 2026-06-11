@@ -9,7 +9,17 @@ const DEFAULT_CAMPAIGNS = {
 };
 const DEFAULT_MEMBERS = 960;
 
-// פענוח CSV עמיד: עוטף-מירכאות, פסיקים בתוך תאים, ושורות עם CR
+// מבנה הגיליון של "סיכום רכישות קבוצתיות":
+//   עמודה B (אינדקס 1) = תוויות שורה ("חתמו", "חיסכון ש\"ח בחודש", ...)
+//   עמודה E (4) = סלולר "סכ"ה" | עמודה I (8) = דלק "סכ"ה"
+//   עמודה G (6) = בנזין | עמודה H (7) = סולר (פירוט בתוך דלק)
+const LABEL_COL = 1;
+const CAMPAIGN_COLS = {
+    cellular: 4,
+    fuel: 8,
+    diesel: 7, // ספציפית עמודת הסולר בתוך דלק
+};
+
 function parseCsv(text) {
     const rows = [];
     let row = [];
@@ -36,35 +46,17 @@ function parseCsv(text) {
     return rows;
 }
 
-const HEADER_ALIASES = {
-    campaign: ["campaign", "קמפיין", "name", "שם"],
-    monthly: ["monthly", "חודשי", "חיסכון חודשי"],
-    annual: ["annual", "yearly", "שנתי", "חיסכון שנתי"],
-    members: ["members", "חברים", "מספר חברים"],
+const norm = (v) => (v || "").trim();
+const includesAll = (s, ...words) => {
+    const t = norm(s);
+    return words.every((w) => t.includes(w));
 };
+const isMonthlyRow = (l) => includesAll(l, "חיסכון") && (l.includes("חודש") || l.includes("חודשי"));
+const isAnnualRow = (l) => includesAll(l, "חיסכון") && (l.includes("שנה") || l.includes("שנתי"));
+const isMembersRow = (l) => norm(l).includes("חתמו");
 
-// מאתר את שורת הכותרות ומחזיר מיפוי {campaign, monthly, annual, members} → index
-function findHeaders(rows) {
-    for (let r = 0; r < rows.length; r++) {
-        const norm = rows[r].map((c) => (c || "").trim().toLowerCase());
-        const idx = {};
-        for (const [key, aliases] of Object.entries(HEADER_ALIASES)) {
-            const i = norm.findIndex((c) => aliases.includes(c));
-            if (i >= 0) idx[key] = i;
-        }
-        if (idx.campaign !== undefined && (idx.monthly !== undefined || idx.annual !== undefined || idx.members !== undefined)) {
-            return { headerRow: r, idx };
-        }
-    }
-    return null;
-}
-
-const toInt = (v) => {
-    const n = parseInt((v || "").replace(/[^\d-]/g, ""));
-    return isNaN(n) ? 0 : n;
-};
 const toNum = (v) => {
-    const n = parseFloat((v || "").replace(/[^\d.-]/g, ""));
+    const n = parseFloat(norm(v).replace(/[^\d.-]/g, ""));
     return isNaN(n) ? 0 : Math.round(n);
 };
 
@@ -77,26 +69,19 @@ export async function load({ fetch }) {
         const response = await fetch(url);
         if (response.ok) {
             const rows = parseCsv(await response.text());
-            const header = findHeaders(rows);
-            if (header) {
-                const { headerRow, idx } = header;
-                for (let r = headerRow + 1; r < rows.length; r++) {
-                    const row = rows[r];
-                    const name = (row[idx.campaign] || "").trim().toLowerCase();
-                    if (!name) continue;
+            for (const row of rows) {
+                const label = row[LABEL_COL] || "";
+                if (!label) continue;
 
-                    if (name === "total") {
-                        if (idx.members !== undefined) {
-                            const v = toInt(row[idx.members]);
-                            if (v > 0) members = v;
-                        }
-                        continue;
+                if (isMonthlyRow(label)) {
+                    for (const [name, col] of Object.entries(CAMPAIGN_COLS)) {
+                        const v = toNum(row[col]);
+                        if (v > 0) campaigns[name] = { ...campaigns[name], monthly: v };
                     }
-
-                    const monthly = idx.monthly !== undefined ? toNum(row[idx.monthly]) : 0;
-                    const annual = idx.annual !== undefined ? toNum(row[idx.annual]) : 0;
-                    if (monthly > 0 || annual > 0) {
-                        campaigns[name] = { monthly, annual };
+                } else if (isAnnualRow(label)) {
+                    for (const [name, col] of Object.entries(CAMPAIGN_COLS)) {
+                        const v = toNum(row[col]);
+                        if (v > 0) campaigns[name] = { ...campaigns[name], annual: v };
                     }
                 }
             }

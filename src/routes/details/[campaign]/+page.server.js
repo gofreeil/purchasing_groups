@@ -17,6 +17,12 @@ const DEFAULT_MEMBERS = {
     fuel: 198,
 };
 
+const LABEL_COL = 1;
+const CAMPAIGN_COLS = {
+    cellular: 4,
+    fuel: 8,
+};
+
 function parseCsv(text) {
     const rows = [];
     let row = [];
@@ -43,25 +49,11 @@ function parseCsv(text) {
     return rows;
 }
 
-const HEADER_ALIASES = {
-    campaign: ["campaign", "קמפיין", "name", "שם"],
-    members: ["members", "חברים", "מספר חברים"],
+const isMembersRow = (l) => (l || "").trim().includes("חתמו");
+const toInt = (v) => {
+    const n = parseInt((v || "").replace(/[^\d-]/g, ""));
+    return isNaN(n) ? 0 : n;
 };
-
-function findHeaders(rows) {
-    for (let r = 0; r < rows.length; r++) {
-        const norm = rows[r].map((c) => (c || "").trim().toLowerCase());
-        const idx = {};
-        for (const [key, aliases] of Object.entries(HEADER_ALIASES)) {
-            const i = norm.findIndex((c) => aliases.includes(c));
-            if (i >= 0) idx[key] = i;
-        }
-        if (idx.campaign !== undefined && idx.members !== undefined) {
-            return { headerRow: r, idx };
-        }
-    }
-    return null;
-}
 
 export async function load({ params, fetch }) {
     if (!CAMPAIGNS.includes(params.campaign)) {
@@ -69,27 +61,25 @@ export async function load({ params, fetch }) {
     }
 
     let activeMembers = DEFAULT_MEMBERS[params.campaign] ?? 0;
+    const col = CAMPAIGN_COLS[params.campaign];
 
-    try {
-        const url = `https://docs.google.com/spreadsheets/d/${DASHBOARD_SHEET_ID}/export?format=csv&gid=${DASHBOARD_GID}`;
-        const response = await fetch(url);
-        if (response.ok) {
-            const rows = parseCsv(await response.text());
-            const header = findHeaders(rows);
-            if (header) {
-                const { headerRow, idx } = header;
-                for (let r = headerRow + 1; r < rows.length; r++) {
-                    const name = (rows[r][idx.campaign] || "").trim().toLowerCase();
-                    if (name === params.campaign.toLowerCase()) {
-                        const v = parseInt((rows[r][idx.members] || "").replace(/[^\d]/g, ""));
-                        if (!isNaN(v) && v > 0) activeMembers = v;
+    if (col !== undefined) {
+        try {
+            const url = `https://docs.google.com/spreadsheets/d/${DASHBOARD_SHEET_ID}/export?format=csv&gid=${DASHBOARD_GID}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const rows = parseCsv(await response.text());
+                for (const row of rows) {
+                    if (isMembersRow(row[LABEL_COL])) {
+                        const v = toInt(row[col]);
+                        if (v > 0) activeMembers = v;
                         break;
                     }
                 }
             }
+        } catch (err) {
+            console.error("Failed to load members from dashboard sheet:", err);
         }
-    } catch (err) {
-        console.error("Failed to load members from dashboard sheet:", err);
     }
 
     return { campaign: params.campaign, activeMembers };

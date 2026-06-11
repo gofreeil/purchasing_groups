@@ -212,7 +212,7 @@
                     },
                 ],
             },
-            joinCtaSubtitle: "הנחה בדלק (95 או 98)",
+            joinCtaSubtitle: "הנחה בדלק<br />(95 או 98)",
             plansTableNote: "שים לב: דלק, הינו מוצר במחיר מפוקח, לכן אין כפל מבצעים. אם המשתמש בוחר למלא בתדלוק עצמי הוא אינו זכאי להנחה על ההנחה.",
             plansTableDiesel: {
                 title: "פירוט ההנחה בסולר",
@@ -981,6 +981,7 @@
         font-size: 1rem;
         line-height: 1.5;
         color: rgba(255, 255, 255, 0.92);
+        margin: 0;
     }
 
     /* בדסקטופ - אם מספר היתרונות אי-זוגי, מרכזים את האחרון במקום שיישאר לבד בעמודה */
@@ -1097,6 +1098,8 @@
     :global(.plans-table td .multi-logos .plans-table-logo) {
         width: 40px;
         height: 40px;
+        border-radius: 10px;
+        overflow: hidden;
     }
 
     @media (max-width: 768px) {
@@ -1343,8 +1346,9 @@
 
         .plans-table tbody td[data-label="לוגו"] {
             position: absolute;
-            top: 0.2rem;
+            top: 50%;
             left: 0.5rem;
+            transform: translateY(-50%);
             display: block;
             padding: 0;
             margin: 0;
