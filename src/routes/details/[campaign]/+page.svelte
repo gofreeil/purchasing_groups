@@ -1358,25 +1358,14 @@
 
         .plans-table tbody td[data-label="לוגו"] {
             position: absolute;
-            top: 60%;
+            top: 0.55rem;
             left: 0.5rem;
-            transform: translateY(-50%);
             display: block;
             padding: 0;
             margin: 0;
             background: transparent;
             border: none;
             z-index: 2;
-        }
-
-        /* תאי לוגו עם multi-logos (סולר) - יוצאים מ-absolute ונמצאים inline במרכז */
-        :global(.plans-table tbody td[data-label="לוגו"]:has(.multi-logos)) {
-            position: static;
-            top: auto;
-            left: auto;
-            text-align: center;
-            padding: 0.5rem 0.6rem;
-            background: rgba(255, 255, 255, 0.03);
         }
 
         .plans-table tbody td[data-label="לוגו"]::before {
