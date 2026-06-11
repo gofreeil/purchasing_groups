@@ -225,7 +225,7 @@
                 ],
                 rows: [
                     {
-                        title: "כל הרשתות",
+                        title: "כלל התחנות של -",
                         cells: [
                             { label: "רשת תחנות", html: 'סונול / דור אלון / טן' },
                             { label: "הנחה לליטר סולר", value: "3.76" },
@@ -1366,6 +1366,11 @@
             background: transparent;
             border: none;
             z-index: 2;
+        }
+
+        /* multi-logos של סולר - לוגויים גדולים יותר (26px), מתקנים את המיקום למעלה */
+        :global(.plans-table tbody td[data-label="לוגו"]:has(.multi-logos)) {
+            top: 0.2rem;
         }
 
         .plans-table tbody td[data-label="לוגו"]::before {
