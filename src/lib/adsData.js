@@ -22,6 +22,16 @@ export const ads = [
 		color: "linear-gradient(90deg, #db2777, #c026d3, #7e22ce)",
 	},
 	{
+		id: 3,
+		title: "קהילה בשכונה",
+		description: "כל יתרונות השכונה תחת קורת גג אחת",
+		cta: "לאתר הראשי – קהילה בשכונה",
+		hover: "כל יתרונות השכונה תחת קורת גג אחת",
+		href: "https://community-il.vercel.app/",
+		image: "/assets/community-neighborhood.png",
+		color: "linear-gradient(90deg, #2563eb, #7e22ce)",
+	},
+	{
 		id: 2,
 		title: "ועדי שכונות",
 		description: "מהפכת משילות העם על המוסדות",
@@ -57,16 +67,6 @@ export const ads = [
 		href: "https://referendum-il.vercel.app/",
 		image: "/assets/referendum.png",
 		color: "linear-gradient(90deg, #9333ea, #4338ca)",
-	},
-	{
-		id: 3,
-		title: "קהילה בשכונה",
-		description: "כל יתרונות השכונה תחת קורת גג אחת",
-		cta: "לאתר הראשי – קהילה בשכונה",
-		hover: "כל יתרונות השכונה תחת קורת גג אחת",
-		href: "https://community-il.vercel.app/",
-		image: "/assets/community-neighborhood.png",
-		color: "linear-gradient(90deg, #2563eb, #7e22ce)",
 	},
 	{
 		id: 4,
