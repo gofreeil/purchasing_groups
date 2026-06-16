@@ -7,7 +7,7 @@ const DEFAULT_CAMPAIGNS = {
     fuel: { monthly: 570, annual: 6840 },
     diesel: { monthly: 0, annual: 0 },
 };
-const DEFAULT_MEMBERS = 960;
+const DEFAULT_MEMBERS = 964;
 
 // מבנה הגיליון של "סיכום רכישות קבוצתיות":
 //   עמודה B (אינדקס 1) = תוויות שורה ("חתמו", "חיסכון ש\"ח בחודש", ...)
