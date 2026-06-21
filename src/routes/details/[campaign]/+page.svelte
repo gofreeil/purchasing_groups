@@ -7,6 +7,13 @@
 
     const whatsappLink = "https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI";
 
+    // נתוני חיסכון/דירוג/ביקורות - קבועים בקוד (לא תלויים בעריכה ב-admin).
+    // חברי פעילים מגיעים מ-Google Sheet (data.activeMembers).
+    const STATS = {
+        cellular: { rating: 5.0, savings: 25, annualSavings: 300, reviews: 47 },
+        fuel: { rating: 4.9, savings: 15, annualSavings: 180, reviews: 21, savingsText: '10-70 ש"ח', annualSavingsText: 'כ-420 ש"ח בשנה' },
+    };
+
     // תוכן ייחודי לכל קמפיין מגיע מ-Strapi דרך data.campaign (ראה +page.server.js).
     // אם תרצה להחזיר fallback hardcoded - יש לבטל את התגובה למטה.
     /*
@@ -216,19 +223,21 @@
     let plansTableHighlight = $state(false);
     let shareToast = $state(false);
 
-    // כל הנתונים הקבועים של הקמפיין מגיעים מ-Strapi דרך data.campaign
+    // תוכן/מבנה (מ-Strapi) - title/description/image/links/pageConfig
     let campaign = $derived(data.campaign?.slug ?? "");
     let campaignTitle = $derived(data.campaign?.title ?? "");
     let campaignDesc = $derived(data.campaign?.description ?? "");
     let campaignImage = $derived(data.campaign?.image_url ?? "");
+
+    // מספרים (חברים/דירוג/חיסכון) - מהגיליון + קבועים בקוד
     let campaignStats = $derived({
-        members: data.campaign?.members_count ?? 0,
-        rating: Number(data.campaign?.rating ?? 0),
-        savings: data.campaign?.monthly_savings ?? 0,
-        annualSavings: data.campaign?.annual_savings ?? 0,
-        reviews: data.campaign?.reviews_count ?? 0,
-        savingsText: data.campaign?.savings_text ?? null,
-        annualSavingsText: data.campaign?.annual_savings_text ?? null,
+        members: data.activeMembers ?? 0,
+        rating: STATS[campaign]?.rating ?? 0,
+        savings: STATS[campaign]?.savings ?? 0,
+        annualSavings: STATS[campaign]?.annualSavings ?? 0,
+        reviews: STATS[campaign]?.reviews ?? 0,
+        savingsText: STATS[campaign]?.savingsText ?? null,
+        annualSavingsText: STATS[campaign]?.annualSavingsText ?? null,
     });
     let joinLink = $derived(data.campaign?.join_link ?? "");
     let joinLinkDiesel = $derived(data.campaign?.join_link_diesel ?? "");

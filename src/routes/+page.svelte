@@ -6,20 +6,28 @@
 
     let { data } = $props();
 
-    // קמפיינים פעילים/בקרוב לפי הסטטוס שמגיע מ-Strapi
+    // קמפיינים פעילים/בקרוב - מבנה/תוכן מ-Strapi
     let activeCampaigns = $derived((data.campaigns ?? []).filter((c) => c.status === 'active'));
     let soonCampaigns = $derived((data.campaigns ?? []).filter((c) => c.status === 'soon'));
 
-    // מונה החברים - מגיע מ-Strapi (pg-stat); נופל לברירת מחדל אם חסר.
-    // קריאה ראשונית בלבד - הערך לא משתנה אחרי טעינת העמוד.
-    let targetCount = data.stat?.total_members ?? 964;
+    // נתוני חיסכון/חברים - מ-Google Sheet (data.sheetData/data.members)
+    let targetCount = data.members;
     const count = tweened(targetCount, {
         duration: 2500,
         easing: cubicOut,
     });
 
-    // סכום חיסכון שנתי גלובלי - מ-pg-stat ב-Strapi
-    let totalAnnualSavings = data.stat?.total_annual_savings ?? 0;
+    // סכום חיסכון שנתי כולל - מסכם את כל הקמפיינים בגיליון
+    let totalAnnualSavings = Object.values(data.sheetData).reduce(
+        (sum, c) => sum + (c?.annual || 0),
+        0,
+    );
+
+    // נתוני דירוג/חיסכון לכרטיסים (חודשי/שנתי) — דירוג קבוע, חיסכון מהגיליון
+    const CARD_CONFIG = {
+        cellular: { rating: 5.0 },
+        fuel: { rating: 4.9, savingsText: '10-70 ש"ח', annualSavingsText: 'כ-420 ש"ח בשנה' },
+    };
 
     // התween מאותחל לערך האמיתי כך שהמספר מוצג מיד (גם ב-SSR וגם בלי JS)
     const savings = tweened(totalAnnualSavings, {
@@ -174,6 +182,8 @@
 
 <div class="purchases-list">
     {#each activeCampaigns as campaign}
+        {@const sheet = data.sheetData?.[campaign.slug]}
+        {@const card = CARD_CONFIG[campaign.slug] ?? {}}
         <div class="purchase-card" style="margin-bottom: 3rem;">
             <a
                 href={`/details/${campaign.slug}`}
@@ -210,18 +220,18 @@
                 <div class="status-col">
                     <span class="status-label">{$t.purchases.saved}</span>
                     <span class="status-value highlight-monthly" style="color: #4ade80; font-weight: bold;">
-                        {campaign.savings_text ?? `${(campaign.monthly_savings ?? 0).toLocaleString('he-IL')} ${$t.currency} ${$t.purchases.perMonth}`}
+                        {card.savingsText ?? `${(sheet?.monthly ?? 0).toLocaleString('he-IL')} ${$t.currency} ${$t.purchases.perMonth}`}
                     </span>
                     <span class="status-value highlight-yearly" style="color: #ff4444; font-weight: bold;">
-                        {campaign.annual_savings_text ?? `${(campaign.annual_savings ?? 0).toLocaleString('he-IL')} ${$t.currency} ${$t.purchases.perYear}`}
+                        {card.annualSavingsText ?? `${(sheet?.annual ?? 0).toLocaleString('he-IL')} ${$t.currency} ${$t.purchases.perYear}`}
                     </span>
                 </div>
 
-                {#if campaign.rating > 0}
+                {#if card.rating}
                     <div class="survey-badge-container">
                         <div class="survey-rating-summary">
                             <span class="stars-gold">⭐⭐⭐⭐⭐</span>
-                            <span class="rating-val">{campaign.rating.toFixed(1)}/5</span>
+                            <span class="rating-val">{card.rating.toFixed(1)}/5</span>
                         </div>
                     </div>
                 {/if}
@@ -271,7 +281,7 @@
 <div class="boycott-banner">
     <span class="boycott-icon">✊</span>
     <p class="boycott-text">
-        {data.stat?.boycott_text || `כשנגיע ל-${(data.stat?.boycott_threshold ?? 10000).toLocaleString('he-IL')} חברים נחל הליך של חרם כנגד משווקים שמפקיעים מחירים!`}
+        כשנגיע ל-10,000 חברים נחל הליך של חרם כנגד משווקים שמפקיעים מחירים!
     </p>
     <span class="boycott-icon">✊</span>
 </div>
