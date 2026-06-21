@@ -25,7 +25,7 @@ export const ads = [
 		id: 3,
 		title: "קהילה בשכונה",
 		description: "כל יתרונות השכונה תחת קורת גג אחת",
-		cta: "לאתר הראשי – קהילה בשכונה",
+		cta: "תהנה מכל היתרונות של הקהילה בשכונה שלך",
 		hover: "כל יתרונות השכונה תחת קורת גג אחת",
 		href: "https://community-il.vercel.app/",
 		image: "/assets/community-neighborhood.png",
