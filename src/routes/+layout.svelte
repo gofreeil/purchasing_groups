@@ -187,7 +187,7 @@
 	<footer class="main-footer">
 		<div class="footer-container">
 			<a
-				href="https://freedom-il.vercel.app/"
+				href="https://gofreeil.com/"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="footer-brand"
