@@ -5,47 +5,12 @@
 
     let { data } = $props();
 
-    const icons = {
-        cellular: "📱",
-        internet: "🌐",
-        fuel: "⛽",
-        carInsurance: "🚗",
-        electricity: "⚡",
-        coupons: "🎟️",
-    };
-
-    const images = {
-        cellular: "/assets/cellular.jpg",
-        internet: "/assets/internet.jpg",
-        fuel: "/assets/fuel.jpg",
-        carInsurance: "/assets/car_insurance.png",
-        electricity: "/assets/electricity.jpg",
-        coupons: "/assets/coupons.jpg",
-    };
-
-    const joinLinks = {
-        cellular: "https://docs.google.com/forms/d/e/1FAIpQLSfRCs5W7HUuc5vcOuMGqsqaDubzNBn4YuC4UDbvoFmSCdJAiQ/viewform?usp=header",
-        fuel: "https://forms.gle/2Y9SdUfqkJd5mPaS7",
-    };
-
-    // קישור משני לטופס סולר (יוצג רק אם קיים)
-    const joinLinksDiesel = {
-        fuel: "https://docs.google.com/forms/d/e/1FAIpQLScz6iFzBwX7oGYXdh98Y9aah_RgWXINtbsJ5u05wWYE8anVUA/viewform?usp=publish-editor",
-    };
-
     const whatsappLink = "https://chat.whatsapp.com/FWz0ha6fRqxEjDLzFVq7jI";
 
-    const stats = {
-        cellular: { rating: 5.0, savings: 25, annualSavings: 300, reviews: 47 },
-        fuel: { rating: 4.9, savings: 15, annualSavings: 180, reviews: 21, savingsText: "10-70 ש\"ח", annualSavingsText: "כ-420 ש\"ח בשנה" },
-        internet: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
-        carInsurance: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
-        electricity: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
-        coupons: { rating: 0, savings: 0, annualSavings: 0, reviews: 0 },
-    };
-
-    // תוכן ייחודי לכל קמפיין - שורת ספקים, חיפוש (קליטה/תחנות), טבלת מסלולים, כתוביות CTA, התנהגות שלבים
-    const pageConfig = {
+    // תוכן ייחודי לכל קמפיין מגיע מ-Strapi דרך data.campaign (ראה +page.server.js).
+    // אם תרצה להחזיר fallback hardcoded - יש לבטל את התגובה למטה.
+    /*
+    const pageConfig_OLD = {
         cellular: {
             providersLine: "מסלולים בחברת רמי לוי, אקס פון, וויקום",
             findSection: {
@@ -238,26 +203,66 @@
             plansTableDieselNote: "אין כפל מבצעים. המשתמש מקבל את ההנחה מהמחיר היציג של סונול ללא קשר לאופן המילוי - שירות עצמי או מלא.",
         },
     };
+    */
 
     let satisfactionLevel = $state(0);
     let improvements = $state("");
     let additionalComments = $state("");
     let submitted = $state(false);
+    let submitError = $state("");
     let openFaq = $state(-1);
     let joinCtaEl = $state(null);
     let joinCtaClicked = $state(false);
     let plansTableHighlight = $state(false);
     let shareToast = $state(false);
 
-    let campaign = $derived(data.campaign);
-    let campaignTitle = $derived($t.purchases[campaign].title);
-    let campaignDesc = $derived($t.purchases[campaign].desc);
-    let campaignIcon = $derived(icons[campaign] ?? "📋");
-    let campaignImage = $derived(images[campaign]);
-    let campaignStats = $derived({ ...stats[campaign], members: data.activeMembers });
-    let joinLink = $derived(joinLinks[campaign]);
-    let joinLinkDiesel = $derived(joinLinksDiesel[campaign]);
-    let pageData = $derived(pageConfig[campaign] ?? null);
+    // כל הנתונים הקבועים של הקמפיין מגיעים מ-Strapi דרך data.campaign
+    let campaign = $derived(data.campaign?.slug ?? "");
+    let campaignTitle = $derived(data.campaign?.title ?? "");
+    let campaignDesc = $derived(data.campaign?.description ?? "");
+    let campaignImage = $derived(data.campaign?.image_url ?? "");
+    let campaignStats = $derived({
+        members: data.campaign?.members_count ?? 0,
+        rating: Number(data.campaign?.rating ?? 0),
+        savings: data.campaign?.monthly_savings ?? 0,
+        annualSavings: data.campaign?.annual_savings ?? 0,
+        reviews: data.campaign?.reviews_count ?? 0,
+        savingsText: data.campaign?.savings_text ?? null,
+        annualSavingsText: data.campaign?.annual_savings_text ?? null,
+    });
+    let joinLink = $derived(data.campaign?.join_link ?? "");
+    let joinLinkDiesel = $derived(data.campaign?.join_link_diesel ?? "");
+
+    // pageData ממופה משדות ה-JSON שבסכמת Strapi לשמות המקוריים שמשמשים את ה-template למטה.
+    // כשמוסיפים שדה חדש לטמפלייט - להוסיף את המיפוי כאן.
+    let pageData = $derived.by(() => {
+        const c = data.campaign;
+        if (!c) return null;
+        const hasAny =
+            c.providers_line ||
+            c.find_section ||
+            c.benefits ||
+            c.steps_override ||
+            c.faq_override ||
+            c.plans_table ||
+            c.plans_table_diesel ||
+            c.plans_table_note ||
+            c.plans_table_diesel_note ||
+            c.join_cta_subtitle;
+        if (!hasAny) return null;
+        return {
+            providersLine: c.providers_line || null,
+            findSection: c.find_section || null,
+            benefits: c.benefits || null,
+            stepsOverride: c.steps_override || null,
+            faqOverride: c.faq_override || null,
+            plansTable: c.plans_table || null,
+            plansTableDiesel: c.plans_table_diesel || null,
+            plansTableNote: c.plans_table_note || null,
+            plansTableDieselNote: c.plans_table_diesel_note || null,
+            joinCtaSubtitle: c.join_cta_subtitle || null,
+        };
+    });
 
     const levels = [
         { value: 1, label: "😞" },
@@ -267,15 +272,26 @@
         { value: 5, label: "🤩" },
     ];
 
-    function handleSubmit() {
+    async function handleSubmit() {
         if (satisfactionLevel === 0) return;
-        console.log("Survey submitted:", {
-            campaign,
-            satisfactionLevel,
-            improvements,
-            additionalComments,
-        });
-        submitted = true;
+        submitError = "";
+        try {
+            const res = await fetch("/api/satisfaction", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                    campaign_slug: campaign,
+                    level: satisfactionLevel,
+                    improvements,
+                    comments: additionalComments,
+                }),
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            submitted = true;
+        } catch (err) {
+            console.error("submit failed:", err);
+            submitError = "השליחה נכשלה - נסה שוב בעוד מספר רגעים";
+        }
     }
 
     function mockLogin() {
@@ -725,6 +741,10 @@
                         placeholder="הערות נוספות..."
                     ></textarea>
                 </div>
+
+                {#if submitError}
+                    <div class="submit-error" role="alert">{submitError}</div>
+                {/if}
 
                 <button
                     class="primary-btn submit-btn"

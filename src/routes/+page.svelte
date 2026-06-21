@@ -6,25 +6,20 @@
 
     let { data } = $props();
 
-    // מונה החברים מגיע מהגיליון (שורת total). אנימציית הספירה רצה בגלילה.
-    let targetCount = data.members;
+    // קמפיינים פעילים/בקרוב לפי הסטטוס שמגיע מ-Strapi
+    let activeCampaigns = $derived((data.campaigns ?? []).filter((c) => c.status === 'active'));
+    let soonCampaigns = $derived((data.campaigns ?? []).filter((c) => c.status === 'soon'));
+
+    // מונה החברים - מגיע מ-Strapi (pg-stat); נופל לברירת מחדל אם חסר.
+    // קריאה ראשונית בלבד - הערך לא משתנה אחרי טעינת העמוד.
+    let targetCount = data.stat?.total_members ?? 964;
     const count = tweened(targetCount, {
         duration: 2500,
         easing: cubicOut,
     });
 
-    // מוני חיסכון לכל קמפיין - הנתונים נטענים בצד השרת מגיליון האגרגציה
-    let targetSavings = $state(data.campaigns.cellular.annual);
-    let monthlySavings = $state(data.campaigns.cellular.monthly);
-
-    let fuelMonthlySavings = $state(data.campaigns.fuel.monthly);
-    let fuelAnnualSavings = $state(data.campaigns.fuel.annual);
-
-    // סכום החיסכון השנתי הכולל - סוכם אוטומטית על כל הקמפיינים בגיליון
-    let totalAnnualSavings = Object.values(data.campaigns).reduce(
-        (sum, c) => sum + (c?.annual || 0),
-        0,
-    );
+    // סכום חיסכון שנתי גלובלי - מ-pg-stat ב-Strapi
+    let totalAnnualSavings = data.stat?.total_annual_savings ?? 0;
 
     // התween מאותחל לערך האמיתי כך שהמספר מוצג מיד (גם ב-SSR וגם בלי JS)
     const savings = tweened(totalAnnualSavings, {
@@ -178,220 +173,91 @@
 </div>
 
 <div class="purchases-list">
-    <!-- Cellular -->
-    <div class="purchase-card" style="margin-bottom: 3rem;">
-        <a
-            href="/details/cellular"
-            class="purchase-link-overlay"
-            aria-label={$t.purchases.cellular.title}
-        ></a>
-        <div class="purchase-img-frame">
-            <img
-                src="/assets/cellular.jpg"
-                alt="תמונה המייצגת קבוצה סלולרית עם חברי הקבוצה חוסכים כסף"
-                class="purchase-img"
-            />
-        </div>
-        <div class="purchase-info">
-            <h3
-                use:popOnView={() => (cellularPop = true)}
-                class="cellular-title"
-                class:pop={cellularPop}
-            >{$t.purchases.cellular.title}</h3>
-            <p>
-                {$t.purchases.cellular.desc}
-            </p>
-        </div>
-        <div class="purchase-status purchase-status-2col">
-            <div class="status-col">
-                <span class="status-line">
-                    <span class="status-label">{$t.purchases.status}</span>
-                    <span class="status-value" style="color: #4ade80;"
-                        >{$t.purchases.active}</span
-                    >
-                </span>
-                <span class="status-line">
-                    <span class="status-label">{$t.purchases.canJoin}</span>
-                    <span class="status-value" style="color: #4ade80;">{$t.purchases.yes}</span>
-                </span>
+    {#each activeCampaigns as campaign}
+        <div class="purchase-card" style="margin-bottom: 3rem;">
+            <a
+                href={`/details/${campaign.slug}`}
+                class="purchase-link-overlay"
+                aria-label={campaign.title}
+            ></a>
+            {#if campaign.is_new}
+                <div class="new-burst">{campaign.new_badge_text || $t.purchases.newBadge}</div>
+            {/if}
+            <div class="purchase-img-frame" class:fuel-zoom={campaign.slug === 'fuel'}>
+                <img
+                    src={campaign.image_url || '/assets/cellular.jpg'}
+                    alt={campaign.title}
+                    class="purchase-img"
+                />
             </div>
-            <div class="status-col">
-                <span class="status-label">{$t.purchases.saved}</span>
-                <span
-                    class="status-value highlight-monthly"
-                    style="color: #4ade80; font-weight: bold;"
-                >
-                    {monthlySavings.toLocaleString("he-IL")}
-                    {$t.currency} {$t.purchases.perMonth}
-                </span>
-                <span
-                    class="status-value highlight-yearly"
-                    style="color: #ff4444; font-weight: bold;"
-                >
-                    {targetSavings.toLocaleString("he-IL")}
-                    {$t.currency} {$t.purchases.perYear}
-                </span>
+            <div class="purchase-info">
+                <h3 class="cellular-title">{campaign.title}</h3>
+                <p>{@html campaign.description || ''}</p>
             </div>
+            <div class="purchase-status purchase-status-2col">
+                <div class="status-col">
+                    <span class="status-line">
+                        <span class="status-label">{$t.purchases.status}</span>
+                        <span class="status-value" style="color: #4ade80;">{$t.purchases.active}</span>
+                    </span>
+                    <span class="status-line">
+                        <span class="status-label">{$t.purchases.canJoin}</span>
+                        <span class="status-value" style="color: {campaign.can_join ? '#4ade80' : '#999'};">
+                            {campaign.can_join ? $t.purchases.yes : $t.purchases.no}
+                        </span>
+                    </span>
+                </div>
+                <div class="status-col">
+                    <span class="status-label">{$t.purchases.saved}</span>
+                    <span class="status-value highlight-monthly" style="color: #4ade80; font-weight: bold;">
+                        {campaign.savings_text ?? `${(campaign.monthly_savings ?? 0).toLocaleString('he-IL')} ${$t.currency} ${$t.purchases.perMonth}`}
+                    </span>
+                    <span class="status-value highlight-yearly" style="color: #ff4444; font-weight: bold;">
+                        {campaign.annual_savings_text ?? `${(campaign.annual_savings ?? 0).toLocaleString('he-IL')} ${$t.currency} ${$t.purchases.perYear}`}
+                    </span>
+                </div>
 
-            <div class="survey-badge-container">
-                <div class="survey-rating-summary">
-                    <span class="stars-gold">⭐⭐⭐⭐⭐</span>
-                    <span class="rating-val">5.0/5</span>
+                {#if campaign.rating > 0}
+                    <div class="survey-badge-container">
+                        <div class="survey-rating-summary">
+                            <span class="stars-gold">⭐⭐⭐⭐⭐</span>
+                            <span class="rating-val">{campaign.rating.toFixed(1)}/5</span>
+                        </div>
+                    </div>
+                {/if}
+            </div>
+        </div>
+    {/each}
+
+    {#if soonCampaigns.length > 0}
+        <!-- Soon Separator -->
+        <div class="soon-separator">
+            <span class="soon-text">{$t.homepage.soonColon}</span>
+            <div class="separator-line"></div>
+        </div>
+
+        {#each soonCampaigns as campaign}
+            <div class="purchase-card">
+                <div class="purchase-img-frame">
+                    <img
+                        src={campaign.image_url || '/assets/internet.jpg'}
+                        alt={campaign.title}
+                        class="purchase-img"
+                    />
+                </div>
+                <div class="purchase-info">
+                    <h3>{campaign.title}</h3>
+                    <p>{campaign.description || ''}</p>
+                </div>
+                <div class="purchase-status">
+                    <span class="status-label">{$t.purchases.status}</span>
+                    <span class="status-value">{$t.purchases.notStarted}</span>
+                    <span class="status-label">{$t.purchases.canJoin}</span>
+                    <span class="status-value">{$t.purchases.no}</span>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Fuel -->
-    <div class="purchase-card" style="margin-bottom: 3rem;">
-        <a
-            href="/details/fuel"
-            class="purchase-link-overlay"
-            aria-label={$t.purchases.fuel.title}
-        ></a>
-        <div class="new-burst">{$t.purchases.newBadge}</div>
-        <div class="purchase-img-frame fuel-zoom">
-            <img
-                src="/assets/fuel.jpg"
-                alt="תמונה המייצגת תחנת דלק עם מחירי דלק מוזלים לחברי הקבוצה"
-                class="purchase-img"
-            />
-        </div>
-        <div class="purchase-info">
-            <h3
-                use:popOnView={() => (fuelPop = true)}
-                class="cellular-title"
-                class:pop={fuelPop}
-            >{$t.purchases.fuel.title}</h3>
-            <p>{@html $t.purchases.fuel.desc}</p>
-        </div>
-        <div class="purchase-status purchase-status-2col">
-            <div class="status-col">
-                <span class="status-line">
-                    <span class="status-label">{$t.purchases.status}</span>
-                    <span class="status-value" style="color: #4ade80;">{$t.purchases.active}</span>
-                </span>
-                <span class="status-line">
-                    <span class="status-label">{$t.purchases.canJoin}</span>
-                    <span class="status-value" style="color: #4ade80;">{$t.purchases.yes}</span>
-                </span>
-            </div>
-            <div class="status-col">
-                <span class="status-label">{$t.purchases.saved}</span>
-                <span
-                    class="status-value highlight-monthly"
-                    style="color: #4ade80; font-weight: bold;"
-                >
-                    {fuelMonthlySavings.toLocaleString("he-IL")}
-                    {$t.currency} {$t.purchases.perMonth}
-                </span>
-                <span
-                    class="status-value highlight-yearly"
-                    style="color: #ff4444; font-weight: bold;"
-                >
-                    {fuelAnnualSavings.toLocaleString("he-IL")}
-                    {$t.currency} {$t.purchases.perYear}
-                </span>
-            </div>
-
-            <div class="survey-badge-container">
-                <div class="survey-rating-summary">
-                    <span class="stars-gold">⭐⭐⭐⭐⭐</span>
-                    <span class="rating-val">4.9/5</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Soon Separator -->
-    <div class="soon-separator">
-        <span class="soon-text">{$t.homepage.soonColon}</span>
-        <div class="separator-line"></div>
-    </div>
-
-    <!-- Internet -->
-    <div class="purchase-card">
-        <div class="purchase-img-frame">
-            <img
-                src="/assets/internet.jpg"
-                alt="תמונה המייצגת קבוצת אינטרנט מהירה עם חיסכון לחברי הקבוצה"
-                class="purchase-img"
-            />
-        </div>
-        <div class="purchase-info">
-            <h3>{$t.purchases.internet.title}</h3>
-            <p>{$t.purchases.internet.desc}</p>
-        </div>
-        <div class="purchase-status">
-            <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.notStarted}</span>
-            <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value">{$t.purchases.no}</span>
-        </div>
-    </div>
-
-    <!-- Car Insurance -->
-    <div class="purchase-card">
-        <div class="purchase-img-frame">
-            <img
-                src="/assets/car_insurance.png"
-                alt="תמונה המייצגת ביטוח חברות לרכב עם הנחות לחברי הקבוצה"
-                class="purchase-img"
-            />
-        </div>
-        <div class="purchase-info">
-            <h3>{$t.purchases.carInsurance.title}</h3>
-            <p>{$t.purchases.carInsurance.desc}</p>
-        </div>
-        <div class="purchase-status">
-            <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.notStarted}</span>
-            <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value">{$t.purchases.no}</span>
-        </div>
-    </div>
-
-    <!-- Electricity -->
-    <div class="purchase-card">
-        <div class="purchase-img-frame">
-            <img
-                src="/assets/electricity.jpg"
-                alt="תמונה המייצגת חשמל חשמוני עם הנחות קבוצתית לחברי הקבוצה"
-                class="purchase-img"
-            />
-        </div>
-        <div class="purchase-info">
-            <h3>{$t.purchases.electricity.title}</h3>
-            <p>{$t.purchases.electricity.desc}</p>
-        </div>
-        <div class="purchase-status">
-            <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.notStarted}</span>
-            <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value">{$t.purchases.no}</span>
-        </div>
-    </div>
-
-    <!-- Coupons -->
-    <div class="purchase-card">
-        <div class="purchase-img-frame">
-            <img
-                src="/assets/coupons.jpg"
-                alt="תמונה המייצגת קופונים והנחות לחברי הקבוצה"
-                class="purchase-img"
-            />
-        </div>
-        <div class="purchase-info">
-            <h3>{$t.purchases.coupons.title}</h3>
-            <p>{$t.purchases.coupons.desc}</p>
-        </div>
-        <div class="purchase-status">
-            <span class="status-label">{$t.purchases.status}</span>
-            <span class="status-value">{$t.purchases.notStarted}</span>
-            <span class="status-label">{$t.purchases.canJoin}</span>
-            <span class="status-value">{$t.purchases.no}</span>
-        </div>
-    </div>
+        {/each}
+    {/if}
 </div>
 
 <div class="section-title" style="margin-top: 5rem;">
@@ -405,7 +271,7 @@
 <div class="boycott-banner">
     <span class="boycott-icon">✊</span>
     <p class="boycott-text">
-        כשנגיע ל-10,000 חברים נחל הליך של חרם כנגד משווקים שמפקיעים מחירים!
+        {data.stat?.boycott_text || `כשנגיע ל-${(data.stat?.boycott_threshold ?? 10000).toLocaleString('he-IL')} חברים נחל הליך של חרם כנגד משווקים שמפקיעים מחירים!`}
     </p>
     <span class="boycott-icon">✊</span>
 </div>
