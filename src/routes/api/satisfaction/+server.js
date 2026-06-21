@@ -8,7 +8,7 @@ export async function POST({ request, fetch }) {
     } catch {
         throw error(400, 'JSON body required');
     }
-    const { campaign_slug, level, improvements = '', comments = '' } = body || {};
+    const { campaign_slug, level, improvements = '', comments = '', phone = '' } = body || {};
     const lvl = parseInt(level, 10);
     if (!campaign_slug || !lvl || lvl < 1 || lvl > 5) {
         throw error(400, 'campaign_slug + level (1-5) נדרשים');
@@ -21,6 +21,7 @@ export async function POST({ request, fetch }) {
                 level: lvl,
                 improvements: String(improvements),
                 comments: String(comments),
+                user_phone: String(phone),
                 submitted_at: new Date().toISOString(),
             },
             { fetch },

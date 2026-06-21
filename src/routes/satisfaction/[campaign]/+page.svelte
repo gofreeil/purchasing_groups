@@ -1,6 +1,5 @@
 <script>
     import { t } from "$lib/i18n.js";
-    import { isLoggedIn } from "$lib/user.js";
     import { fade, slide } from "svelte/transition";
 
     let { data } = $props();
@@ -17,10 +16,12 @@
     let satisfactionLevel = $state(0);
     let improvements = $state("");
     let additionalComments = $state("");
+    let phone = $state("");
     let submitted = $state(false);
+    let submitError = $state("");
 
     let campaign = $derived(data.campaign);
-    let campaignTitle = $derived($t.purchases[campaign].title);
+    let campaignTitle = $derived($t.purchases[campaign]?.title ?? campaign);
     let campaignIcon = $derived(icons[campaign] ?? "📋");
 
     const levels = [
@@ -31,22 +32,27 @@
         { value: 5, label: "🤩" },
     ];
 
-    function handleSubmit() {
+    async function handleSubmit() {
         if (satisfactionLevel === 0) return;
-
-        // TODO: send to Strapi instead of logging.
-        console.log("Survey submitted:", {
-            campaign,
-            satisfactionLevel,
-            improvements,
-            additionalComments,
-        });
-
-        submitted = true;
-    }
-
-    function mockLogin() {
-        $isLoggedIn = true;
+        submitError = "";
+        try {
+            const res = await fetch("/api/satisfaction", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                    campaign_slug: campaign,
+                    level: satisfactionLevel,
+                    improvements,
+                    comments: additionalComments,
+                    phone,
+                }),
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            submitted = true;
+        } catch (err) {
+            console.error("submit failed:", err);
+            submitError = "השליחה נכשלה - נסה שוב בעוד מספר רגעים";
+        }
     }
 </script>
 
@@ -55,23 +61,12 @@
 </svelte:head>
 
 <div class="satisfaction-page-container">
-    {#if !$isLoggedIn}
-        <div class="restricted-access" in:fade={{ duration: 300 }}>
-            <div class="restriction-icon">🔒</div>
-            <h1>{$t.satisfaction.restrictedTitle}</h1>
-            <p>{$t.satisfaction.restrictedMessage}</p>
-            <button class="login-prompt-btn" onclick={mockLogin}>
-                {$t.satisfaction.loginToParticipate}
-            </button>
-        </div>
-    {:else if submitted}
+    {#if submitted}
         <div class="thank-you-message" in:fade={{ duration: 400 }}>
             <div class="success-icon">✨</div>
             <h1>{$t.satisfaction.thankYou}</h1>
             <p>המשוב שלך עוזר לנו לצמוח ולהשתפר.</p>
-            <a href="/satisfaction" class="back-home-btn"
-                >{$t.satisfaction.backToSurveys}</a
-            >
+            <a href="/" class="back-home-btn">חזרה לדף הבית</a>
         </div>
     {:else}
         <div class="survey-form" in:slide={{ duration: 400 }}>
@@ -120,6 +115,22 @@
                 ></textarea>
             </div>
 
+            <div class="survey-section">
+                <label for="phone" class="question">
+                    מספר טלפון (אופציונלי - כדי שנוכל לחזור אליך)
+                </label>
+                <input
+                    id="phone"
+                    type="tel"
+                    bind:value={phone}
+                    placeholder="050-1234567"
+                />
+            </div>
+
+            {#if submitError}
+                <div class="submit-error" role="alert">{submitError}</div>
+            {/if}
+
             <button
                 class="submit-btn"
                 onclick={handleSubmit}
@@ -128,9 +139,7 @@
                 {$t.satisfaction.submit}
             </button>
 
-            <a href="/satisfaction" class="back-link"
-                >← {$t.satisfaction.backToSurveys}</a
-            >
+            <a href="/" class="back-link">← חזרה לדף הבית</a>
         </div>
     {/if}
 </div>

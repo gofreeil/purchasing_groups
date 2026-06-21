@@ -215,6 +215,7 @@
     let satisfactionLevel = $state(0);
     let improvements = $state("");
     let additionalComments = $state("");
+    let phone = $state("");
     let submitted = $state(false);
     let submitError = $state("");
     let openFaq = $state(-1);
@@ -293,6 +294,7 @@
                     level: satisfactionLevel,
                     improvements,
                     comments: additionalComments,
+                    phone,
                 }),
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -700,12 +702,7 @@
     <section class="section survey-section-wrap">
         <h2>דרגו וכיתבו את החוויה שלכם</h2>
 
-        {#if !$isLoggedIn}
-            <div class="restricted-box">
-                <div class="restriction-icon">🔒</div>
-                <p>הפיצר יהיה זמין בהמשך</p>
-            </div>
-        {:else if submitted}
+        {#if submitted}
             <div class="thank-you" in:fade={{ duration: 400 }}>
                 <div class="success-icon">✨</div>
                 <h3>{$t.satisfaction.thankYou}</h3>
@@ -749,6 +746,18 @@
                         bind:value={additionalComments}
                         placeholder="הערות נוספות..."
                     ></textarea>
+                </div>
+
+                <div class="form-row">
+                    <label for="phone" class="question">
+                        מספר טלפון (אופציונלי - כדי שנוכל לחזור אליך)
+                    </label>
+                    <input
+                        id="phone"
+                        type="tel"
+                        bind:value={phone}
+                        placeholder="050-1234567"
+                    />
                 </div>
 
                 {#if submitError}
