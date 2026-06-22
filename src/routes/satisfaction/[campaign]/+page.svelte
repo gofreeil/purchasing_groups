@@ -13,24 +13,29 @@
         coupons: "🎟️",
     };
 
+    const EMOJI_BY_LEVEL = {
+        0: { face: "🤔", text: "" },
+        1: { face: "😞", text: "מאוד לא מרוצה" },
+        2: { face: "😐", text: "לא מרוצה" },
+        3: { face: "🙂", text: "סביר" },
+        4: { face: "😊", text: "מרוצה" },
+        5: { face: "🤩", text: "מאוד מרוצה!" },
+    };
+
     let satisfactionLevel = $state(0);
+    let hoverLevel = $state(0);
     let improvements = $state("");
     let additionalComments = $state("");
     let phone = $state("");
     let submitted = $state(false);
     let submitError = $state("");
 
+    let displayRating = $derived(hoverLevel || satisfactionLevel);
+    let currentEmoji = $derived(EMOJI_BY_LEVEL[displayRating]);
+
     let campaign = $derived(data.campaign);
     let campaignTitle = $derived($t.purchases[campaign]?.title ?? campaign);
     let campaignIcon = $derived(icons[campaign] ?? "📋");
-
-    const levels = [
-        { value: 1, label: "😞" },
-        { value: 2, label: "😐" },
-        { value: 3, label: "🙂" },
-        { value: 4, label: "😊" },
-        { value: 5, label: "🤩" },
-    ];
 
     async function handleSubmit() {
         if (satisfactionLevel === 0) return;
@@ -78,18 +83,25 @@
 
             <div class="survey-section">
                 <p class="question">{$t.satisfaction.q1Campaign}</p>
-                <div class="rating-container">
-                    {#each levels as level}
-                        <button
-                            class="rating-btn {satisfactionLevel === level.value
-                                ? 'active'
-                                : ''}"
-                            onclick={() => (satisfactionLevel = level.value)}
-                            type="button"
-                        >
-                            <span class="emoji">{level.label}</span>
-                        </button>
-                    {/each}
+                <div class="star-rating">
+                    <div class="stars" onmouseleave={() => (hoverLevel = 0)} role="presentation">
+                        {#each [1, 2, 3, 4, 5] as n}
+                            <button
+                                type="button"
+                                class="star"
+                                class:filled={n <= displayRating}
+                                onclick={() => (satisfactionLevel = n)}
+                                onmouseenter={() => (hoverLevel = n)}
+                                aria-label={`דירוג ${n} מתוך 5`}
+                            >★</button>
+                        {/each}
+                    </div>
+                    <div class="emoji-display" class:active={displayRating > 0}>
+                        <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
+                        {#if currentEmoji.text}
+                            <span class="emoji-text">{currentEmoji.text}</span>
+                        {/if}
+                    </div>
                 </div>
             </div>
 
@@ -240,49 +252,69 @@
         color: rgba(255, 255, 255, 0.9);
     }
 
-    .rating-container {
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        margin-top: 1rem;
-        direction: ltr;
-    }
-
-    .rating-btn {
-        background: rgba(255, 255, 255, 0.05);
-        border: 2px solid rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        width: 70px;
-        height: 70px;
+    /* כוכבים + סמיילי דינמי */
+    .star-rating {
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    .stars {
+        display: inline-flex;
+        gap: 0.3rem;
+        direction: ltr;
+        flex-direction: row-reverse;
+    }
+    .star {
+        background: transparent;
+        border: none;
         cursor: pointer;
-        transition: all 0.3s ease;
+        font-size: 2.6rem;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.22);
+        transition: color 0.18s ease, transform 0.15s ease, text-shadow 0.18s ease;
+        padding: 0.15rem 0.05rem;
     }
-
-    .rating-btn .emoji {
-        font-size: 2rem;
-        transition: transform 0.3s ease;
+    .star:hover { transform: scale(1.18); }
+    .star.filled {
+        color: #facc15;
+        text-shadow: 0 0 12px rgba(250, 204, 21, 0.55);
     }
-
-    .rating-btn:hover {
-        background: rgba(250, 204, 21, 0.1);
-        border-color: #facc15;
+    .star:focus-visible {
+        outline: 2px solid #facc15;
+        outline-offset: 2px;
+        border-radius: 4px;
     }
-
-    .rating-btn:hover .emoji {
-        transform: scale(1.2);
+    .emoji-display {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 56px;
+        opacity: 0.4;
+        transform: scale(0.85);
+        transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-
-    .rating-btn.active {
-        background: #facc15;
-        border-color: #facc15;
-        box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
+    .emoji-display.active {
+        opacity: 1;
+        transform: scale(1);
     }
-
-    .rating-btn.active .emoji {
-        transform: scale(1.1);
+    .emoji-face {
+        font-size: 2.8rem;
+        line-height: 1;
+    }
+    .emoji-text {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #facc15;
+        white-space: nowrap;
+    }
+    @media (max-width: 480px) {
+        .star-rating { gap: 1rem; }
+        .star { font-size: 2.1rem; }
+        .emoji-face { font-size: 2.3rem; }
+        .emoji-text { font-size: 0.95rem; }
     }
 
     textarea {
@@ -328,19 +360,6 @@
         .satisfaction-page-container {
             margin: 1rem;
             padding: 1.5rem;
-        }
-
-        .rating-container {
-            gap: 0.5rem;
-        }
-
-        .rating-btn {
-            width: 55px;
-            height: 55px;
-        }
-
-        .rating-btn .emoji {
-            font-size: 1.5rem;
         }
 
         .survey-title {
