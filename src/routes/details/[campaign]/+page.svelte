@@ -751,7 +751,18 @@
         </div>
     {/if}
 
-    <a href="/" class="bottom-back">{$t.details.backToHome}</a>
+    <div class="bottom-nav">
+        <a href="/" class="bottom-back">{$t.details.backToHome}</a>
+        <button
+            type="button"
+            class="back-to-top"
+            onclick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="חזרה לראש הדף"
+        >
+            <span class="arrow" aria-hidden="true">↑</span>
+            <span>חזרה לראש הדף</span>
+        </button>
+    </div>
 </div>
 
 <style>
@@ -762,9 +773,17 @@
         color: white;
     }
 
+    .bottom-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
     .bottom-back {
         display: inline-block;
-        margin-top: 2rem;
         color: rgba(255, 255, 255, 0.7);
         text-decoration: none;
         font-size: 0.95rem;
@@ -773,6 +792,32 @@
 
     .bottom-back:hover {
         color: #facc15;
+    }
+
+    .back-to-top {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+        padding: 0.5rem 1.1rem;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .back-to-top:hover {
+        color: #facc15;
+        border-color: #facc15;
+        background: rgba(250, 204, 21, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .back-to-top .arrow {
+        font-size: 1.1rem;
+        line-height: 1;
     }
 
     /* Unified hero + stats banner */
