@@ -726,40 +726,46 @@
         {:else}
             <div class="survey-form">
                 {#if ratingCompanies}
-                    <div class="company-picker" role="radiogroup" aria-label="בחר חברה לדירוג">
-                        {#each ratingCompanies as company}
-                            <button
-                                type="button"
-                                role="radio"
-                                aria-checked={selectedCompany === company}
-                                class="company-pill"
-                                class:selected={selectedCompany === company}
-                                onclick={() => selectCompany(company)}
-                            >
-                                {company}
-                            </button>
-                        {/each}
+                    <div class="survey-step">
+                        <span class="step-label">בחר</span>
+                        <div class="company-picker" role="radiogroup" aria-label="בחר חברה לדירוג">
+                            {#each ratingCompanies as company}
+                                <button
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={selectedCompany === company}
+                                    class="company-pill"
+                                    class:selected={selectedCompany === company}
+                                    onclick={() => selectCompany(company)}
+                                >
+                                    {company}
+                                </button>
+                            {/each}
+                        </div>
                     </div>
                 {/if}
 
-                <div class="star-rating">
-                    <div class="stars" role="presentation">
-                        {#each [1, 2, 3, 4, 5] as n}
-                            <button
-                                type="button"
-                                class="star"
-                                class:filled={n <= rating}
-                                onclick={() => (rating = n)}
-                                aria-label={`דירוג ${n} מתוך 5`}
-                            >★</button>
-                        {/each}
-                    </div>
-                    {#if currentEmoji}
-                        <div class="emoji-display" in:fade={{ duration: 220 }}>
-                            <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
-                            <span class="emoji-text">{currentEmoji.text}</span>
+                <div class="survey-step">
+                    <span class="step-label">דרג</span>
+                    <div class="star-rating">
+                        <div class="stars" role="presentation">
+                            {#each [1, 2, 3, 4, 5] as n}
+                                <button
+                                    type="button"
+                                    class="star"
+                                    class:filled={n <= rating}
+                                    onclick={() => (rating = n)}
+                                    aria-label={`דירוג ${n} מתוך 5`}
+                                >★</button>
+                            {/each}
                         </div>
-                    {/if}
+                        {#if currentEmoji}
+                            <div class="emoji-display" in:fade={{ duration: 220 }}>
+                                <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
+                                <span class="emoji-text">{currentEmoji.text}</span>
+                            </div>
+                        {/if}
+                    </div>
                 </div>
 
                 {#if ratingCompanies && !selectedCompany && rating > 0}
@@ -1891,13 +1897,41 @@
         color: rgba(255, 255, 255, 0.9);
     }
 
+    /* כל "שלב" בסקר - תווית קצרה משמאל (RTL = ימין) + תוכן הפעולה */
+    .survey-step {
+        display: grid;
+        grid-template-columns: 60px 1fr;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.1rem;
+    }
+    .step-label {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #facc15;
+        text-align: center;
+        background: rgba(250, 204, 21, 0.08);
+        border: 1px solid rgba(250, 204, 21, 0.4);
+        border-radius: 999px;
+        padding: 0.35rem 0;
+    }
+    @media (max-width: 560px) {
+        .survey-step {
+            grid-template-columns: 50px 1fr;
+            gap: 0.5rem;
+        }
+        .step-label {
+            font-size: 1rem;
+        }
+    }
+
     /* בחירת חברה לדירוג */
     .company-picker {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
         gap: 0.6rem;
-        margin: 0 auto 1.25rem;
+        margin: 0;
     }
     .company-pill {
         background: rgba(255, 255, 255, 0.05);
@@ -2031,9 +2065,8 @@
     }
 
     .submit-btn:disabled {
-        opacity: 0.5;
         cursor: not-allowed;
-        filter: grayscale(1);
+        opacity: 0.92;
     }
 
     /* Responsive */
