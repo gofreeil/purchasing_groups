@@ -2033,7 +2033,7 @@
     .user-fields {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0.4rem;
+        gap: 1.2rem;
         margin: 0.6rem auto 0;
         max-width: 480px;
         padding: 0 2.5rem;
