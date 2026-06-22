@@ -775,7 +775,7 @@
                 {/if}
 
                 <div class="comments-row">
-                    <label for="survey-comments" class="comments-label">הערות (לא חובה):</label>
+                    <label for="survey-comments" class="comments-label">הערות לגבי החברה המדורגת בלבד:</label>
                     <textarea
                         id="survey-comments"
                         class="comments-input"
