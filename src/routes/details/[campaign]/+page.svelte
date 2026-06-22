@@ -213,9 +213,6 @@
     */
 
     let satisfactionLevel = $state(0);
-    let improvements = $state("");
-    let additionalComments = $state("");
-    let phone = $state("");
     let submitted = $state(false);
     let submitError = $state("");
     let openFaq = $state(-1);
@@ -292,9 +289,6 @@
                 body: JSON.stringify({
                     campaign_slug: campaign,
                     level: satisfactionLevel,
-                    improvements,
-                    comments: additionalComments,
-                    phone,
                 }),
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -698,15 +692,15 @@
         </div>
     {/if}
 
-    <!-- Survey -->
+    <!-- Rating only - הסקר המלא בדף /satisfaction/[campaign]/ -->
     <section class="section survey-section-wrap">
-        <h2>דרגו וכיתבו את החוויה שלכם</h2>
+        <h2>איך הייתה החוויה שלך?</h2>
 
         {#if submitted}
             <div class="thank-you" in:fade={{ duration: 400 }}>
                 <div class="success-icon">✨</div>
-                <h3>{$t.satisfaction.thankYou}</h3>
-                <p>המשוב שלך עוזר לנו לצמוח ולהשתפר.</p>
+                <h3>תודה על הדירוג!</h3>
+                <p>רוצה לכתוב לנו עוד? <a href={`/satisfaction/${campaign}`} class="survey-link">מלא את הסקר המלא ←</a></p>
             </div>
         {:else}
             <div class="survey-form">
@@ -726,40 +720,6 @@
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <label for="improvements" class="question">
-                        {$t.satisfaction.question2}
-                    </label>
-                    <textarea
-                        id="improvements"
-                        bind:value={improvements}
-                        placeholder="כתוב כאן..."
-                    ></textarea>
-                </div>
-
-                <div class="form-row">
-                    <label for="comments" class="question">
-                        {$t.satisfaction.question3}
-                    </label>
-                    <textarea
-                        id="comments"
-                        bind:value={additionalComments}
-                        placeholder="הערות נוספות..."
-                    ></textarea>
-                </div>
-
-                <div class="form-row">
-                    <label for="phone" class="question">
-                        מספר טלפון (אופציונלי - כדי שנוכל לחזור אליך)
-                    </label>
-                    <input
-                        id="phone"
-                        type="tel"
-                        bind:value={phone}
-                        placeholder="050-1234567"
-                    />
-                </div>
-
                 {#if submitError}
                     <div class="submit-error" role="alert">{submitError}</div>
                 {/if}
@@ -769,8 +729,12 @@
                     onclick={handleSubmit}
                     disabled={satisfactionLevel === 0}
                 >
-                    {$t.satisfaction.submit}
+                    שלח דירוג
                 </button>
+
+                <p class="survey-cta">
+                    רוצה לכתוב לנו יותר? <a href={`/satisfaction/${campaign}`} class="survey-link">למילוי סקר מלא ←</a>
+                </p>
             </div>
         {/if}
     </section>
