@@ -2040,15 +2040,20 @@
         display: flex;
         flex-direction: column;
         gap: 0.6rem;
-        min-width: 180px;
+        width: 140px;
     }
     .submit-stack .submit-btn {
         margin-top: 0;
+        padding: 0.75rem 0.6rem;
+        font-size: 0.95rem;
         white-space: nowrap;
+    }
+    .submit-stack .text-input {
+        width: 100%;
     }
     @media (max-width: 600px) {
         .submit-stack {
-            min-width: 0;
+            width: 100%;
         }
     }
     .text-input {
