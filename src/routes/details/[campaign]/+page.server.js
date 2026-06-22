@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { fetchCampaignBySlug } from '$lib/strapi.js';
+import { fallbackCampaign } from '$lib/fallback-campaigns.js';
 
 // --- Google Sheet: מספר חברים פעילים פר-קמפיין (שורת "חתמו") ---
 const DASHBOARD_SHEET_ID = '1YGcal1HFy-q4hLJfBF5uml1CMUO4KqZRYnnp6ZneIH0';
@@ -59,16 +60,22 @@ async function loadMembersFromSheet(fetch, campaignSlug) {
     return activeMembers;
 }
 
-export async function load({ params, fetch }) {
+export async function load({ params, fetch, setHeaders }) {
+    // SSR cache: 60s טרי, עד 10 דקות stale-while-revalidate.
+    // משמעות - גם אם Strapi נופל ל-10 דקות, ה-CDN של Vercel ימשיך לשרת את הגרסה האחרונה.
+    setHeaders({ 'cache-control': 'public, s-maxage=60, stale-while-revalidate=600' });
+
     let campaign = null;
     try {
         campaign = await fetchCampaignBySlug(params.campaign, { fetch });
     } catch (err) {
-        console.error(`Failed to fetch campaign "${params.campaign}":`, err);
-        throw error(503, 'מקור הנתונים אינו זמין כרגע, נסה שוב בעוד מספר רגעים');
+        // graceful degradation: אם Strapi נופל - לחזור ל-hardcoded fallback במקום לזרוק 503
+        console.error(`Strapi unreachable for "${params.campaign}", using fallback:`, err.message);
+        campaign = fallbackCampaign(params.campaign);
     }
 
     if (!campaign) {
+        // ה-slug באמת לא קיים - לא Strapi down
         throw error(404, 'Campaign not found');
     }
 

@@ -1,4 +1,5 @@
 import { fetchCampaigns } from '$lib/strapi.js';
+import { fallbackCampaignList } from '$lib/fallback-campaigns.js';
 
 // ----- Google Sheet: מקור אמת לנתוני חברים וחיסכון -----
 // המבנה (לפי "סיכום רכישות קבוצתיות"):
@@ -78,17 +79,22 @@ async function loadSheetData(fetch) {
     return { aggregated, members };
 }
 
-export async function load({ fetch }) {
+export async function load({ fetch, setHeaders }) {
+    setHeaders({ 'cache-control': 'public, s-maxage=60, stale-while-revalidate=600' });
+
     const [campaigns, sheet] = await Promise.all([
         fetchCampaigns({ fetch }).catch((err) => {
-            console.error('Failed to load campaigns from Strapi:', err);
-            return [];
+            console.error('Strapi unreachable for home, using fallback:', err.message);
+            return fallbackCampaignList();
         }),
         loadSheetData(fetch),
     ]);
 
+    // אם Strapi החזיר רשימה ריקה - גם זה fallback
+    const finalCampaigns = (campaigns && campaigns.length > 0) ? campaigns : fallbackCampaignList();
+
     return {
-        campaigns,
+        campaigns: finalCampaigns,
         sheetData: sheet.aggregated,
         members: sheet.members,
     };
