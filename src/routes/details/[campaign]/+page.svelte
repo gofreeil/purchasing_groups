@@ -227,6 +227,7 @@
     let comments = $state("");
     let submitted = $state(false);
     let submitError = $state("");
+    let mustPickCompanyShake = $state(false); // אנימציית שייק על הגלולות אם מנסים לדרג לפני בחירה
 
     // רשימת חברות לדירוג. אם אין - מציגים דירוג בודד בלי בחירה.
     let ratingCompanies = $derived(
@@ -243,6 +244,16 @@
         if (selectedCompany === name) return;
         selectedCompany = name;
         rating = 0; // איפוס כשבוחרים חברה אחרת
+    }
+
+    // ניסיון לדרג לפני בחירת חברה - חוסם, מציג רמיזה ומשפעיל אנימציה
+    function tryRate(n) {
+        if (ratingCompanies && !selectedCompany) {
+            mustPickCompanyShake = true;
+            setTimeout(() => (mustPickCompanyShake = false), 600);
+            return;
+        }
+        rating = n;
     }
     let openFaq = $state(-1);
     let joinCtaEl = $state(null);
@@ -730,7 +741,12 @@
                 {#if ratingCompanies}
                     <div class="survey-step">
                         <span class="step-label">בחר:</span>
-                        <div class="company-picker" role="radiogroup" aria-label="בחר חברה לדירוג">
+                        <div
+                            class="company-picker"
+                            class:shake={mustPickCompanyShake}
+                            role="radiogroup"
+                            aria-label="בחר חברה לדירוג"
+                        >
                             {#each ratingCompanies as company}
                                 <button
                                     type="button"
@@ -756,7 +772,7 @@
                                     type="button"
                                     class="star"
                                     class:filled={n <= rating}
-                                    onclick={() => (rating = n)}
+                                    onclick={() => tryRate(n)}
                                     aria-label={`דירוג ${n} מתוך 5`}
                                 >★</button>
                             {/each}
@@ -770,8 +786,10 @@
                     </div>
                 </div>
 
-                {#if ratingCompanies && !selectedCompany && rating > 0}
-                    <p class="rating-hint">בחר חברה מלמעלה כדי לשלוח את הדירוג</p>
+                {#if mustPickCompanyShake}
+                    <p class="rating-hint" in:fade={{ duration: 180 }}>
+                        סמן קודם את החברה שנותנת לך שירות, ואז דרג ⬆️
+                    </p>
                 {/if}
 
                 <div class="comments-row">
@@ -1964,6 +1982,24 @@
         border-color: #facc15;
         color: #1a1a1a;
         box-shadow: 0 4px 16px rgba(250, 204, 21, 0.35);
+    }
+    /* שייק על שורת הגלולות כאשר מנסים לדרג בלי לבחור חברה */
+    .company-picker.shake {
+        animation: pickerShake 0.55s ease;
+    }
+    @keyframes pickerShake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-8px); }
+        40% { transform: translateX(8px); }
+        60% { transform: translateX(-5px); }
+        80% { transform: translateX(5px); }
+    }
+    .company-picker.shake .company-pill {
+        border-color: #facc15;
+        box-shadow: 0 0 12px rgba(250, 204, 21, 0.45);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .company-picker.shake { animation: none; }
     }
     .rating-hint {
         margin: 0.75rem 0 0;
