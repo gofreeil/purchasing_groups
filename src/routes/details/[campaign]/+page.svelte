@@ -3,9 +3,8 @@
     import { isLoggedIn } from "$lib/user.js";
     import { fade, slide } from "svelte/transition";
 
-    // סמיילי שמשתנה לפי הדירוג שנבחר/hover
+    // סמיילי שמשתנה רק לאחר לחיצה (לא על hover - כדי שלא יקפוץ)
     const EMOJI_BY_LEVEL = {
-        0: { face: "🤔", text: "" },
         1: { face: "😞", text: "מאוד לא מרוצה" },
         2: { face: "😐", text: "לא מרוצה" },
         3: { face: "🙂", text: "סביר" },
@@ -223,12 +222,11 @@
     */
 
     let satisfactionLevel = $state(0);
-    let hoverLevel = $state(0);
     let submitted = $state(false);
     let submitError = $state("");
 
-    let displayRating = $derived(hoverLevel || satisfactionLevel);
-    let currentEmoji = $derived(EMOJI_BY_LEVEL[displayRating]);
+    // הסמיילי משקף את הבחירה הקבועה בלבד (ללא hover) כדי שלא יקפוץ
+    let currentEmoji = $derived(EMOJI_BY_LEVEL[satisfactionLevel] ?? null);
     let openFaq = $state(-1);
     let joinCtaEl = $state(null);
     let joinCtaClicked = $state(false);
@@ -713,24 +711,23 @@
                 <div class="form-row">
                     <p class="question">{$t.satisfaction.q1Campaign}</p>
                     <div class="star-rating">
-                        <div class="stars" onmouseleave={() => (hoverLevel = 0)} role="presentation">
+                        <div class="stars" role="presentation">
                             {#each [1, 2, 3, 4, 5] as n}
                                 <button
                                     type="button"
                                     class="star"
-                                    class:filled={n <= displayRating}
+                                    class:filled={n <= satisfactionLevel}
                                     onclick={() => (satisfactionLevel = n)}
-                                    onmouseenter={() => (hoverLevel = n)}
                                     aria-label={`דירוג ${n} מתוך 5`}
                                 >★</button>
                             {/each}
                         </div>
-                        <div class="emoji-display" class:active={displayRating > 0}>
-                            <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
-                            {#if currentEmoji.text}
+                        {#if currentEmoji}
+                            <div class="emoji-display" in:fade={{ duration: 220 }}>
+                                <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
                                 <span class="emoji-text">{currentEmoji.text}</span>
-                            {/if}
-                        </div>
+                            </div>
+                        {/if}
                     </div>
                 </div>
 
