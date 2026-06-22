@@ -221,20 +221,28 @@
     };
     */
 
-    // מפת דירוג לפי חברה. אם אין חברות (rating_companies ריק) - דירוג בודד עם key='_'
-    let ratingByCompany = $state({});
+    // המשתמש בוחר חברה (או נשאר null אם אין חברות), ואז נותן דירוג אחד.
+    let selectedCompany = $state(null);
+    let rating = $state(0);
     let submitted = $state(false);
     let submitError = $state("");
 
-    // רשימת חברות לדירוג. אם אין - מציגים דירוג בודד.
+    // רשימת חברות לדירוג. אם אין - מציגים דירוג בודד בלי בחירה.
     let ratingCompanies = $derived(
         Array.isArray(data.campaign?.rating_companies) && data.campaign.rating_companies.length > 0
             ? data.campaign.rating_companies
             : null,
     );
 
-    // יש לפחות דירוג אחד כדי להפעיל את כפתור השליחה
-    let hasAnyRating = $derived(Object.values(ratingByCompany).some((v) => v > 0));
+    // אם יש חברות - צריך לבחור אחת לפני שדירוג מופעל. אם אין - הדירוג זמין מיד.
+    let canRate = $derived(ratingCompanies === null || selectedCompany !== null);
+    let currentEmoji = $derived(EMOJI_BY_LEVEL[rating] ?? null);
+
+    function selectCompany(name) {
+        if (selectedCompany === name) return;
+        selectedCompany = name;
+        rating = 0; // איפוס כשבוחרים חברה אחרת
+    }
     let openFaq = $state(-1);
     let joinCtaEl = $state(null);
     let joinCtaClicked = $state(false);
@@ -292,26 +300,19 @@
     });
 
     async function handleSubmit() {
-        if (!hasAnyRating) return;
+        if (rating === 0) return;
         submitError = "";
-        // שולחים רשומה נפרדת לכל חברה שדורגה
-        const entries = Object.entries(ratingByCompany).filter(([, lvl]) => lvl > 0);
         try {
-            await Promise.all(
-                entries.map(([company, level]) =>
-                    fetch("/api/satisfaction", {
-                        method: "POST",
-                        headers: { "content-type": "application/json" },
-                        body: JSON.stringify({
-                            campaign_slug: campaign,
-                            company: company === "_" ? null : company,
-                            level,
-                        }),
-                    }).then((res) => {
-                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    }),
-                ),
-            );
+            const res = await fetch("/api/satisfaction", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                    campaign_slug: campaign,
+                    company: selectedCompany,
+                    level: rating,
+                }),
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             submitted = true;
         } catch (err) {
             console.error("submit failed:", err);
@@ -724,34 +725,44 @@
             </div>
         {:else}
             <div class="survey-form">
-                <div class="rating-rows">
-                    {#each (ratingCompanies ?? ["_"]) as company}
-                        {@const level = ratingByCompany[company] ?? 0}
-                        {@const emoji = EMOJI_BY_LEVEL[level]}
-                        <div class="rating-row">
-                            {#if company !== "_"}
-                                <span class="company-name">{company}</span>
-                            {/if}
-                            <div class="stars" role="presentation">
-                                {#each [1, 2, 3, 4, 5] as n}
-                                    <button
-                                        type="button"
-                                        class="star"
-                                        class:filled={n <= level}
-                                        onclick={() => (ratingByCompany = { ...ratingByCompany, [company]: n })}
-                                        aria-label={`דירוג ${n} מתוך 5${company !== "_" ? " ל-" + company : ""}`}
-                                    >★</button>
-                                {/each}
-                            </div>
-                            {#if emoji}
-                                <div class="emoji-display" in:fade={{ duration: 220 }}>
-                                    <span class="emoji-face" aria-hidden="true">{emoji.face}</span>
-                                    <span class="emoji-text">{emoji.text}</span>
-                                </div>
-                            {/if}
+                {#if ratingCompanies}
+                    <div class="company-picker" role="radiogroup" aria-label="בחר חברה לדירוג">
+                        {#each ratingCompanies as company}
+                            <button
+                                type="button"
+                                role="radio"
+                                aria-checked={selectedCompany === company}
+                                class="company-pill"
+                                class:selected={selectedCompany === company}
+                                onclick={() => selectCompany(company)}
+                            >
+                                {company}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+
+                {#if canRate}
+                    <div class="star-rating" in:fade={{ duration: 220 }}>
+                        <div class="stars" role="presentation">
+                            {#each [1, 2, 3, 4, 5] as n}
+                                <button
+                                    type="button"
+                                    class="star"
+                                    class:filled={n <= rating}
+                                    onclick={() => (rating = n)}
+                                    aria-label={`דירוג ${n} מתוך 5`}
+                                >★</button>
+                            {/each}
                         </div>
-                    {/each}
-                </div>
+                        {#if currentEmoji}
+                            <div class="emoji-display" in:fade={{ duration: 220 }}>
+                                <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
+                                <span class="emoji-text">{currentEmoji.text}</span>
+                            </div>
+                        {/if}
+                    </div>
+                {/if}
 
                 {#if submitError}
                     <div class="submit-error" role="alert">{submitError}</div>
@@ -760,7 +771,7 @@
                 <button
                     class="primary-btn submit-btn"
                     onclick={handleSubmit}
-                    disabled={!hasAnyRating}
+                    disabled={rating === 0}
                 >
                     שלח דירוג
                 </button>
@@ -1878,44 +1889,34 @@
         color: rgba(255, 255, 255, 0.9);
     }
 
-    /* רשימת דירוגים - שורה לכל חברה */
-    .rating-rows {
+    /* בחירת חברה לדירוג */
+    .company-picker {
         display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        margin: 0.5rem 0 1.5rem;
-    }
-    .rating-row {
-        display: grid;
-        grid-template-columns: minmax(80px, 110px) auto 1fr;
-        align-items: center;
-        gap: 1.25rem;
-        padding: 0.5rem 0.25rem;
-    }
-    .rating-row:has(.company-name) + .rating-row:has(.company-name) {
-        border-top: 1px dashed rgba(255, 255, 255, 0.08);
-        padding-top: 1rem;
-    }
-    .company-name {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: rgba(255, 255, 255, 0.92);
-        text-align: right;
-    }
-    /* שורה בודדה (קמפיין בלי חברות) - בלי עמודת שם */
-    .rating-row:not(:has(.company-name)) {
-        grid-template-columns: auto 1fr;
+        flex-wrap: wrap;
         justify-content: center;
+        gap: 0.6rem;
+        margin: 0 auto 1.25rem;
     }
-    @media (max-width: 560px) {
-        .rating-row {
-            grid-template-columns: 1fr;
-            gap: 0.4rem;
-            justify-items: center;
-        }
-        .company-name {
-            text-align: center;
-        }
+    .company-pill {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        padding: 0.5rem 1.2rem;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+    .company-pill:hover {
+        background: rgba(250, 204, 21, 0.1);
+        border-color: rgba(250, 204, 21, 0.5);
+    }
+    .company-pill.selected {
+        background: linear-gradient(135deg, #facc15, #fb923c);
+        border-color: #facc15;
+        color: #1a1a1a;
+        box-shadow: 0 4px 16px rgba(250, 204, 21, 0.35);
     }
 
     /* כוכבים + סמיילי דינמי */
