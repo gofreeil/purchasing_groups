@@ -861,12 +861,12 @@
                         : (r.user_name || (r.user_city ? `מ${r.user_city}` : ''))}
                     <div class="response-item">
                         <div class="response-header">
+                            {#if author}
+                                <span class="response-author">{author}</span>
+                            {/if}
                             <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
                             {#if r.company}
                                 <span class="response-company">{r.company}</span>
-                            {/if}
-                            {#if author}
-                                <span class="response-author">{author}</span>
                             {/if}
                             <span class="response-date">{formatDate(r.createdAt || r.submitted_at)}</span>
                         </div>
@@ -886,7 +886,7 @@
     {/if}
 
     <div class="bottom-nav">
-        <a href="/" class="bottom-back">{$t.details.backToHome}</a>
+        <button type="button" class="bottom-back" onclick={() => history.back()}>{$t.details.backToHome}</button>
         <button
             type="button"
             class="back-to-top"
@@ -922,6 +922,11 @@
         text-decoration: none;
         font-size: 0.95rem;
         transition: color 0.3s ease;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        font-family: inherit;
     }
 
     .bottom-back:hover {
@@ -2092,6 +2097,10 @@
     @media (max-width: 600px) {
         .submit-stack {
             width: 100%;
+        }
+        .submit-stack .text-input {
+            width: 60%;
+            align-self: flex-start;
         }
     }
     .text-input {

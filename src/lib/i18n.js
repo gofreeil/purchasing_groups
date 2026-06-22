@@ -210,7 +210,7 @@ export const translations = readable({
             ],
             surveyTitle: "ספרו לנו על החוויה שלכם",
             joinCta: "למילוי הטופס",
-            backToHome: "← חזרה לדף הבית"
+            backToHome: "← אל הדף הקודם"
         }
     },
     en: {
