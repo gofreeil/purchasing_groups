@@ -727,7 +727,7 @@
             <div class="survey-form">
                 {#if ratingCompanies}
                     <div class="survey-step">
-                        <span class="step-label">בחר</span>
+                        <span class="step-label">בחר:</span>
                         <div class="company-picker" role="radiogroup" aria-label="בחר חברה לדירוג">
                             {#each ratingCompanies as company}
                                 <button
@@ -746,7 +746,7 @@
                 {/if}
 
                 <div class="survey-step">
-                    <span class="step-label">דרג</span>
+                    <span class="step-label">דרג:</span>
                     <div class="star-rating">
                         <div class="stars" role="presentation">
                             {#each [1, 2, 3, 4, 5] as n}
