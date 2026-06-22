@@ -813,14 +813,14 @@
                                 type="text"
                                 class="text-input"
                                 bind:value={userName}
-                                placeholder="שם (לא חובה)"
+                                placeholder="שם"
                                 aria-label="שם"
                             />
                             <input
                                 type="text"
                                 class="text-input"
                                 bind:value={userCity}
-                                placeholder="עיר (לא חובה)"
+                                placeholder="עיר"
                                 aria-label="עיר"
                             />
                             <button
