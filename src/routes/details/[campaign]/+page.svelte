@@ -1854,13 +1854,7 @@
         align-items: center;
         gap: 0.55rem;
         min-height: 56px;
-        opacity: 0.4;
-        transform: scale(0.85);
-        transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .emoji-display.active {
         opacity: 1;
-        transform: scale(1);
     }
     .emoji-face {
         font-size: 2.6rem;
