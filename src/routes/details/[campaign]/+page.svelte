@@ -2034,7 +2034,9 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 0.4rem;
-        margin: 0.6rem 0 0;
+        margin: 0.6rem auto 0;
+        max-width: 480px;
+        padding: 0 2.5rem;
     }
     .text-input {
         width: 100%;
