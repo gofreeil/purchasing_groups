@@ -221,12 +221,20 @@
     };
     */
 
-    let satisfactionLevel = $state(0);
+    // מפת דירוג לפי חברה. אם אין חברות (rating_companies ריק) - דירוג בודד עם key='_'
+    let ratingByCompany = $state({});
     let submitted = $state(false);
     let submitError = $state("");
 
-    // הסמיילי משקף את הבחירה הקבועה בלבד (ללא hover) כדי שלא יקפוץ
-    let currentEmoji = $derived(EMOJI_BY_LEVEL[satisfactionLevel] ?? null);
+    // רשימת חברות לדירוג. אם אין - מציגים דירוג בודד.
+    let ratingCompanies = $derived(
+        Array.isArray(data.campaign?.rating_companies) && data.campaign.rating_companies.length > 0
+            ? data.campaign.rating_companies
+            : null,
+    );
+
+    // יש לפחות דירוג אחד כדי להפעיל את כפתור השליחה
+    let hasAnyRating = $derived(Object.values(ratingByCompany).some((v) => v > 0));
     let openFaq = $state(-1);
     let joinCtaEl = $state(null);
     let joinCtaClicked = $state(false);
@@ -284,18 +292,26 @@
     });
 
     async function handleSubmit() {
-        if (satisfactionLevel === 0) return;
+        if (!hasAnyRating) return;
         submitError = "";
+        // שולחים רשומה נפרדת לכל חברה שדורגה
+        const entries = Object.entries(ratingByCompany).filter(([, lvl]) => lvl > 0);
         try {
-            const res = await fetch("/api/satisfaction", {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({
-                    campaign_slug: campaign,
-                    level: satisfactionLevel,
-                }),
-            });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            await Promise.all(
+                entries.map(([company, level]) =>
+                    fetch("/api/satisfaction", {
+                        method: "POST",
+                        headers: { "content-type": "application/json" },
+                        body: JSON.stringify({
+                            campaign_slug: campaign,
+                            company: company === "_" ? null : company,
+                            level,
+                        }),
+                    }).then((res) => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    }),
+                ),
+            );
             submitted = true;
         } catch (err) {
             console.error("submit failed:", err);
@@ -708,26 +724,33 @@
             </div>
         {:else}
             <div class="survey-form">
-                <div class="form-row">
-                    <div class="star-rating">
-                        <div class="stars" role="presentation">
-                            {#each [1, 2, 3, 4, 5] as n}
-                                <button
-                                    type="button"
-                                    class="star"
-                                    class:filled={n <= satisfactionLevel}
-                                    onclick={() => (satisfactionLevel = n)}
-                                    aria-label={`דירוג ${n} מתוך 5`}
-                                >★</button>
-                            {/each}
-                        </div>
-                        {#if currentEmoji}
-                            <div class="emoji-display" in:fade={{ duration: 220 }}>
-                                <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
-                                <span class="emoji-text">{currentEmoji.text}</span>
+                <div class="rating-rows">
+                    {#each (ratingCompanies ?? ["_"]) as company}
+                        {@const level = ratingByCompany[company] ?? 0}
+                        {@const emoji = EMOJI_BY_LEVEL[level]}
+                        <div class="rating-row">
+                            {#if company !== "_"}
+                                <span class="company-name">{company}</span>
+                            {/if}
+                            <div class="stars" role="presentation">
+                                {#each [1, 2, 3, 4, 5] as n}
+                                    <button
+                                        type="button"
+                                        class="star"
+                                        class:filled={n <= level}
+                                        onclick={() => (ratingByCompany = { ...ratingByCompany, [company]: n })}
+                                        aria-label={`דירוג ${n} מתוך 5${company !== "_" ? " ל-" + company : ""}`}
+                                    >★</button>
+                                {/each}
                             </div>
-                        {/if}
-                    </div>
+                            {#if emoji}
+                                <div class="emoji-display" in:fade={{ duration: 220 }}>
+                                    <span class="emoji-face" aria-hidden="true">{emoji.face}</span>
+                                    <span class="emoji-text">{emoji.text}</span>
+                                </div>
+                            {/if}
+                        </div>
+                    {/each}
                 </div>
 
                 {#if submitError}
@@ -737,7 +760,7 @@
                 <button
                     class="primary-btn submit-btn"
                     onclick={handleSubmit}
-                    disabled={satisfactionLevel === 0}
+                    disabled={!hasAnyRating}
                 >
                     שלח דירוג
                 </button>
@@ -1856,6 +1879,46 @@
         margin-bottom: 1rem;
         display: block;
         color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* רשימת דירוגים - שורה לכל חברה */
+    .rating-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin: 0.5rem 0 1.5rem;
+    }
+    .rating-row {
+        display: grid;
+        grid-template-columns: minmax(80px, 110px) auto 1fr;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 0.5rem 0.25rem;
+    }
+    .rating-row:has(.company-name) + .rating-row:has(.company-name) {
+        border-top: 1px dashed rgba(255, 255, 255, 0.08);
+        padding-top: 1rem;
+    }
+    .company-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.92);
+        text-align: right;
+    }
+    /* שורה בודדה (קמפיין בלי חברות) - בלי עמודת שם */
+    .rating-row:not(:has(.company-name)) {
+        grid-template-columns: auto 1fr;
+        justify-content: center;
+    }
+    @media (max-width: 560px) {
+        .rating-row {
+            grid-template-columns: 1fr;
+            gap: 0.4rem;
+            justify-items: center;
+        }
+        .company-name {
+            text-align: center;
+        }
     }
 
     /* כוכבים + סמיילי דינמי */
