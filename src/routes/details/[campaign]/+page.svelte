@@ -706,7 +706,7 @@
             <div class="thank-you" in:fade={{ duration: 400 }}>
                 <div class="success-icon">✨</div>
                 <h3>תודה על הדירוג!</h3>
-                <p>רוצה לכתוב לנו עוד? <a href={`/satisfaction/${campaign}`} class="survey-link">מלא את הסקר המלא ←</a></p>
+                <p>המשוב שלך עוזר לנו להשתפר.</p>
             </div>
         {:else}
             <div class="survey-form">
@@ -745,10 +745,6 @@
                 >
                     שלח דירוג
                 </button>
-
-                <p class="survey-cta">
-                    רוצה לכתוב לנו יותר? <a href={`/satisfaction/${campaign}`} class="survey-link">למילוי סקר מלא ←</a>
-                </p>
             </div>
         {/if}
     </section>
