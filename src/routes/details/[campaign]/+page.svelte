@@ -796,23 +796,6 @@
                     </p>
                 {/if}
 
-                <div class="user-fields">
-                    <input
-                        type="text"
-                        class="text-input"
-                        bind:value={userName}
-                        placeholder="שם (לא חובה)"
-                        aria-label="שם"
-                    />
-                    <input
-                        type="text"
-                        class="text-input"
-                        bind:value={userCity}
-                        placeholder="עיר (לא חובה)"
-                        aria-label="עיר"
-                    />
-                </div>
-
                 <div class="comments-row">
                     <label for="survey-comments" class="comments-label">הערות לגבי החברה המדורגת בלבד:</label>
                     <div class="comments-submit-grid">
@@ -831,6 +814,23 @@
                             שלח דירוג
                         </button>
                     </div>
+                </div>
+
+                <div class="user-fields">
+                    <input
+                        type="text"
+                        class="text-input"
+                        bind:value={userName}
+                        placeholder="שם (לא חובה)"
+                        aria-label="שם"
+                    />
+                    <input
+                        type="text"
+                        class="text-input"
+                        bind:value={userCity}
+                        placeholder="עיר (לא חובה)"
+                        aria-label="עיר"
+                    />
                 </div>
 
                 {#if submitError}
@@ -2033,27 +2033,28 @@
     .user-fields {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0.6rem;
-        margin: 1.1rem 0 0;
+        gap: 0.4rem;
+        margin: 0.6rem 0 0;
     }
     .text-input {
         width: 100%;
-        padding: 0.7rem 0.9rem;
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 10px;
-        color: rgba(255, 255, 255, 0.95);
-        font-size: 0.98rem;
+        padding: 0.35rem 0.65rem;
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 0.82rem;
         font-family: inherit;
         transition: border-color 0.2s ease, background 0.2s ease;
     }
     .text-input::placeholder {
-        color: rgba(255, 255, 255, 0.4);
+        color: rgba(255, 255, 255, 0.35);
+        font-size: 0.82rem;
     }
     .text-input:focus {
         outline: none;
-        border-color: #facc15;
-        background: rgba(0, 0, 0, 0.45);
+        border-color: rgba(250, 204, 21, 0.6);
+        background: rgba(0, 0, 0, 0.4);
     }
     @media (max-width: 480px) {
         .user-fields {
