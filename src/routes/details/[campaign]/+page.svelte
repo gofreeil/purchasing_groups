@@ -776,26 +776,27 @@
 
                 <div class="comments-row">
                     <label for="survey-comments" class="comments-label">הערות לגבי החברה המדורגת בלבד:</label>
-                    <textarea
-                        id="survey-comments"
-                        class="comments-input"
-                        bind:value={comments}
-                        placeholder="מה היה טוב? מה אפשר לשפר? כל מה שתרצה להוסיף..."
-                        rows="3"
-                    ></textarea>
+                    <div class="comments-submit-grid">
+                        <textarea
+                            id="survey-comments"
+                            class="comments-input"
+                            bind:value={comments}
+                            placeholder="מה היה טוב? מה אפשר לשפר? כל מה שתרצה להוסיף..."
+                            rows="3"
+                        ></textarea>
+                        <button
+                            class="primary-btn submit-btn"
+                            onclick={handleSubmit}
+                            disabled={rating === 0 || !canRate}
+                        >
+                            שלח דירוג
+                        </button>
+                    </div>
                 </div>
 
                 {#if submitError}
                     <div class="submit-error" role="alert">{submitError}</div>
                 {/if}
-
-                <button
-                    class="primary-btn submit-btn"
-                    onclick={handleSubmit}
-                    disabled={rating === 0 || !canRate}
-                >
-                    שלח דירוג
-                </button>
             </div>
         {/if}
     </section>
@@ -1983,6 +1984,22 @@
         font-weight: 600;
         color: rgba(255, 255, 255, 0.85);
         text-align: right;
+    }
+    .comments-submit-grid {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.85rem;
+        align-items: stretch;
+    }
+    .comments-submit-grid .submit-btn {
+        margin-top: 0;
+        align-self: stretch;
+        white-space: nowrap;
+    }
+    @media (max-width: 600px) {
+        .comments-submit-grid {
+            grid-template-columns: 1fr;
+        }
     }
     .comments-input {
         width: 100%;
