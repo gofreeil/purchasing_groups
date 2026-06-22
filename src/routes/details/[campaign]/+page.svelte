@@ -709,7 +709,6 @@
         {:else}
             <div class="survey-form">
                 <div class="form-row">
-                    <p class="question">{$t.satisfaction.q1Campaign}</p>
                     <div class="star-rating">
                         <div class="stars" role="presentation">
                             {#each [1, 2, 3, 4, 5] as n}
