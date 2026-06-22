@@ -856,18 +856,20 @@
             <div class="responses-list">
                 <h3 class="responses-title">תגובות אחרונות ({data.responses.length})</h3>
                 {#each data.responses as r (r.id)}
-                    {@const author = [r.user_name, r.user_city].filter(Boolean).join(', ')}
+                    {@const author = r.user_name && r.user_city
+                        ? `${r.user_name} מ${r.user_city}`
+                        : (r.user_name || (r.user_city ? `מ${r.user_city}` : ''))}
                     <div class="response-item">
                         <div class="response-header">
                             <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
                             {#if r.company}
                                 <span class="response-company">{r.company}</span>
                             {/if}
+                            {#if author}
+                                <span class="response-author">{author}</span>
+                            {/if}
                             <span class="response-date">{formatDate(r.createdAt || r.submitted_at)}</span>
                         </div>
-                        {#if author}
-                            <div class="response-author">{author}</div>
-                        {/if}
                         {#if r.comments}
                             <p class="response-text">{r.comments}</p>
                         {/if}
@@ -2212,16 +2214,17 @@
         margin-inline-start: auto;
     }
     .response-author {
-        margin: 0.15rem 0 0.2rem;
-        color: rgba(255, 255, 255, 0.65);
-        font-size: 0.9rem;
-        font-weight: 600;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.92rem;
+        font-weight: 700;
+        white-space: nowrap;
     }
     .response-text {
-        margin: 0.25rem 0 0;
+        margin: 0.75rem 0 0;
         color: rgba(255, 255, 255, 0.88);
         line-height: 1.5;
         white-space: pre-wrap;
+        text-align: right;
     }
 
     /* כוכבים + סמיילי דינמי */
