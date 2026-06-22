@@ -856,6 +856,7 @@
             <div class="responses-list">
                 <h3 class="responses-title">תגובות אחרונות ({data.responses.length})</h3>
                 {#each data.responses as r (r.id)}
+                    {@const author = [r.user_name, r.user_city].filter(Boolean).join(', ')}
                     <div class="response-item">
                         <div class="response-header">
                             <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
@@ -864,6 +865,9 @@
                             {/if}
                             <span class="response-date">{formatDate(r.createdAt || r.submitted_at)}</span>
                         </div>
+                        {#if author}
+                            <div class="response-author">{author}</div>
+                        {/if}
                         {#if r.comments}
                             <p class="response-text">{r.comments}</p>
                         {/if}
@@ -2206,6 +2210,12 @@
         color: rgba(255, 255, 255, 0.45);
         font-size: 0.85rem;
         margin-inline-start: auto;
+    }
+    .response-author {
+        margin: 0.15rem 0 0.2rem;
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 0.9rem;
+        font-weight: 600;
     }
     .response-text {
         margin: 0.25rem 0 0;
