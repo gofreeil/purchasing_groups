@@ -700,7 +700,7 @@
 
     <!-- Rating only - הסקר המלא בדף /satisfaction/[campaign]/ -->
     <section class="section survey-section-wrap">
-        <h2>איך הייתה החוויה שלך?</h2>
+        <h2>שביעות רצון משירות החברה ומהמבצע</h2>
 
         {#if submitted}
             <div class="thank-you" in:fade={{ duration: 400 }}>
