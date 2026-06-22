@@ -225,6 +225,8 @@
     let selectedCompany = $state(null);
     let rating = $state(0);
     let comments = $state("");
+    let userName = $state("");
+    let userCity = $state("");
     let submitted = $state(false);
     let submitError = $state("");
     let mustPickCompanyShake = $state(false); // אנימציית שייק על הגלולות אם מנסים לדרג לפני בחירה
@@ -323,6 +325,8 @@
                     company: selectedCompany,
                     level: rating,
                     comments,
+                    user_name: userName,
+                    user_city: userCity,
                 }),
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -791,6 +795,23 @@
                         סמן קודם את החברה שנותנת לך שירות, ואז דרג ⬆️
                     </p>
                 {/if}
+
+                <div class="user-fields">
+                    <input
+                        type="text"
+                        class="text-input"
+                        bind:value={userName}
+                        placeholder="שם (לא חובה)"
+                        aria-label="שם"
+                    />
+                    <input
+                        type="text"
+                        class="text-input"
+                        bind:value={userCity}
+                        placeholder="עיר (לא חובה)"
+                        aria-label="עיר"
+                    />
+                </div>
 
                 <div class="comments-row">
                     <label for="survey-comments" class="comments-label">הערות לגבי החברה המדורגת בלבד:</label>
@@ -2009,8 +2030,39 @@
         font-weight: 600;
     }
 
+    .user-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+        margin: 1.1rem 0 0;
+    }
+    .text-input {
+        width: 100%;
+        padding: 0.7rem 0.9rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 10px;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 0.98rem;
+        font-family: inherit;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .text-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+    .text-input:focus {
+        outline: none;
+        border-color: #facc15;
+        background: rgba(0, 0, 0, 0.45);
+    }
+    @media (max-width: 480px) {
+        .user-fields {
+            grid-template-columns: 1fr;
+        }
+    }
+
     .comments-row {
-        margin: 1.25rem 0 0.5rem;
+        margin: 0.85rem 0 0.5rem;
         display: flex;
         flex-direction: column;
         gap: 0.45rem;
