@@ -224,6 +224,7 @@
     // המשתמש בוחר חברה (או נשאר null אם אין חברות), ואז נותן דירוג אחד.
     let selectedCompany = $state(null);
     let rating = $state(0);
+    let comments = $state("");
     let submitted = $state(false);
     let submitError = $state("");
 
@@ -310,6 +311,7 @@
                     campaign_slug: campaign,
                     company: selectedCompany,
                     level: rating,
+                    comments,
                 }),
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -771,6 +773,17 @@
                 {#if ratingCompanies && !selectedCompany && rating > 0}
                     <p class="rating-hint">בחר חברה מלמעלה כדי לשלוח את הדירוג</p>
                 {/if}
+
+                <div class="comments-row">
+                    <label for="survey-comments" class="comments-label">הערות (לא חובה):</label>
+                    <textarea
+                        id="survey-comments"
+                        class="comments-input"
+                        bind:value={comments}
+                        placeholder="מה היה טוב? מה אפשר לשפר? כל מה שתרצה להוסיף..."
+                        rows="3"
+                    ></textarea>
+                </div>
 
                 {#if submitError}
                     <div class="submit-error" role="alert">{submitError}</div>
@@ -1957,6 +1970,40 @@
         color: #facc15;
         font-size: 0.95rem;
         font-weight: 600;
+    }
+
+    .comments-row {
+        margin: 1.25rem 0 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+    .comments-label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.85);
+        text-align: right;
+    }
+    .comments-input {
+        width: 100%;
+        min-height: 80px;
+        padding: 0.8rem 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 12px;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .comments-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+    .comments-input:focus {
+        outline: none;
+        border-color: #facc15;
+        background: rgba(0, 0, 0, 0.45);
     }
 
     /* כוכבים + סמיילי דינמי */
