@@ -1900,9 +1900,9 @@
     /* כל "שלב" בסקר - תווית קצרה משמאל (RTL = ימין) + תוכן הפעולה */
     .survey-step {
         display: grid;
-        grid-template-columns: 60px 1fr;
+        grid-template-columns: 45px 1fr;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.25rem;
         margin-bottom: 1.1rem;
     }
     .step-label {
@@ -1910,15 +1910,12 @@
         font-weight: 800;
         color: #facc15;
         text-align: center;
-        background: rgba(250, 204, 21, 0.08);
-        border: 1px solid rgba(250, 204, 21, 0.4);
-        border-radius: 999px;
         padding: 0.35rem 0;
     }
     @media (max-width: 560px) {
         .survey-step {
-            grid-template-columns: 50px 1fr;
-            gap: 0.5rem;
+            grid-template-columns: 38px 1fr;
+            gap: 0.2rem;
         }
         .step-label {
             font-size: 1rem;
