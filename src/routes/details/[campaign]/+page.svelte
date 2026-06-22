@@ -343,7 +343,9 @@
     function formatDate(iso) {
         try {
             const d = new Date(iso);
-            return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' });
+            const date = d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' });
+            const time = d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+            return `${date}, ${time}`;
         } catch { return ''; }
     }
 
