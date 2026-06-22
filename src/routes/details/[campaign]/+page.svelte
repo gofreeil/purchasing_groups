@@ -808,31 +808,30 @@
                             placeholder="מצב קליטה, כמה כסף התוכנית חסכה לך בחודש וכמה בשנה"
                             rows="3"
                         ></textarea>
-                        <button
-                            class="primary-btn submit-btn"
-                            onclick={handleSubmit}
-                            disabled={rating === 0 || !canRate}
-                        >
-                            שלח דירוג
-                        </button>
+                        <div class="submit-stack">
+                            <input
+                                type="text"
+                                class="text-input"
+                                bind:value={userName}
+                                placeholder="שם (לא חובה)"
+                                aria-label="שם"
+                            />
+                            <input
+                                type="text"
+                                class="text-input"
+                                bind:value={userCity}
+                                placeholder="עיר (לא חובה)"
+                                aria-label="עיר"
+                            />
+                            <button
+                                class="primary-btn submit-btn"
+                                onclick={handleSubmit}
+                                disabled={rating === 0 || !canRate}
+                            >
+                                שלח דירוג ותגובה
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div class="user-fields">
-                    <input
-                        type="text"
-                        class="text-input"
-                        bind:value={userName}
-                        placeholder="שם (לא חובה)"
-                        aria-label="שם"
-                    />
-                    <input
-                        type="text"
-                        class="text-input"
-                        bind:value={userCity}
-                        placeholder="עיר (לא חובה)"
-                        aria-label="עיר"
-                    />
                 </div>
 
                 {#if submitError}
@@ -2037,13 +2036,20 @@
         font-weight: 600;
     }
 
-    .user-fields {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.2rem;
-        margin: 0.6rem auto 0;
-        max-width: 480px;
-        padding: 0 2.5rem;
+    .submit-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        min-width: 180px;
+    }
+    .submit-stack .submit-btn {
+        margin-top: 0;
+        white-space: nowrap;
+    }
+    @media (max-width: 600px) {
+        .submit-stack {
+            min-width: 0;
+        }
     }
     .text-input {
         width: 100%;
@@ -2064,11 +2070,6 @@
         outline: none;
         border-color: rgba(250, 204, 21, 0.6);
         background: rgba(0, 0, 0, 0.4);
-    }
-    @media (max-width: 480px) {
-        .user-fields {
-            grid-template-columns: 1fr;
-        }
     }
 
     .comments-row {
