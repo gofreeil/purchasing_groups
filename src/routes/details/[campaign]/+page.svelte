@@ -742,51 +742,53 @@
             </div>
         {:else}
             <div class="survey-form">
-                {#if ratingCompanies}
-                    <div class="survey-step">
-                        <span class="step-label">בחר:</span>
-                        <div
-                            class="company-picker"
-                            class:shake={mustPickCompanyShake}
-                            role="radiogroup"
-                            aria-label="בחר חברה לדירוג"
-                        >
-                            {#each ratingCompanies as company}
-                                <button
-                                    type="button"
-                                    role="radio"
-                                    aria-checked={selectedCompany === company}
-                                    class="company-pill"
-                                    class:selected={selectedCompany === company}
-                                    onclick={() => selectCompany(company)}
-                                >
-                                    {company}
-                                </button>
-                            {/each}
-                        </div>
-                    </div>
-                {/if}
-
-                <div class="survey-step">
-                    <span class="step-label">דרג:</span>
-                    <div class="star-rating">
-                        <div class="stars" role="presentation">
-                            {#each [1, 2, 3, 4, 5] as n}
-                                <button
-                                    type="button"
-                                    class="star"
-                                    class:filled={n <= rating}
-                                    onclick={() => tryRate(n)}
-                                    aria-label={`דירוג ${n} מתוך 5`}
-                                >★</button>
-                            {/each}
-                        </div>
-                        {#if currentEmoji}
-                            <div class="emoji-display" in:fade={{ duration: 220 }}>
-                                <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
-                                <span class="emoji-text">{currentEmoji.text}</span>
+                <div class="survey-inline-row">
+                    {#if ratingCompanies}
+                        <div class="survey-step">
+                            <span class="step-label">בחר:</span>
+                            <div
+                                class="company-picker"
+                                class:shake={mustPickCompanyShake}
+                                role="radiogroup"
+                                aria-label="בחר חברה לדירוג"
+                            >
+                                {#each ratingCompanies as company}
+                                    <button
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={selectedCompany === company}
+                                        class="company-pill"
+                                        class:selected={selectedCompany === company}
+                                        onclick={() => selectCompany(company)}
+                                    >
+                                        {company}
+                                    </button>
+                                {/each}
                             </div>
-                        {/if}
+                        </div>
+                    {/if}
+
+                    <div class="survey-step">
+                        <span class="step-label">דרג:</span>
+                        <div class="star-rating">
+                            <div class="stars" role="presentation">
+                                {#each [1, 2, 3, 4, 5] as n}
+                                    <button
+                                        type="button"
+                                        class="star"
+                                        class:filled={n <= rating}
+                                        onclick={() => tryRate(n)}
+                                        aria-label={`דירוג ${n} מתוך 5`}
+                                    >★</button>
+                                {/each}
+                            </div>
+                            {#if currentEmoji}
+                                <div class="emoji-display" in:fade={{ duration: 220 }}>
+                                    <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
+                                    <span class="emoji-text">{currentEmoji.text}</span>
+                                </div>
+                            {/if}
+                        </div>
                     </div>
                 </div>
 
@@ -803,7 +805,7 @@
                             id="survey-comments"
                             class="comments-input"
                             bind:value={comments}
-                            placeholder="מה היה טוב? מה אפשר לשפר? כל מה שתרצה להוסיף..."
+                            placeholder="מצב קליטה, כמה כסף התוכנית חסכה לך בחודש וכמה בשנה"
                             rows="3"
                         ></textarea>
                         <button
@@ -1950,25 +1952,30 @@
         color: rgba(255, 255, 255, 0.9);
     }
 
-    /* כל "שלב" בסקר - תווית קצרה משמאל (RTL = ימין) + תוכן הפעולה */
-    .survey-step {
-        display: grid;
-        grid-template-columns: 45px 1fr;
+    /* שורה אחת לבחירה+דירוג - שני survey-step בצד-זה-לצד */
+    .survey-inline-row {
+        display: flex;
         align-items: center;
-        gap: 0.25rem;
+        justify-content: center;
+        gap: 1.75rem;
+        flex-wrap: wrap;
         margin-bottom: 1.1rem;
+    }
+    /* כל "שלב" בסקר - תווית קצרה ליד התוכן */
+    .survey-step {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
     }
     .step-label {
         font-size: 1.15rem;
         font-weight: 800;
         color: #facc15;
-        text-align: center;
-        padding: 0.35rem 0;
+        white-space: nowrap;
     }
     @media (max-width: 560px) {
-        .survey-step {
-            grid-template-columns: 38px 1fr;
-            gap: 0.2rem;
+        .survey-inline-row {
+            gap: 0.9rem;
         }
         .step-label {
             font-size: 1rem;
