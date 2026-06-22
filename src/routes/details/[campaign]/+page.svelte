@@ -742,26 +742,28 @@
                     </div>
                 {/if}
 
-                {#if canRate}
-                    <div class="star-rating" in:fade={{ duration: 220 }}>
-                        <div class="stars" role="presentation">
-                            {#each [1, 2, 3, 4, 5] as n}
-                                <button
-                                    type="button"
-                                    class="star"
-                                    class:filled={n <= rating}
-                                    onclick={() => (rating = n)}
-                                    aria-label={`דירוג ${n} מתוך 5`}
-                                >★</button>
-                            {/each}
-                        </div>
-                        {#if currentEmoji}
-                            <div class="emoji-display" in:fade={{ duration: 220 }}>
-                                <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
-                                <span class="emoji-text">{currentEmoji.text}</span>
-                            </div>
-                        {/if}
+                <div class="star-rating">
+                    <div class="stars" role="presentation">
+                        {#each [1, 2, 3, 4, 5] as n}
+                            <button
+                                type="button"
+                                class="star"
+                                class:filled={n <= rating}
+                                onclick={() => (rating = n)}
+                                aria-label={`דירוג ${n} מתוך 5`}
+                            >★</button>
+                        {/each}
                     </div>
+                    {#if currentEmoji}
+                        <div class="emoji-display" in:fade={{ duration: 220 }}>
+                            <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
+                            <span class="emoji-text">{currentEmoji.text}</span>
+                        </div>
+                    {/if}
+                </div>
+
+                {#if ratingCompanies && !selectedCompany && rating > 0}
+                    <p class="rating-hint">בחר חברה מלמעלה כדי לשלוח את הדירוג</p>
                 {/if}
 
                 {#if submitError}
@@ -771,7 +773,7 @@
                 <button
                     class="primary-btn submit-btn"
                     onclick={handleSubmit}
-                    disabled={rating === 0}
+                    disabled={rating === 0 || !canRate}
                 >
                     שלח דירוג
                 </button>
@@ -1917,6 +1919,13 @@
         border-color: #facc15;
         color: #1a1a1a;
         box-shadow: 0 4px 16px rgba(250, 204, 21, 0.35);
+    }
+    .rating-hint {
+        margin: 0.75rem 0 0;
+        text-align: center;
+        color: #facc15;
+        font-size: 0.95rem;
+        font-weight: 600;
     }
 
     /* כוכבים + סמיילי דינמי */
