@@ -225,6 +225,8 @@
     let selectedCompany = $state(null);
     let rating = $state(0);
     let comments = $state("");
+    let userName = $state("");
+    let userCity = $state("");
     let submitted = $state(false);
     let submitError = $state("");
     let mustPickCompanyShake = $state(false); // אנימציית שייק על הגלולות אם מנסים לדרג לפני בחירה
@@ -323,6 +325,8 @@
                     company: selectedCompany,
                     level: rating,
                     comments,
+                    user_name: userName,
+                    user_city: userCity,
                 }),
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -804,13 +808,29 @@
                             placeholder="מצב קליטה, כמה כסף התוכנית חסכה לך בחודש וכמה בשנה"
                             rows="3"
                         ></textarea>
-                        <button
-                            class="primary-btn submit-btn"
-                            onclick={handleSubmit}
-                            disabled={rating === 0 || !canRate}
-                        >
-                            שלח דירוג ותגובה
-                        </button>
+                        <div class="submit-stack">
+                            <input
+                                type="text"
+                                class="text-input"
+                                bind:value={userName}
+                                placeholder="שם"
+                                aria-label="שם"
+                            />
+                            <input
+                                type="text"
+                                class="text-input"
+                                bind:value={userCity}
+                                placeholder="עיר"
+                                aria-label="עיר"
+                            />
+                            <button
+                                class="primary-btn submit-btn"
+                                onclick={handleSubmit}
+                                disabled={rating === 0 || !canRate}
+                            >
+                                שלח דירוג ותגובה
+                            </button>
+                        </div>
                     </div>
                 </div>
 
