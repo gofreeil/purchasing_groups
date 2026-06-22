@@ -822,19 +822,16 @@
         align-items: center;
         gap: 0.5rem;
         background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 999px;
-        padding: 0.5rem 1.1rem;
+        border: none;
+        padding: 0.5rem 0.25rem;
         color: rgba(255, 255, 255, 0.85);
         font-size: 0.95rem;
         cursor: pointer;
-        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+        transition: color 0.2s ease, transform 0.2s ease;
     }
 
     .back-to-top:hover {
         color: #facc15;
-        border-color: #facc15;
-        background: rgba(250, 204, 21, 0.08);
         transform: translateY(-2px);
     }
 
