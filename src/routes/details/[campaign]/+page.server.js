@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { fetchCampaignBySlug } from '$lib/strapi.js';
+import { fetchCampaignBySlug, fetchSatisfactionResponses } from '$lib/strapi.js';
 import { fallbackCampaign } from '$lib/fallback-campaigns.js';
 
 // --- Google Sheet: מספר חברים פעילים פר-קמפיין (שורת "חתמו") ---
@@ -79,7 +79,13 @@ export async function load({ params, fetch, setHeaders }) {
         throw error(404, 'Campaign not found');
     }
 
-    const activeMembers = await loadMembersFromSheet(fetch, params.campaign);
+    const [activeMembers, responses] = await Promise.all([
+        loadMembersFromSheet(fetch, params.campaign),
+        fetchSatisfactionResponses(params.campaign, { fetch }).catch((err) => {
+            console.error('Failed to fetch satisfaction responses:', err.message);
+            return [];
+        }),
+    ]);
 
-    return { campaign, activeMembers };
+    return { campaign, activeMembers, responses };
 }

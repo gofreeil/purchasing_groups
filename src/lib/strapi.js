@@ -43,3 +43,12 @@ export async function fetchCampaignBySlug(slug, { fetch: f = fetch } = {}) {
     }, { fetch: f });
     return (data?.data ?? [])[0] ?? null;
 }
+
+export async function fetchSatisfactionResponses(campaignSlug, { fetch: f = fetch, pageSize = 50 } = {}) {
+    const data = await strapiGet('pg-satisfaction-responses', {
+        'filters[campaign_slug][$eq]': campaignSlug,
+        sort: 'createdAt:desc',
+        'pagination[pageSize]': pageSize,
+    }, { fetch: f });
+    return data?.data ?? [];
+}

@@ -2,6 +2,7 @@
     import { t } from "$lib/i18n.js";
     import { isLoggedIn } from "$lib/user.js";
     import { fade, slide } from "svelte/transition";
+    import { invalidateAll } from "$app/navigation";
 
     // סמיילי שמשתנה רק לאחר לחיצה (לא על hover - כדי שלא יקפוץ)
     const EMOJI_BY_LEVEL = {
@@ -331,10 +332,19 @@
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             submitted = true;
+            // טוען מחדש את התגובות (כולל זו שהרגע נשלחה)
+            await invalidateAll();
         } catch (err) {
             console.error("submit failed:", err);
             submitError = "השליחה נכשלה - נסה שוב בעוד מספר רגעים";
         }
+    }
+
+    function formatDate(iso) {
+        try {
+            const d = new Date(iso);
+            return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' });
+        } catch { return ''; }
     }
 
     function mockLogin() {
@@ -837,6 +847,26 @@
                 {#if submitError}
                     <div class="submit-error" role="alert">{submitError}</div>
                 {/if}
+            </div>
+        {/if}
+
+        {#if data.responses && data.responses.length > 0}
+            <div class="responses-list">
+                <h3 class="responses-title">תגובות אחרונות ({data.responses.length})</h3>
+                {#each data.responses as r (r.id)}
+                    <div class="response-item">
+                        <div class="response-header">
+                            <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
+                            {#if r.company}
+                                <span class="response-company">{r.company}</span>
+                            {/if}
+                            <span class="response-date">{formatDate(r.createdAt || r.submitted_at)}</span>
+                        </div>
+                        {#if r.comments}
+                            <p class="response-text">{r.comments}</p>
+                        {/if}
+                    </div>
+                {/each}
             </div>
         {/if}
     </section>
@@ -2125,6 +2155,61 @@
         outline: none;
         border-color: #facc15;
         background: rgba(0, 0, 0, 0.45);
+    }
+
+    /* רשימת תגובות אחרונות */
+    .responses-list {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px dashed rgba(255, 255, 255, 0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+    .responses-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0 0 0.5rem;
+        text-align: right;
+    }
+    .response-item {
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 0.85rem 1.1rem;
+    }
+    .response-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.3rem;
+        flex-wrap: wrap;
+    }
+    .response-stars {
+        color: #facc15;
+        letter-spacing: 1px;
+        font-size: 1.05rem;
+    }
+    .response-company {
+        background: rgba(250, 204, 21, 0.12);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-radius: 999px;
+        padding: 0.1rem 0.7rem;
+        font-size: 0.85rem;
+        color: #facc15;
+        font-weight: 600;
+    }
+    .response-date {
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 0.85rem;
+        margin-inline-start: auto;
+    }
+    .response-text {
+        margin: 0.25rem 0 0;
+        color: rgba(255, 255, 255, 0.88);
+        line-height: 1.5;
+        white-space: pre-wrap;
     }
 
     /* כוכבים + סמיילי דינמי */
