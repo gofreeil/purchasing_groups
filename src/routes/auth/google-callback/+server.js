@@ -3,7 +3,6 @@ import { AUTH_COOKIE, authCookieOptions, exchangeGoogleToken } from '$lib/auth.j
 
 export async function GET({ url, cookies, fetch }) {
     const accessToken = url.searchParams.get('access_token');
-    const returnTo = url.searchParams.get('returnTo') || '/';
     if (!accessToken) throw error(400, 'access_token חסר');
 
     let data;
@@ -15,5 +14,7 @@ export async function GET({ url, cookies, fetch }) {
     if (!data?.jwt) throw error(502, 'Strapi לא החזיר JWT');
 
     cookies.set(AUTH_COOKIE, data.jwt, authCookieOptions(url));
+    const returnTo = cookies.get('oauth-return-to') || '/';
+    cookies.delete('oauth-return-to', { ...authCookieOptions(url) });
     throw redirect(302, returnTo);
 }
