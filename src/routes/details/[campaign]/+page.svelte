@@ -856,23 +856,29 @@
             <div class="responses-list">
                 <h3 class="responses-title">תגובות אחרונות ({data.responses.length})</h3>
                 {#each data.responses as r (r.id)}
-                    {@const author = r.user_name && r.user_city
-                        ? `${r.user_name} מ${r.user_city}`
-                        : (r.user_name || (r.user_city ? `מ${r.user_city}` : ''))}
                     <div class="response-item">
                         <div class="response-header">
-                            {#if author}
-                                <span class="response-author">{author}</span>
-                            {/if}
                             <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
                             {#if r.company}
                                 <span class="response-company">{r.company}</span>
                             {/if}
                             <span class="response-date">{formatDate(r.createdAt || r.submitted_at)}</span>
                         </div>
-                        {#if r.comments}
-                            <p class="response-text">{r.comments}</p>
-                        {/if}
+                        <div class="response-body">
+                            {#if r.user_name || r.user_city}
+                                <div class="response-user">
+                                    {#if r.user_name}
+                                        <span class="response-name">{r.user_name}</span>
+                                    {/if}
+                                    {#if r.user_city}
+                                        <span class="response-city">{r.user_city}</span>
+                                    {/if}
+                                </div>
+                            {/if}
+                            {#if r.comments}
+                                <p class="response-text">{r.comments}</p>
+                            {/if}
+                        </div>
                     </div>
                 {/each}
             </div>
@@ -2221,14 +2227,32 @@
         font-size: 0.85rem;
         margin-inline-start: auto;
     }
-    .response-author {
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 0.92rem;
+    .response-body {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.75rem;
+        align-items: flex-start;
+    }
+    .response-user {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        flex-shrink: 0;
+        min-width: 6rem;
+        max-width: 9rem;
+    }
+    .response-name {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95rem;
         font-weight: 700;
-        white-space: nowrap;
+    }
+    .response-city {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.85rem;
     }
     .response-text {
-        margin: 0.75rem 0 0;
+        flex: 1;
+        margin: 0;
         color: rgba(255, 255, 255, 0.88);
         line-height: 1.5;
         white-space: pre-wrap;
