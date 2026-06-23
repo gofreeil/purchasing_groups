@@ -230,6 +230,8 @@
     let userCity = $state("");
     let submitted = $state(false);
     let submitError = $state("");
+    let extraResponses = $state([]);
+    let allResponses = $derived([...extraResponses, ...(data.responses || [])]);
     let mustPickCompanyShake = $state(false); // אנימציית שייק על הגלולות אם מנסים לדרג לפני בחירה
 
     // רשימת חברות לדירוג. אם אין - מציגים דירוג בודד בלי בחירה.
@@ -331,9 +333,22 @@
                 }),
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const now = new Date().toISOString();
+            extraResponses = [
+                {
+                    id: `optimistic-${Date.now()}`,
+                    level: rating,
+                    company: selectedCompany,
+                    comments,
+                    user_name: userName,
+                    user_city: userCity,
+                    submitted_at: now,
+                    createdAt: now,
+                },
+                ...extraResponses,
+            ];
             submitted = true;
-            // טוען מחדש את התגובות (כולל זו שהרגע נשלחה)
-            await invalidateAll();
+            invalidateAll().then(() => { extraResponses = []; });
         } catch (err) {
             console.error("submit failed:", err);
             submitError = "השליחה נכשלה - נסה שוב בעוד מספר רגעים";
@@ -852,10 +867,10 @@
             </div>
         {/if}
 
-        {#if data.responses && data.responses.length > 0}
+        {#if allResponses.length > 0}
             <div class="responses-list">
-                <h3 class="responses-title">תגובות אחרונות ({data.responses.length})</h3>
-                {#each data.responses as r (r.id)}
+                <h3 class="responses-title">תגובות אחרונות ({allResponses.length})</h3>
+                {#each allResponses as r (r.id)}
                     <div class="response-item">
                         <div class="response-header">
                             <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
