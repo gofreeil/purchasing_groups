@@ -183,7 +183,8 @@
 <div class="purchases-list">
     {#each activeCampaigns as campaign}
         {@const sheet = data.sheetData?.[campaign.slug]}
-        {@const card = CARD_CONFIG[campaign.slug] ?? {}}
+        {@const liveRating = data.averageRatings?.[campaign.slug]}
+        {@const card = { ...(CARD_CONFIG[campaign.slug] ?? {}), ...(liveRating ? { rating: liveRating.avg } : {}) }}
         <div class="purchase-card" style="margin-bottom: 3rem;">
             <a
                 href={`/details/${campaign.slug}`}

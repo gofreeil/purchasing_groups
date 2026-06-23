@@ -1,4 +1,4 @@
-import { fetchCampaigns } from '$lib/strapi.js';
+import { fetchCampaigns, fetchSatisfactionResponses } from '$lib/strapi.js';
 import { fallbackCampaignList } from '$lib/fallback-campaigns.js';
 
 // ----- Google Sheet: מקור אמת לנתוני חברים וחיסכון -----
@@ -93,9 +93,28 @@ export async function load({ fetch, setHeaders }) {
     // אם Strapi החזיר רשימה ריקה - גם זה fallback
     const finalCampaigns = (campaigns && campaigns.length > 0) ? campaigns : fallbackCampaignList();
 
+    // ממוצע דירוג פר-קמפיין מתגובות סקר אמיתיות - בקשות מקבילות, רק לקמפיינים פעילים
+    const activeSlugs = finalCampaigns.filter((c) => c.status === 'active').map((c) => c.slug);
+    const responseLists = await Promise.all(
+        activeSlugs.map((slug) =>
+            fetchSatisfactionResponses(slug, { fetch }).catch(() => []),
+        ),
+    );
+    const averageRatings = {};
+    activeSlugs.forEach((slug, i) => {
+        const rated = responseLists[i].filter((r) => typeof r.level === 'number' && r.level > 0);
+        if (rated.length > 0) {
+            averageRatings[slug] = {
+                avg: rated.reduce((s, r) => s + r.level, 0) / rated.length,
+                count: rated.length,
+            };
+        }
+    });
+
     return {
         campaigns: finalCampaigns,
         sheetData: sheet.aggregated,
         members: sheet.members,
+        averageRatings,
     };
 }

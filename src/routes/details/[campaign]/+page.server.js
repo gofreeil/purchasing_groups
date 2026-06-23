@@ -100,11 +100,19 @@ export async function load({ params, fetch, setHeaders }) {
         }),
     ]);
 
+    // ממוצע דירוג מחושב מאותן תגובות שכבר נטענו — בלי בקשה נוספת.
+    const ratedResponses = responses.filter(r => typeof r.level === 'number' && r.level > 0);
+    const averageRating = ratedResponses.length > 0
+        ? ratedResponses.reduce((sum, r) => sum + r.level, 0) / ratedResponses.length
+        : 0;
+
     return {
         campaign,
         activeMembers: sheetStats.activeMembers,
         sheetMonthlySavings: sheetStats.monthlySavings,
         sheetAnnualSavings: sheetStats.annualSavings,
+        averageRating,
+        ratingCount: ratedResponses.length,
         responses,
     };
 }

@@ -275,7 +275,7 @@
     // מספרים (חברים/דירוג/חיסכון) - מהגיליון + קבועים בקוד
     let campaignStats = $derived({
         members: data.activeMembers ?? 0,
-        rating: STATS[campaign]?.rating ?? 0,
+        rating: data.ratingCount > 0 ? data.averageRating : (STATS[campaign]?.rating ?? 0),
         savings: data.sheetMonthlySavings ?? STATS[campaign]?.savings ?? 0,
         annualSavings: data.sheetAnnualSavings ?? STATS[campaign]?.annualSavings ?? 0,
         reviews: STATS[campaign]?.reviews ?? 0,
