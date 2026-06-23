@@ -1,8 +1,16 @@
 <script>
+    import { onMount } from "svelte";
     import { t } from "$lib/i18n.js";
     import { isLoggedIn } from "$lib/user.js";
     import { fade, slide } from "svelte/transition";
     import { invalidateAll } from "$app/navigation";
+    import {
+        googleOAuthStartUrl,
+        getCurrentUser,
+        isSuperAdmin,
+        logout as adminLogout,
+        updateResponseAdmin,
+    } from "$lib/strapi-client.js";
 
     // סמיילי שמשתנה רק לאחר לחיצה (לא על hover - כדי שלא יקפוץ)
     const EMOJI_BY_LEVEL = {
@@ -232,6 +240,67 @@
     let submitError = $state("");
     let extraResponses = $state([]);
     let allResponses = $derived([...extraResponses, ...(data.responses || [])]);
+
+    // ─── Admin (Google OAuth) ───
+    let adminUser = $state(null);
+    let adminBusy = $state({});
+    let replyDraft = $state({});
+    let adminIsSuper = $derived(isSuperAdmin(adminUser));
+
+    onMount(async () => {
+        adminUser = await getCurrentUser();
+    });
+
+    function adminLogin() {
+        if (typeof window !== "undefined") {
+            window.location.href = googleOAuthStartUrl(window.location.pathname);
+        }
+    }
+
+    function doLogout() {
+        adminLogout();
+        adminUser = null;
+    }
+
+    async function toggleFeatured(r) {
+        if (!r.documentId) return;
+        adminBusy = { ...adminBusy, [r.documentId]: true };
+        try {
+            await updateResponseAdmin(r.documentId, { is_featured: !r.is_featured });
+            await invalidateAll();
+        } catch (e) {
+            alert(`שגיאה: ${e.message}`);
+        } finally {
+            adminBusy = { ...adminBusy, [r.documentId]: false };
+        }
+    }
+    async function toggleLike(r) {
+        if (!r.documentId) return;
+        adminBusy = { ...adminBusy, [r.documentId]: true };
+        try {
+            await updateResponseAdmin(r.documentId, { admin_liked: !r.admin_liked });
+            await invalidateAll();
+        } catch (e) {
+            alert(`שגיאה: ${e.message}`);
+        } finally {
+            adminBusy = { ...adminBusy, [r.documentId]: false };
+        }
+    }
+    async function saveReply(r) {
+        if (!r.documentId) return;
+        const text = (replyDraft[r.documentId] ?? r.admin_reply ?? "").trim();
+        adminBusy = { ...adminBusy, [r.documentId]: true };
+        try {
+            await updateResponseAdmin(r.documentId, { admin_reply: text || null });
+            const { [r.documentId]: _, ...rest } = replyDraft;
+            replyDraft = rest;
+            await invalidateAll();
+        } catch (e) {
+            alert(`שגיאה: ${e.message}`);
+        } finally {
+            adminBusy = { ...adminBusy, [r.documentId]: false };
+        }
+    }
     let mustPickCompanyShake = $state(false); // אנימציית שייק על הגלולות אם מנסים לדרג לפני בחירה
 
     // רשימת חברות לדירוג. אם אין - מציגים דירוג בודד בלי בחירה.
@@ -481,6 +550,15 @@
 </svelte:head>
 
 <div class="details-page" in:fade={{ duration: 300 }}>
+    <div class="admin-bar">
+        {#if adminUser}
+            <span class="admin-user">{adminIsSuper ? "🔑" : "👤"} {adminUser.email}</span>
+            <button type="button" class="admin-link" onclick={doLogout}>יציאה</button>
+        {:else}
+            <button type="button" class="admin-link" onclick={adminLogin}>התחבר כאדמין</button>
+        {/if}
+    </div>
+
     <!-- Hero + Stats unified banner -->
     <section class="hero-card">
         <div class="hero">
@@ -904,6 +982,24 @@
                             <div class="response-admin-reply">
                                 <span class="admin-reply-label">תגובת האדמין:</span>
                                 <p class="admin-reply-text">{r.admin_reply}</p>
+                            </div>
+                        {/if}
+                        {#if adminIsSuper}
+                            <div class="admin-controls">
+                                <button type="button" class="admin-btn" class:on={r.is_featured} disabled={adminBusy[r.documentId]} onclick={() => toggleFeatured(r)} title="פין">📌</button>
+                                <button type="button" class="admin-btn" class:on={r.admin_liked} disabled={adminBusy[r.documentId]} onclick={() => toggleLike(r)} title="לייק">❤️</button>
+                                {#if replyDraft[r.documentId] !== undefined || r.admin_reply}
+                                    <input
+                                        type="text"
+                                        class="admin-reply-input"
+                                        placeholder="תגובת אדמין"
+                                        value={replyDraft[r.documentId] ?? r.admin_reply ?? ""}
+                                        oninput={(e) => (replyDraft = { ...replyDraft, [r.documentId]: e.currentTarget.value })}
+                                    />
+                                    <button type="button" class="admin-btn" disabled={adminBusy[r.documentId]} onclick={() => saveReply(r)}>שמור</button>
+                                {:else}
+                                    <button type="button" class="admin-btn" onclick={() => (replyDraft = { ...replyDraft, [r.documentId]: "" })} title="תגובת אדמין">↩️</button>
+                                {/if}
                             </div>
                         {/if}
                     </div>
@@ -2277,6 +2373,76 @@
     }
     .responses-all-link:hover {
         color: #fde047;
+    }
+
+    /* פס אדמין למעלה */
+    .admin-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.6rem;
+        align-items: center;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+    .admin-user {
+        color: rgba(255, 255, 255, 0.75);
+    }
+    .admin-link {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: rgba(255, 255, 255, 0.85);
+        padding: 0.25rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .admin-link:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* פקדי אדמין על תגובה */
+    .admin-controls {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.6rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .admin-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.9);
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .admin-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .admin-btn.on {
+        background: rgba(250, 204, 21, 0.18);
+        border-color: rgba(250, 204, 21, 0.55);
+    }
+    .admin-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .admin-reply-input {
+        flex: 1;
+        min-width: 8rem;
+        padding: 0.3rem 0.6rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        color: rgba(255, 255, 255, 0.92);
+        font-family: inherit;
+        font-size: 0.9rem;
     }
     .response-header {
         display: flex;
