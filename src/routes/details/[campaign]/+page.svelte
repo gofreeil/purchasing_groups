@@ -21,7 +21,7 @@
     // חברי פעילים מגיעים מ-Google Sheet (data.activeMembers).
     const STATS = {
         cellular: { rating: 5.0, savings: 25, annualSavings: 300, reviews: 47 },
-        fuel: { rating: 4.9, savings: 15, annualSavings: 180, reviews: 21, savingsText: '10-70 ש"ח', annualSavingsText: 'כ-420 ש"ח בשנה' },
+        fuel: { rating: 4.9, savings: 15, annualSavings: 180, reviews: 21 },
     };
 
     // תוכן ייחודי לכל קמפיין מגיע מ-Strapi דרך data.campaign (ראה +page.server.js).

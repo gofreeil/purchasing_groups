@@ -26,7 +26,7 @@
     // נתוני דירוג/חיסכון לכרטיסים (חודשי/שנתי) — דירוג קבוע, חיסכון מהגיליון
     const CARD_CONFIG = {
         cellular: { rating: 5.0 },
-        fuel: { rating: 4.9, savingsText: '10-70 ש"ח', annualSavingsText: 'כ-420 ש"ח בשנה' },
+        fuel: { rating: 4.9 },
     };
 
     // התween מאותחל לערך האמיתי כך שהמספר מוצג מיד (גם ב-SSR וגם בלי JS)
