@@ -8,8 +8,8 @@
 export const FALLBACK_CAMPAIGNS = {
     cellular: {
         slug: 'cellular',
-        title: 'סלולר חוסכוני',
-        description: 'מסלולי סלולר זולים במיוחד מבית רמי לוי, אקס פון ווויקום',
+        title: 'קו הסלולר הזול במדינה!',
+        description: 'החל מ-15 ש"ח לחודש, ללא התחייבות, ללא דמי הצטרפות',
         icon: '📱',
         image_url: '/assets/cellular.jpg',
         order: 1,
@@ -31,8 +31,8 @@ export const FALLBACK_CAMPAIGNS = {
     },
     fuel: {
         slug: 'fuel',
-        title: 'דלק חוסכוני',
-        description: 'הנחה קבועה בדלק בתחנות סונול, דור אלון, טן ותפוז',
+        title: 'הנחה בדלק לכל החיים!',
+        description: 'הנחה של 31 אגורות על כל ליטר בנזין מהמחיר היציג של סונול כל ימי חייך. ניתן לממש ב-555 תחנות ברחבי הארץ של דור אלון, טן, תפוז וסונול!',
         icon: '⛽',
         image_url: '/assets/fuel.jpg',
         order: 2,
@@ -51,10 +51,10 @@ export const FALLBACK_CAMPAIGNS = {
             stationNames: ['סונול', 'דור אלון', 'טן', 'תפוז'],
         },
     },
-    internet: { slug: 'internet', title: 'אינטרנט מהיר', description: 'בקרוב - חבילות אינטרנט בהנחה לחברי הקבוצה', icon: '🌐', image_url: '/assets/internet.jpg', order: 3, status: 'soon', can_join: false },
-    carInsurance: { slug: 'carInsurance', title: 'ביטוח רכב', description: 'בקרוב - ביטוח רכב קבוצתי בהנחה משמעותית', icon: '🚗', image_url: '/assets/car_insurance.png', order: 4, status: 'soon', can_join: false },
-    electricity: { slug: 'electricity', title: 'חשמל חוסכוני', description: 'בקרוב - חבילות חשמל בהנחה לחברי הקבוצה', icon: '⚡', image_url: '/assets/electricity.jpg', order: 5, status: 'soon', can_join: false },
-    coupons: { slug: 'coupons', title: 'קופונים והנחות', description: 'בקרוב - קופונים והנחות בלעדיים לחברי הקבוצה', icon: '🎟️', image_url: '/assets/coupons.jpg', order: 6, status: 'soon', can_join: false },
+    internet: { slug: 'internet', title: 'אינטרנט ביתי הזול במדינה!', description: 'צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.', icon: '🌐', image_url: '/assets/internet.jpg', order: 3, status: 'soon', can_join: false },
+    carInsurance: { slug: 'carInsurance', title: 'ביטוח רכב הזול במדינה!', description: 'צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.', icon: '🚗', image_url: '/assets/car_insurance.png', order: 4, status: 'soon', can_join: false },
+    electricity: { slug: 'electricity', title: 'מערכת חשמל עצמאית המשתלמת במדינה!', description: 'צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.', icon: '⚡', image_url: '/assets/electricity.jpg', order: 5, status: 'soon', can_join: false },
+    coupons: { slug: 'coupons', title: 'רכישת קופוני הנחה ברשתות המזון', description: 'צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.', icon: '🎟️', image_url: '/assets/coupons.jpg', order: 6, status: 'soon', can_join: false },
 };
 
 export function fallbackCampaign(slug) {
