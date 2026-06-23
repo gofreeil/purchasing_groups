@@ -869,13 +869,19 @@
 
         {#if allResponses.length > 0}
             <div class="responses-list">
-                <h3 class="responses-title">תגובות אחרונות ({allResponses.length})</h3>
+                <h3 class="responses-title">תגובות מובילות</h3>
                 {#each allResponses as r (r.id)}
-                    <div class="response-item">
+                    <div class="response-item" class:featured={r.is_featured}>
                         <div class="response-header">
                             <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
                             {#if r.company}
                                 <span class="response-company">{r.company}</span>
+                            {/if}
+                            {#if r.is_featured}
+                                <span class="response-pin" title="תגובה מובילה">📌</span>
+                            {/if}
+                            {#if r.admin_liked}
+                                <span class="response-like" title="אהוב על האדמין">❤️</span>
                             {/if}
                             <span class="response-date">{formatDate(r.createdAt || r.submitted_at)}</span>
                         </div>
@@ -894,8 +900,19 @@
                                 <p class="response-text">{r.comments}</p>
                             {/if}
                         </div>
+                        {#if r.admin_reply}
+                            <div class="response-admin-reply">
+                                <span class="admin-reply-label">תגובת האדמין:</span>
+                                <p class="admin-reply-text">{r.admin_reply}</p>
+                            </div>
+                        {/if}
                     </div>
                 {/each}
+                {#if (data.totalResponsesCount ?? 0) > allResponses.length}
+                    <a class="responses-all-link" href={`/details/${campaign}/responses`}>
+                        לכלל התגובות והדירוגים הקש כאן ←
+                    </a>
+                {/if}
             </div>
         {/if}
     </section>
@@ -2215,6 +2232,51 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
         padding: 0.85rem 1.1rem;
+    }
+    .response-item.featured {
+        border-color: rgba(250, 204, 21, 0.45);
+        background: rgba(250, 204, 21, 0.05);
+    }
+    .response-pin,
+    .response-like {
+        font-size: 1rem;
+        line-height: 1;
+    }
+    .response-admin-reply {
+        margin-top: 0.75rem;
+        padding: 0.6rem 0.85rem;
+        background: rgba(96, 165, 250, 0.08);
+        border-right: 3px solid rgba(96, 165, 250, 0.6);
+        border-radius: 8px;
+    }
+    .admin-reply-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: rgba(96, 165, 250, 0.95);
+        margin-bottom: 0.25rem;
+    }
+    .admin-reply-text {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.92rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        text-align: right;
+    }
+    .responses-all-link {
+        display: block;
+        margin-top: 0.5rem;
+        text-align: center;
+        color: #facc15;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.5rem;
+        transition: color 0.2s ease;
+    }
+    .responses-all-link:hover {
+        color: #fde047;
     }
     .response-header {
         display: flex;
