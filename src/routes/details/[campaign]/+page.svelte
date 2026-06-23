@@ -2093,14 +2093,13 @@
     }
     .submit-stack .text-input {
         width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
     @media (max-width: 600px) {
         .submit-stack {
-            width: 100%;
-        }
-        .submit-stack .text-input {
-            width: 60%;
-            align-self: flex-start;
+            width: 70%;
+            justify-self: start;
         }
     }
     .text-input {
