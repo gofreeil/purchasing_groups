@@ -2,7 +2,7 @@
 // משתמש ב-env שמותקן בזמן הריצה (SvelteKit/Vite מטעין אותו על הצד-שרת בלבד).
 import { env } from '$env/dynamic/private';
 
-const STRAPI_URL = (env.STRAPI_URL || 'https://community-il.duckdns.org').replace(/\/$/, '');
+const STRAPI_URL = (env.STRAPI_URL || 'https://api.gofreeil.com').replace(/\/$/, '');
 
 export async function strapiGet(path, params = {}, { fetch: f = fetch } = {}) {
     const search = new URLSearchParams();
