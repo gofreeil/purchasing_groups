@@ -32,32 +32,45 @@ function parseCsv(text) {
 }
 
 const isMembersRow = (l) => (l || '').trim().includes('חתמו');
+const isMonthlySavingsRow = (l) => (l || '').includes('חיסכון') && (l || '').includes('בחודש');
+const isAnnualSavingsRow = (l) => (l || '').includes('חיסכון') && (l || '').includes('בשנה');
 const toInt = (v) => {
     const n = parseInt((v || '').replace(/[^\d-]/g, ''));
     return isNaN(n) ? 0 : n;
 };
+const toNum = (v) => {
+    const n = parseFloat((v || '').replace(/[^\d.-]/g, ''));
+    return isNaN(n) ? 0 : n;
+};
 
-async function loadMembersFromSheet(fetch, campaignSlug) {
-    let activeMembers = DEFAULT_MEMBERS[campaignSlug] ?? 0;
+async function loadSheetStats(fetch, campaignSlug) {
+    const out = {
+        activeMembers: DEFAULT_MEMBERS[campaignSlug] ?? 0,
+        monthlySavings: 0,
+        annualSavings: 0,
+    };
     const col = CAMPAIGN_COLS[campaignSlug];
-    if (col === undefined) return activeMembers;
+    if (col === undefined) return out;
     try {
         const url = `https://docs.google.com/spreadsheets/d/${DASHBOARD_SHEET_ID}/export?format=csv&gid=${DASHBOARD_GID}`;
         const response = await fetch(url);
-        if (response.ok) {
-            const rows = parseCsv(await response.text());
-            for (const row of rows) {
-                if (isMembersRow(row[LABEL_COL])) {
-                    const v = toInt(row[col]);
-                    if (v > 0) activeMembers = v;
-                    break;
-                }
+        if (!response.ok) return out;
+        const rows = parseCsv(await response.text());
+        for (const row of rows) {
+            const label = row[LABEL_COL];
+            if (isMembersRow(label)) {
+                const v = toInt(row[col]);
+                if (v > 0) out.activeMembers = v;
+            } else if (isMonthlySavingsRow(label)) {
+                out.monthlySavings = Math.round(toNum(row[col]));
+            } else if (isAnnualSavingsRow(label)) {
+                out.annualSavings = Math.round(toNum(row[col]));
             }
         }
     } catch (err) {
-        console.error('Failed to load members from sheet:', err);
+        console.error('Failed to load sheet stats:', err);
     }
-    return activeMembers;
+    return out;
 }
 
 export async function load({ params, fetch, setHeaders }) {
@@ -79,13 +92,19 @@ export async function load({ params, fetch, setHeaders }) {
         throw error(404, 'Campaign not found');
     }
 
-    const [activeMembers, responses] = await Promise.all([
-        loadMembersFromSheet(fetch, params.campaign),
+    const [sheetStats, responses] = await Promise.all([
+        loadSheetStats(fetch, params.campaign),
         fetchSatisfactionResponses(params.campaign, { fetch }).catch((err) => {
             console.error('Failed to fetch satisfaction responses:', err.message);
             return [];
         }),
     ]);
 
-    return { campaign, activeMembers, responses };
+    return {
+        campaign,
+        activeMembers: sheetStats.activeMembers,
+        sheetMonthlySavings: sheetStats.monthlySavings,
+        sheetAnnualSavings: sheetStats.annualSavings,
+        responses,
+    };
 }

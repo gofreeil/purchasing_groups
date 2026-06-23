@@ -276,8 +276,8 @@
     let campaignStats = $derived({
         members: data.activeMembers ?? 0,
         rating: STATS[campaign]?.rating ?? 0,
-        savings: STATS[campaign]?.savings ?? 0,
-        annualSavings: STATS[campaign]?.annualSavings ?? 0,
+        savings: data.sheetMonthlySavings ?? STATS[campaign]?.savings ?? 0,
+        annualSavings: data.sheetAnnualSavings ?? STATS[campaign]?.annualSavings ?? 0,
         reviews: STATS[campaign]?.reviews ?? 0,
         savingsText: STATS[campaign]?.savingsText ?? null,
         annualSavingsText: STATS[campaign]?.annualSavingsText ?? null,
@@ -510,12 +510,12 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">💰</div>
-                    <div class="stat-value">{campaignStats.savingsText ?? `${campaignStats.savings} ${$t.currency}`}</div>
+                    <div class="stat-value">{campaignStats.savingsText ?? `${campaignStats.savings.toLocaleString('he-IL')} ${$t.currency}`}</div>
                     <div class="stat-label">{$t.details.statsSavings}</div>
                     {#if campaignStats.annualSavingsText}
                         <div class="stat-sub">{campaignStats.annualSavingsText}</div>
                     {:else if campaignStats.annualSavings > 0}
-                        <div class="stat-sub">{campaignStats.annualSavings} {$t.currency} בשנה</div>
+                        <div class="stat-sub">{campaignStats.annualSavings.toLocaleString('he-IL')} {$t.currency} בשנה</div>
                     {/if}
                 </div>
                 <div class="stat-card">
