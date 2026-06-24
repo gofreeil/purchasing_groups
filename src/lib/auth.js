@@ -24,14 +24,16 @@ export function authCookieOptions(url) {
     return opts;
 }
 
-export async function exchangeGoogleToken(accessToken, { fetch: f = fetch } = {}) {
-    const res = await f(`${STRAPI_URL}/api/auth/google/callback?access_token=${encodeURIComponent(accessToken)}`);
+export async function exchangeOAuthToken(provider, accessToken, { fetch: f = fetch } = {}) {
+    const res = await f(`${STRAPI_URL}/api/auth/${provider}/callback?access_token=${encodeURIComponent(accessToken)}`);
     if (!res.ok) {
         const txt = await res.text().catch(() => '');
-        throw new Error(`Google exchange failed: ${res.status} ${txt.slice(0, 200)}`);
+        throw new Error(`${provider} exchange failed: ${res.status} ${txt.slice(0, 200)}`);
     }
     return res.json();
 }
+// alias לתאימות
+export const exchangeGoogleToken = (token, opts) => exchangeOAuthToken('google', token, opts);
 
 export async function fetchCurrentUser(jwt, { fetch: f = fetch } = {}) {
     if (!jwt) return null;

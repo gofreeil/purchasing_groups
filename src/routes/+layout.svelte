@@ -159,7 +159,7 @@
 				{:else}
 					<a
 						class="login-header-btn"
-						href={`/auth/login?returnTo=${encodeURIComponent($page.url.pathname)}`}
+						href={`/login?returnTo=${encodeURIComponent($page.url.pathname)}`}
 					>
 						{$t.login}
 					</a>
