@@ -317,14 +317,6 @@
 </svelte:head>
 
 <div class="details-page" in:fade={{ duration: 300 }}>
-    <div class="admin-bar">
-        {#if data.user}
-            <span class="admin-user">{adminIsSuper ? '🔑' : '👤'} {data.user.email}</span>
-            <a class="admin-link" href={`/auth/logout?returnTo=/details/${campaign}`}>יציאה</a>
-        {:else}
-            <a class="admin-link" href={`/auth/login?returnTo=/details/${campaign}`}>התחבר כאדמין</a>
-        {/if}
-    </div>
     <!-- Hero + Stats unified banner -->
     <section class="hero-card">
         <div class="hero">

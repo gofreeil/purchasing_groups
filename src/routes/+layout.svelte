@@ -1,14 +1,14 @@
 <script>
 	import { onMount } from "svelte";
+	import { page } from "$app/stores";
 	const favicon = "/assets/קבוצות-רכישה.png";
 	import "../app.css?v=1.0.3";
 	import { lang, t } from "$lib/i18n.js";
-	import { isLoggedIn } from "$lib/user.js";
 	import AdsSidebar from "$lib/components/AdsSidebar.svelte";
 	import RightAdBanner from "$lib/components/RightAdBanner.svelte";
 	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
 
-	let { children } = $props();
+	let { data, children } = $props();
 
 	/**
 	 * @param {string} newLang
@@ -143,20 +143,27 @@
 					{/if}
 				</div>
 
-				<button
-					class="login-header-btn"
-					onclick={() => ($isLoggedIn = !$isLoggedIn)}
-				>
-					{#if $isLoggedIn}
+				{#if data?.user}
+					<a
+						class="login-header-btn"
+						href={`/auth/logout?returnTo=${encodeURIComponent($page.url.pathname)}`}
+						title={data.user.email}
+					>
+						{#if data.user.app_role === 'super_admin'}🔑{:else}👤{/if}
 						{$lang === "he"
 							? "התנתק"
 							: $lang === "ru"
 								? "Выйти"
 								: "Logout"}
-					{:else}
+					</a>
+				{:else}
+					<a
+						class="login-header-btn"
+						href={`/auth/login?returnTo=${encodeURIComponent($page.url.pathname)}`}
+					>
 						{$t.login}
-					{/if}
-				</button>
+					</a>
+				{/if}
 
 				<a
 					href="https://docs.google.com/forms/d/e/1FAIpQLSeK7H6wdZnAddeD7TuQwutsEYAT3AKkMh6L82gX797DVw8sRQ/viewform?usp=dialog"
