@@ -221,7 +221,6 @@
 							{:else}
 								<span class="user-avatar user-avatar-fallback" aria-hidden="true">{avatarInitial}</span>
 							{/if}
-							{#if data.user.app_role === 'super_admin'}<span class="user-admin-badge" title="מנהל">🔑</span>{/if}
 							<span class="chevron">⌄</span>
 						</button>
 
@@ -457,11 +456,11 @@
 		padding: 0.3rem 0.6rem;
 	}
 	.user-avatar {
-		width: 2rem;
-		height: 2rem;
+		width: 2.75rem;
+		height: 2.75rem;
 		border-radius: 50%;
 		object-fit: cover;
-		border: 1px solid var(--border-color);
+		border: 2px solid rgba(250, 204, 21, 0.5);
 		flex-shrink: 0;
 		display: block;
 	}
@@ -472,12 +471,7 @@
 		background: linear-gradient(135deg, #facc15, #fb923c);
 		color: #1a1a1a;
 		font-weight: 800;
-		font-size: 0.95rem;
-		line-height: 1;
-		border: none;
-	}
-	.user-admin-badge {
-		font-size: 0.85rem;
+		font-size: 1.2rem;
 		line-height: 1;
 	}
 	.user-dropdown {
