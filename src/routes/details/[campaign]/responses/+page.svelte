@@ -1,4 +1,6 @@
 <script>
+    import RatingForm from "$lib/RatingForm.svelte";
+
     let { data } = $props();
 
     function formatDate(iso) {
@@ -25,6 +27,11 @@
             {/if}
         </p>
     </header>
+
+    <RatingForm
+        campaignSlug={data.campaign?.slug ?? ''}
+        ratingCompanies={data.campaign?.rating_companies ?? null}
+    />
 
     {#if data.responses.length === 0}
         <p class="empty-state">אין עדיין תגובות. תהיה הראשון!</p>
