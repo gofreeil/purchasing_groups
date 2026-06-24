@@ -230,10 +230,14 @@
 
                 {#if card.rating}
                     <div class="survey-badge-container">
-                        <div class="survey-rating-summary">
+                        <a
+                            href={`/details/${campaign.slug}/responses`}
+                            class="survey-rating-summary"
+                            aria-label={`${$t.details?.statsRating ?? 'דירוג'} ${card.rating.toFixed(1)} מתוך 5 — לצפייה בכל הדירוגים והתגובות`}
+                        >
                             <span class="stars-gold">⭐⭐⭐⭐⭐</span>
                             <span class="rating-val">{card.rating.toFixed(1)}/5</span>
-                        </div>
+                        </a>
                     </div>
                 {/if}
             </div>
@@ -568,6 +572,14 @@
 
     .purchase-status {
         position: relative;
+        /* מעל ה-overlay (z-index:1) כדי שלינק הכוכבים יהיה לחיץ; pointer-events:none
+           מעביר קליקים על שאר הכרטיס ל-overlay, רק הכוכבים תופסים (auto למטה) */
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .survey-rating-summary {
+        pointer-events: auto;
     }
 
     .status-col,
@@ -674,6 +686,15 @@
         border: 1px solid rgba(250, 204, 21, 0.4);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         animation: slideInRight 0.5s ease-out;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .survey-rating-summary:hover {
+        transform: translateY(-2px);
+        border-color: #facc15;
+        box-shadow: 0 6px 20px rgba(250, 204, 21, 0.35);
     }
 
     @keyframes slideInRight {
