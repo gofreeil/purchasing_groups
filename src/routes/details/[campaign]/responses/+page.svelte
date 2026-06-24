@@ -34,20 +34,12 @@
 
     <section class="rate-section">
         <h2 class="rate-title">דרגו ושתפו את דעתכם</h2>
-        {#if data.user}
-            <RatingForm
-                campaignSlug={data.campaign?.slug ?? ''}
-                ratingCompanies={data.campaign?.rating_companies ?? null}
-            />
-        {:else}
-            <div class="register-gate">
-                <span class="register-gate-icon" aria-hidden="true">🔒</span>
-                <p class="register-gate-text">
-                    הדירוג והדעה שלך חשובים לנו, אנא הירשם תחילה על מנת לוודא שבוטים לא מעורבים בהצבעה והתגובות
-                </p>
-                <a class="register-gate-btn" href={loginHref}>הרשמה / התחברות</a>
-            </div>
-        {/if}
+        <RatingForm
+            campaignSlug={data.campaign?.slug ?? ''}
+            ratingCompanies={data.campaign?.rating_companies ?? null}
+            loggedIn={!!data.user}
+            {loginHref}
+        />
     </section>
 
     {#if data.responses.length === 0}
@@ -112,42 +104,6 @@
         font-size: 1.4rem;
         font-weight: 800;
         margin: 0 0 1.2rem;
-    }
-    .register-gate {
-        max-width: 560px;
-        margin: 0 auto;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem 0.5rem;
-    }
-    .register-gate-icon {
-        font-size: 2.6rem;
-        line-height: 1;
-    }
-    .register-gate-text {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 600;
-        line-height: 1.6;
-        color: rgba(255, 255, 255, 0.92);
-    }
-    .register-gate-btn {
-        display: inline-block;
-        padding: 0.8rem 2.2rem;
-        background: linear-gradient(135deg, #facc15, #fb923c);
-        color: #1a1a1a;
-        font-size: 1.05rem;
-        font-weight: 800;
-        border-radius: 12px;
-        text-decoration: none;
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
-    }
-    .register-gate-btn:hover {
-        transform: translateY(-3px) scale(1.03);
-        box-shadow: 0 10px 22px rgba(250, 204, 21, 0.4);
     }
     .responses-page-head {
         text-align: right;

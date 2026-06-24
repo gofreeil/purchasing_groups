@@ -2,9 +2,11 @@
     import { fade } from "svelte/transition";
     import { invalidateAll } from "$app/navigation";
 
-    // טופס דירוג + תגובה. מוצג רק למשתמשים מחוברים (ה-gate בצד הקורא).
-    // campaignSlug: ה-slug של המבצע; ratingCompanies: רשימת חברות לבחירה (או null אם אין).
-    let { campaignSlug, ratingCompanies = null } = $props();
+    // טופס דירוג + תגובה. הטופס תמיד גלוי; אם אורח (לא מחובר) מנסה לדרג/לשלוח,
+    // מוצגת הודעת הרשמה במקום לבצע את הפעולה.
+    // campaignSlug: ה-slug של המבצע; ratingCompanies: רשימת חברות לבחירה (או null);
+    // loggedIn: האם המשתמש מחובר; loginHref: יעד כפתור ההרשמה.
+    let { campaignSlug, ratingCompanies = null, loggedIn = true, loginHref = "/login" } = $props();
 
     const EMOJI_BY_LEVEL = {
         1: { face: "😞", text: "מאוד לא מרוצה" },
@@ -22,6 +24,7 @@
     let submitted = $state(false);
     let submitError = $state("");
     let mustPickCompanyShake = $state(false);
+    let showRegisterPrompt = $state(false); // מופיע רק כשאורח לוחץ על דירוג/שליחה
 
     let companies = $derived(
         Array.isArray(ratingCompanies) && ratingCompanies.length > 0 ? ratingCompanies : null,
@@ -36,6 +39,11 @@
     }
 
     function tryRate(n) {
+        // אורח שלוחץ על דירוג - מציגים הודעת הרשמה ולא מדרגים
+        if (!loggedIn) {
+            showRegisterPrompt = true;
+            return;
+        }
         if (companies && !selectedCompany) {
             mustPickCompanyShake = true;
             setTimeout(() => (mustPickCompanyShake = false), 600);
@@ -45,6 +53,10 @@
     }
 
     async function handleSubmit() {
+        if (!loggedIn) {
+            showRegisterPrompt = true;
+            return;
+        }
         if (rating === 0) return;
         submitError = "";
         try {
@@ -138,6 +150,16 @@
             </p>
         {/if}
 
+        {#if showRegisterPrompt}
+            <div class="register-prompt" in:fade={{ duration: 220 }} role="alert">
+                <span class="register-prompt-icon" aria-hidden="true">🔒</span>
+                <p class="register-prompt-text">
+                    הדירוג והדעה שלך חשובים לנו, אנא הירשם תחילה על מנת לוודא שבוטים לא מעורבים בהצבעה והתגובות
+                </p>
+                <a href={loginHref} class="register-prompt-btn">הרשמה / התחברות</a>
+            </div>
+        {/if}
+
         <div class="comments-row">
             <label for="rate-comments" class="comments-label">הערות לגבי החברה המדורגת בלבד:</label>
             <div class="comments-submit-grid">
@@ -146,7 +168,7 @@
                     class="comments-input"
                     bind:value={comments}
                     placeholder="מצב קליטה, כמה כסף התוכנית חסכה לך בחודש וכמה בשנה"
-                    rows="3"
+                    rows="2"
                 ></textarea>
                 <div class="submit-stack">
                     <input type="text" class="text-input" bind:value={userName} placeholder="שם" aria-label="שם" />
@@ -370,8 +392,9 @@
     }
     .comments-input {
         width: 100%;
-        min-height: 64px;
-        padding: 0.8rem 1rem;
+        min-height: 0;
+        height: auto;
+        padding: 0.55rem 1rem;
         background: rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.18);
         border-radius: 12px;
@@ -444,5 +467,46 @@
         color: #fecaca;
         font-weight: 600;
         text-align: center;
+    }
+
+    /* הודעת הרשמה - מופיעה רק כשאורח לוחץ על הדירוג, הטופס נשאר גלוי מעליה */
+    .register-prompt {
+        margin: 1rem auto 0;
+        max-width: 560px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1.2rem 1.4rem;
+        background: rgba(250, 204, 21, 0.08);
+        border: 1px solid rgba(250, 204, 21, 0.45);
+        border-radius: 14px;
+        text-align: center;
+    }
+    .register-prompt-icon {
+        font-size: 2.2rem;
+        line-height: 1;
+    }
+    .register-prompt-text {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 600;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.92);
+    }
+    .register-prompt-btn {
+        display: inline-block;
+        padding: 0.7rem 2rem;
+        background: linear-gradient(135deg, #facc15, #fb923c);
+        color: #1a1a1a;
+        font-size: 1.02rem;
+        font-weight: 800;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .register-prompt-btn:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 10px 22px rgba(250, 204, 21, 0.4);
     }
 </style>
