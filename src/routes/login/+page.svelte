@@ -3,9 +3,14 @@
     let { form } = $props();
 
     const returnTo = $derived($page.url.searchParams.get('returnTo') || '/');
-    const communityLoginUrl = $derived(
-        `https://community.gofreeil.com/login?returnTo=${encodeURIComponent('https://groups.gofreeil.com' + returnTo)}`,
+    // SSO: שולחים לקהילה, היא קובעת את העוגייה המשותפת ומחזירה לכאן.
+    const communityCallback = $derived(
+        `https://groups.gofreeil.com/auth/community-callback?returnTo=${encodeURIComponent(returnTo)}`,
     );
+    const communityLoginUrl = $derived(
+        `https://community.gofreeil.com/sso?callback=${encodeURIComponent(communityCallback)}`,
+    );
+    const communityError = $derived($page.url.searchParams.get('communityError') === '1');
 </script>
 
 <svelte:head><title>התחברות | רכישות קבוצתיות</title></svelte:head>
@@ -13,6 +18,12 @@
 <section class="login-page">
     <h1>התחברות</h1>
     <p class="sub">בחר איך להתחבר. אם אין לך חשבון — ההתחברות יוצרת אותו אוטומטית.</p>
+
+    {#if communityError}
+        <div class="community-notice">
+            עדיין אינך מופיע ברשימת קהילת יוצאים לחירות. אנא הירשם באחת מהדרכים האחרות.
+        </div>
+    {/if}
 
     <div class="providers">
         <a class="prov google" href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`}>
@@ -94,6 +105,16 @@
         color: rgba(255, 255, 255, 0.7);
         margin: 0 0 1.6rem;
     }
+    .community-notice {
+        background: rgba(250, 204, 21, 0.12);
+        border: 1px solid rgba(250, 204, 21, 0.4);
+        color: #fde68a;
+        padding: 0.7rem 0.95rem;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        margin-bottom: 1.2rem;
+        line-height: 1.5;
+    }
     .providers {
         display: flex;
         flex-direction: column;
@@ -109,6 +130,10 @@
         text-decoration: none;
         transition: transform 0.1s ease, background 0.15s ease;
         font-size: 0.98rem;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-family: inherit;
     }
     .prov:hover { transform: translateY(-1px); }
     .prov-icon {

@@ -32,6 +32,22 @@
 
 	let showLangMenu = $state(false);
 
+	// ברכת SSO מקהילה: מופיעה כש-?welcome=community ויש משתמש מזוהה.
+	let showWelcome = $state(false);
+	onMount(() => {
+		if (
+			$page.url.searchParams.get("welcome") === "community" &&
+			data?.user
+		) {
+			showWelcome = true;
+			// מנקה את הפרמטר מה-URL בלי לטעון מחדש
+			const url = new URL(window.location.href);
+			url.searchParams.delete("welcome");
+			history.replaceState(history.state, "", url);
+			setTimeout(() => (showWelcome = false), 6000);
+		}
+	});
+
 	/**
 	 * @param {MouseEvent} event
 	 */
@@ -47,6 +63,24 @@
 </script>
 
 <svelte:window onclick={handleClickOutside} />
+
+{#if showWelcome && data?.user}
+	<div class="welcome-toast" role="status">
+		<span class="welcome-emoji">🎉</span>
+		<span>
+			{$lang === "he"
+				? `ברוך הבא, ${data.user.username || data.user.email}! זיהינו אותך דרך קהילת יוצאים לחירות.`
+				: $lang === "ru"
+					? `Добро пожаловать, ${data.user.username || data.user.email}!`
+					: `Welcome, ${data.user.username || data.user.email}!`}
+		</span>
+		<button
+			class="welcome-close"
+			onclick={() => (showWelcome = false)}
+			aria-label="סגור">×</button
+		>
+	</div>
+{/if}
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
@@ -225,6 +259,48 @@
 </div>
 
 <style>
+	.welcome-toast {
+		position: fixed;
+		top: 1rem;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 1000;
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		max-width: 90vw;
+		background: linear-gradient(135deg, #16a34a, #15803d);
+		color: #fff;
+		padding: 0.8rem 1.1rem;
+		border-radius: 12px;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+		font-weight: 600;
+		font-size: 0.95rem;
+		animation: welcome-in 0.35s ease;
+	}
+	.welcome-emoji {
+		font-size: 1.3rem;
+	}
+	.welcome-close {
+		background: none;
+		border: none;
+		color: rgba(255, 255, 255, 0.85);
+		font-size: 1.4rem;
+		line-height: 1;
+		cursor: pointer;
+		padding: 0 0.2rem;
+	}
+	@keyframes welcome-in {
+		from {
+			opacity: 0;
+			transform: translate(-50%, -12px);
+		}
+		to {
+			opacity: 1;
+			transform: translate(-50%, 0);
+		}
+	}
+
 	.lang-selector-container {
 		position: relative;
 	}
