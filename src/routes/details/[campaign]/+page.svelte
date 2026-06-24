@@ -640,7 +640,11 @@
                                         type="button"
                                         class="star"
                                         class:filled={n <= rating}
-                                        onclick={() => tryRate(n)}
+                                        onclick={(e) => {
+                                            e.stopPropagation();
+                                            tryRate(n);
+                                            setTimeout(() => window.location.assign(`/details/${campaign}/responses`), 100);
+                                        }}
                                         aria-label={`דירוג ${n} מתוך 5`}
                                     >★</button>
                                 {/each}
@@ -2269,6 +2273,10 @@
         gap: 1.5rem;
         flex-wrap: wrap;
         margin-top: 0.5rem;
+    }
+    .stars-link {
+        text-decoration: none;
+        display: inline-block;
     }
     .stars {
         display: inline-flex;
