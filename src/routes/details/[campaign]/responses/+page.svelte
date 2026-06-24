@@ -33,7 +33,8 @@
     </header>
 
     <section class="rate-section">
-        <h2 class="rate-title">דרגו ושתפו את דעתכם</h2>
+        <h2 class="rate-title">שביעות רצון משירות החברה ומהמבצע</h2>
+        <p class="rate-subtitle">דרגו ושתפו את החוויה שלכם</p>
         <RatingForm
             campaignSlug={data.campaign?.slug ?? ''}
             ratingCompanies={data.campaign?.rating_companies ?? null}
@@ -103,6 +104,13 @@
         color: #facc15;
         font-size: 1.4rem;
         font-weight: 800;
+        margin: 0 0 0.4rem;
+    }
+    .rate-subtitle {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 1rem;
+        font-weight: 500;
         margin: 0 0 1.2rem;
     }
     .responses-page-head {
