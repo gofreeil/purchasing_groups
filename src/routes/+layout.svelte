@@ -143,6 +143,12 @@
 					{/if}
 				</div>
 
+				<a
+					href="https://docs.google.com/forms/d/e/1FAIpQLSeK7H6wdZnAddeD7TuQwutsEYAT3AKkMh6L82gX797DVw8sRQ/viewform?usp=dialog"
+					target="_blank"
+					class="add-business-btn">{$t.addOffer}</a
+				>
+
 				{#if data?.user}
 					<a
 						class="login-header-btn"
@@ -164,12 +170,6 @@
 						{$t.login}
 					</a>
 				{/if}
-
-				<a
-					href="https://docs.google.com/forms/d/e/1FAIpQLSeK7H6wdZnAddeD7TuQwutsEYAT3AKkMh6L82gX797DVw8sRQ/viewform?usp=dialog"
-					target="_blank"
-					class="add-business-btn">{$t.addOffer}</a
-				>
 			</div>
 		</div>
 	</header>
