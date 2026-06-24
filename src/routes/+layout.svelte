@@ -31,6 +31,7 @@
 	});
 
 	let showLangMenu = $state(false);
+	let showUserMenu = $state(false); // תפריט המשתמש בהדר (החלף פרופיל / התנתק)
 
 	// ברכת SSO מקהילה: מופיעה כש-?welcome=community ויש משתמש מזוהה.
 	let showWelcome = $state(false);
@@ -58,6 +59,13 @@
 			!event.target.closest(".lang-selector")
 		) {
 			showLangMenu = false;
+		}
+		if (
+			showUserMenu &&
+			event.target instanceof Element &&
+			!event.target.closest(".user-menu")
+		) {
+			showUserMenu = false;
 		}
 	}
 </script>
@@ -184,18 +192,44 @@
 				>
 
 				{#if data?.user}
-					<a
-						class="login-header-btn"
-						href={`/auth/logout?returnTo=${encodeURIComponent($page.url.pathname)}`}
-						title={data.user.email}
-					>
-						{#if data.user.app_role === 'super_admin'}🔑{:else}👤{/if}
-						{$lang === "he"
-							? "התנתק"
-							: $lang === "ru"
-								? "Выйти"
-								: "Logout"}
-					</a>
+					<div class="user-menu">
+						<button
+							class="login-header-btn user-menu-btn"
+							onclick={() => (showUserMenu = !showUserMenu)}
+							title={data.user.email}
+						>
+							{#if data.user.app_role === 'super_admin'}🔑{:else}👤{/if}
+							<span class="user-name">{data.user.username || data.user.email}</span>
+							<span class="chevron">⌄</span>
+						</button>
+
+						{#if showUserMenu}
+							<div class="user-dropdown">
+								<a
+									class="user-dropdown-item"
+									href={`/login?returnTo=${encodeURIComponent($page.url.pathname)}`}
+									onclick={() => (showUserMenu = false)}
+								>
+									🔄 {$lang === "he"
+										? "החלף פרופיל"
+										: $lang === "ru"
+											? "Сменить профиль"
+											: "Switch profile"}
+								</a>
+								<a
+									class="user-dropdown-item"
+									href={`/auth/logout?returnTo=${encodeURIComponent($page.url.pathname)}`}
+									onclick={() => (showUserMenu = false)}
+								>
+									🚪 {$lang === "he"
+										? "התנתק"
+										: $lang === "ru"
+											? "Выйти"
+											: "Logout"}
+								</a>
+							</div>
+						{/if}
+					</div>
 				{:else}
 					<a
 						class="login-header-btn"
