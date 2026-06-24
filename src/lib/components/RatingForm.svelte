@@ -167,8 +167,10 @@
                     id="rate-comments"
                     class="comments-input"
                     bind:value={comments}
-                    placeholder="מצב קליטה, כמה כסף התוכנית חסכה לך בחודש וכמה בשנה"
-                    rows="2"
+                    placeholder={`שירות החברה, מהירות הגלישה
+כמה כסף אני חוסך בחודש וכמה בשנה
+וכו'`}
+                    rows="3"
                 ></textarea>
                 <div class="submit-stack">
                     <input type="text" class="text-input" bind:value={userName} placeholder="שם" aria-label="שם" />
@@ -362,7 +364,7 @@
         display: grid;
         grid-template-columns: 1fr auto;
         gap: 1.5rem;
-        align-items: start;
+        align-items: stretch;   /* ה-textarea נמתח אנכית עד תחתית הכפתור השלישי */
     }
     .comments-submit-grid .submit-btn {
         margin-top: 0;
@@ -373,6 +375,7 @@
             grid-template-columns: 1fr;
             gap: 0.85rem;
         }
+        .comments-input { max-width: 100%; }
     }
     .submit-stack {
         display: flex;
@@ -392,6 +395,8 @@
     }
     .comments-input {
         width: 100%;
+        max-width: 490px;          /* רוחב המסגרת - מורחב שמאלה עם רווח מהכפתורים */
+        justify-self: start;       /* RTL: עוגן לימין; הקצה השמאלי זז ימינה → רווח מהכפתורים */
         min-height: 0;
         height: auto;
         padding: 0.55rem 1rem;
