@@ -597,111 +597,18 @@
     <section class="section survey-section-wrap">
         <h2>שביעות רצון משירות החברה ומהמבצע</h2>
 
-        {#if submitted}
-            <div class="thank-you" in:fade={{ duration: 400 }}>
-                <div class="success-icon">✨</div>
-                <h3>תודה על הדירוג!</h3>
-                <p>המשוב שלך עוזר לנו להשתפר.</p>
+        <!-- אין דירוג בדף המבצע - רק סיכום ההצבעות, מקושר לדף הדירוגים והתגובות -->
+        <a
+            href={`/details/${campaign}/responses`}
+            class="rating-summary-cta"
+            aria-label={`דירוג ${campaignStats.rating.toFixed(1)} מתוך 5 — למעבר לכל הדירוגים והתגובות`}
+        >
+            <div class="rating-summary-badge">
+                <span class="rating-summary-stars" aria-hidden="true">⭐⭐⭐⭐⭐</span>
+                <span class="rating-summary-val">{campaignStats.rating.toFixed(1)}/5</span>
             </div>
-        {:else}
-            <div class="survey-form">
-                <div class="survey-inline-row">
-                    {#if ratingCompanies}
-                        <div class="survey-step">
-                            <span class="step-label">בחר:</span>
-                            <div
-                                class="company-picker"
-                                class:shake={mustPickCompanyShake}
-                                role="radiogroup"
-                                aria-label="בחר חברה לדירוג"
-                            >
-                                {#each ratingCompanies as company}
-                                    <button
-                                        type="button"
-                                        role="radio"
-                                        aria-checked={selectedCompany === company}
-                                        class="company-pill"
-                                        class:selected={selectedCompany === company}
-                                        onclick={() => selectCompany(company)}
-                                    >
-                                        {company}
-                                    </button>
-                                {/each}
-                            </div>
-                        </div>
-                    {/if}
-
-                    <div class="survey-step">
-                        <span class="step-label">דרג:</span>
-                        <div class="star-rating">
-                            <div class="stars" role="presentation">
-                                {#each [1, 2, 3, 4, 5] as n}
-                                    <button
-                                        type="button"
-                                        class="star"
-                                        class:filled={n <= rating}
-                                        onclick={() => tryRate(n)}
-                                        aria-label={`דירוג ${n} מתוך 5`}
-                                    >★</button>
-                                {/each}
-                            </div>
-                            {#if currentEmoji}
-                                <div class="emoji-display" in:fade={{ duration: 220 }}>
-                                    <span class="emoji-face" aria-hidden="true">{currentEmoji.face}</span>
-                                    <span class="emoji-text">{currentEmoji.text}</span>
-                                </div>
-                            {/if}
-                        </div>
-                    </div>
-                </div>
-
-                {#if mustPickCompanyShake}
-                    <p class="rating-hint" in:fade={{ duration: 180 }}>
-                        סמן קודם את החברה שנותנת לך שירות, ואז דרג ⬆️
-                    </p>
-                {/if}
-
-                <div class="comments-row">
-                    <label for="survey-comments" class="comments-label">הערות לגבי החברה המדורגת בלבד:</label>
-                    <div class="comments-submit-grid">
-                        <textarea
-                            id="survey-comments"
-                            class="comments-input"
-                            bind:value={comments}
-                            placeholder="מצב קליטה, כמה כסף התוכנית חסכה לך בחודש וכמה בשנה"
-                            rows="3"
-                        ></textarea>
-                        <div class="submit-stack">
-                            <input
-                                type="text"
-                                class="text-input"
-                                bind:value={userName}
-                                placeholder="שם"
-                                aria-label="שם"
-                            />
-                            <input
-                                type="text"
-                                class="text-input"
-                                bind:value={userCity}
-                                placeholder="עיר"
-                                aria-label="עיר"
-                            />
-                            <button
-                                class="primary-btn submit-btn"
-                                onclick={handleSubmit}
-                                disabled={rating === 0 || !canRate}
-                            >
-                                שלח דירוג ותגובה
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {#if submitError}
-                    <div class="submit-error" role="alert">{submitError}</div>
-                {/if}
-            </div>
-        {/if}
+            <span class="rating-summary-text">לדירוגים והתגובות&nbsp;←</span>
+        </a>
 
         {#if allResponses.length > 0}
             <div class="responses-list">
@@ -1846,6 +1753,55 @@
     /* Survey */
     .survey-section-wrap {
         text-align: center;
+    }
+
+    /* סיכום ההצבעות בדף המבצע - קישור לדף הדירוגים והתגובות (במקום טופס דירוג) */
+    .rating-summary-cta {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 0 auto 0.5rem;
+        padding: 1.1rem 2rem;
+        background: rgba(10, 17, 40, 0.55);
+        border: 2px solid rgba(250, 204, 21, 0.45);
+        border-radius: 18px;
+        text-decoration: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .rating-summary-cta:hover {
+        transform: translateY(-3px);
+        border-color: #facc15;
+        box-shadow: 0 10px 26px rgba(250, 204, 21, 0.35);
+    }
+    .rating-summary-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+    }
+    .rating-summary-stars {
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+        line-height: 1;
+    }
+    .rating-summary-val {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #facc15;
+    }
+    .rating-summary-text {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #facc15;
+    }
+    @media (max-width: 560px) {
+        .rating-summary-cta {
+            padding: 0.9rem 1.4rem;
+        }
+        .rating-summary-stars { font-size: 1.25rem; }
+        .rating-summary-val { font-size: 1.35rem; }
+        .rating-summary-text { font-size: 1rem; }
     }
 
     .restricted-box,
