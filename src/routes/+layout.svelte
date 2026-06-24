@@ -33,6 +33,23 @@
 	let showLangMenu = $state(false);
 	let showUserMenu = $state(false); // תפריט המשתמש בהדר (החלף פרופיל / התנתק)
 
+	// שם תצוגה ידידותי. לעולם לא להציג מזהה אוטומטי כמו "google_1164663...".
+	// סדר העדפה: שם אמיתי → החלק שלפני @ באימייל → username אנושי → "משתמש".
+	const AUTO_ID = /^(google|facebook|apple|community|local)[_-]/i;
+	/** @param {string|null|undefined} s */
+	function humanOrEmpty(s) {
+		if (!s || AUTO_ID.test(s)) return "";
+		return s;
+	}
+	let displayName = $derived.by(() => {
+		const u = data?.user;
+		if (!u) return "";
+		const emailLocal = u.email && !AUTO_ID.test(u.email) ? u.email.split("@")[0] : "";
+		return humanOrEmpty(u.name) || emailLocal || humanOrEmpty(u.username) || "משתמש";
+	});
+	// אות ראשונה לעיגול ה-fallback כשאין תמונת פרופיל
+	let avatarInitial = $derived((displayName || "U").charAt(0).toUpperCase());
+
 	// ברכת SSO מקהילה: מופיעה כש-?welcome=community ויש משתמש מזוהה.
 	let showWelcome = $state(false);
 	onMount(() => {
@@ -196,10 +213,15 @@
 						<button
 							class="login-header-btn user-menu-btn"
 							onclick={() => (showUserMenu = !showUserMenu)}
-							title={data.user.email}
+							title={data.user.email || displayName}
+							aria-label={displayName}
 						>
-							{#if data.user.app_role === 'super_admin'}🔑{:else}👤{/if}
-							<span class="user-name">{data.user.username || data.user.email}</span>
+							{#if data.user.avatar_url}
+								<img class="user-avatar" src={data.user.avatar_url} alt="" referrerpolicy="no-referrer" />
+							{:else}
+								<span class="user-avatar user-avatar-fallback" aria-hidden="true">{avatarInitial}</span>
+							{/if}
+							{#if data.user.app_role === 'super_admin'}<span class="user-admin-badge" title="מנהל">🔑</span>{/if}
 							<span class="chevron">⌄</span>
 						</button>
 
@@ -422,5 +444,74 @@
 	.chevron {
 		font-size: 0.8rem;
 		opacity: 0.7;
+	}
+
+	/* תפריט משתמש בהדר */
+	.user-menu {
+		position: relative;
+	}
+	.user-menu-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.3rem 0.6rem;
+	}
+	.user-avatar {
+		width: 2rem;
+		height: 2rem;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 1px solid var(--border-color);
+		flex-shrink: 0;
+		display: block;
+	}
+	.user-avatar-fallback {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, #facc15, #fb923c);
+		color: #1a1a1a;
+		font-weight: 800;
+		font-size: 0.95rem;
+		line-height: 1;
+		border: none;
+	}
+	.user-admin-badge {
+		font-size: 0.85rem;
+		line-height: 1;
+	}
+	.user-dropdown {
+		position: absolute;
+		top: calc(100% + 0.5rem);
+		left: 0;
+		background: var(--bg-header);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+		display: flex;
+		flex-direction: column;
+		min-width: 160px;
+		z-index: 1001;
+		overflow: hidden;
+		animation: slideDown 0.2s ease-out;
+	}
+	.user-dropdown-item {
+		background: none;
+		border: none;
+		color: var(--text-white);
+		padding: 0.8rem 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		cursor: pointer;
+		text-align: right;
+		text-decoration: none;
+		font-size: 0.9rem;
+		font-weight: 600;
+		transition: background 0.2s, color 0.2s;
+	}
+	.user-dropdown-item:hover {
+		background: rgba(250, 204, 21, 0.1);
+		color: #facc15;
 	}
 </style>
