@@ -28,22 +28,7 @@ export async function strapiPost(path, data, { fetch: f = fetch } = {}) {
     return res.json();
 }
 
-export async function fetchCampaigns({ fetch: f = fetch } = {}) {
-    const data = await strapiGet('pg-campaigns', {
-        sort: 'order:asc',
-        'pagination[pageSize]': 100,
-    }, { fetch: f });
-    return data?.data ?? [];
-}
-
-export async function fetchCampaignBySlug(slug, { fetch: f = fetch } = {}) {
-    const data = await strapiGet('pg-campaigns', {
-        'filters[slug][$eq]': slug,
-        'pagination[pageSize]': 1,
-    }, { fetch: f });
-    return (data?.data ?? [])[0] ?? null;
-}
-
+// תוכן הקמפיינים עבר לפרונט (campaigns.js) - Strapi משמש כאן רק לתגובות שביעות-רצון.
 export async function fetchSatisfactionResponses(campaignSlug, { fetch: f = fetch, pageSize = 50 } = {}) {
     const data = await strapiGet('pg-satisfaction-responses', {
         'filters[campaign_slug][$eq]': campaignSlug,

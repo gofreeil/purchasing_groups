@@ -1,17 +1,11 @@
 import { error } from '@sveltejs/kit';
-import { fetchCampaignBySlug, fetchSatisfactionResponses } from '$lib/strapi.js';
-import { fallbackCampaign } from '$lib/fallback-campaigns.js';
+import { fetchSatisfactionResponses } from '$lib/strapi.js';
+import { getCampaign } from '$lib/campaigns.js';
 
 export async function load({ params, fetch, setHeaders }) {
     setHeaders({ 'cache-control': 'public, s-maxage=60, stale-while-revalidate=600' });
 
-    let campaign = null;
-    try {
-        campaign = await fetchCampaignBySlug(params.campaign, { fetch });
-    } catch (err) {
-        console.error(`Strapi unreachable for "${params.campaign}", using fallback:`, err.message);
-        campaign = fallbackCampaign(params.campaign);
-    }
+    const campaign = getCampaign(params.campaign);
     if (!campaign) throw error(404, 'Campaign not found');
 
     const responses = await fetchSatisfactionResponses(params.campaign, { fetch, pageSize: 500 })

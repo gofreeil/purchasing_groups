@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
-import { fetchCampaignBySlug, fetchSatisfactionResponses } from '$lib/strapi.js';
-import { fallbackCampaign } from '$lib/fallback-campaigns.js';
+import { fetchSatisfactionResponses } from '$lib/strapi.js';
+import { getCampaign } from '$lib/campaigns.js';
 
 // --- Google Sheet: מספר חברים פעילים פר-קמפיין (שורת "חתמו") ---
 const DASHBOARD_SHEET_ID = '1YGcal1HFy-q4hLJfBF5uml1CMUO4KqZRYnnp6ZneIH0';
@@ -78,17 +78,9 @@ export async function load({ params, fetch, setHeaders }) {
     // משמעות - גם אם Strapi נופל ל-10 דקות, ה-CDN של Vercel ימשיך לשרת את הגרסה האחרונה.
     setHeaders({ 'cache-control': 'public, s-maxage=60, stale-while-revalidate=600' });
 
-    let campaign = null;
-    try {
-        campaign = await fetchCampaignBySlug(params.campaign, { fetch });
-    } catch (err) {
-        // graceful degradation: אם Strapi נופל - לחזור ל-hardcoded fallback במקום לזרוק 503
-        console.error(`Strapi unreachable for "${params.campaign}", using fallback:`, err.message);
-        campaign = fallbackCampaign(params.campaign);
-    }
-
+    // תוכן הקמפיין מגיע מהפרונט (campaigns.js) - לא תלוי ב-Strapi.
+    const campaign = getCampaign(params.campaign);
     if (!campaign) {
-        // ה-slug באמת לא קיים - לא Strapi down
         throw error(404, 'Campaign not found');
     }
 
