@@ -232,6 +232,38 @@
     let submitError = $state("");
     let extraResponses = $state([]);
     let allResponses = $derived([...extraResponses, ...(data.responses || [])]);
+
+    // ─── Admin ───
+    let adminIsSuper = $derived(data.user?.app_role === 'super_admin');
+    let adminBusy = $state({});
+    let replyDraft = $state({});
+
+    async function adminUpdate(r, fields) {
+        if (!r.documentId) return;
+        adminBusy = { ...adminBusy, [r.documentId]: true };
+        try {
+            const res = await fetch(`/api/admin/responses/${r.documentId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fields),
+            });
+            if (!res.ok) throw new Error((await res.text()).slice(0, 200));
+            await invalidateAll();
+        } catch (e) {
+            alert(`שגיאה: ${e.message}`);
+        } finally {
+            adminBusy = { ...adminBusy, [r.documentId]: false };
+        }
+    }
+    const toggleFeatured = (r) => adminUpdate(r, { is_featured: !r.is_featured });
+    const toggleLike = (r) => adminUpdate(r, { admin_liked: !r.admin_liked });
+    const saveReply = (r) => {
+        const text = (replyDraft[r.documentId] ?? r.admin_reply ?? '').trim();
+        adminUpdate(r, { admin_reply: text || null }).then(() => {
+            const { [r.documentId]: _, ...rest } = replyDraft;
+            replyDraft = rest;
+        });
+    };
     let mustPickCompanyShake = $state(false); // אנימציית שייק על הגלולות אם מנסים לדרג לפני בחירה
 
     // רשימת חברות לדירוג. אם אין - מציגים דירוג בודד בלי בחירה.
@@ -481,6 +513,14 @@
 </svelte:head>
 
 <div class="details-page" in:fade={{ duration: 300 }}>
+    <div class="admin-bar">
+        {#if data.user}
+            <span class="admin-user">{adminIsSuper ? '🔑' : '👤'} {data.user.email}</span>
+            <a class="admin-link" href={`/auth/logout?returnTo=/details/${campaign}`}>יציאה</a>
+        {:else}
+            <a class="admin-link" href={`/auth/login?returnTo=/details/${campaign}`}>התחבר כאדמין</a>
+        {/if}
+    </div>
     <!-- Hero + Stats unified banner -->
     <section class="hero-card">
         <div class="hero">
@@ -904,6 +944,24 @@
                             <div class="response-admin-reply">
                                 <span class="admin-reply-label">תגובת האדמין:</span>
                                 <p class="admin-reply-text">{r.admin_reply}</p>
+                            </div>
+                        {/if}
+                        {#if adminIsSuper}
+                            <div class="admin-controls">
+                                <button type="button" class="admin-btn" class:on={r.is_featured} disabled={adminBusy[r.documentId]} onclick={() => toggleFeatured(r)} title="פין">📌</button>
+                                <button type="button" class="admin-btn" class:on={r.admin_liked} disabled={adminBusy[r.documentId]} onclick={() => toggleLike(r)} title="לייק">❤️</button>
+                                {#if replyDraft[r.documentId] !== undefined || r.admin_reply}
+                                    <input
+                                        type="text"
+                                        class="admin-reply-input"
+                                        placeholder="תגובת אדמין"
+                                        value={replyDraft[r.documentId] ?? r.admin_reply ?? ''}
+                                        oninput={(e) => (replyDraft = { ...replyDraft, [r.documentId]: e.currentTarget.value })}
+                                    />
+                                    <button type="button" class="admin-btn" disabled={adminBusy[r.documentId]} onclick={() => saveReply(r)}>שמור</button>
+                                {:else}
+                                    <button type="button" class="admin-btn" onclick={() => (replyDraft = { ...replyDraft, [r.documentId]: '' })} title="תגובת אדמין">↩️</button>
+                                {/if}
                             </div>
                         {/if}
                     </div>
@@ -2278,6 +2336,77 @@
     .responses-all-link:hover {
         color: #fde047;
     }
+
+    /* פס אדמין למעלה */
+    .admin-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.6rem;
+        align-items: center;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+    .admin-user {
+        color: rgba(255, 255, 255, 0.75);
+    }
+    .admin-link {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: rgba(255, 255, 255, 0.85);
+        padding: 0.25rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .admin-link:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* פקדי אדמין על תגובה */
+    .admin-controls {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.6rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .admin-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.9);
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s ease;
+    }
+    .admin-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .admin-btn.on {
+        background: rgba(250, 204, 21, 0.18);
+        border-color: rgba(250, 204, 21, 0.55);
+    }
+    .admin-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .admin-reply-input {
+        flex: 1;
+        min-width: 8rem;
+        padding: 0.3rem 0.6rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        color: rgba(255, 255, 255, 0.92);
+        font-family: inherit;
+        font-size: 0.9rem;
+    }
+
     .response-header {
         display: flex;
         align-items: center;
