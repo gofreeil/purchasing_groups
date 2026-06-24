@@ -37,8 +37,10 @@
         </a>
 
         <a class="prov community" href={communityLoginUrl}>
-            <span class="prov-icon">🏘️</span>
-            התחבר דרך קהילה בשכונה
+            <span class="prov-icon">
+                <img src="/assets/yotzim-lecherut.png" alt="יוצאים לחירות" />
+            </span>
+            התחבר דרך קהילת יוצאים לחירות
         </a>
     </div>
 
@@ -116,6 +118,12 @@
         width: 26px;
         height: 26px;
         font-size: 1.1rem;
+    }
+    .prov-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 4px;
     }
     .prov.google {
         background: #fff;
