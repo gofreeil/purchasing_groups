@@ -167,8 +167,8 @@
                     id="rate-comments"
                     class="comments-input"
                     bind:value={comments}
-                    placeholder={`שירות החברה, מהירות הגלישה
-כמה כסף אני חוסך בחודש וכמה בשנה
+                    placeholder={`שירות החברה, מהירות הגלישה,
+כמה כסף אני חוסך בחודש, כמה בשנה
 וכו'`}
                     rows="3"
                 ></textarea>
