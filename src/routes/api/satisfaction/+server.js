@@ -1,7 +1,12 @@
 import { json, error } from '@sveltejs/kit';
 import { strapiPost } from '$lib/strapi.js';
 
-export async function POST({ request, fetch }) {
+export async function POST({ request, fetch, locals }) {
+    // מניעת בוטים: רק משתמשים שנרשמו והתחברו (JWT תקף ב-locals.user) יכולים לדרג ולהגיב.
+    // locals.user מאומת מול Strapi ב-hooks.server.js, כך שאי-אפשר לזייף אותו מהקליינט.
+    if (!locals.user) {
+        throw error(401, 'נדרשת הרשמה כדי לדרג ולהגיב');
+    }
     let body;
     try {
         body = await request.json();
