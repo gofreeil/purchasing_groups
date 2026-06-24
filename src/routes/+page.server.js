@@ -86,11 +86,12 @@ export async function load({ fetch, setHeaders }) {
     const finalCampaigns = getCampaignList();
     const sheet = await loadSheetData(fetch);
 
-    // ממוצע דירוג פר-קמפיין מתגובות סקר אמיתיות - בקשות מקבילות, רק לקמפיינים פעילים
+    // ממוצע דירוג פר-קמפיין מתגובות סקר אמיתיות - בקשות מקבילות, רק לקמפיינים פעילים.
+    // pageSize: 500 כדי לכלול את *כל* הדירוגים בממוצע (עקבי עם דף /responses).
     const activeSlugs = finalCampaigns.filter((c) => c.status === 'active').map((c) => c.slug);
     const responseLists = await Promise.all(
         activeSlugs.map((slug) =>
-            fetchSatisfactionResponses(slug, { fetch }).catch(() => []),
+            fetchSatisfactionResponses(slug, { fetch, pageSize: 500 }).catch(() => []),
         ),
     );
     const averageRatings = {};
