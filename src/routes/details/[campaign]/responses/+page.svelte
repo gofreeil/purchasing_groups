@@ -24,9 +24,6 @@
                 · ממוצע {data.averageRating.toFixed(1)}/5 ({data.ratingCount})
             {/if}
         </p>
-        <a class="back-link" href={`/details/${data.campaign?.slug ?? ''}`}>
-            ← חזרה לדף המבצע
-        </a>
     </header>
 
     {#if data.responses.length === 0}
@@ -63,6 +60,10 @@
             {/each}
         </div>
     {/if}
+
+    <a class="back-link" href={`/details/${data.campaign?.slug ?? ''}`}>
+        ← חזרה לדף המבצע
+    </a>
 </section>
 
 <style>
@@ -85,7 +86,9 @@
         margin: 0 0 1rem;
     }
     .back-link {
-        display: inline-block;
+        display: block;
+        text-align: center;
+        margin-top: 2rem;
         color: #facc15;
         text-decoration: none;
         font-weight: 600;
