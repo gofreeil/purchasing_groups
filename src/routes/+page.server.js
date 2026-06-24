@@ -15,7 +15,7 @@ const DEFAULT_CAMPAIGNS = {
     fuel: { monthly: 570, annual: 6840 },
     diesel: { monthly: 0, annual: 0 },
 };
-const DEFAULT_MEMBERS = 964;
+const DEFAULT_MEMBERS = 1000;
 
 function parseCsv(text) {
     const rows = [];
