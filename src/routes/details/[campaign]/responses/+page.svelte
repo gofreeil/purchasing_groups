@@ -1,11 +1,31 @@
 <script>
     import RatingForm from "$lib/components/RatingForm.svelte";
+    import { invalidateAll } from "$app/navigation";
 
     let { data } = $props();
 
     let loginHref = $derived(
         `/login?returnTo=${encodeURIComponent(`/details/${data.campaign?.slug ?? ""}/responses`)}`,
     );
+
+    // ─── אדמין: מחיקת תגובה (super_admin בלבד) ───
+    let adminIsSuper = $derived(data.user?.app_role === 'super_admin');
+    let deletingId = $state(null);
+
+    async function deleteResponse(r) {
+        if (!r.documentId) return;
+        if (!confirm('למחוק את התגובה הזו לצמיתות?')) return;
+        deletingId = r.documentId;
+        try {
+            const res = await fetch(`/api/admin/responses/${r.documentId}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error((await res.text()).slice(0, 200));
+            await invalidateAll();
+        } catch (e) {
+            alert(`שגיאה במחיקה: ${e.message}`);
+        } finally {
+            deletingId = null;
+        }
+    }
 
     function formatDate(iso) {
         try {
@@ -24,10 +44,9 @@
 <section class="responses-page">
     <header class="responses-page-head">
         <h1>שביעות רצון משירות החברה והמבצע</h1>
-        <p class="responses-page-tagline">כל הדירוגים והתגובות</p>
-        {#if data.campaign?.title}
-            <p class="responses-page-sub">{data.campaign.title}</p>
-        {/if}
+        <p class="responses-page-tagline">
+            {#if data.campaign?.title}{data.campaign.title} {/if}כל הדירוגים והתגובות
+        </p>
         {#if data.ratingCount > 0}
             <div class="rating-badge" aria-label={`ממוצע ${data.averageRating.toFixed(1)} מתוך 5 מתוך ${data.ratingCount} דירוגים`}>
                 <span class="stars-gold" aria-hidden="true">⭐⭐⭐⭐⭐</span>
@@ -74,6 +93,19 @@
                         <div class="response-admin-reply">
                             <span class="admin-reply-label">תגובת האדמין:</span>
                             <p class="admin-reply-text">{r.admin_reply}</p>
+                        </div>
+                    {/if}
+                    {#if adminIsSuper}
+                        <div class="admin-controls">
+                            <button
+                                type="button"
+                                class="admin-del-btn"
+                                disabled={deletingId === r.documentId}
+                                onclick={() => deleteResponse(r)}
+                                title="מחק תגובה"
+                            >
+                                🗑️ {deletingId === r.documentId ? 'מוחק…' : 'מחק'}
+                            </button>
                         </div>
                     {/if}
                 </div>
@@ -267,5 +299,31 @@
         line-height: 1.5;
         white-space: pre-wrap;
         text-align: right;
+    }
+    .admin-controls {
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 0.6rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+    .admin-del-btn {
+        background: rgba(220, 38, 38, 0.12);
+        border: 1px solid rgba(248, 113, 113, 0.5);
+        color: #fecaca;
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s ease;
+    }
+    .admin-del-btn:hover:not(:disabled) {
+        background: rgba(220, 38, 38, 0.25);
+    }
+    .admin-del-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 </style>

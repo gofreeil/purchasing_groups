@@ -27,3 +27,19 @@ export async function PATCH({ params, request, locals, fetch }) {
     }
     return json(await res.json());
 }
+
+// מחיקת תגובה - super_admin בלבד (אכיפה כפולה: כאן וב-Strapi controller).
+export async function DELETE({ params, locals, fetch }) {
+    if (!isSuperAdmin(locals.user)) throw error(403, 'רק super_admin');
+    if (!locals.jwt) throw error(401, 'לא מחובר');
+
+    const res = await fetch(`${STRAPI_URL}/api/pg-satisfaction-responses/${params.documentId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${locals.jwt}` },
+    });
+    if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        throw error(res.status, `Strapi: ${txt.slice(0, 200)}`);
+    }
+    return json({ success: true });
+}

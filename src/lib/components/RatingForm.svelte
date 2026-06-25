@@ -397,6 +397,7 @@
         width: 100%;
         max-width: 490px;          /* רוחב המסגרת - מורחב שמאלה עם רווח מהכפתורים */
         justify-self: start;       /* RTL: עוגן לימין; הקצה השמאלי זז ימינה → רווח מהכפתורים */
+        box-sizing: border-box;    /* כולל את ה-padding ברוחב, אחרת ה-textarea חורג מהמכל שמאלה בנייד */
         min-height: 0;
         height: auto;
         padding: 0.55rem 1rem;
