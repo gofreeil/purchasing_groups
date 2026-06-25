@@ -1413,7 +1413,11 @@
             border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
             text-align: left;
             font-size: 0.9rem;
-            white-space: nowrap;
+            white-space: normal;   /* ערכים ארוכים נשברים לשורה נוספת במקום להיחתך בקצה */
+        }
+        .plans-table tbody td > *,
+        .plans-table tbody td {
+            min-width: 0;          /* מאפשר לערך להתכווץ ולעטוף בתוך ה-flex */
         }
 
         .plans-table tbody tr td:last-child {
@@ -2228,10 +2232,9 @@
             max-width: none;
             margin-inline-start: 0.75rem;
             margin-bottom: 0.35rem;
-            padding: 0.4rem 0.65rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
+            padding: 0;
+            border: none;
+            background: none;     /* בלתי נראית - רק השם והעיר, התוכן עוטף סביבם */
         }
     }
 
@@ -2527,6 +2530,28 @@
 
         .rating-container {
             gap: 0.5rem;
+        }
+    }
+
+    /* בנייד צר: מצמצמים את הריפוד הצדדי של העמוד והסקשנים בצורה אחידה,
+       כדי שכל המסגרות יתרחבו והתוכן יקבל יותר רוחב ולא ייחתך */
+    @media (max-width: 560px) {
+        .details-page {
+            padding: 0 0.65rem;
+        }
+        .section {
+            padding: 1.4rem 0.9rem;
+        }
+    }
+    @media (max-width: 380px) {
+        .details-page {
+            padding: 0 0.4rem;
+        }
+        .section {
+            padding: 1.2rem 0.65rem;
+        }
+        .plans-table tbody td {
+            margin: 0 0.2rem;
         }
     }
 </style>

@@ -63,7 +63,7 @@ export const CAMPAIGNS = {
                         { label: 'רשת בדור', value: '4/5' },
                         { label: 'דקות/סמסים', value: '5000' },
                         { label: 'חבילת גלישה ג\'יגה', value: '300' },
-                        { label: 'עלות ממוצעת לקו לשנה', html: '16.4 <span class="plan-note">(קו 1 ל-2 מכשירים 15 ש"ח כל אחד)</span>' },
+                        { label: 'עלות ממוצעת לקו לשנה', html: '16.4 <span class="plan-note">(עלות קו ל-2 מכשירים 15 ש"ח כל אחד)</span>' },
                         { label: 'עלות סים', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
                         { label: 'עלות משלוח', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
                         { label: 'רוכב על רשת', image: { src: '/images/פלאפון.jfif', alt: 'פלאפון' } },
