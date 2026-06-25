@@ -121,9 +121,9 @@
         margin: 0 0 0.5rem;
     }
     .responses-page-tagline {
-        color: rgba(255, 255, 255, 0.85);
+        color: rgba(255, 255, 255, 0.92);
         font-size: 1.2rem;
-        font-weight: 600;
+        font-weight: 700;
         margin: 0 0 0.6rem;
     }
     /* באדג' ממוצע עם כוכבים - עיצוב זהה לדף הבית */
