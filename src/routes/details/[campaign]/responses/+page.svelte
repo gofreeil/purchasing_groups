@@ -24,9 +24,9 @@
 <section class="responses-page">
     <header class="responses-page-head">
         <h1>שביעות רצון משירות החברה ומהמבצע</h1>
-        <p class="responses-page-tagline">דרגו ושתפו את החוויה שלכם</p>
+        <p class="responses-page-tagline">כל הדירוגים והתגובות</p>
         <p class="responses-page-sub">
-            {#if data.campaign?.title}{data.campaign.title} · {/if}כל התגובות והדירוגים
+            {#if data.campaign?.title}{data.campaign.title}{/if}
             {#if data.ratingCount > 0}
                 · ממוצע {data.averageRating.toFixed(1)}/5 ({data.ratingCount})
             {/if}
