@@ -245,6 +245,18 @@
         justify-content: center;
         gap: 0.6rem;
     }
+    @media (max-width: 560px) {
+        /* בנייד: שלוש החברות בשורה אחת - בלי גלישה, עם כיווץ עדין */
+        .company-picker {
+            flex-wrap: nowrap;
+            gap: 0.4rem;
+        }
+        .company-pill {
+            padding: 0.45rem 0.7rem;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+    }
     .company-pill {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.18);
