@@ -25,12 +25,15 @@
     <header class="responses-page-head">
         <h1>שביעות רצון משירות החברה והמבצע</h1>
         <p class="responses-page-tagline">כל הדירוגים והתגובות</p>
-        <p class="responses-page-sub">
-            {#if data.campaign?.title}{data.campaign.title}{/if}
-            {#if data.ratingCount > 0}
-                · ממוצע {data.averageRating.toFixed(1)}/5 ({data.ratingCount})
-            {/if}
-        </p>
+        {#if data.campaign?.title}
+            <p class="responses-page-sub">{data.campaign.title}</p>
+        {/if}
+        {#if data.ratingCount > 0}
+            <div class="rating-badge" aria-label={`ממוצע ${data.averageRating.toFixed(1)} מתוך 5 מתוך ${data.ratingCount} דירוגים`}>
+                <span class="stars-gold" aria-hidden="true">⭐⭐⭐⭐⭐</span>
+                <span class="rating-val">{data.averageRating.toFixed(1)}/5 ({data.ratingCount})</span>
+            </div>
+        {/if}
     </header>
 
     <section class="rate-section">
@@ -122,6 +125,28 @@
         font-size: 1.2rem;
         font-weight: 600;
         margin: 0 0 0.6rem;
+    }
+    /* באדג' ממוצע עם כוכבים - עיצוב זהה לדף הבית */
+    .rating-badge {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        margin-top: 0.7rem;
+        padding: 6px 16px;
+        background: rgba(10, 17, 40, 0.9);
+        border: 1px solid rgba(250, 204, 21, 0.4);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    .rating-badge .stars-gold {
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+    }
+    .rating-badge .rating-val {
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #facc15;
     }
     @media (max-width: 600px) {
         .responses-page-head h1 { font-size: 1.85rem; }
