@@ -2216,6 +2216,24 @@
         white-space: pre-wrap;
         text-align: right;
     }
+    @media (max-width: 560px) {
+        /* בנייד: השם+העיר בקופסה קטנה שצפה לפינה הימנית, והתוכן עוטף סביבה וממלא את שאר הרוחב */
+        .response-body {
+            display: flow-root;   /* מכיל את ה-float */
+            gap: 0;
+        }
+        .response-user {
+            float: inline-start;  /* RTL: נצמד לימין למעלה */
+            min-width: 0;
+            max-width: none;
+            margin-inline-start: 0.75rem;
+            margin-bottom: 0.35rem;
+            padding: 0.4rem 0.65rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+    }
 
     /* כוכבים + סמיילי דינמי */
     .star-rating {
