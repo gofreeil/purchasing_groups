@@ -96,10 +96,10 @@
     <div class="survey-form">
         <div class="survey-inline-row">
             {#if companies}
-                <div class="survey-step">
-                    <span class="step-label">בחר:</span>
+                <div class="survey-step company-step">
+                    <span class="step-label">בחר חברה:</span>
                     <div
-                        class="company-picker"
+                        class="company-row"
                         class:shake={mustPickCompanyShake}
                         role="radiogroup"
                         aria-label="בחר חברה לדירוג"
@@ -109,7 +109,7 @@
                                 type="button"
                                 role="radio"
                                 aria-checked={selectedCompany === company}
-                                class="company-pill"
+                                class="company-box"
                                 class:selected={selectedCompany === company}
                                 onclick={() => selectCompany(company)}
                             >
@@ -235,51 +235,56 @@
         white-space: nowrap;
     }
     @media (max-width: 560px) {
-        .survey-inline-row { gap: 0.9rem; }
+        .survey-inline-row { gap: 0.6rem; }
         .step-label { font-size: 1rem; }
+        .survey-step { gap: 0.35rem; min-width: 0; }
     }
 
-    .company-picker {
+    /* בחירת חברה - תווית בשורה למעלה, שלוש החברות פרוסות מתחת במסגרות מרובעות-מעוגלות */
+    .company-step {
+        flex: 1 0 100%;          /* תופס שורה שלמה משלו */
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+    }
+    .company-step .step-label {
+        text-align: center;
+    }
+    .company-row {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.6rem;
+        gap: 0.5rem;
+        width: 100%;
     }
-    @media (max-width: 560px) {
-        /* בנייד: שלוש החברות בשורה אחת - בלי גלישה, עם כיווץ עדין */
-        .company-picker {
-            flex-wrap: nowrap;
-            gap: 0.4rem;
-        }
-        .company-pill {
-            padding: 0.45rem 0.7rem;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-    }
-    .company-pill {
+    .company-box {
+        flex: 1 1 0;             /* שלושתם ברוחב שווה, פרוסים על כל השורה */
+        min-width: 0;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 999px;
-        padding: 0.5rem 1.2rem;
+        border-radius: 10px;     /* מרובע עם פינות מעוגלות, לא גלולה */
+        padding: 0.55rem 0.4rem;
         color: rgba(255, 255, 255, 0.88);
         font-size: 1rem;
         font-weight: 600;
+        font-family: inherit;
         cursor: pointer;
         transition: all 0.18s ease;
     }
-    .company-pill:hover {
+    .company-box:hover {
         background: rgba(250, 204, 21, 0.1);
         border-color: rgba(250, 204, 21, 0.5);
     }
-    .company-pill.selected {
+    .company-box.selected {
         background: linear-gradient(135deg, #facc15, #fb923c);
         border-color: #facc15;
         color: #1a1a1a;
         box-shadow: 0 4px 16px rgba(250, 204, 21, 0.35);
     }
-    .company-picker.shake {
+    .company-row.shake {
         animation: pickerShake 0.55s ease;
+    }
+    .company-row.shake .company-box {
+        border-color: #facc15;
+        box-shadow: 0 0 12px rgba(250, 204, 21, 0.45);
     }
     @keyframes pickerShake {
         0%, 100% { transform: translateX(0); }
@@ -288,12 +293,8 @@
         60% { transform: translateX(-5px); }
         80% { transform: translateX(5px); }
     }
-    .company-picker.shake .company-pill {
-        border-color: #facc15;
-        box-shadow: 0 0 12px rgba(250, 204, 21, 0.45);
-    }
     @media (prefers-reduced-motion: reduce) {
-        .company-picker.shake { animation: none; }
+        .company-row.shake { animation: none; }
     }
     .rating-hint {
         margin: 0.75rem 0 0;

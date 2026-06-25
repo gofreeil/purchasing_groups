@@ -2230,11 +2230,15 @@
             float: inline-start;  /* RTL: נצמד לימין למעלה */
             min-width: 0;
             max-width: none;
-            margin-inline-start: 0.75rem;
+            margin-inline-end: 1.25rem;    /* RTL: רווח בצד שמאל - בין השם לתוכן שעוטף */
             margin-bottom: 0.35rem;
             padding: 0;
             border: none;
             background: none;     /* בלתי נראית - רק השם והעיר, התוכן עוטף סביבם */
+        }
+        .response-name,
+        .response-city {
+            color: #facc15;       /* שם ועיר בצהוב */
         }
     }
 
