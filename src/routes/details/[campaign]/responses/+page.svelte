@@ -12,6 +12,81 @@
     let adminIsSuper = $derived(data.user?.app_role === 'super_admin');
     let deletingId = $state(null);
 
+    // ─── לייק + תגובה ציבוריים (לכל משתמש מחובר) ───
+    let loggedIn = $derived(!!data.user);
+    let currentUserId = $derived(data.user?.id != null ? String(data.user.id) : null);
+    let showLoginPrompt = $state(false);
+
+    // override-ים אופטימיים לפי documentId
+    let likeOverride = $state({});
+    let likeBusy = $state({});
+    let repliesOverride = $state({});
+    let replyOpen = $state({});
+    let replyDraft = $state({});
+    let replyBusy = $state({});
+
+    function likeState(r) {
+        const o = likeOverride[r.documentId];
+        if (o) return o;
+        const arr = Array.isArray(r.liked_by) ? r.liked_by.map(String) : [];
+        const likes = typeof r.likes === 'number' ? r.likes : arr.length;
+        const liked = currentUserId ? arr.includes(currentUserId) : false;
+        return { likes, liked };
+    }
+
+    function repliesFor(r) {
+        const o = repliesOverride[r.documentId];
+        if (Array.isArray(o)) return o;
+        return Array.isArray(r.replies) ? r.replies : [];
+    }
+
+    async function toggleLike(r) {
+        if (!loggedIn) { showLoginPrompt = true; return; }
+        if (!r.documentId || likeBusy[r.documentId]) return;
+        const cur = likeState(r);
+        likeOverride = { ...likeOverride, [r.documentId]: { likes: cur.likes + (cur.liked ? -1 : 1), liked: !cur.liked } };
+        likeBusy = { ...likeBusy, [r.documentId]: true };
+        try {
+            const res = await fetch(`/api/responses/${r.documentId}/like`, { method: 'POST' });
+            if (!res.ok) throw new Error((await res.text()).slice(0, 200));
+            const out = await res.json();
+            likeOverride = { ...likeOverride, [r.documentId]: { likes: out.likes, liked: out.liked } };
+        } catch (e) {
+            likeOverride = { ...likeOverride, [r.documentId]: cur };
+            alert('שמירת הלייק נכשלה, נסה שוב');
+        } finally {
+            likeBusy = { ...likeBusy, [r.documentId]: false };
+        }
+    }
+
+    function toggleReplyBox(r) {
+        if (!loggedIn) { showLoginPrompt = true; return; }
+        replyOpen = { ...replyOpen, [r.documentId]: !replyOpen[r.documentId] };
+    }
+
+    async function submitReply(r) {
+        if (!loggedIn) { showLoginPrompt = true; return; }
+        const text = (replyDraft[r.documentId] ?? '').trim();
+        if (!text || replyBusy[r.documentId]) return;
+        replyBusy = { ...replyBusy, [r.documentId]: true };
+        try {
+            const res = await fetch(`/api/responses/${r.documentId}/reply`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ text, user_name: data.user?.name || data.user?.username || '' }),
+            });
+            if (!res.ok) throw new Error((await res.text()).slice(0, 200));
+            const out = await res.json();
+            repliesOverride = { ...repliesOverride, [r.documentId]: out.replies };
+            replyDraft = { ...replyDraft, [r.documentId]: '' };
+            replyOpen = { ...replyOpen, [r.documentId]: false };
+        } catch (e) {
+            alert('שליחת התגובה נכשלה, נסה שוב');
+        } finally {
+            replyBusy = { ...replyBusy, [r.documentId]: false };
+        }
+    }
+
     async function deleteResponse(r) {
         if (!r.documentId) return;
         if (!confirm('למחוק את התגובה הזו לצמיתות?')) return;
@@ -65,11 +140,23 @@
         />
     </section>
 
+    {#if showLoginPrompt && !loggedIn}
+        <div class="register-prompt" role="alert">
+            <span class="register-prompt-icon" aria-hidden="true">🔒</span>
+            <p class="register-prompt-text">
+                כדי לסמן לייק או להגיב, אנא הירשם תחילה — כך נוודא שאין בוטים בהצבעות ובתגובות
+            </p>
+            <a href={loginHref} class="register-prompt-btn">הרשמה / התחברות</a>
+        </div>
+    {/if}
+
     {#if data.responses.length === 0}
         <p class="empty-state">אין עדיין תגובות. תהיה הראשון!</p>
     {:else}
         <div class="responses-list">
             {#each data.responses as r (r.id)}
+                {@const ls = likeState(r)}
+                {@const reps = repliesFor(r)}
                 <div class="response-item" class:featured={r.is_featured}>
                     <div class="response-header">
                         <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
@@ -95,6 +182,69 @@
                             <p class="admin-reply-text">{r.admin_reply}</p>
                         </div>
                     {/if}
+
+                    <!-- פעולות ציבוריות: לייק + הגב (לכל משתמש מחובר) -->
+                    <div class="response-actions">
+                        <button
+                            type="button"
+                            class="action-btn like-btn"
+                            class:liked={ls.liked}
+                            onclick={() => toggleLike(r)}
+                            disabled={likeBusy[r.documentId]}
+                            aria-pressed={ls.liked}
+                            title={ls.liked ? 'בטל לייק' : 'אהבתי'}
+                        >
+                            <span class="action-icon">{ls.liked ? '❤️' : '🤍'}</span>
+                            <span class="action-label">אהבתי</span>
+                            {#if ls.likes > 0}<span class="like-count">{ls.likes}</span>{/if}
+                        </button>
+                        <button
+                            type="button"
+                            class="action-btn reply-toggle"
+                            onclick={() => toggleReplyBox(r)}
+                            title="הגב לתגובה"
+                        >
+                            <span class="action-icon">💬</span>
+                            <span class="action-label">הגב{reps.length > 0 ? ` (${reps.length})` : ''}</span>
+                        </button>
+                    </div>
+
+                    {#if reps.length > 0}
+                        <div class="replies-list">
+                            {#each reps as rep, i (i)}
+                                <div class="reply-item" class:admin={rep.is_admin}>
+                                    <div class="reply-meta">
+                                        <span class="reply-name">{rep.user_name || 'משתמש'}{#if rep.is_admin} <span class="reply-admin-tag">מנהל</span>{/if}</span>
+                                        {#if rep.created_at}<span class="reply-date">{formatDate(rep.created_at)}</span>{/if}
+                                    </div>
+                                    <p class="reply-text">{rep.text}</p>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+
+                    {#if replyOpen[r.documentId]}
+                        <div class="reply-box">
+                            <textarea
+                                class="reply-input"
+                                rows="2"
+                                placeholder="כתוב תגובה…"
+                                value={replyDraft[r.documentId] ?? ''}
+                                oninput={(e) => (replyDraft = { ...replyDraft, [r.documentId]: e.currentTarget.value })}
+                            ></textarea>
+                            <div class="reply-box-actions">
+                                <button
+                                    type="button"
+                                    class="reply-send-btn"
+                                    onclick={() => submitReply(r)}
+                                    disabled={replyBusy[r.documentId] || !((replyDraft[r.documentId] ?? '').trim())}
+                                >
+                                    {replyBusy[r.documentId] ? 'שולח…' : 'שלח תגובה'}
+                                </button>
+                            </div>
+                        </div>
+                    {/if}
+
                     {#if adminIsSuper}
                         <div class="admin-controls">
                             <button
@@ -325,5 +475,188 @@
     .admin-del-btn:disabled {
         opacity: 0.6;
         cursor: not-allowed;
+    }
+
+    /* ── פעולות ציבוריות: לייק + הגב ── */
+    .response-actions {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.85);
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+    .action-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(250, 204, 21, 0.4);
+    }
+    .action-btn:active:not(:disabled) { transform: scale(0.96); }
+    .action-btn:disabled { opacity: 0.7; cursor: default; }
+    .action-icon { font-size: 1rem; line-height: 1; }
+    .like-btn.liked {
+        background: rgba(244, 63, 94, 0.12);
+        border-color: rgba(244, 63, 94, 0.5);
+        color: #fda4af;
+    }
+    .like-count {
+        background: rgba(250, 204, 21, 0.18);
+        color: #facc15;
+        border-radius: 999px;
+        padding: 0 0.45rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        min-width: 1.2rem;
+        text-align: center;
+    }
+
+    /* ── רשימת תגובות-לתגובה ── */
+    .replies-list {
+        margin-top: 0.7rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-inline-start: 0.5rem;
+        border-inline-start: 2px solid rgba(255, 255, 255, 0.08);
+    }
+    .reply-item {
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+    }
+    .reply-item.admin {
+        background: rgba(96, 165, 250, 0.08);
+        border-inline-start: 3px solid rgba(96, 165, 250, 0.6);
+    }
+    .reply-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.2rem;
+        flex-wrap: wrap;
+    }
+    .reply-name {
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+    .reply-admin-tag {
+        background: rgba(96, 165, 250, 0.2);
+        color: #93c5fd;
+        border-radius: 6px;
+        padding: 0 0.35rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+    .reply-date {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.78rem;
+        margin-inline-start: auto;
+    }
+    .reply-text {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.9rem;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        text-align: right;
+    }
+
+    /* ── תיבת כתיבת תגובה ── */
+    .reply-box {
+        margin-top: 0.6rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .reply-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.5rem 0.75rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 10px;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 0.9rem;
+        font-family: inherit;
+        resize: vertical;
+        text-align: right;
+    }
+    .reply-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+    .reply-input:focus {
+        outline: none;
+        border-color: #facc15;
+        background: rgba(0, 0, 0, 0.45);
+    }
+    .reply-box-actions {
+        display: flex;
+        justify-content: flex-start;
+    }
+    .reply-send-btn {
+        background: linear-gradient(135deg, #facc15, #fb923c);
+        color: #1a1a1a;
+        border: none;
+        border-radius: 8px;
+        padding: 0.4rem 1.1rem;
+        font-size: 0.88rem;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .reply-send-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(250, 204, 21, 0.3);
+    }
+    .reply-send-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ── הודעת הרשמה לאורח ── */
+    .register-prompt {
+        margin: 0 auto 1.5rem;
+        max-width: 560px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1.2rem 1.4rem;
+        background: rgba(250, 204, 21, 0.08);
+        border: 1px solid rgba(250, 204, 21, 0.45);
+        border-radius: 14px;
+        text-align: center;
+    }
+    .register-prompt-icon { font-size: 2.2rem; line-height: 1; }
+    .register-prompt-text {
+        margin: 0;
+        font-size: 1.02rem;
+        font-weight: 600;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.92);
+    }
+    .register-prompt-btn {
+        display: inline-block;
+        padding: 0.7rem 2rem;
+        background: linear-gradient(135deg, #facc15, #fb923c);
+        color: #1a1a1a;
+        font-size: 1.02rem;
+        font-weight: 800;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .register-prompt-btn:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 10px 22px rgba(250, 204, 21, 0.4);
     }
 </style>
