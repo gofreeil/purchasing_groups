@@ -4,6 +4,18 @@
 
     let { data } = $props();
 
+    // שם תצוגה ידידותי. לעולם לא להציג מזהה אוטומטי כמו "google_1164663...".
+    const AUTO_ID = /^(google|facebook|apple|community|local)[_-]/i;
+    /** @param {string|null|undefined} s @param {string} [fallback] */
+    function humanName(s, fallback = '') {
+        if (!s || AUTO_ID.test(s)) return fallback;
+        return s;
+    }
+    /** השם הנקי של המשתמש המחובר, לשמירה בתגובות חדשות */
+    let myName = $derived(
+        humanName(data.user?.name) || humanName(data.user?.username) || '',
+    );
+
     let loginHref = $derived(
         `/login?returnTo=${encodeURIComponent(`/details/${data.campaign?.slug ?? ""}/responses`)}`,
     );
@@ -73,7 +85,7 @@
             const res = await fetch(`/api/responses/${r.documentId}/reply`, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ text, user_name: data.user?.name || data.user?.username || '' }),
+                body: JSON.stringify({ text, user_name: myName }),
             });
             if (!res.ok) throw new Error((await res.text()).slice(0, 200));
             const out = await res.json();
@@ -168,9 +180,9 @@
                         <span class="response-date">{formatDate(r.createdAt || r.submitted_at)}</span>
                     </div>
                     <div class="response-body">
-                        {#if r.user_name || r.user_city}
+                        {#if humanName(r.user_name) || r.user_city}
                             <div class="response-user">
-                                {#if r.user_name}<span class="response-name">{r.user_name}</span>{/if}
+                                {#if humanName(r.user_name)}<span class="response-name">{humanName(r.user_name)}</span>{/if}
                                 {#if r.user_city}<span class="response-city">{r.user_city}</span>{/if}
                             </div>
                         {/if}
@@ -214,7 +226,7 @@
                             {#each reps as rep, i (i)}
                                 <div class="reply-item" class:admin={rep.is_admin}>
                                     <div class="reply-meta">
-                                        <span class="reply-name">{rep.user_name || 'משתמש'}{#if rep.is_admin} <span class="reply-admin-tag">מנהל</span>{/if}</span>
+                                        <span class="reply-name">{humanName(rep.user_name, 'משתמש')}{#if rep.is_admin} <span class="reply-admin-tag">מנהל</span>{/if}</span>
                                         {#if rep.created_at}<span class="reply-date">{formatDate(rep.created_at)}</span>{/if}
                                     </div>
                                     <p class="reply-text">{rep.text}</p>
