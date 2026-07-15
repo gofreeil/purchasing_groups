@@ -11,6 +11,14 @@
         `https://community.gofreeil.com/sso?callback=${encodeURIComponent(communityCallback)}`,
     );
     const communityError = $derived($page.url.searchParams.get('communityError') === '1');
+    const authError = $derived($page.url.searchParams.get('authError'));
+    const authErrorMsg = $derived(
+        authError === 'email_taken'
+            ? 'המייל הזה כבר רשום במערכת. התחבר עם הסיסמה שלך למטה, או דרך "יוצאים לחירות".'
+            : authError
+              ? 'ההתחברות נכשלה. נסה שוב, או בחר דרך אחרת להתחבר.'
+              : '',
+    );
 </script>
 
 <svelte:head><title>התחברות | רכישות קבוצתיות</title></svelte:head>
@@ -23,6 +31,10 @@
         <div class="community-notice">
             עדיין אינך מופיע ברשימת קהילת יוצאים לחירות. אנא הירשם באחת מהדרכים האחרות.
         </div>
+    {/if}
+
+    {#if authErrorMsg}
+        <div class="community-notice">{authErrorMsg}</div>
     {/if}
 
     <div class="providers">
