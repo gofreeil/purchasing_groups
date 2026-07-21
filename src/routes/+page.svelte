@@ -27,9 +27,8 @@
     const CARD_CONFIG = {
         cellular: { rating: 5.0 },
         fuel: { rating: 4.9 },
-        // ביטוח רכב - פעיל, אך אין עדיין עמודת חיסכון בגיליון.
-        // כשיהיו נתונים: להוסיף עמודה ל-CAMPAIGN_COLS ב-+page.server.js ולמחוק את השורה הזו.
-        carInsurance: { savingsText: 'בקרוב', annualSavingsText: '' },
+        // ביטוח רכב - פעיל; עד שתתווסף עמודה ב-CAMPAIGN_COLS (+page.server.js)
+        // הכרטיס מציג 0 ש"ח, כמו קמפיין ללא נתונים בגיליון.
     };
 
     // התween מאותחל לערך האמיתי כך שהמספר מוצג מיד (גם ב-SSR וגם בלי JS)
