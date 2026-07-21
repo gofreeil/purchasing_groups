@@ -227,7 +227,7 @@ export const CAMPAIGNS = {
     carInsurance: {
         slug: 'carInsurance',
         title: 'ביטוח רכב הזול במדינה!',
-        description: 'משאירים פרטים בטופס ומקבלים הצעת מחיר קבוצתית לביטוח הרכב - ללא התחייבות וללא עלות הצטרפות.',
+        description: 'הצעה אישית לביטוח רכב קבוצתי המשתלם במדינה!<br />כולל הטבות ייחודיות רק לחברי הקבוצה',
         icon: '🚗',
         image_url: '/assets/car_insurance.png',
         order: 4,
