@@ -597,18 +597,29 @@
     <section class="section survey-section-wrap">
         <h2>שביעות רצון משירות החברה והמבצע</h2>
 
-        <!-- אין דירוג בדף המבצע - רק סיכום ההצבעות, מקושר לדף הדירוגים והתגובות -->
-        <a
-            href={`/details/${campaign}/responses`}
-            class="rating-summary-cta"
-            aria-label={`דירוג ${campaignStats.rating.toFixed(1)} מתוך 5 — למעבר לכל הדירוגים והתגובות`}
-        >
-            <div class="rating-summary-badge">
-                <span class="rating-summary-stars" aria-hidden="true">⭐⭐⭐⭐⭐</span>
-                <span class="rating-summary-val">{campaignStats.rating.toFixed(1)}/5</span>
-            </div>
-            <span class="rating-summary-text">לדירוגים והתגובות&nbsp;←</span>
-        </a>
+        <!-- אין דירוג בדף המבצע - רק סיכום ההצבעות, מקושר לדף הדירוגים והתגובות.
+             במבצע חדש שאין בו עדיין דירוגים לא מציגים "0.0/5" אלא הזמנה לדרג ראשון. -->
+        {#if campaignStats.rating > 0}
+            <a
+                href={`/details/${campaign}/responses`}
+                class="rating-summary-cta"
+                aria-label={`דירוג ${campaignStats.rating.toFixed(1)} מתוך 5 — למעבר לכל הדירוגים והתגובות`}
+            >
+                <div class="rating-summary-badge">
+                    <span class="rating-summary-stars" aria-hidden="true">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-summary-val">{campaignStats.rating.toFixed(1)}/5</span>
+                </div>
+                <span class="rating-summary-text">לדירוגים והתגובות&nbsp;←</span>
+            </a>
+        {:else}
+            <a
+                href={`/details/${campaign}/responses`}
+                class="rating-summary-cta"
+                aria-label="עדיין אין דירוגים למבצע זה — למעבר לדף הדירוגים והתגובות"
+            >
+                <span class="rating-summary-text">עדיין אין דירוגים - היו הראשונים לדרג&nbsp;←</span>
+            </a>
+        {/if}
 
         {#if allResponses.length > 0}
             <div class="responses-list">

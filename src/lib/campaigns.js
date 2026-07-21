@@ -227,12 +227,38 @@ export const CAMPAIGNS = {
     carInsurance: {
         slug: 'carInsurance',
         title: 'ביטוח רכב הזול במדינה!',
-        description: 'צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.',
+        description: 'משאירים פרטים בטופס ומקבלים הצעת מחיר קבוצתית לביטוח הרכב - ללא התחייבות וללא עלות הצטרפות.',
         icon: '🚗',
         image_url: '/assets/car_insurance.png',
         order: 4,
-        status: 'soon',
-        can_join: false,
+        status: 'active',
+        can_join: true,
+        is_new: true,
+        new_badge_text: 'חדש!',
+        join_link: 'https://docs.google.com/forms/d/e/1FAIpQLSffJvHIO1PECwmTX_sYaRX2m96Pfef56R-xD9E63TUHm7NO_A/viewform?usp=header',
+        join_cta_subtitle: 'ביטוח רכב במחיר קבוצתי <span class="cta-small">(פרטי / מסחרי)</span>',
+        benefits: {
+            title: 'היתרונות שלך',
+            items: [
+                { icon: '💪', text: 'כוח קנייה קבוצתי - מגיעים לחברות הביטוח יחד ולא כל אחד לבד' },
+                { icon: '📋', text: 'הצעה אחת מרוכזת - בלי לרוץ בין סוכנים ואתרי השוואה' },
+                { icon: '📞', text: 'נציג חוזר אליכם באופן אישי ועובר איתכם על הכיסויים' },
+                { icon: '🚗', text: 'מתאים לכל סוגי הרכבים - פרטי, מסחרי וגם כמה רכבים במשפחה' },
+                { icon: '🛡️', text: 'ללא התחייבות - ההצעה לעיונכם, ההחלטה תמיד שלכם' },
+                { icon: '✅', text: 'ללא דמי הצטרפות ובלי עלות לחברי הקבוצה' },
+            ],
+        },
+        steps_override: [
+            { icon: '📝', title: 'ממלאים פרטים בטופס', desc: 'פרטי הרכב, הנהגים והפוליסה הנוכחית - לוקח דקה.' },
+            { icon: '📞', title: 'מקבלים הצעה אישית', desc: 'נציג חוזר אליכם עם הצעת מחיר קבוצתית ובודק מולכם שהכיסוי מתאים.' },
+            { icon: '💸', title: 'מתחילים לחסוך', desc: 'מצרפים חברים ומשפחה ומגדילים יותר את הכח שלנו.' },
+        ],
+        faq_override: [
+            { q: 'האם מילוי הטופס מחייב אותי לרכוש את הביטוח?', a: 'לא. הטופס הוא לקבלת הצעה בלבד - ההחלטה אם לעבור נשארת אצלכם.' },
+            { q: 'האם יש עלות להצטרפות לקבוצה?', a: 'לא. ההצטרפות לקבוצה וקבלת ההצעה חינמיות לחלוטין.' },
+            { q: 'אני באמצע פוליסה קיימת - כדאי להשאיר פרטים?', a: 'כן. השאירו פרטים ונחזור אליכם לקראת מועד החידוש של הפוליסה.' },
+            { q: 'אילו פרטים צריך כדי לקבל הצעה?', a: 'פרטי הרכב (יצרן, דגם ושנתון), פרטי הנהגים והפוליסה הנוכחית אם יש - הכל בטופס ההצטרפות.' },
+        ],
     },
     electricity: {
         slug: 'electricity',
@@ -256,8 +282,12 @@ export const CAMPAIGNS = {
     },
 };
 
+// השוואה גם ב-lowercase: יש slug ב-camelCase (carInsurance), כך שקישור שהועתק
+// באותיות קטנות (/details/carinsurance) לא יחזיר 404.
 export function getCampaign(slug) {
-    return CAMPAIGNS[slug] ?? null;
+    const lower = String(slug ?? '').toLowerCase();
+    const key = Object.keys(CAMPAIGNS).find((k) => k === slug || k.toLowerCase() === lower);
+    return key ? CAMPAIGNS[key] : null;
 }
 
 export function getCampaignList() {
