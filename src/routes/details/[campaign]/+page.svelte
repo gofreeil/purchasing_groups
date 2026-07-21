@@ -943,31 +943,47 @@
         margin: 0 0 2rem;
     }
 
-    /* Benefits list */
+    /* Benefits list - בלי כרטיס נפרד לכל יתרון; במקומו קווי הפרדה דקים שנמוגים בקצוות */
     .benefits-list {
         list-style: none;
         padding: 0;
         margin: 0;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1rem;
+        grid-template-columns: 1fr;
+        gap: 0 2.5rem;
     }
 
     .benefit-item {
+        position: relative;
         display: flex;
         align-items: flex-start;
         gap: 0.85rem;
-        padding: 1rem 1.1rem;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px;
-        transition: background 0.2s, border-color 0.2s, transform 0.2s;
+        padding: 1.05rem 0.4rem;
     }
 
-    .benefit-item:hover {
-        background: rgba(250, 204, 21, 0.08);
-        border-color: rgba(250, 204, 21, 0.35);
-        transform: translateY(-2px);
+    /* הקו האופקי שבין השורות - לא נוגע בקצוות ונמוג בשני צדדיו */
+    .benefit-item::after {
+        content: '';
+        position: absolute;
+        left: 7%;
+        right: 7%;
+        bottom: 0;
+        height: 1px;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.16) 20%,
+            rgba(255, 255, 255, 0.16) 80%,
+            transparent
+        );
+    }
+
+    .benefit-item:last-child::after {
+        display: none;
+    }
+
+    .benefit-item:hover .benefit-text {
+        color: #fff;
     }
 
     .benefit-icon {
@@ -981,27 +997,46 @@
         line-height: 1.5;
         color: rgba(255, 255, 255, 0.92);
         margin: 0;
+        transition: color 0.2s;
     }
 
-    /* בדסקטופ - אם מספר היתרונות אי-זוגי, מרכזים את האחרון במקום שיישאר לבד בעמודה */
-    @media (min-width: 641px) {
+    /* בדסקטופ - שתי עמודות עם קו אנכי במרווח שביניהן */
+    @media (min-width: 820px) {
+        .benefits-list {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .benefit-item:nth-child(odd):not(:last-child)::before {
+            content: '';
+            position: absolute;
+            inset-inline-end: -1.25rem;
+            top: 14%;
+            height: 72%;
+            width: 1px;
+            background: linear-gradient(
+                180deg,
+                transparent,
+                rgba(255, 255, 255, 0.16),
+                transparent
+            );
+        }
+        /* בשורה האחרונה אין קו אופקי מתחת */
+        .benefit-item:nth-last-child(2):nth-child(odd)::after {
+            display: none;
+        }
+        /* מספר יתרונות אי-זוגי - מרכזים את האחרון במקום שיישאר לבד בעמודה */
         .benefit-item:last-child:nth-child(odd) {
             grid-column: 1 / -1;
-            max-width: calc(50% - 0.5rem);
+            max-width: calc(50% - 1.25rem);
             margin-inline: auto;
         }
     }
 
     @media (max-width: 640px) {
-        .benefits-list {
-            grid-template-columns: 1fr;
-            gap: 0.55rem;
-        }
         .benefit-item {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 0.55rem 0.7rem;
+            padding: 0.7rem 0.5rem;
             gap: 0.25rem;
         }
         .benefit-icon {
