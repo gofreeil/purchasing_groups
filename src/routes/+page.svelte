@@ -29,6 +29,8 @@
         fuel: { rating: 4.9 },
         // ביטוח רכב - פעיל; עד שתתווסף עמודה ב-CAMPAIGN_COLS (+page.server.js)
         // הכרטיס מציג 0 ש"ח, כמו קמפיין ללא נתונים בגיליון.
+        // rating: 0 כדי שגלולת הכוכבים תוצג גם לפני הדירוג הראשון (הערך יתעדכן מהתגובות).
+        carInsurance: { rating: 0 },
     };
 
     // התween מאותחל לערך האמיתי כך שהמספר מוצג מיד (גם ב-SSR וגם בלי JS)
@@ -230,7 +232,7 @@
                     </span>
                 </div>
 
-                {#if card.rating}
+                {#if card.rating !== undefined}
                     <div class="survey-badge-container">
                         <a
                             href={`/details/${campaign.slug}/responses`}
