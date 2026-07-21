@@ -7,6 +7,7 @@
 	import AdsSidebar from "$lib/components/AdsSidebar.svelte";
 	import RightAdBanner from "$lib/components/RightAdBanner.svelte";
 	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
+	import WelcomeScreen from "$lib/components/WelcomeScreen.svelte";
 
 	let { data, children } = $props();
 
@@ -111,6 +112,9 @@
 	<link rel="icon" href={favicon} />
 	<title>{$t.title}</title>
 </svelte:head>
+
+<!-- מסך פתיחה אחרי הרשמה / זיהוי ראשון — גלובלי, מופעל ע"י ?welcome ב-URL -->
+<WelcomeScreen />
 
 <div class="app-wrapper">
 	<!-- Header -->
