@@ -277,11 +277,11 @@
 		</main>
 
 		<!-- Sidebar for Ads (desktop) -->
-		<AdsSidebar />
+		<AdsSidebar approvedAds={data?.approvedAds ?? []} />
 	</div>
 
 	<!-- Mobile ads drawer + tab -->
-	<MobileAdsDrawer />
+	<MobileAdsDrawer approvedAds={data?.approvedAds ?? []} />
 
 	<!-- Footer -->
 	<footer class="main-footer">
@@ -323,7 +323,8 @@
 		top: 1rem;
 		left: 50%;
 		transform: translateX(-50%);
-		z-index: 1000;
+		/* מעל ההדר הקבוע (z-index 1000) והתפריטים הנפתחים (1001) */
+		z-index: 1300;
 		display: flex;
 		align-items: center;
 		gap: 0.6rem;

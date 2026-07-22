@@ -1,16 +1,35 @@
 <script>
 	import { ads } from "$lib/adsData.js";
+
+	// פרסומות מאושרות של מפרסמים (מ-Strapi) - מוצגות לפני פרסומות השותפים.
+	// הקישור שלהן פנימי - לדף הנחיתה /ads/[id] שנבנה ב-builder.
+	let { approvedAds = [] } = $props();
+
+	let merged = $derived([
+		...approvedAds.map((/** @type {any} */ a) => ({
+			id: `sub-${a.id}`,
+			title: a.title,
+			description: a.subtitle,
+			cta: a.cta || a.title,
+			hover: a.hover || undefined,
+			href: `/ads/${a.id}`,
+			target: "_self",
+			image: a.mainImage,
+			color: a.gradient || "linear-gradient(135deg, #f59e0b, #ea580c)",
+		})),
+		...ads.map((a) => ({ ...a, target: "_blank" })),
+	]);
 </script>
 
 <aside class="ads-sidebar" aria-label="פרסומות ושותפים">
 	<h4 class="ads-sidebar-title">מתקדמים לחברה מתוקנת ועצמאית</h4>
 	<div class="ads-sidebar-list">
-		{#each ads as ad (ad.id)}
+		{#each merged as ad (ad.id)}
 			<a
 				href={ad.href}
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label="{ad.title} – {ad.description} (נפתח בחלון חדש)"
+				target={ad.target}
+				rel={ad.target === "_blank" ? "noopener noreferrer" : undefined}
+				aria-label="{ad.title} – {ad.description}{ad.target === '_blank' ? ' (נפתח בחלון חדש)' : ''}"
 				class="ad-item"
 			>
 				<div class="ad-image-wrap">
@@ -34,6 +53,13 @@
 				</div>
 			</a>
 		{/each}
+
+		<!-- קריאה למפרסמים חדשים - מובילה לדף המחשבון והפרסום -->
+		<a href="/advertise" class="advertise-cta">
+			<span class="advertise-cta-icon">📢</span>
+			<span class="advertise-cta-text">רוצים לפרסם כאן?</span>
+			<span class="advertise-cta-sub">לחצו למחירון ולהעלאת פרסומת</span>
+		</a>
 	</div>
 </aside>
 
@@ -177,6 +203,38 @@
 
 	.ad-cta-bar:hover .ad-tooltip {
 		display: block;
+	}
+
+	/* קריאה למפרסמים חדשים */
+	.advertise-cta {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.2rem;
+		border: 2px dashed rgba(251, 191, 36, 0.4);
+		border-radius: 12px;
+		background: rgba(251, 191, 36, 0.05);
+		padding: 0.9rem 0.75rem;
+		text-decoration: none;
+		transition: all 0.2s;
+	}
+	.advertise-cta:hover {
+		border-color: rgba(251, 191, 36, 0.8);
+		background: rgba(251, 191, 36, 0.1);
+		transform: scale(1.03);
+	}
+	.advertise-cta-icon {
+		font-size: 1.4rem;
+	}
+	.advertise-cta-text {
+		color: #fbbf24;
+		font-weight: 900;
+		font-size: 0.9rem;
+	}
+	.advertise-cta-sub {
+		color: #94a3b8;
+		font-size: 0.7rem;
+		font-weight: 600;
 	}
 
 	@media (max-width: 768px) {

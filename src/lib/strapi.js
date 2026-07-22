@@ -28,6 +28,21 @@ export async function strapiPost(path, data, { fetch: f = fetch } = {}) {
     return res.json();
 }
 
+// עדכון רשומה קיימת (משמש את מסך אישור הפרסומות של האדמין).
+export async function strapiPut(path, data, { fetch: f = fetch, jwt = '' } = {}) {
+    const url = `${STRAPI_URL}/api/${path}`;
+    /** @type {Record<string, string>} */
+    const headers = { 'Content-Type': 'application/json' };
+    if (jwt) headers['Authorization'] = `Bearer ${jwt}`;
+    const res = await f(url, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ data }),
+    });
+    if (!res.ok) throw new Error(`Strapi PUT ${path} failed: ${res.status} ${res.statusText}`);
+    return res.json();
+}
+
 // תוכן הקמפיינים עבר לפרונט (campaigns.js) - Strapi משמש כאן רק לתגובות שביעות-רצון.
 export async function fetchSatisfactionResponses(campaignSlug, { fetch: f = fetch, pageSize = 50 } = {}) {
     const data = await strapiGet('pg-satisfaction-responses', {

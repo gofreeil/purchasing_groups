@@ -1,6 +1,19 @@
-// חושף את המשתמש המחובר לכל הדפים דרך data.user.
-export function load({ locals }) {
+import { listApproved } from '$lib/server/adsStore.js';
+
+// חושף את המשתמש המחובר לכל הדפים דרך data.user,
+// ואת הפרסומות המאושרות של מפרסמים - לסיידבר הפרסומות.
+export async function load({ locals, fetch }) {
     const u = locals.user;
+
+    // כשל בטעינת הפרסומות לא מפיל את האתר - פשוט לא מציגים אותן.
+    /** @type {any[]} */
+    let approvedAds = [];
+    try {
+        approvedAds = await listApproved({ fetch });
+    } catch (err) {
+        console.warn('layout: loading approved ads failed', err);
+    }
+
     return {
         user: u
             ? {
@@ -14,5 +27,6 @@ export function load({ locals }) {
                 app_role: u.app_role ?? null,
             }
             : null,
+        approvedAds,
     };
 }

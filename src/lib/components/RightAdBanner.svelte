@@ -55,7 +55,7 @@
 					</span>
 				</div>
 				<a
-					href="mailto:freedomhasbegun@gmail.com"
+					href="/advertise"
 					class="right-ad-btn"
 					style="background: {slot.btn}"
 				>

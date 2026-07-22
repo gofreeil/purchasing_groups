@@ -2,6 +2,23 @@
 	import { onMount } from "svelte";
 	import { ads } from "$lib/adsData.js";
 
+	// פרסומות מאושרות של מפרסמים - מוצגות לפני פרסומות השותפים גם בנייד.
+	let { approvedAds = [] } = $props();
+
+	let merged = $derived([
+		...approvedAds.map((/** @type {any} */ a) => ({
+			id: `sub-${a.id}`,
+			title: a.title,
+			description: a.subtitle,
+			cta: a.cta || a.title,
+			hover: a.hover || undefined,
+			href: `/ads/${a.id}`,
+			target: "_self",
+			image: a.mainImage,
+		})),
+		...ads.map((a) => ({ ...a, target: "_blank" })),
+	]);
+
 	let open = $state(false);
 	let collapsed = $state(false);
 
@@ -211,11 +228,11 @@
 
 		<!-- רשימת פרסומות -->
 		<div class="benefits-list">
-			{#each ads as ad (ad.id)}
+			{#each merged as ad (ad.id)}
 				<a
 					href={ad.href}
-					target="_blank"
-					rel="noopener noreferrer"
+					target={ad.target}
+					rel={ad.target === "_blank" ? "noopener noreferrer" : undefined}
 					class="benefit-card"
 					onclick={closeAll}
 				>
@@ -236,6 +253,15 @@
 					</div>
 				</a>
 			{/each}
+
+			<!-- קריאה למפרסמים - מובילה לדף המחירון והפרסום -->
+			<a href="/advertise" class="benefit-card advertise-cta" onclick={closeAll}>
+				<div class="advertise-cta-inner">
+					<span class="advertise-cta-icon">📢</span>
+					<p class="benefit-title">רוצים לפרסם כאן?</p>
+					<p class="benefit-desc">מחירון, מחשבון והעלאת פרסומת בקלות</p>
+				</div>
+			</a>
 		</div>
 	</div>
 
@@ -456,6 +482,32 @@
 		background: rgba(99, 102, 241, 0.12);
 		border-radius: 4px;
 		padding: 0.15rem 0.45rem;
+	}
+
+	/* ---- קריאה למפרסמים ---- */
+	.advertise-cta {
+		justify-content: center;
+		border-style: dashed;
+		border-color: rgba(251, 191, 36, 0.4);
+		background: rgba(251, 191, 36, 0.06);
+	}
+	.advertise-cta:hover {
+		border-color: rgba(251, 191, 36, 0.7);
+		background: rgba(251, 191, 36, 0.12);
+	}
+	.advertise-cta-inner {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.2rem;
+		text-align: center;
+		padding: 0.4rem;
+	}
+	.advertise-cta-inner .benefit-title {
+		color: #fbbf24;
+	}
+	.advertise-cta-icon {
+		font-size: 1.3rem;
 	}
 
 	/* ---- כרטיס ריק ---- */
