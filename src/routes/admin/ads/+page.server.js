@@ -30,9 +30,15 @@ export const actions = {
         const form = await request.formData();
         const id = String(form.get('id') ?? '');
         if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
+        // משך הפרסום נקבע כאן ולא ע"י המפרסם - התשלום ידני, אז מי שקיבל
+        // את הכסף הוא זה שקובע אם שולמו חודש או חצי שנה.
+        const durationDays = Number(form.get('durationDays')) === 180 ? 180 : 30;
         try {
-            await approveAd(id, { fetch, jwt: locals.jwt ?? '' });
-            return { success: true, message: 'הפרסומת אושרה ופורסמה ✅' };
+            await approveAd(id, { durationDays, fetch, jwt: locals.jwt ?? '' });
+            return {
+                success: true,
+                message: `הפרסומת אושרה ופורסמה ל-${durationDays === 180 ? 'חצי שנה' : 'חודש'} ✅`,
+            };
         } catch (err) {
             console.error('approve failed:', err);
             return fail(502, { error: 'האישור נכשל - נסו שוב' });

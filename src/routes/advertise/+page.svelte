@@ -213,13 +213,19 @@
     // ---- תקופת הפרסום: יום עריכה חינם + חודש מלא ----
     let confirmedPeriod = $state(false);
     let today = new Date();
-    /** @param {Date} d */
-    function addOneMonthSameDate(d) {
+    /**
+     * @param {Date} d
+     * @param {number} n
+     */
+    function addMonths(d, n) {
         const r = new Date(d);
-        r.setMonth(r.getMonth() + 1);
+        r.setMonth(r.getMonth() + n);
         return r;
     }
-    let expirationDate = $derived(addOneMonthSameDate(today));
+    // אורך התקופה נגזר מהמסלול שנבחר: חצי שנה = 6 חודשים, אחרת חודש.
+    // כשנבחרו כמה פרסומות עם מסלולים שונים - מוצגת הארוכה מביניהן.
+    let periodMonths = $derived(selectedItems.some((r) => r.plan === "half") ? 6 : 1);
+    let expirationDate = $derived(addMonths(today, periodMonths));
     /** @param {Date} d */
     function fmtDate(d) {
         return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -551,7 +557,7 @@
                 <p class="g-title">🎁 יום העריכה - חינם על חשבון המערכת</p>
                 <ul>
                     <li>היום, <strong>{fmtDate(today)}</strong>, הוא יום העריכה החינמית - לא נספר בתקופת הפרסום.</li>
-                    <li>הפרסומת תרוץ <strong>חודש מלא</strong> - עד <strong>{fmtDate(expirationDate)} כולל</strong>.</li>
+                    <li>הפרסומת תרוץ <strong>{periodMonths === 6 ? "שישה חודשים מלאים" : "חודש מלא"}</strong> - עד <strong>{fmtDate(expirationDate)} כולל</strong>.</li>
                     <li>תקופת העריכה החינמית נגמרת היום ב-<strong>23:59</strong>. כדאי לסיים את העריכה לפני זה!</li>
                 </ul>
             </div>
@@ -589,7 +595,7 @@
             <label class="ap-period-confirm">
                 <input type="checkbox" bind:checked={confirmedPeriod} />
                 <div>
-                    <p class="c-main">הבנתי את אורך התקופה ואת תאריך התפוגה</p>
+                    <p class="c-main">הבנתי את אורך התקופה ({periodMonths === 6 ? "חצי שנה" : "חודש"}) ואת תאריך התפוגה</p>
                     <p class="c-sub">
                         היום ({fmtDate(today)}) הוא יום עריכה חינם, והפרסום ירוץ עד
                         <span>{fmtDate(expirationDate)} כולל</span>.

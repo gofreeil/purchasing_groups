@@ -95,8 +95,15 @@
                             <a href="/ads/{ad.id}" target="_blank" class="a-btn ghost">פתח את דף הנחיתה ↗</a>
                         {/if}
                         {#if ad.status !== "approved"}
-                            <form method="POST" action="?/approve" use:enhance>
+                            <form method="POST" action="?/approve" use:enhance class="approve-form">
                                 <input type="hidden" name="id" value={ad.id} />
+                                <label class="duration-label">
+                                    שולם עבור:
+                                    <select name="durationDays" class="duration-select">
+                                        <option value="30">חודש</option>
+                                        <option value="180">חצי שנה</option>
+                                    </select>
+                                </label>
                                 <button type="submit" class="a-btn approve">✅ אשר ופרסם</button>
                             </form>
                         {/if}
@@ -311,11 +318,31 @@
         border: 1px solid rgba(255, 255, 255, 0.15);
     }
     .a-btn.ghost:hover { color: #fff; }
+    .approve-form,
     .reject-form {
         display: flex;
         gap: 0.4rem;
         align-items: center;
         flex-wrap: wrap;
+    }
+    .duration-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        color: #9ca3af;
+        font-weight: 700;
+    }
+    .duration-select {
+        padding: 0.4rem 0.5rem;
+        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
     }
     .reject-input {
         padding: 0.4rem 0.7rem;
