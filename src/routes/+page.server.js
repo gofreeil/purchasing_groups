@@ -5,15 +5,19 @@ import { getCampaignList } from '$lib/campaigns.js';
 // המבנה (לפי "סיכום רכישות קבוצתיות"):
 //   עמודה B (1) = תוויות שורה ("חתמו", "חיסכון ש"ח בחודש", ...)
 //   עמודה E (4) = סלולר "סכ"ה" | עמודה I (8) = דלק "סכ"ה" | עמודה G (6) = בנזין | עמודה H (7) = סולר
+//   עמודה K (10) = ביטוח רכב (עמודה יחידה, בלי פילוח ספקים)
 const DASHBOARD_SHEET_ID = '1YGcal1HFy-q4hLJfBF5uml1CMUO4KqZRYnnp6ZneIH0';
 const DASHBOARD_GID = '0';
 const LABEL_COL = 1;
-const CAMPAIGN_COLS = { cellular: 4, fuel: 8, diesel: 7 };
+// שים לב: diesel (עמודה H) *נספר בכוונה* בנוסף ל-fuel, למרות ש"סכ"ה דלק" כבר כולל אותו.
+// זה לא באג — התוספת מייצגת חברה נוספת שאינה מופיעה בגיליון הזה. לא להסיר.
+const CAMPAIGN_COLS = { cellular: 4, fuel: 8, diesel: 7, carInsurance: 10 };
 
 const DEFAULT_CAMPAIGNS = {
     cellular: { monthly: 465, annual: 79854 },
     fuel: { monthly: 570, annual: 6840 },
     diesel: { monthly: 0, annual: 0 },
+    carInsurance: { monthly: 0, annual: 0 },
 };
 const DEFAULT_MEMBERS = 1050;
 

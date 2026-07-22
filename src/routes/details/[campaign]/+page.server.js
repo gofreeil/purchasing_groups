@@ -6,10 +6,10 @@ import { getCampaign } from '$lib/campaigns.js';
 const DASHBOARD_SHEET_ID = '1YGcal1HFy-q4hLJfBF5uml1CMUO4KqZRYnnp6ZneIH0';
 const DASHBOARD_GID = '0';
 const LABEL_COL = 1;
-// carInsurance עדיין ללא עמודה בגיליון - עד שתתווסף, בלוק הסטטיסטיקות בדף הפרטים מוסתר
-// (מוצג רק כש-members > 0). כשיהיו נתונים: להוסיף כאן carInsurance: <מס' עמודה> ומספר חברים.
-const CAMPAIGN_COLS = { cellular: 4, fuel: 8 };
-const DEFAULT_MEMBERS = { cellular: 312, fuel: 198 };
+// carInsurance = עמודה K בגיליון. כל עוד שורת "חתמו" שם היא 0, בלוק הסטטיסטיקות
+// בדף הפרטים נשאר מוסתר (מוצג רק כש-members > 0) — הוא ייפתח מעצמו כשהגיליון יתמלא.
+const CAMPAIGN_COLS = { cellular: 4, fuel: 8, carInsurance: 10 };
+const DEFAULT_MEMBERS = { cellular: 312, fuel: 198, carInsurance: 0 };
 
 function parseCsv(text) {
     const rows = [];
