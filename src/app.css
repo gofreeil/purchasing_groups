@@ -700,11 +700,14 @@ a {
     border: 1px solid var(--border-color);
     padding: 0.9rem 2.5rem;
     gap: 2.5rem;
-    transition: background 0.3s;
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
 .purchase-card:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(66, 90, 128, 0.92);
+    border-color: rgba(74, 222, 128, 0.6);
+    box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.25),
+        0 10px 26px rgba(0, 0, 0, 0.28);
 }
 
 .purchase-img {

@@ -190,6 +190,9 @@ export async function POST({ request }) {
             body: JSON.stringify({
                 from: `${SITE_NAME} <${fromEmail}>`,
                 to: [email],
+                // כתובת השולח היא של הדומיין המאומת, אבל תשובות של מפרסמים
+                // צריכות להגיע לתיבה שאנחנו באמת קוראים.
+                reply_to: CONTACT_EMAIL,
                 subject: `✅ בקשת הפרסום שלך התקבלה - ₪${payload.totalPayment}`,
                 html: buildEmailHtml(payload),
             }),
