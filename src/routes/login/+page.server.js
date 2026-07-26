@@ -23,6 +23,9 @@ export const actions = {
         if (!data?.jwt) return fail(502, { error: 'Strapi לא החזיר JWT' });
 
         cookies.set(AUTH_COOKIE, data.jwt, authCookieOptions(url));
-        throw redirect(303, returnTo);
+        // התחברות מפורשת בסיסמה מדף ההתחברות → מסך "ברוכים השבים"
+        // (אותו דפוס כמו withWelcome בדף ההתחברות של שאר אתרי הרשת)
+        const sep = returnTo.includes('?') ? '&' : '?';
+        throw redirect(303, `${returnTo}${sep}welcome=back`);
     },
 };

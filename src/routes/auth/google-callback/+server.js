@@ -24,7 +24,10 @@ export async function GET({ url, cookies, fetch }) {
     cookies.set(AUTH_COOKIE, data.jwt, authCookieOptions(url));
     cookies.delete('oauth-return-to', { ...authCookieOptions(url) });
     cookies.delete('oauth-provider', { ...authCookieOptions(url) });
-    throw redirect(302, returnTo);
+    // התחברות מפורשת מדף ההתחברות (Google/Facebook) → מסך "ברוכים השבים"
+    // (אותו דפוס כמו withWelcome בדף ההתחברות של שאר אתרי הרשת)
+    const sep = returnTo.includes('?') ? '&' : '?';
+    throw redirect(302, `${returnTo}${sep}welcome=back`);
 }
 
 /**

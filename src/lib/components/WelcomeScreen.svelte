@@ -1,22 +1,23 @@
 <script>
 	/**
-	 * מסך פתיחה מלא אחרי הרשמה / זיהוי ראשון — גלובלי (מוצג ב-+layout), כדי שיופיע
-	 * בכל יעד נחיתה. מקור-אמת: פרמטר `welcome` ב-URL שנשתל בזרימת ה-SSO של קהילה:
-	 *   welcome=1 | welcome=new  → "ברוכים המצטרפים" (הרשמה / זיהוי ראשון + רשת האתרים)
+	 * מסך פתיחה מלא אחרי התחברות — גלובלי (מוצג ב-+layout), כדי שיופיע
+	 * בכל יעד נחיתה. מקור-אמת: פרמטר `welcome` ב-URL שנשתל בזרימות ההתחברות:
+	 *   welcome=1 | welcome=new  → "ברוכים המצטרפים"
 	 *   welcome=back             → "ברוכים השבים"
+	 * בשני המצבים מוצגת רשת הלוגואים של כל אתרי הרשת (networkSites —
+	 * הרשימה הקנונית המלאה, כולל האתר הנוכחי עצמו).
 	 *
-	 * עצמאי בכוונה: קורא את ה-URL דרך window.location ב-onMount (לא $app/stores) ומציג
-	 * את רשת הבאנרים עם השדות המשותפים לכל האתרים בלבד (id/href/image/color) — כדי
-	 * שאותו רכיב יעבוד בכל מאגרי הרשת ללא תלות במבנה ה-adsData או ב-i18n.
+	 * עצמאי בכוונה: קורא את ה-URL דרך window.location ב-onMount (לא $app/stores).
 	 *
 	 * הערת התאמה מקומית: ב-purchasing_groups אין Tailwind (העיצוב ב-CSS ידני עם
 	 * משתני CSS), אין preprocess ל-TS, ו-community-callback הוא endpoint צד-שרת שאינו
 	 * יכול לקרוא localStorage. לכן: הרכיב כתוב ב-JS רגיל עם CSS ממודר, שדה color מוחל
-	 * כ-inline background, ושער "ביקור ראשון בדפדפן" (gofreeil-welcomed) מבוצע כאן —
-	 * המקום היחיד בצד-הלקוח בזרימה. משתמש חוזר → הפרמטר נוקה והמסך לא מוצג.
+	 * כ-inline background, והבחנת "מצטרף חדש / שב" עבור welcome=new מבוצעת כאן
+	 * (gofreeil-welcomed) — המקום היחיד בצד-הלקוח בזרימה: דפדפן שכבר בורך פעם
+	 * מקבל "ברוכים השבים" במקום "ברוכים המצטרפים".
 	 */
 	import { onMount } from 'svelte';
-	import { ads } from '$lib/adsData';
+	import { networkSites } from '$lib/networkSites';
 
 	let { userName = '' } = $props();
 
@@ -49,17 +50,16 @@
 
 	onMount(() => {
 		const p = new URLSearchParams(window.location.search).get('welcome');
-		const k = p === '1' || p === 'new' ? 'new' : p === 'back' ? 'back' : null;
+		/** @type {'new' | 'back' | null} */
+		let k = p === '1' || p === 'new' ? 'new' : p === 'back' ? 'back' : null;
 		if (!k) return;
-		// ברכת "מצטרפים" מוצגת רק בביקור הראשון בדפדפן זה; כניסות SSO הבאות מנקות את
-		// הפרמטר ולא מציגות שוב. ("ברוכים השבים" אינו מוגבל — הוא נשלח במפורש בלבד.)
+		// ברכת "מצטרפים" מוצגת רק בביקור הראשון בדפדפן זה; דפדפן שכבר בורך מקבל
+		// במקומה "ברוכים השבים" (המקבילה צד-הלקוח להבחנת new/back שנעשית באתרים
+		// אחרים ברשת בתוך ה-callback עצמו). "back" מפורש מוצג תמיד כפי שהוא.
 		try {
-			if (k === 'new' && localStorage.getItem('gofreeil-welcomed')) {
-				stripParam();
-				return;
-			}
+			if (k === 'new' && localStorage.getItem('gofreeil-welcomed')) k = 'back';
 		} catch {
-			/* localStorage חסום — ממשיכים ומציגים */
+			/* localStorage חסום — ממשיכים ומציגים כ"מצטרפים" */
 		}
 		kind = k;
 		visible = true;
@@ -96,23 +96,6 @@
 						נרשמת בהצלחה — ומעכשיו אתה מוכר בכל אתרי רשת יוצאים לחירות, ללא צורך בהזדהות נוספת.
 					</p>
 					<p class="welcome-tagline">יוצאים לחירות מוכיחים שעולם חדש הוא אפשרי</p>
-					<!-- לוגואים של כל האתרים ברשת — אריחי תמונה (שדות משותפים בלבד),
-					     flex-wrap עם מרכוז כדי שהשורה האחרונה החלקית תתמרכז -->
-					<div class="welcome-grid" aria-label="אתרי רשת יוצאים לחירות">
-						{#each ads as site (site.id)}
-							<a
-								class="welcome-tile"
-								href={site.href}
-								target="_blank"
-								rel="noopener noreferrer"
-								aria-label="מעבר לאתר ברשת יוצאים לחירות"
-							>
-								<div class="welcome-tile-img" style="background: {site.color}">
-									<img src={site.image} alt="" loading="lazy" />
-								</div>
-							</a>
-						{/each}
-					</div>
 				{:else}
 					<div class="welcome-wave">👋</div>
 					<h2 class="welcome-title welcome-title-back">
@@ -120,6 +103,25 @@
 					</h2>
 					<p class="welcome-text">טוב לראות אותך שוב ברשת יוצאים לחירות.</p>
 				{/if}
+				<!-- לוגואים של כל האתרים ברשת (הרשימה הקנונית המלאה, כולל האתר
+				     הנוכחי) — מוצגים בשני המצבים (מצטרפים + שבים). flex-wrap עם
+				     מרכוז כדי שהשורה האחרונה (חלקית) תתמרכז ולא תישאר צמודה לצד -->
+				<div class="welcome-grid" aria-label="אתרי רשת יוצאים לחירות">
+					{#each networkSites as site (site.id)}
+						<a
+							class="welcome-tile"
+							href={site.href}
+							target="_blank"
+							rel="noopener noreferrer"
+							title={site.title}
+						>
+							<div class="welcome-tile-img" style="background: {site.color}">
+								<img src={site.image} alt={site.title} loading="lazy" />
+							</div>
+							<span class="welcome-tile-title">{site.title}</span>
+						</a>
+					{/each}
+				</div>
 			</div>
 		</div>
 
@@ -256,8 +258,27 @@
 	}
 	.welcome-tile:hover {
 		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(192, 132, 252, 0.4);
 		transform: translateY(-2px);
+	}
+	/* צבע מסגרת ה-hover לפי מצב הברכה — סגול למצטרפים, אמרלד לשבים */
+	.new .welcome-tile:hover {
+		border-color: rgba(192, 132, 252, 0.4);
+	}
+	.back .welcome-tile:hover {
+		border-color: rgba(52, 211, 153, 0.4);
+	}
+
+	.welcome-tile-title {
+		font-size: 11px;
+		line-height: 1.2;
+		font-weight: 600;
+		color: #e5e7eb;
+		text-align: center;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 
 	.welcome-tile-img {

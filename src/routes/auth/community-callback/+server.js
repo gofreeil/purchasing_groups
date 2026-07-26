@@ -9,8 +9,8 @@ import { redirect } from '@sveltejs/kit';
  * - כישלון → ?error=not_registered → חזרה ל-/login עם הודעה.
  *
  * הזרקת welcome=new היא ללא-תנאי (endpoint צד-שרת אינו יכול לקרוא localStorage);
- * שער "ביקור ראשון בדפדפן" (gofreeil-welcomed) נאכף בצד-הלקוח ב-WelcomeScreen —
- * משתמש חוזר מקבל את הפרמטר אך המסך אינו מוצג והפרמטר נוקה מה-URL.
+ * הבחנת "מצטרף חדש / שב" (gofreeil-welcomed) נאכפת בצד-הלקוח ב-WelcomeScreen —
+ * דפדפן שכבר בורך פעם מקבל "ברוכים השבים" במקום "ברוכים המצטרפים".
  */
 export function GET({ url }) {
 	const returnTo = url.searchParams.get('returnTo') || '/';

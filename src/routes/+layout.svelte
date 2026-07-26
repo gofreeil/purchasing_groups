@@ -113,8 +113,8 @@
 	<title>{$t.title}</title>
 </svelte:head>
 
-<!-- מסך פתיחה אחרי הרשמה / זיהוי ראשון — גלובלי, מופעל ע"י ?welcome ב-URL -->
-<WelcomeScreen />
+<!-- מסך פתיחה אחרי התחברות (מצטרפים / שבים) — גלובלי, מופעל ע"י ?welcome ב-URL -->
+<WelcomeScreen userName={displayName} />
 
 <div class="app-wrapper">
 	<!-- Header -->
