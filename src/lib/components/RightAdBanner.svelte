@@ -40,9 +40,11 @@
 	<h4 class="right-ad-title">תוכן שיווקי</h4>
 	<div class="right-ad-list">
 		{#each displayed as slot, index (currentGroup * 4 + index)}
-			<div
+			<a
+				href="/advertise"
 				class="right-ad-card"
 				style="border-color: {slot.border}; background: {slot.bg};"
+				aria-label="מקום פרסום פנוי - לפרטים על פרסום באתר"
 			>
 				<div class="right-ad-num">{currentGroup * 4 + index + 1}</div>
 				<div class="right-ad-emoji">📢</div>
@@ -54,14 +56,13 @@
 						- יכול להיות שלך
 					</span>
 				</div>
-				<a
-					href="/advertise"
+				<span
 					class="right-ad-btn"
 					style="background: {slot.btn}"
 				>
 					לפרטים
-				</a>
-			</div>
+				</span>
+			</a>
 		{/each}
 	</div>
 </aside>
@@ -104,6 +105,7 @@
 		border: 2px dashed;
 		padding: 1.5rem 0.75rem;
 		overflow: hidden;
+		text-decoration: none;
 		animation: rightAdFadeIn 0.7s ease-in-out;
 	}
 
