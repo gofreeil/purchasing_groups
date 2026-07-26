@@ -70,6 +70,11 @@
                         <span class="status-pill {ad.status}">
                             {ad.status === "pending" ? "ממתינה" : ad.status === "approved" ? "מאושרת" : "נדחתה"}
                         </span>
+                        {#if ad.payment === "code"}
+                            <span class="status-pill approved">💳 קוד תנועה — כמו שולם</span>
+                        {:else}
+                            <span class="status-pill pending">⌛ תשלום לתיאום</span>
+                        {/if}
                     </div>
                     <p class="ad-sub">{ad.subtitle}</p>
                     {#if ad.hoverText}<p class="ad-hover">ריחוף: {ad.hoverText}</p>{/if}
@@ -99,9 +104,10 @@
                                 <input type="hidden" name="id" value={ad.id} />
                                 <label class="duration-label">
                                     שולם עבור:
+                                    <!-- ברירת המחדל = התקופה שהמפרסם בחר בשליחה -->
                                     <select name="durationDays" class="duration-select">
-                                        <option value="30">חודש</option>
-                                        <option value="180">חצי שנה</option>
+                                        <option value="30" selected={ad.requestedDurationDays !== 180}>חודש</option>
+                                        <option value="180" selected={ad.requestedDurationDays === 180}>חצי שנה</option>
                                     </select>
                                 </label>
                                 <button type="submit" class="a-btn approve">✅ אשר ופרסם</button>

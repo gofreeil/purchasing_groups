@@ -7,6 +7,11 @@
 //   logo (text ארוך - base64), main_image (text ארוך - base64), landing (JSON),
 //   submitted_by_id, submitted_by_email, submitted_by_name, submitted_at,
 //   decided_at, rejection_reason, expires_at, duration_days (number).
+//
+// אי אפשר להוסיף עמודות חדשות ל-content type (Strapi דוחה מפתחות לא מוכרים),
+// לכן פרטי התשלום מהשליחה נארזים בתוך ה-JSON של landing:
+//   landing._payment ("code" = הוזן קוד התנועה, כמו שולם | "pending" = לתיאום)
+//   landing._requestedDurationDays (30 | 180) - התקופה שהמפרסם ביקש.
 
 import { strapiGet, strapiPost, strapiPut } from '$lib/strapi.js';
 
@@ -46,6 +51,9 @@ function fromStrapi(row) {
         rejectionReason: row.rejection_reason ?? '',
         expiresAt: row.expires_at ?? '',
         durationDays: row.duration_days ?? DEFAULT_DURATION_DAYS,
+        // פרטי התשלום מהשליחה - ארוזים בתוך ה-JSON של landing (אין עמודות חדשות)
+        payment: row.landing?._payment === 'code' ? 'code' : 'pending',
+        requestedDurationDays: Number(row.landing?._requestedDurationDays) === 180 ? 180 : 30,
     };
 }
 
@@ -66,7 +74,11 @@ export async function submitAd(payload, { fetch: f = fetch } = {}) {
             gradient: payload.gradient ?? '',
             logo: payload.logo ?? '',
             main_image: payload.mainImage ?? '',
-            landing: payload.landing ?? {},
+            landing: {
+                ...(payload.landing ?? {}),
+                _payment: payload.payment === 'code' ? 'code' : 'pending',
+                _requestedDurationDays: payload.requestedDurationDays === 180 ? 180 : 30,
+            },
             submitted_by_id: payload.submittedBy?.id ?? '',
             submitted_by_email: payload.submittedBy?.email ?? '',
             submitted_by_name: payload.submittedBy?.name ?? '',

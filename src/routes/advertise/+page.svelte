@@ -2,7 +2,8 @@
     import { browser } from "$app/environment";
     import { goto } from "$app/navigation";
     import { evaluateDiscount, discountAmount, DEFAULT_DISCOUNT_CODES } from "$lib/discountCodes.js";
-    import { FREE_PROMO, FREE_PROMO_CODE_TEXT, FREE_PROMO_DISCOUNT } from "$lib/freePromo.js";
+    // הקוד עצמו לא מוצג בשום מקום בדף - מי שמזין אותו בשדה ההנחה עדיין מקבל פטור.
+    import { FREE_PROMO, FREE_PROMO_DISCOUNT } from "$lib/freePromo.js";
 
     // דף הפרסום והמחשבון - הועתק מאתר "קהילה בשכונה" והותאם לקבוצות רכישה:
     // אתר אחד, בלי בחירת עיר/שכונה - מחיר אחיד לכל סוג פרסום.
@@ -273,19 +274,6 @@
             היחשף לקהל של אלפי חברי קבוצות הרכישה - קהל צרכני, ממוקד ומעורב
         </p>
     </div>
-
-    {#if FREE_PROMO}
-        <!-- מבצע השקה: פרסום חינם באמצעות קוד בשדה ההנחה -->
-        <div class="ap-promo-banner">
-            <div class="ap-promo-icon">🎉</div>
-            <h2 class="ap-promo-title">בתקופה הראשונית - הפרסום חינם!</h2>
-            <p class="ap-promo-text">
-                בשדה קוד ההנחה שבתחתית הדף רשמו
-                <span class="ap-promo-code">"{FREE_PROMO_CODE_TEXT}"</span>
-                ותוכלו להעלות את הפרסום <strong class="ap-promo-free">ללא תשלום</strong>.
-            </p>
-        </div>
-    {/if}
 
     <!-- אפשרויות הפרסום -->
     <h2 class="ap-section-title">אפשרויות הפרסום</h2>
@@ -619,11 +607,7 @@
         <!-- קוד הנחה -->
         <div class="ap-discount">
             <label for="discount-code">🎟️ קוד הנחה</label>
-            {#if FREE_PROMO}
-                <p class="d-promo">🎉 בתקופה הראשונית: רשמו כאן "{FREE_PROMO_CODE_TEXT}" והעלאת הפרסום חינם - ללא תשלום.</p>
-            {:else}
-                <p class="d-have">יש לך קוד הנחה? הזן אותו כאן</p>
-            {/if}
+            <p class="d-have">יש לך קוד הנחה? הזן אותו כאן</p>
             <input id="discount-code" type="text" bind:value={discountInput} placeholder="הקלד קוד הנחה..." dir="rtl" class="ap-input full" />
             {#if discountInput.trim()}
                 {#if discountEval.applied && discountEval.matched}
@@ -683,13 +667,14 @@
                         rel="noopener noreferrer"
                         class="ap-btn purple"
                     >💬 לתשלום ותיאום בוואטסאפ</a>
-                    <a href="/advertise/builder" class="ap-btn green">🎨 כבר שילמתי - לבנות את הפרסומת</a>
+                    <a href="/advertise/builder" class="ap-btn green">🎨 לעיצוב הפרסומת - בלי תשלום מראש</a>
                 </div>
 
                 <div class="ap-after-pay">
-                    <p class="a-title">💾 אחרי התשלום - בונים את הפרסומת</p>
+                    <p class="a-title">🎨 קודם מעצבים - התשלום בשלב השליחה</p>
                     <ul>
-                        <li>נכנסים ל<a href="/advertise/builder">בונה הפרסומות</a> ומעצבים את המודעה שלכם צעד-צעד.</li>
+                        <li>נכנסים ל<a href="/advertise/builder">בונה הפרסומות</a> ומעצבים את המודעה שלכם צעד-צעד - פתוח לכולם.</li>
+                        <li>בשלב השליחה בוחרים את תקופת הפרסום ומתאמים את התשלום.</li>
                         <li>הטיוטה <strong>נשמרת אוטומטית</strong> בדפדפן - אפשר לצאת ולחזור מתי שרוצים.</li>
                     </ul>
                 </div>
@@ -750,48 +735,6 @@
         max-width: 42rem;
         margin: 0 auto;
         line-height: 1.6;
-    }
-
-    /* ---- מבצע השקה ---- */
-    .ap-promo-banner {
-        margin-bottom: 2.5rem;
-        border-radius: 1rem;
-        border: 2px solid rgba(34, 197, 94, 0.6);
-        background: linear-gradient(135deg, rgba(20, 83, 45, 0.3), rgba(6, 78, 59, 0.2));
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(34, 197, 94, 0.1);
-        animation: slideDown 0.4s ease-out;
-    }
-    .ap-promo-icon {
-        font-size: 2.25rem;
-        margin-bottom: 0.5rem;
-    }
-    .ap-promo-title {
-        font-size: 1.6rem;
-        font-weight: 900;
-        color: #86efac;
-        margin: 0 0 0.5rem;
-    }
-    .ap-promo-text {
-        color: #e5e7eb;
-        font-size: 1.05rem;
-        line-height: 1.6;
-        margin: 0;
-    }
-    .ap-promo-code {
-        display: inline-block;
-        background: rgba(34, 197, 94, 0.2);
-        border: 1px solid rgba(74, 222, 128, 0.5);
-        border-radius: 0.5rem;
-        padding: 0.1rem 0.75rem;
-        color: #bbf7d0;
-        font-weight: 900;
-        white-space: nowrap;
-    }
-    .ap-promo-free {
-        color: #86efac;
-        font-weight: 900;
     }
 
     /* ---- כותרות סקציה ---- */
@@ -1691,13 +1634,6 @@
         font-weight: 900;
         font-size: 0.95rem;
         margin-bottom: 0.4rem;
-        text-align: right;
-    }
-    .ap-discount .d-promo {
-        color: #86efac;
-        font-size: 0.85rem;
-        font-weight: 700;
-        margin: 0 0 0.6rem;
         text-align: right;
     }
     .ap-discount .d-have {

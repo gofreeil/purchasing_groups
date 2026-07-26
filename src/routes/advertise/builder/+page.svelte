@@ -501,11 +501,12 @@
     // בשלב 6 (טקסט בריחוף) מציגים אוטומטית את הצד האחורי של הפרסומת
     const showHover = $derived(hoverPreview || activeStep === "hover");
 
-    // ===== שערת גישה =====
+    // ===== גישה =====
+    // הלוגיקה: קודם מעצבים את הפרסומת, עניין התשלום מגיע רק בשלב
+    // השליחה (בדף הנחיתה) — לכן הבונה פתוח לכולם, בלי שער תשלום.
     function checkAccess() {
         if (!browser) return;
-        const paid = localStorage.getItem(PAID_KEY) === "1";
-        accessGranted = isSuperAdmin || paid;
+        accessGranted = true;
         accessChecked = true;
     }
 
@@ -697,26 +698,7 @@
     <title>בניית הפרסומת שלי | רכישות קבוצתיות יוצאים לחירות</title>
 </svelte:head>
 
-{#if accessChecked && !accessGranted}
-    <!-- ===== שערה - נדרש תשלום ===== -->
-    <div class="gate" dir="rtl">
-        <div class="gate-icon">🔒</div>
-        <h1>בונה הפרסומות פתוח למפרסמים</h1>
-        <p>
-            כדי לבנות ולהעלות פרסומת יש להסדיר קודם את התשלום בדף הפרסום.
-            <br />יש לכם קוד פטור? הזינו אותו בשדה ההנחה בדף הפרסום.
-        </p>
-        <div class="gate-actions">
-            <a href="/advertise" class="b-btn amber">לדף הפרסום והתשלום</a>
-            <a
-                href={"https://wa.me/972508750632?text=" + encodeURIComponent("שלום, שילמתי על פרסום באתר קבוצות הרכישה ואני צריך גישה לבונה הפרסומות")}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="b-btn green"
-            >שילמתי - צרו איתי קשר</a>
-        </div>
-    </div>
-{:else if !accessChecked}
+{#if !accessChecked}
     <div style="min-height: 40vh;" aria-hidden="true"></div>
 {:else}
     <div class="ad-builder" dir="rtl">
@@ -1373,50 +1355,6 @@
 {/if}
 
 <style>
-    /* ============== שערה ============== */
-    .gate {
-        max-width: 36rem;
-        margin: 0 auto;
-        padding: 3rem 1rem 5rem;
-        text-align: center;
-    }
-    .gate-icon { font-size: 3.75rem; margin-bottom: 1rem; }
-    .gate h1 {
-        font-size: 1.75rem;
-        font-weight: 900;
-        color: #fbbf24;
-        margin: 0 0 0.75rem;
-    }
-    .gate p {
-        color: #d1d5db;
-        font-size: 1.05rem;
-        line-height: 1.6;
-        margin: 0 0 1.5rem;
-    }
-    .gate-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        justify-content: center;
-    }
-    @media (min-width: 640px) {
-        .gate-actions { flex-direction: row; }
-    }
-    .b-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.75rem;
-        font-weight: 900;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-    .b-btn.amber { background: #f59e0b; color: #000; }
-    .b-btn.amber:hover { background: #fbbf24; }
-    .b-btn.green { background: #16a34a; color: #fff; }
-    .b-btn.green:hover { background: #22c55e; }
-
     /* ============== מבנה כללי ============== */
     .ad-builder {
         max-width: 64rem;

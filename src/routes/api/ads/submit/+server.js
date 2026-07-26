@@ -33,6 +33,9 @@ export async function POST({ request, fetch, locals }) {
                     : undefined,
                 title: payload.title,
                 subtitle: payload.subtitle,
+                // "code" = הוזן קוד התנועה בשלב השליחה — נחשב כמו שולם
+                payment: payload.payment === 'code' ? 'code' : 'pending',
+                requestedDurationDays: Number(payload.requestedDurationDays) === 180 ? 180 : 30,
                 hoverText: payload.hoverText ?? '',
                 cta: payload.cta ?? '',
                 gradient: payload.gradient,
