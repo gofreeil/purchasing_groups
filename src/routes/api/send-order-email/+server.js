@@ -15,7 +15,7 @@ function buildEmailHtml(payload) {
     const discountValue = payload.discountValue ?? 0;
     const discountLabel = payload.discountLabel ?? '';
 
-    // מסלול אחד לכל הפרסום (כל המיקומים כלולים), לפי תקופה — ראו $lib/adPlans.js
+    // מסלול אחד לפרסומת האחת (דסקטופ + נייד), לפי תקופה — ראו $lib/adPlans.js
     const itemsRows = selectedItems
         .map((item) => {
             const color = '#f59e0b';
@@ -33,7 +33,7 @@ function buildEmailHtml(payload) {
 
     const summaryLine = `<p style="margin:0; color:#94a3b8; font-size:13px;">${
         selectedItems[0]?.type ?? 'פרסום'
-    } · כל מיקומי הפרסום באתר כלולים</p>`;
+    } · הטור הימני בדסקטופ + מסך מלא בנייד</p>`;
 
     return `<!DOCTYPE html>
 <html lang="he" dir="rtl">
