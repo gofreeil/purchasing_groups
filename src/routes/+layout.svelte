@@ -387,10 +387,22 @@
 		background: rgba(255, 255, 255, 0.15);
 	}
 
-	/* במובייל — רק הדגל, בלי שם השפה */
+	/* במובייל — הדר קומפקטי: רק דגל בלי שם שפה, אווטאר וכפתורים קטנים */
 	@media (max-width: 768px) {
 		.lang-name {
 			display: none;
+		}
+		.lang-selector-btn {
+			padding: 0.35rem 0.6rem;
+		}
+		.user-avatar {
+			width: 2.1rem;
+			height: 2.1rem;
+		}
+		.login-header-btn {
+			padding: 0.35rem 0.9rem;
+			font-size: 0.85rem;
+			white-space: nowrap;
 		}
 	}
 
