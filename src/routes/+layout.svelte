@@ -206,12 +206,6 @@
 					{/if}
 				</div>
 
-				<a
-					href="https://docs.google.com/forms/d/e/1FAIpQLSeK7H6wdZnAddeD7TuQwutsEYAT3AKkMh6L82gX797DVw8sRQ/viewform?usp=dialog"
-					target="_blank"
-					class="add-business-btn">{$t.addOffer}</a
-				>
-
 				{#if data?.user}
 					<div class="user-menu">
 						<button
@@ -299,6 +293,13 @@
 				/>
 				<span class="footer-brand-text">{$t.footer.clickForActivity}</span>
 			</a>
+
+			<a
+				href="https://docs.google.com/forms/d/e/1FAIpQLSeK7H6wdZnAddeD7TuQwutsEYAT3AKkMh6L82gX797DVw8sRQ/viewform?usp=dialog"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="add-business-btn footer-offer-btn">{$t.addOffer}</a
+			>
 
 			<nav class="footer-links" aria-label="ניווט תחתון">
 				<a href="/privacy">{$t.footer.privacy}</a>
