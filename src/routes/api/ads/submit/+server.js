@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import { submitAd } from '$lib/server/adsStore.js';
 import { isOwnerCode, notifyOwnerCodeUse } from '$lib/server/adsCode.js';
+import { normalizePlanDays } from '$lib/adPlans.js';
 
 // קליטת פרסומת חדשה מה-builder - נשמרת ב-Strapi במצב "ממתינה לאישור".
 // אין דרישת התחברות (כמו במקור בקהילה בשכונה) - הסינון האמיתי הוא האישור הידני.
@@ -24,7 +25,7 @@ export async function POST({ request, fetch, locals }) {
 
     // הקוד מאומת כאן, בשרת — לא סומכים על דגל payment מהדפדפן
     const usedOwnerCode = isOwnerCode(payload.ownerCode);
-    const requestedDurationDays = Number(payload.requestedDurationDays) === 180 ? 180 : 30;
+    const requestedDurationDays = normalizePlanDays(payload.requestedDurationDays);
     try {
         const ad = await submitAd(
             {

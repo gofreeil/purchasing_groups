@@ -12,6 +12,7 @@
 // ============================================================
 
 import { env } from '$env/dynamic/private';
+import { planLabelWithPrice } from '$lib/adPlans.js';
 
 const STRAPI_URL = (env.STRAPI_URL || 'https://api.gofreeil.com').replace(/\/$/, '');
 const SITE_NAME = 'רכישות קבוצתיות';
@@ -70,7 +71,7 @@ export async function notifyOwnerCodeUse(info) {
             `📢 שימוש בקוד בעלים — ${SITE_NAME}\n` +
             `פרסומת: "${info.adTitle}"\n` +
             `מי השתמש: ${who}\n` +
-            `תקופה מבוקשת: ${info.durationDays === 180 ? 'חצי שנה' : 'חודש'}\n` +
+            `תקופה מבוקשת: ${planLabelWithPrice(info.durationDays)}\n` +
             `המודעה ממתינה לאישור ב-groups.gofreeil.com/admin/ads`;
         const res = await api('/api/messages', {
             method: 'POST',

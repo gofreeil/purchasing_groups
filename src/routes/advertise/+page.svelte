@@ -4,6 +4,7 @@
     import { evaluateDiscount, discountAmount, DEFAULT_DISCOUNT_CODES } from "$lib/discountCodes.js";
     // הקוד עצמו לא מוצג בשום מקום בדף - מי שמזין אותו בשדה ההנחה עדיין מקבל פטור.
     import { FREE_PROMO, FREE_PROMO_DISCOUNT } from "$lib/freePromo.js";
+    import { adPlans } from "$lib/adPlans.js";
 
     // דף הפרסום והמחשבון - הועתק מאתר "קהילה בשכונה" והותאם לקבוצות רכישה:
     // אתר אחד, בלי בחירת עיר/שכונה - מחיר אחיד לכל סוג פרסום.
@@ -35,16 +36,26 @@
         },
     ];
 
-    // ---- טבלת המחירים - מחיר אחיד לכל האתר (בלי שכונות) ----
-    // half = ₪ לחודש במסלול חצי שנה; total = סה"כ לחצי שנה; single = חודש בודד.
-    const rows = [
-        { num: 1, type: "באנר צד ימין",        icon: "📌", half: 25, total: 150, single: 35, details: "מתחלף ברוטציה בצד ימין של כל עמודי האתר" },
-        { num: 2, type: "כרטיס בסיידבר",       icon: "🖼️", half: 45, total: 270, single: 60, details: "כרטיס עם תמונה, טקסט בריחוף ודף נחיתה" },
-        { num: 3, type: "פרסומת בנייד",         icon: "📱", half: 10, total: 60,  single: 15, details: "מופיע במגירת ההטבות בנייד + דף נחיתה" },
-    ];
+    // ---- טבלת המחירים - מסלול אחד לכל הפרסום (כל המיקומים כלולים),
+    // לפי תקופה, בתשלום מראש. המקור: $lib/adPlans.js, משותף לכל אתרי הרשת. ----
+    const ROW_META = {
+        7:   { icon: "⚡",  details: "טעימה קצרה - מתאים למבצע או אירוע נקודתי" },
+        30:  { icon: "📅",  details: "החודש הקלאסי - כל מיקומי הפרסום באתר" },
+        90:  { icon: "🗓️", details: "שלושה חודשים - נוכחות רציפה לאורך עונה" },
+        180: { icon: "🌗",  details: "חצי שנה - הכי משתלם לעסק שרוצה קביעות" },
+        365: { icon: "🏆",  details: "שנה מלאה - המחיר הנמוך ביותר ליום פרסום" },
+    };
+    const rows = adPlans.map((plan, i) => ({
+        num: i + 1,
+        days: plan.days,
+        type: plan.title,
+        price: plan.price,
+        icon: ROW_META[/** @type {keyof typeof ROW_META} */ (plan.days)]?.icon ?? "📢",
+        details: ROW_META[/** @type {keyof typeof ROW_META} */ (plan.days)]?.details ?? "",
+    }));
 
     // ---- מדריך מובנה: הבהוב מספר השלב ואצבע מכוונת ----
-    let tutorialStep = $state(/** @type {'pick-row' | 'pick-plan' | 'done'} */ ("pick-row"));
+    let tutorialStep = $state(/** @type {'pick-row' | 'done'} */ ("pick-row"));
     /** @type {number | null} */
     let highlightedRow = $state(null);
     /** @type {number | null} */
@@ -58,30 +69,19 @@
         return n.toLocaleString("en-US");
     }
 
+    // ---- מצב המחשבון: מסלול אחד נבחר (או כלום) ----
+    /** @type {number | null} */
+    let selectedNum = $state(null);
+
     /** @param {number} num */
-    function highlightRow(num) {
+    function selectRow(num) {
         highlightedRow = num;
-        if (tutorialStep === "pick-row") tutorialStep = "pick-plan";
-    }
-
-    // ---- מצב המחשבון: לכל שורה מסלול 'half' | 'single' | כלום ----
-    let planMap = $state(/** @type {Map<number, 'half' | 'single'>} */ (new Map()));
-
-    /**
-     * @param {number} num
-     * @param {'half' | 'single'} plan
-     */
-    function setPlan(num, plan) {
-        const next = new Map(planMap);
-        if (next.get(num) === plan) {
-            next.delete(num); // לחיצה על הצד הפעיל = ביטול
-            planMap = next;
+        if (selectedNum === num) {
+            selectedNum = null; // לחיצה על המסלול הפעיל = ביטול
             return;
         }
-        next.set(num, plan);
-        highlightedRow = num;
+        selectedNum = num;
         if (tutorialStep !== "done") tutorialStep = "done";
-        planMap = next;
 
         // אישור ויזואלי: וי קופץ, ואז גלילה איטית אל המחשבון והבהוב הסכום
         confirmingRow = num;
@@ -121,23 +121,12 @@
         requestAnimationFrame(step);
     }
 
-    let selectedItems = $derived(
-        rows
-            .filter((r) => planMap.has(r.num))
-            .map((r) => {
-                const plan = planMap.get(r.num) ?? "half";
-                const monthsCount = plan === "half" ? 6 : 1;
-                const eMonthly = plan === "half" ? r.half : r.single;
-                const eTotal = plan === "half" ? r.total : r.single;
-                return { ...r, plan, monthsCount, eMonthly, eTotal };
-            }),
-    );
+    let selectedRow = $derived(rows.find((r) => r.num === selectedNum) ?? null);
+    // נשמר כמערך כדי לא לשנות את חוזה הסיכום/המייל (selectedItems)
+    let selectedItems = $derived(selectedRow ? [{ ...selectedRow, eTotal: selectedRow.price }] : []);
 
-    let totalPayment = $derived(selectedItems.reduce((s, r) => s + r.eTotal, 0));
-    let totalMonthly = $derived(selectedItems.reduce((s, r) => s + r.eMonthly, 0));
-    let halfItems = $derived(selectedItems.filter((r) => r.plan === "half"));
-    let singleItems = $derived(selectedItems.filter((r) => r.plan === "single"));
-    let hasSelection = $derived(planMap.size > 0);
+    let totalPayment = $derived(selectedRow?.price ?? 0);
+    let hasSelection = $derived(!!selectedRow);
 
     // ---- קוד הנחה (כולל קוד מבצע ההשקה) ----
     const discountCodes = [
@@ -185,7 +174,6 @@
                     email: userEmail,
                     selectedItems,
                     totalPayment: effectiveTotal,
-                    totalMonthly,
                     discountLabel: discountValue > 0 ? discountLabelText : "",
                     discountValue,
                 }),
@@ -218,15 +206,15 @@
      * @param {Date} d
      * @param {number} n
      */
-    function addMonths(d, n) {
+    function addDays(d, n) {
         const r = new Date(d);
-        r.setMonth(r.getMonth() + n);
+        r.setDate(r.getDate() + n);
         return r;
     }
-    // אורך התקופה נגזר מהמסלול שנבחר: חצי שנה = 6 חודשים, אחרת חודש.
-    // כשנבחרו כמה פרסומות עם מסלולים שונים - מוצגת הארוכה מביניהן.
-    let periodMonths = $derived(selectedItems.some((r) => r.plan === "half") ? 6 : 1);
-    let expirationDate = $derived(addMonths(today, periodMonths));
+    // אורך התקופה = הימים של המסלול שנבחר (הפרסום מתחיל אחרי יום העריכה)
+    let periodDays = $derived(selectedRow?.days ?? 0);
+    let periodLabel = $derived(selectedRow?.type.replace(/^פרסום ל/, "") ?? "");
+    let expirationDate = $derived(addDays(today, periodDays));
     /** @param {Date} d */
     function fmtDate(d) {
         return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -295,43 +283,43 @@
     <!-- מחירון -->
     <h2 class="ap-section-title big">מחירון</h2>
 
+    <p class="ap-price-intro">
+        מחיר אחד לפרסום — כל מיקומי הפרסום באתר כלולים. בוחרים תקופה, ומשלמים מראש.
+    </p>
+
     <div class="ap-steps-row">
         <p class="ap-step-label">
             <span class="ap-step-num">1</span>
-            בחר את סוג הפרסום
+            לבחור ולשלם מראש
             {#if tutorialStep === "pick-row"}
                 <span class="tutorial-finger" aria-hidden="true">👇</span>
             {/if}
         </p>
-        <p class="ap-step-label" class:dimmed={tutorialStep === "pick-row"}>
-            <span class="ap-step-num">2</span>
-            בחר את פרק הזמן
-            {#if tutorialStep === "pick-plan"}
-                <span class="tutorial-finger" aria-hidden="true">👇</span>
-            {/if}
+        <p class="ap-step-label">
+            <a href="/advertise/terms" class="ap-terms-link">📜 תנאי הפרסום</a>
+            — לקריאה לפני התשלום
         </p>
     </div>
 
     <!-- כרטיסי מחיר (מובייל) + טבלה (מחשב) - כאן ממומש כרשימת כרטיסים רספונסיבית -->
     <div class="ap-rows">
         {#each rows as row}
-            {@const plan = planMap.get(row.num)}
-            {@const highlighted = !plan && highlightedRow === row.num}
+            {@const chosen = selectedNum === row.num}
+            {@const highlighted = !chosen && highlightedRow === row.num}
             <div
                 role="button"
                 tabindex="0"
-                onclick={() => highlightRow(row.num)}
+                onclick={() => selectRow(row.num)}
                 onkeydown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        highlightRow(row.num);
+                        selectRow(row.num);
                     }
                 }}
                 class="ap-row"
-                class:plan-half={plan === "half"}
-                class:plan-single={plan === "single"}
+                class:plan-chosen={chosen}
                 class:highlighted
-                class:selected={!!plan && confirmingRow !== row.num}
+                class:selected={chosen && confirmingRow !== row.num}
             >
                 {#if confirmingRow === row.num}
                     <span class="confirm-check-pop" aria-hidden="true"><span>✓</span></span>
@@ -344,53 +332,13 @@
                         <span class="ap-row-name">{row.type}</span>
                     </div>
 
-                    <!-- מתג מסלול: חצי שנה / חודש בודד -->
-                    <div
-                        class="ap-toggle"
-                        role="presentation"
-                        onclick={(e) => e.stopPropagation()}
-                        style="background: {plan === 'half'
-                            ? 'rgba(245,158,11,0.2)'
-                            : plan === 'single'
-                              ? 'rgba(59,130,246,0.2)'
-                              : 'rgba(255,255,255,0.12)'};
-                               border-color: {plan === 'half'
-                            ? 'rgba(245,158,11,0.7)'
-                            : plan === 'single'
-                              ? 'rgba(59,130,246,0.7)'
-                              : 'rgba(255,255,255,0.3)'};"
-                    >
-                        <button
-                            type="button"
-                            onclick={() => setPlan(row.num, "half")}
-                            class="ap-toggle-seg"
-                            style="background: {plan === 'half' ? '#f59e0b' : 'transparent'};
-                                   color: {plan === 'half' ? '#000' : plan ? '#9ca3af' : '#e5e7eb'};"
-                            title="חצי שנה"
-                        >½שנה</button>
-                        {#if !plan}
-                            <span class="ap-toggle-sep">/</span>
-                        {/if}
-                        <button
-                            type="button"
-                            onclick={() => setPlan(row.num, "single")}
-                            class="ap-toggle-seg"
-                            style="background: {plan === 'single' ? '#3b82f6' : 'transparent'};
-                                   color: {plan === 'single' ? '#fff' : plan ? '#9ca3af' : '#e5e7eb'};"
-                            title="חודש בודד"
-                        >חודש</button>
-                    </div>
+                    <span class="ap-row-pick" class:on={chosen}>{chosen ? "✓ נבחר" : "בחר"}</span>
                 </div>
 
                 <div class="ap-row-prices">
                     <div class="ap-price-block">
-                        <span class="ap-price-label">חצי שנה -</span>
-                        <span class="ap-price-half">₪{fmt(row.half)}</span>
-                        <span class="ap-price-label">לחודש (סה"כ ₪{fmt(row.total)})</span>
-                    </div>
-                    <div class="ap-price-block">
-                        <span class="ap-price-label">חודש בודד -</span>
-                        <span class="ap-price-single">₪{fmt(row.single)}</span>
+                        <span class="ap-price-half">₪{fmt(row.price)}</span>
+                        <span class="ap-price-label">ל-{row.days} ימי פרסום, מראש</span>
                     </div>
                 </div>
 
@@ -405,17 +353,13 @@
             <div class="ap-calc-head">
                 <span class="ap-calc-emoji">🧮</span>
                 <h2 class="ap-calc-title">מחשבון וסיכום</h2>
-                <span class="ap-calc-badge">{planMap.size} נבחרו</span>
+                <span class="ap-calc-badge">המסלול שנבחר</span>
             </div>
 
-            <!-- פירוט הפרסומות שנבחרו -->
+            <!-- פירוט המסלול שנבחר -->
             <div class="ap-calc-list">
                 <div class="ap-calc-list-head">
-                    <p>פרסומות שנבחרו</p>
-                    <div class="ap-calc-list-counts">
-                        {#if halfItems.length > 0}<span class="c-half">🟡 {halfItems.length} חצי שנה</span>{/if}
-                        {#if singleItems.length > 0}<span class="c-single">🔵 {singleItems.length} חודש בודד</span>{/if}
-                    </div>
+                    <p>המסלול שנבחר</p>
                 </div>
                 <ul>
                     {#each selectedItems as item}
@@ -423,26 +367,16 @@
                             <div class="ap-item-right">
                                 <button
                                     type="button"
-                                    onclick={() => {
-                                        const n = new Map(planMap);
-                                        n.delete(item.num);
-                                        planMap = n;
-                                    }}
+                                    onclick={() => (selectedNum = null)}
                                     class="ap-item-remove"
                                     aria-label="הסר"
                                 >✕</button>
-                                <span class="ap-item-name" class:half={item.plan === "half"} class:single={item.plan === "single"}>
-                                    {item.type}
-                                </span>
+                                <span class="ap-item-name half">{item.type}</span>
                             </div>
                             <div class="ap-item-left">
-                                <span class="ap-item-plan" class:half={item.plan === "half"} class:single={item.plan === "single"}>
-                                    {item.plan === "half" ? "½ שנה" : "חודש"}
-                                </span>
-                                <span class="ap-item-duration">{item.plan === "half" ? "ל-6 חודשים" : "לחודש"}</span>
-                                <span class="ap-item-price" class:half={item.plan === "half"} class:single={item.plan === "single"}>
-                                    ₪{fmt(item.eTotal)}
-                                </span>
+                                <span class="ap-item-plan half">{item.days} ימים</span>
+                                <span class="ap-item-duration">תשלום מראש</span>
+                                <span class="ap-item-price half">₪{fmt(item.eTotal)}</span>
                             </div>
                         </li>
                     {/each}
@@ -455,16 +389,10 @@
                     <div class="ap-total-math">
                         {#each selectedItems as item}
                             <p>
-                                <span class:t-half={item.plan === "half"} class:t-single={item.plan === "single"}>{item.type}:</span>
-                                <span class="white">₪{fmt(item.eMonthly)}</span>
-                                <span class="gray">לחודש</span>
-                                {#if item.monthsCount > 1}
-                                    <span class="gray">×</span>
-                                    <span class="white">{item.monthsCount}</span>
-                                    <span class="gray">חודשים</span>
-                                {/if}
+                                <span class="t-half">{item.type}:</span>
+                                <span class="gray">{item.days} ימים, כל מיקומי הפרסום</span>
                                 <span class="gray">=</span>
-                                <span class="bold" class:t-half={item.plan === "half"} class:t-single={item.plan === "single"}>₪{fmt(item.eTotal)}</span>
+                                <span class="bold t-half">₪{fmt(item.eTotal)}</span>
                             </p>
                         {/each}
                     </div>
@@ -545,7 +473,7 @@
                 <p class="g-title">🎁 יום העריכה - חינם על חשבון המערכת</p>
                 <ul>
                     <li>היום, <strong>{fmtDate(today)}</strong>, הוא יום העריכה החינמית - לא נספר בתקופת הפרסום.</li>
-                    <li>הפרסומת תרוץ <strong>{periodMonths === 6 ? "שישה חודשים מלאים" : "חודש מלא"}</strong> - עד <strong>{fmtDate(expirationDate)} כולל</strong>.</li>
+                    <li>הפרסומת תרוץ <strong>{periodDays} ימים מלאים</strong> - עד <strong>{fmtDate(expirationDate)} כולל</strong>.</li>
                     <li>תקופת העריכה החינמית נגמרת היום ב-<strong>23:59</strong>. כדאי לסיים את העריכה לפני זה!</li>
                 </ul>
             </div>
@@ -583,7 +511,7 @@
             <label class="ap-period-confirm">
                 <input type="checkbox" bind:checked={confirmedPeriod} />
                 <div>
-                    <p class="c-main">הבנתי את אורך התקופה ({periodMonths === 6 ? "חצי שנה" : "חודש"}) ואת תאריך התפוגה</p>
+                    <p class="c-main">הבנתי את אורך התקופה ({periodLabel}) ואת תאריך התפוגה</p>
                     <p class="c-sub">
                         היום ({fmtDate(today)}) הוא יום עריכה חינם, והפרסום ירוץ עד
                         <span>{fmtDate(expirationDate)} כולל</span>.
@@ -823,9 +751,6 @@
         gap: 0.5rem;
         margin: 0;
     }
-    .ap-step-label.dimmed {
-        opacity: 0.5;
-    }
     .ap-step-num {
         width: 1.75rem;
         height: 1.75rem;
@@ -876,13 +801,9 @@
         box-shadow: 0 10px 20px rgba(245, 158, 11, 0.2);
         transform: scale(1.01);
     }
-    .ap-row.plan-half {
+    .ap-row.plan-chosen {
         border-color: rgba(245, 158, 11, 0.5);
         background: rgba(245, 158, 11, 0.1);
-    }
-    .ap-row.plan-single {
-        border-color: rgba(59, 130, 246, 0.5);
-        background: rgba(59, 130, 246, 0.1);
     }
     .ap-row.selected {
         outline: 2px solid #fbbf24;
@@ -949,44 +870,35 @@
         font-size: 1.05rem;
     }
 
-    .ap-toggle {
-        position: relative;
-        display: inline-flex;
-        height: 2.25rem;
-        border-radius: 999px;
+    /* תג הבחירה בשורת המסלול (במקום מתג חצי-שנה/חודש שהיה כאן) */
+    .ap-row-pick {
         flex-shrink: 0;
-        padding: 2px;
-        border: 1.5px solid;
-        transition: all 0.3s;
-    }
-    .ap-toggle-seg {
-        position: relative;
-        z-index: 10;
         border-radius: 999px;
-        padding: 0 0.75rem;
+        padding: 0.3rem 0.85rem;
         font-size: 0.75rem;
         font-weight: 900;
-        border: none;
-        cursor: pointer;
         white-space: nowrap;
-        display: flex;
-        align-items: center;
+        border: 1.5px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.12);
+        color: #e5e7eb;
         transition: all 0.2s;
-        font-family: inherit;
     }
-    .ap-toggle-seg:hover {
-        transform: scale(1.08);
-        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.45);
+    .ap-row-pick.on {
+        background: #f59e0b;
+        border-color: #f59e0b;
+        color: #000;
     }
-    .ap-toggle-seg:active {
-        transform: scale(0.95);
+    .ap-price-intro {
+        text-align: center;
+        color: #d1d5db;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0 0 1rem;
     }
-    .ap-toggle-sep {
-        align-self: center;
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 0.75rem;
+    .ap-terms-link {
+        color: #fbbf24;
         font-weight: 900;
-        margin: 0 0.15rem;
+        text-decoration: underline;
     }
 
     .ap-row-prices {
@@ -1008,11 +920,6 @@
     .ap-price-half {
         font-weight: 900;
         color: #fbbf24;
-        font-size: 0.95rem;
-    }
-    .ap-price-single {
-        font-weight: 900;
-        color: #fff;
         font-size: 0.95rem;
     }
     .ap-row-details {
@@ -1083,14 +990,6 @@
         letter-spacing: 0.05em;
         margin: 0;
     }
-    .ap-calc-list-counts {
-        display: flex;
-        gap: 0.75rem;
-        font-size: 0.7rem;
-        font-weight: 700;
-    }
-    .ap-calc-list-counts .c-half { color: #fbbf24; }
-    .ap-calc-list-counts .c-single { color: #60a5fa; }
     .ap-calc-list ul {
         list-style: none;
         margin: 0;
@@ -1131,7 +1030,6 @@
         font-size: 0.9rem;
     }
     .ap-item-name.half { color: #fde68a; }
-    .ap-item-name.single { color: #bfdbfe; }
     .ap-item-left {
         display: flex;
         align-items: center;
@@ -1149,11 +1047,6 @@
         color: #fbbf24;
         border: 1px solid rgba(245, 158, 11, 0.3);
     }
-    .ap-item-plan.single {
-        background: rgba(59, 130, 246, 0.2);
-        color: #60a5fa;
-        border: 1px solid rgba(59, 130, 246, 0.3);
-    }
     .ap-item-duration {
         color: #4b5563;
         font-size: 0.75rem;
@@ -1164,7 +1057,6 @@
         font-size: 0.9rem;
     }
     .ap-item-price.half { color: #fbbf24; }
-    .ap-item-price.single { color: #60a5fa; }
 
     /* ---- סה"כ + מייל ---- */
     .ap-total-box {
@@ -1203,8 +1095,6 @@
         margin: 0 0 0.35rem;
     }
     .ap-total-math .t-half { color: #fcd34d; }
-    .ap-total-math .t-single { color: #93c5fd; }
-    .ap-total-math .white { color: #fff; }
     .ap-total-math .gray { color: #9ca3af; font-weight: 500; margin: 0 0.1rem; }
     .ap-total-math .bold { font-weight: 900; }
     .ap-total-amount-row {

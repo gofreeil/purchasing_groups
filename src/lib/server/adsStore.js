@@ -11,12 +11,13 @@
 // אי אפשר להוסיף עמודות חדשות ל-content type (Strapi דוחה מפתחות לא מוכרים),
 // לכן פרטי התשלום מהשליחה נארזים בתוך ה-JSON של landing:
 //   landing._payment ("code" = הוזן קוד התנועה, כמו שולם | "pending" = לתיאום)
-//   landing._requestedDurationDays (30 | 180) - התקופה שהמפרסם ביקש.
+//   landing._requestedDurationDays (אחד ממסלולי adPlans) - התקופה שהמפרסם ביקש.
 
 import { strapiGet, strapiPost, strapiPut } from '$lib/strapi.js';
+import { DEFAULT_PLAN_DAYS, normalizePlanDays } from '$lib/adPlans.js';
 
 const ENDPOINT = 'pg-submitted-ads';
-export const DEFAULT_DURATION_DAYS = 30;
+export const DEFAULT_DURATION_DAYS = DEFAULT_PLAN_DAYS;
 
 // קאש קצר לרשימת המאושרות - נטען בכל ניווט דרך ה-layout, אין צורך להציף את Strapi.
 const TTL_MS = 120_000;
@@ -53,7 +54,7 @@ function fromStrapi(row) {
         durationDays: row.duration_days ?? DEFAULT_DURATION_DAYS,
         // פרטי התשלום מהשליחה - ארוזים בתוך ה-JSON של landing (אין עמודות חדשות)
         payment: row.landing?._payment === 'code' ? 'code' : 'pending',
-        requestedDurationDays: Number(row.landing?._requestedDurationDays) === 180 ? 180 : 30,
+        requestedDurationDays: normalizePlanDays(row.landing?._requestedDurationDays),
     };
 }
 
@@ -77,7 +78,7 @@ export async function submitAd(payload, { fetch: f = fetch } = {}) {
             landing: {
                 ...(payload.landing ?? {}),
                 _payment: payload.payment === 'code' ? 'code' : 'pending',
-                _requestedDurationDays: payload.requestedDurationDays === 180 ? 180 : 30,
+                _requestedDurationDays: normalizePlanDays(payload.requestedDurationDays),
             },
             submitted_by_id: payload.submittedBy?.id ?? '',
             submitted_by_email: payload.submittedBy?.email ?? '',
@@ -169,14 +170,15 @@ export async function listAllForAdmin({ fetch: f = fetch } = {}) {
  * @param {{ durationDays?: number, fetch?: typeof fetch, jwt?: string }} [opts]
  */
 export async function approveAd(id, { durationDays = DEFAULT_DURATION_DAYS, fetch: f = fetch, jwt = '' } = {}) {
-    const expires = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+    const days = normalizePlanDays(durationDays);
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
     await strapiPut(
         `${ENDPOINT}/${encodeURIComponent(id)}`,
         {
             ad_status: 'approved',
             decided_at: new Date().toISOString(),
             rejection_reason: '',
-            duration_days: durationDays,
+            duration_days: days,
             expires_at: expires.toISOString(),
         },
         { fetch: f, jwt },

@@ -1,6 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import { isSuperAdmin } from '$lib/auth.js';
 import { listAllForAdmin, approveAd, rejectAd } from '$lib/server/adsStore.js';
+import { normalizePlanDays, planLabel } from '$lib/adPlans.js';
 
 // מסך אישור פרסומות - super_admin בלבד (גרסה פשוטה של ads-review מקהילה בשכונה).
 
@@ -31,13 +32,13 @@ export const actions = {
         const id = String(form.get('id') ?? '');
         if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
         // משך הפרסום נקבע כאן ולא ע"י המפרסם - התשלום ידני, אז מי שקיבל
-        // את הכסף הוא זה שקובע אם שולמו חודש או חצי שנה.
-        const durationDays = Number(form.get('durationDays')) === 180 ? 180 : 30;
+        // את הכסף הוא זה שקובע איזה מסלול שולם בפועל.
+        const durationDays = normalizePlanDays(form.get('durationDays'));
         try {
             await approveAd(id, { durationDays, fetch, jwt: locals.jwt ?? '' });
             return {
                 success: true,
-                message: `הפרסומת אושרה ופורסמה ל-${durationDays === 180 ? 'חצי שנה' : 'חודש'} ✅`,
+                message: `הפרסומת אושרה ופורסמה ל-${planLabel(durationDays)} ✅`,
             };
         } catch (err) {
             console.error('approve failed:', err);

@@ -9,38 +9,31 @@ const SITE_NAME = 'רכישות קבוצתיות יוצאים לחירות';
 const CONTACT_EMAIL = 'freedomhasbegun@gmail.com';
 const CONTACT_WA = 'https://wa.me/972508750632';
 
-/** @param {{ selectedItems: any[], totalPayment: number, totalMonthly: number, discountLabel?: string, discountValue?: number }} payload */
+/** @param {{ selectedItems: any[], totalPayment: number, discountLabel?: string, discountValue?: number }} payload */
 function buildEmailHtml(payload) {
-    const { selectedItems, totalPayment, totalMonthly } = payload;
+    const { selectedItems, totalPayment } = payload;
     const discountValue = payload.discountValue ?? 0;
     const discountLabel = payload.discountLabel ?? '';
 
-    const halfItems = selectedItems.filter((r) => r.plan === 'half');
-    const singleItems = selectedItems.filter((r) => r.plan === 'single');
-
+    // מסלול אחד לכל הפרסום (כל המיקומים כלולים), לפי תקופה — ראו $lib/adPlans.js
     const itemsRows = selectedItems
         .map((item) => {
-            const price = item.plan === 'half' ? item.total : item.single;
-            const planLabel = item.plan === 'half' ? 'חצי שנה' : 'חודש בודד';
-            const color = item.plan === 'half' ? '#f59e0b' : '#3b82f6';
+            const color = '#f59e0b';
             return `
         <tr>
           <td style="padding:12px 16px; border-bottom:1px solid #1e2a3a; color:#e2e8f0; font-size:15px;">${item.type}</td>
           <td style="padding:12px 16px; border-bottom:1px solid #1e2a3a; text-align:center;">
             <span style="background:${color}22; color:${color}; border:1px solid ${color}44;
-                         border-radius:20px; padding:3px 10px; font-size:12px; font-weight:700;">${planLabel}</span>
+                         border-radius:20px; padding:3px 10px; font-size:12px; font-weight:700;">${item.days} ימים</span>
           </td>
-          <td style="padding:12px 16px; border-bottom:1px solid #1e2a3a; text-align:left; color:${color}; font-weight:700; font-size:15px;">₪${price}</td>
+          <td style="padding:12px 16px; border-bottom:1px solid #1e2a3a; text-align:left; color:${color}; font-weight:700; font-size:15px;">₪${item.price}</td>
         </tr>`;
         })
         .join('');
 
-    const summaryLine =
-        halfItems.length > 0 && singleItems.length === 0
-            ? `<p style="margin:0; color:#94a3b8; font-size:13px;">חבילת חצי שנה · ₪${totalMonthly} לחודש</p>`
-            : halfItems.length === 0 && singleItems.length > 0
-              ? `<p style="margin:0; color:#94a3b8; font-size:13px;">${singleItems.length} פרסומות לחודש אחד</p>`
-              : `<p style="margin:0; color:#94a3b8; font-size:13px;">${halfItems.length} חצי שנה + ${singleItems.length} חודשים בודדים</p>`;
+    const summaryLine = `<p style="margin:0; color:#94a3b8; font-size:13px;">${
+        selectedItems[0]?.type ?? 'פרסום'
+    } · כל מיקומי הפרסום באתר כלולים</p>`;
 
     return `<!DOCTYPE html>
 <html lang="he" dir="rtl">
