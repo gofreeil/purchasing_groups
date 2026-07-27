@@ -75,10 +75,9 @@ async function loadSheetStats(fetch, campaignSlug) {
     return out;
 }
 
-export async function load({ params, fetch, setHeaders }) {
-    // SSR cache: 60s טרי, עד 10 דקות stale-while-revalidate.
-    // משמעות - גם אם Strapi נופל ל-10 דקות, ה-CDN של Vercel ימשיך לשרת את הגרסה האחרונה.
-    setHeaders({ 'cache-control': 'public, s-maxage=60, stale-while-revalidate=600' });
+export async function load({ params, fetch }) {
+    // אסור קאש ציבורי על ה-HTML: הדף מוטמע עם data.user מה-layout,
+    // ו-CDN שישמור אותו יגיש את פרטי המשתמש המחובר לגולשים אחרים.
 
     // תוכן הקמפיין מגיע מהפרונט (campaigns.js) - לא תלוי ב-Strapi.
     const campaign = getCampaign(params.campaign);

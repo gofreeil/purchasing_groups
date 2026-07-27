@@ -2,8 +2,9 @@ import { error } from '@sveltejs/kit';
 import { fetchSatisfactionResponses } from '$lib/strapi.js';
 import { getCampaign } from '$lib/campaigns.js';
 
-export async function load({ params, fetch, setHeaders }) {
-    setHeaders({ 'cache-control': 'public, s-maxage=60, stale-while-revalidate=600' });
+export async function load({ params, fetch }) {
+    // אסור קאש ציבורי על ה-HTML: הדף מוטמע עם data.user מה-layout,
+    // ו-CDN שישמור אותו יגיש את פרטי המשתמש המחובר לגולשים אחרים.
 
     const campaign = getCampaign(params.campaign);
     if (!campaign) throw error(404, 'Campaign not found');

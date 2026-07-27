@@ -83,8 +83,9 @@ async function loadSheetData(fetch) {
     return { aggregated, members };
 }
 
-export async function load({ fetch, setHeaders }) {
-    setHeaders({ 'cache-control': 'public, s-maxage=60, stale-while-revalidate=600' });
+export async function load({ fetch }) {
+    // אסור קאש ציבורי על ה-HTML: הדף מוטמע עם data.user מה-layout,
+    // ו-CDN שישמור אותו יגיש את פרטי המשתמש המחובר לגולשים אחרים.
 
     // תוכן הקמפיינים בפרונט (campaigns.js); רק נתוני החיסכון/חברים דינמיים מ-Google Sheet.
     const finalCampaigns = getCampaignList();
