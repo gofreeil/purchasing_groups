@@ -21,16 +21,31 @@
 		{ border: "rgba(217,70,239,0.3)", bg: "rgba(112,26,117,0.1)", text: "#e879f9", btn: "#c026d3" },
 	];
 
+	const VIEW_MS = 14000;   // כמה זמן כל קבוצה נשארת על המסך (החלפה איטית)
+	const FADE_MS = 900;     // אורך הדעיכה בין קבוצה לקבוצה — חייב להתאים ל-CSS
+
+	let fading = $state(false);
+
 	onMount(() => {
+		let fadeTimer;
+		// דעיכה החוצה → החלפת הקבוצה בזמן שהטור שקוף → דעיכה פנימה.
+		// כך אין קפיצה: המשבצות לא מתחלפות מול העין אלא מתוך שקיפות מלאה.
 		const interval = setInterval(() => {
 			if (totalSwaps < MAX_SWAPS) {
-				currentGroup = (currentGroup + 1) % 3;
-				totalSwaps++;
+				fading = true;
+				fadeTimer = setTimeout(() => {
+					currentGroup = (currentGroup + 1) % 3;
+					totalSwaps++;
+					fading = false;
+				}, FADE_MS);
 			} else {
 				clearInterval(interval);
 			}
-		}, 6000);
-		return () => clearInterval(interval);
+		}, VIEW_MS);
+		return () => {
+			clearInterval(interval);
+			clearTimeout(fadeTimer);
+		};
 	});
 
 	let displayed = $derived(slots.slice(currentGroup * 4, currentGroup * 4 + 4));
@@ -38,7 +53,7 @@
 
 <aside class="right-ad-banner" aria-label="פרסומות">
 	<h4 class="right-ad-title">תוכן שיווקי</h4>
-	<div class="right-ad-list">
+	<div class="right-ad-list" class:fading>
 		{#each displayed as slot, index (currentGroup * 4 + index)}
 			<a
 				href="/advertise"
@@ -92,6 +107,17 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
+		/* דעיכה רכה בין קבוצות המודעות — הערך חייב להתאים ל-FADE_MS שבסקריפט */
+		opacity: 1;
+		transition: opacity 900ms ease-in-out;
+	}
+	.right-ad-list.fading {
+		opacity: 0;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.right-ad-list {
+			transition-duration: 1ms;
+		}
 	}
 
 	.right-ad-card {
@@ -106,7 +132,6 @@
 		padding: 1.5rem 0.75rem;
 		overflow: hidden;
 		text-decoration: none;
-		animation: rightAdFadeIn 0.7s ease-in-out;
 	}
 
 	.right-ad-num {
@@ -172,17 +197,6 @@
 
 	.right-ad-btn:hover {
 		transform: scale(1.05);
-	}
-
-	@keyframes rightAdFadeIn {
-		from {
-			opacity: 0;
-			transform: translateX(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(0);
-		}
 	}
 
 	/* מוצג בדסקטופ/טאבלט - יחד עם סיידבר הפרסומות השמאלי */
