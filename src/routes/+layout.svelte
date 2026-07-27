@@ -74,7 +74,7 @@
 		if (
 			showLangMenu &&
 			event.target instanceof Element &&
-			!event.target.closest(".lang-selector")
+			!event.target.closest(".lang-selector-container")
 		) {
 			showLangMenu = false;
 		}
@@ -525,22 +525,27 @@
 			display: none;
 		}
 		.lang-selector-btn {
-			padding: 0 0.6rem;
-			height: 2.4rem;
+			padding: 0 0.5rem;
+			height: 2.75rem;
+			gap: 0.25rem;
 		}
 		.user-menu-btn {
-			padding: 0 0.4rem;
-			height: 2.4rem;
+			padding: 0 0.35rem;
+			height: 2.75rem;
+			gap: 0.2rem;
 		}
 		.user-avatar,
 		.user-avatar-fallback {
-			width: 1.9rem;
-			height: 1.9rem;
+			width: 2.25rem;
+			height: 2.25rem;
+		}
+		.user-avatar-fallback {
+			font-size: 1.1rem;
 		}
 		.login-header-btn {
-			height: 2.4rem;
-			padding: 0 0.9rem;
-			font-size: 0.85rem;
+			height: 2.75rem;
+			padding: 0 1rem;
+			font-size: 0.95rem;
 			white-space: nowrap;
 		}
 	}

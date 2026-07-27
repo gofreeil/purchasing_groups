@@ -546,14 +546,12 @@
 		position: absolute;
 		left: 100%;
 		z-index: 2;
-		background: linear-gradient(180deg, rgba(79, 70, 229, 0.78), rgba(124, 58, 237, 0.78));
-		backdrop-filter: blur(3px);
-		-webkit-backdrop-filter: blur(3px);
+		background: linear-gradient(180deg, #4f46e5, #7c3aed);
 		border: none;
-		border-radius: 0 9px 9px 0;
-		padding: 0.6rem 0.3rem;
+		border-radius: 0 11px 11px 0;
+		padding: 0.85rem 0.45rem;
 		cursor: grab;
-		box-shadow: 2px 0 6px rgba(79, 70, 229, 0.25);
+		box-shadow: 3px 0 12px rgba(79, 70, 229, 0.55);
 		transition: padding 0.2s ease, box-shadow 0.2s, border-radius 0.2s;
 		touch-action: none;
 		overscroll-behavior: contain;
@@ -576,7 +574,7 @@
 	}
 
 	.tab:hover {
-		box-shadow: 2px 0 10px rgba(79, 70, 229, 0.45);
+		box-shadow: 3px 0 16px rgba(79, 70, 229, 0.75);
 	}
 
 	.tab-dragging {
@@ -601,9 +599,13 @@
 		writing-mode: vertical-rl;
 		text-orientation: mixed;
 		transform: rotate(180deg);
-		font-size: 0.6rem;
-		font-weight: 700;
+		font-size: 0.78rem;
+		font-weight: 800;
 		color: #fff;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.04em;
+		/* בלי nowrap הטקסט האנכי נשבר לעמודה שנייה ונראה חתוך */
+		white-space: nowrap;
+		line-height: 1.1;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 	}
 </style>

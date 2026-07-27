@@ -987,7 +987,7 @@ a {
     .main-layout {
         flex-direction: column;
         padding: 1rem;
-        padding-top: 76px;
+        padding-top: 88px;
         /* Space for the header */
         gap: 2rem;
     }
@@ -998,7 +998,7 @@ a {
 
     /* --- Header (Symmetrical & Beautiful) --- */
     .main-header {
-        padding: 0.35rem 0.8rem;
+        padding: 0.45rem 0.7rem;
         backdrop-filter: blur(20px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
@@ -1022,14 +1022,14 @@ a {
     }
 
     .logo-container {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
     }
 
     .main-logo {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
@@ -1040,7 +1040,7 @@ a {
     }
 
     .main-title {
-        font-size: 0.95rem;
+        font-size: 1.1rem;
         line-height: 1.15;
         margin: 0;
         text-align: right;
@@ -1076,8 +1076,8 @@ a {
     }
 
     .flag-icon {
-        width: 20px;
-        margin-inline-end: 6px;
+        width: 26px;
+        margin-inline-end: 4px;
     }
 
     /* --- Footer (Symmetrical) --- */
