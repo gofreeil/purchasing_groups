@@ -960,22 +960,6 @@ a {
     color: #ffffff;
 }
 
-.footer-links a.footer-wa-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: #25d366;
-    color: #ffffff;
-    padding: 0.25rem 0.85rem;
-    border-radius: 999px;
-    transition: background 0.2s;
-}
-
-.footer-links a.footer-wa-btn:hover {
-    background: #1ebe5b;
-    color: #ffffff;
-}
-
 .footer-copy {
     color: #9ca3af;
     font-weight: 700;
@@ -1060,14 +1044,18 @@ a {
         width: 100%;
         display: flex;
         justify-content: center;
-        align-items: stretch;
+        align-items: center;
         gap: 0.8rem;
     }
 
+    /* גובה אחיד לכל כפתורי ההדר (2.4rem) - בלי stretch שמנפח את הכפתור הכחול */
     .add-business-btn {
         flex-grow: 1;
-        text-align: center;
-        padding: 0.35rem 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 2.4rem;
+        padding: 0 0.9rem;
         font-size: 0.9rem;
         max-width: none;
         box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);

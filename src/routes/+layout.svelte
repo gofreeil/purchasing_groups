@@ -307,8 +307,7 @@
 					href="https://wa.me/972504282202"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="footer-wa-btn"
-					>💬 {$t.footer.contactUs}</a
+					>{$t.footer.contactUs}</a
 				>
 				<span class="dot">|</span>
 				<a href="/advertise">{$t.footer.advertiseWithUs}</a>
@@ -385,25 +384,6 @@
 
 	.lang-selector-btn:hover {
 		background: rgba(255, 255, 255, 0.15);
-	}
-
-	/* במובייל — הדר קומפקטי: רק דגל בלי שם שפה, אווטאר וכפתורים קטנים */
-	@media (max-width: 768px) {
-		.lang-name {
-			display: none;
-		}
-		.lang-selector-btn {
-			padding: 0.35rem 0.6rem;
-		}
-		.user-avatar {
-			width: 2.1rem;
-			height: 2.1rem;
-		}
-		.login-header-btn {
-			padding: 0.35rem 0.9rem;
-			font-size: 0.85rem;
-			white-space: nowrap;
-		}
 	}
 
 	.login-header-btn {
@@ -535,5 +515,32 @@
 	.user-dropdown-item:hover {
 		background: rgba(250, 204, 21, 0.1);
 		color: #facc15;
+	}
+
+	/* הדר קומפקטי במובייל. חייב להישאר בסוף ה-style:
+	   media query לא מוסיף specificity, אז כלל בסיס שמופיע אחריו היה דורס אותו. */
+	@media (max-width: 768px) {
+		.lang-name {
+			display: none;
+		}
+		.lang-selector-btn {
+			padding: 0 0.6rem;
+			height: 2.4rem;
+		}
+		.user-menu-btn {
+			padding: 0 0.4rem;
+			height: 2.4rem;
+		}
+		.user-avatar,
+		.user-avatar-fallback {
+			width: 1.9rem;
+			height: 1.9rem;
+		}
+		.login-header-btn {
+			height: 2.4rem;
+			padding: 0 0.9rem;
+			font-size: 0.85rem;
+			white-space: nowrap;
+		}
 	}
 </style>
