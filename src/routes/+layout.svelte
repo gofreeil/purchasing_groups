@@ -303,11 +303,15 @@
 			<nav class="footer-links" aria-label="ניווט תחתון">
 				<a href="/privacy">{$t.footer.privacy}</a>
 				<span class="dot">|</span>
-				<a href="mailto:freedomhasbegun@gmail.com"
-					>{$t.footer.contactUs}</a
+				<a
+					href="https://wa.me/972504282202"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="footer-wa-btn"
+					>💬 {$t.footer.contactUs}</a
 				>
 				<span class="dot">|</span>
-				<a href="/satisfaction">{$t.satisfaction.title}</a>
+				<a href="/advertise">{$t.footer.advertiseWithUs}</a>
 			</nav>
 
 			<p class="footer-copy">

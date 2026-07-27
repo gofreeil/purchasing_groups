@@ -42,6 +42,7 @@ export const translations = readable({
             clickForActivity: "לכלל פעילות התנועה החברתית יוצאים לחירות הקלק:",
             libertyLink: "יוצאים לחירות בונים עולם חדש!",
             contactUs: "צור קשר",
+            advertiseWithUs: "פרסם אצלנו",
             privacy: "מדיניות פרטיות",
             lastUpdated: "עודכן לאחרונה: 10/6/24",
             privacySections: [
@@ -252,6 +253,7 @@ export const translations = readable({
             clickForActivity: "For all Liberty social movement activities click here:",
             libertyLink: "Liberty building a new world!",
             contactUs: "Contact Us",
+            advertiseWithUs: "Advertise With Us",
             privacy: "Privacy Policy",
             lastUpdated: "Last updated: 10/6/24",
             privacySections: [
@@ -426,6 +428,7 @@ export const translations = readable({
             clickForActivity: "Для всех мероприятий общественного движения Свобода нажмите здесь:",
             libertyLink: "Свобода строит новый мир!",
             contactUs: "Связаться с нами",
+            advertiseWithUs: "Разместить рекламу у нас",
             privacy: "Политика конфиденциальности",
             lastUpdated: "Последнее обновление: 10/6/24",
             privacySections: [
