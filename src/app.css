@@ -1061,8 +1061,9 @@ a {
     }
 
     .footer-offer-btn {
-        width: 100%;
-        max-width: 320px;
+        width: auto;
+        max-width: 240px;
+        padding: 0.55rem 1.6rem;
     }
 
     .lang-selector {
