@@ -43,6 +43,7 @@ export const translations = readable({
             libertyLink: "יוצאים לחירות בונים עולם חדש!",
             contactUs: "צור קשר",
             advertiseWithUs: "פרסם אצלנו",
+            copyright: 'רכישות קבוצתיות עם "יוצאים לחירות"',
             privacy: "מדיניות פרטיות",
             lastUpdated: "עודכן לאחרונה: 10/6/24",
             privacySections: [
@@ -254,6 +255,7 @@ export const translations = readable({
             libertyLink: "Liberty building a new world!",
             contactUs: "Contact Us",
             advertiseWithUs: "Advertise With Us",
+            copyright: 'Group Purchases with "Liberty"',
             privacy: "Privacy Policy",
             lastUpdated: "Last updated: 10/6/24",
             privacySections: [
@@ -429,6 +431,7 @@ export const translations = readable({
             libertyLink: "Свобода строит новый мир!",
             contactUs: "Связаться с нами",
             advertiseWithUs: "Разместить рекламу у нас",
+            copyright: 'Групповые закупки с движением «Свобода»',
             privacy: "Политика конфиденциальности",
             lastUpdated: "Последнее обновление: 10/6/24",
             privacySections: [

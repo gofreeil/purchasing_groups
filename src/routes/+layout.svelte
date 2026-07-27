@@ -147,19 +147,19 @@
 								src="https://flagcdn.com/24x18/il.png"
 								alt="IL"
 								class="flag-icon"
-							/> עברית
+							/> <span class="lang-name">עברית</span>
 						{:else if $lang === "en"}
 							<img
 								src="https://flagcdn.com/24x18/us.png"
 								alt="US"
 								class="flag-icon"
-							/> English
+							/> <span class="lang-name">English</span>
 						{:else}
 							<img
 								src="https://flagcdn.com/24x18/ru.png"
 								alt="RU"
 								class="flag-icon"
-							/> Русский
+							/> <span class="lang-name">Русский</span>
 						{/if}
 						<span class="chevron">⌄</span>
 					</button>
@@ -315,7 +315,7 @@
 			</nav>
 
 			<p class="footer-copy">
-				&copy; {new Date().getFullYear()} {$t.title}
+				&copy; {new Date().getFullYear()} {$t.footer.copyright}
 			</p>
 		</div>
 	</footer>
@@ -385,6 +385,13 @@
 
 	.lang-selector-btn:hover {
 		background: rgba(255, 255, 255, 0.15);
+	}
+
+	/* במובייל — רק הדגל, בלי שם השפה */
+	@media (max-width: 768px) {
+		.lang-name {
+			display: none;
+		}
 	}
 
 	.login-header-btn {
