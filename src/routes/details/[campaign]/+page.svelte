@@ -4,7 +4,15 @@
     import { fade, slide } from "svelte/transition";
     import { invalidateAll } from "$app/navigation";
 
+    /** @typedef {import('$lib/strapi.js').SatisfactionResponse} SatisfactionResponse */
+    /**
+     * תגובה "אופטימית" שנוספת לרשימה מיד אחרי שליחה, לפני שהשרת מחזיר את הרשומה
+     * (ולכן עוד אין לה documentId, וה-id שלה מקומי).
+     * @typedef {Omit<SatisfactionResponse, 'id' | 'documentId'> & { id: string, documentId?: string }} OptimisticResponse
+     */
+
     // סמיילי שמשתנה רק לאחר לחיצה (לא על hover - כדי שלא יקפוץ)
+    /** @type {Record<number, { face: string, text: string }>} */
     const EMOJI_BY_LEVEL = {
         1: { face: "😞", text: "מאוד לא מרוצה" },
         2: { face: "😐", text: "לא מרוצה" },
@@ -19,6 +27,7 @@
 
     // נתוני חיסכון/דירוג/ביקורות - קבועים בקוד (לא תלויים בעריכה ב-admin).
     // חברי פעילים מגיעים מ-Google Sheet (data.activeMembers).
+    /** @type {Record<string, { rating: number, savings: number, annualSavings: number, reviews: number, savingsText?: string, annualSavingsText?: string }>} */
     const STATS = {
         cellular: { rating: 5.0, savings: 25, annualSavings: 300, reviews: 47 },
         fuel: { rating: 4.9, savings: 15, annualSavings: 180, reviews: 21 },
@@ -27,6 +36,7 @@
     // תוכן הקמפיין מגיע מ-data.campaign (ראה +page.server.js), שמקורו ב-$lib/campaigns.js בפרונט.
 
     // המשתמש בוחר חברה (או נשאר null אם אין חברות), ואז נותן דירוג אחד.
+    /** @type {string | null} */
     let selectedCompany = $state(null);
     let rating = $state(0);
     let comments = $state("");
@@ -34,14 +44,22 @@
     let userCity = $state("");
     let submitted = $state(false);
     let submitError = $state("");
+    /** @type {OptimisticResponse[]} */
     let extraResponses = $state([]);
+    /** @type {(SatisfactionResponse | OptimisticResponse)[]} */
     let allResponses = $derived([...extraResponses, ...(data.responses || [])]);
 
     // ─── Admin ───
     let adminIsSuper = $derived(data.user?.app_role === 'super_admin');
+    /** @type {Record<string, boolean>} */
     let adminBusy = $state({});
+    /** @type {Record<string, string>} */
     let replyDraft = $state({});
 
+    /**
+     * @param {SatisfactionResponse | OptimisticResponse} r
+     * @param {Record<string, unknown>} fields
+     */
     async function adminUpdate(r, fields) {
         if (!r.documentId) return;
         adminBusy = { ...adminBusy, [r.documentId]: true };
@@ -54,17 +72,21 @@
             if (!res.ok) throw new Error((await res.text()).slice(0, 200));
             await invalidateAll();
         } catch (e) {
-            alert(`שגיאה: ${e.message}`);
+            alert(`שגיאה: ${/** @type {Error} */ (e).message}`);
         } finally {
             adminBusy = { ...adminBusy, [r.documentId]: false };
         }
     }
+    /** @param {SatisfactionResponse | OptimisticResponse} r */
     const toggleFeatured = (r) => adminUpdate(r, { is_featured: !r.is_featured });
+    /** @param {SatisfactionResponse | OptimisticResponse} r */
     const toggleLike = (r) => adminUpdate(r, { admin_liked: !r.admin_liked });
+    /** @param {SatisfactionResponse | OptimisticResponse} r */
     const saveReply = (r) => {
-        const text = (replyDraft[r.documentId] ?? r.admin_reply ?? '').trim();
+        const key = String(r.documentId);
+        const text = (replyDraft[key] ?? r.admin_reply ?? '').trim();
         adminUpdate(r, { admin_reply: text || null }).then(() => {
-            const { [r.documentId]: _, ...rest } = replyDraft;
+            const { [key]: _, ...rest } = replyDraft;
             replyDraft = rest;
         });
     };
@@ -81,6 +103,7 @@
     let canRate = $derived(ratingCompanies === null || selectedCompany !== null);
     let currentEmoji = $derived(EMOJI_BY_LEVEL[rating] ?? null);
 
+    /** @param {string} name */
     function selectCompany(name) {
         if (selectedCompany === name) return;
         selectedCompany = name;
@@ -88,6 +111,7 @@
     }
 
     // ניסיון לדרג לפני בחירת חברה - חוסם, מציג רמיזה ומשפעיל אנימציה
+    /** @param {number} n */
     function tryRate(n) {
         if (ratingCompanies && !selectedCompany) {
             mustPickCompanyShake = true;
@@ -97,6 +121,7 @@
         rating = n;
     }
     let openFaq = $state(-1);
+    /** @type {HTMLAnchorElement | null} */
     let joinCtaEl = $state(null);
     let joinCtaClicked = $state(false);
     let plansTableHighlight = $state(false);
@@ -191,6 +216,7 @@
         }
     }
 
+    /** @param {string} iso */
     function formatDate(iso) {
         try {
             const d = new Date(iso);
@@ -204,10 +230,16 @@
         $isLoggedIn = true;
     }
 
+    /** @param {number} i */
     function toggleFaq(i) {
         openFaq = openFaq === i ? -1 : i;
     }
 
+    /**
+     * @param {number} targetY
+     * @param {number} duration
+     * @returns {Promise<void>}
+     */
     function smoothScrollTo(targetY, duration) {
         return new Promise((resolve) => {
             const startY = window.scrollY;
@@ -228,6 +260,7 @@
         return document.querySelector('.main-header')?.getBoundingClientRect().height ?? 0;
     }
 
+    /** @param {DOMRect} rect */
     function centerInVisibleViewport(rect) {
         const headerHeight = getHeaderHeight();
         const visibleHeight = window.innerHeight - headerHeight;
@@ -235,6 +268,7 @@
         return elementCenter - headerHeight - visibleHeight / 2;
     }
 
+    /** @param {MouseEvent} e */
     async function handlePlansTableClick(e) {
         e.preventDefault();
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
@@ -261,6 +295,7 @@
         plansTableHighlight = false;
     }
 
+    /** @param {MouseEvent} e */
     async function handleScrollToFormClick(e) {
         e.preventDefault();
         if (!joinLink) return;
@@ -274,6 +309,7 @@
         window.open(joinLink, "_blank", "noopener");
     }
 
+    /** @param {MouseEvent} e */
     async function handleShareClick(e) {
         e.preventDefault();
         const url = `${window.location.origin}/`;
@@ -288,7 +324,7 @@
                 return;
             }
         } catch (err) {
-            if (err && err.name === 'AbortError') return;
+            if (err && /** @type {Error} */ (err).name === 'AbortError') return;
         }
         try {
             await navigator.clipboard.writeText(url);
@@ -298,6 +334,7 @@
         shareToast = false;
     }
 
+    /** @param {MouseEvent} e */
     async function handleStep1Click(e) {
         if (!joinLink) return;
         e.preventDefault();
@@ -625,6 +662,7 @@
             <div class="responses-list">
                 <h3 class="responses-title">תגובות מובילות</h3>
                 {#each allResponses as r (r.id)}
+                    {@const rKey = String(r.documentId)}
                     <div class="response-item" class:featured={r.is_featured}>
                         <div class="response-header">
                             <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
@@ -662,19 +700,19 @@
                         {/if}
                         {#if adminIsSuper}
                             <div class="admin-controls">
-                                <button type="button" class="admin-btn" class:on={r.is_featured} disabled={adminBusy[r.documentId]} onclick={() => toggleFeatured(r)} title="פין">📌</button>
-                                <button type="button" class="admin-btn" class:on={r.admin_liked} disabled={adminBusy[r.documentId]} onclick={() => toggleLike(r)} title="לייק">❤️</button>
-                                {#if replyDraft[r.documentId] !== undefined || r.admin_reply}
+                                <button type="button" class="admin-btn" class:on={r.is_featured} disabled={adminBusy[rKey]} onclick={() => toggleFeatured(r)} title="פין">📌</button>
+                                <button type="button" class="admin-btn" class:on={r.admin_liked} disabled={adminBusy[rKey]} onclick={() => toggleLike(r)} title="לייק">❤️</button>
+                                {#if replyDraft[rKey] !== undefined || r.admin_reply}
                                     <input
                                         type="text"
                                         class="admin-reply-input"
                                         placeholder="תגובת אדמין"
-                                        value={replyDraft[r.documentId] ?? r.admin_reply ?? ''}
-                                        oninput={(e) => (replyDraft = { ...replyDraft, [r.documentId]: e.currentTarget.value })}
+                                        value={replyDraft[rKey] ?? r.admin_reply ?? ''}
+                                        oninput={(e) => (replyDraft = { ...replyDraft, [rKey]: e.currentTarget.value })}
                                     />
-                                    <button type="button" class="admin-btn" disabled={adminBusy[r.documentId]} onclick={() => saveReply(r)}>שמור</button>
+                                    <button type="button" class="admin-btn" disabled={adminBusy[rKey]} onclick={() => saveReply(r)}>שמור</button>
                                 {:else}
-                                    <button type="button" class="admin-btn" onclick={() => (replyDraft = { ...replyDraft, [r.documentId]: '' })} title="תגובת אדמין">↩️</button>
+                                    <button type="button" class="admin-btn" onclick={() => (replyDraft = { ...replyDraft, [rKey]: '' })} title="תגובת אדמין">↩️</button>
                                 {/if}
                             </div>
                         {/if}

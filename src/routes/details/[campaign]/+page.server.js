@@ -8,11 +8,19 @@ const DASHBOARD_GID = '0';
 const LABEL_COL = 1;
 // carInsurance = עמודה K בגיליון. כל עוד שורת "חתמו" שם היא 0, בלוק הסטטיסטיקות
 // בדף הפרטים נשאר מוסתר (מוצג רק כש-members > 0) — הוא ייפתח מעצמו כשהגיליון יתמלא.
+/** @type {Record<string, number | undefined>} */
 const CAMPAIGN_COLS = { cellular: 4, fuel: 8, carInsurance: 10 };
+/** @type {Record<string, number>} */
 const DEFAULT_MEMBERS = { cellular: 312, fuel: 198, carInsurance: 0 };
 
+/**
+ * @param {string} text
+ * @returns {string[][]}
+ */
 function parseCsv(text) {
+    /** @type {string[][]} */
     const rows = [];
+    /** @type {string[]} */
     let row = [];
     let cell = '';
     let inQuotes = false;
@@ -33,18 +41,27 @@ function parseCsv(text) {
     return rows;
 }
 
+/** @param {string | null | undefined} l */
 const isMembersRow = (l) => (l || '').trim().includes('חתמו');
+/** @param {string | null | undefined} l */
 const isMonthlySavingsRow = (l) => (l || '').includes('חיסכון') && (l || '').includes('בחודש');
+/** @param {string | null | undefined} l */
 const isAnnualSavingsRow = (l) => (l || '').includes('חיסכון') && (l || '').includes('בשנה');
+/** @param {string | null | undefined} v */
 const toInt = (v) => {
     const n = parseInt((v || '').replace(/[^\d-]/g, ''));
     return isNaN(n) ? 0 : n;
 };
+/** @param {string | null | undefined} v */
 const toNum = (v) => {
     const n = parseFloat((v || '').replace(/[^\d.-]/g, ''));
     return isNaN(n) ? 0 : n;
 };
 
+/**
+ * @param {typeof globalThis.fetch} fetch
+ * @param {string} campaignSlug
+ */
 async function loadSheetStats(fetch, campaignSlug) {
     const out = {
         activeMembers: DEFAULT_MEMBERS[campaignSlug] ?? 0,

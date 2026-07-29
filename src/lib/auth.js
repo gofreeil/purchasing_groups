@@ -7,8 +7,16 @@ import { env } from '$env/dynamic/private';
 export const AUTH_COOKIE = 'gofreeil-auth';
 export const STRAPI_URL = (env.STRAPI_URL || 'https://api.gofreeil.com').replace(/\/$/, '');
 
+/** אפשרויות העוגיה כפי ש-SvelteKit מצפה להן ב-cookies.set/delete. */
+/** @typedef {Parameters<import('@sveltejs/kit').Cookies['set']>[2]} CookieOptions */
+
+/**
+ * @param {URL | null | undefined} url
+ * @returns {CookieOptions}
+ */
 export function authCookieOptions(url) {
-    const isLocalhost = url && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
+    const isLocalhost = !!url && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
+    /** @type {CookieOptions} */
     const opts = {
         path: '/',
         httpOnly: true,
@@ -24,6 +32,11 @@ export function authCookieOptions(url) {
     return opts;
 }
 
+/**
+ * @param {string} provider
+ * @param {string} accessToken
+ * @param {{ fetch?: typeof fetch }} [opts]
+ */
 export async function exchangeOAuthToken(provider, accessToken, { fetch: f = fetch } = {}) {
     const res = await f(`${STRAPI_URL}/api/auth/${provider}/callback?access_token=${encodeURIComponent(accessToken)}`);
     if (!res.ok) {
@@ -33,8 +46,16 @@ export async function exchangeOAuthToken(provider, accessToken, { fetch: f = fet
     return res.json();
 }
 // alias לתאימות
+/**
+ * @param {string} token
+ * @param {{ fetch?: typeof fetch }} [opts]
+ */
 export const exchangeGoogleToken = (token, opts) => exchangeOAuthToken('google', token, opts);
 
+/**
+ * @param {string | null | undefined} jwt
+ * @param {{ fetch?: typeof fetch }} [opts]
+ */
 export async function fetchCurrentUser(jwt, { fetch: f = fetch } = {}) {
     if (!jwt) return null;
     try {
@@ -48,6 +69,7 @@ export async function fetchCurrentUser(jwt, { fetch: f = fetch } = {}) {
     }
 }
 
+/** @param {{ app_role?: string } | null | undefined} user */
 export function isSuperAdmin(user) {
     return !!user && user.app_role === 'super_admin';
 }

@@ -24,6 +24,7 @@
     );
 
     // נתוני דירוג/חיסכון לכרטיסים (חודשי/שנתי) — דירוג קבוע, חיסכון מהגיליון
+    /** @type {Record<string, { rating: number, savingsText?: string, annualSavingsText?: string }>} */
     const CARD_CONFIG = {
         cellular: { rating: 5.0 },
         fuel: { rating: 4.9 },

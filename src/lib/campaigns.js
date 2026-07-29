@@ -5,6 +5,69 @@
 // נתונים דינמיים נשארים חיצוניים: חברים/חיסכון מ-Google Sheet, תגובות שביעות-רצון מ-Strapi.
 // המבנה זהה לזה שה-API של Strapi החזיר (שדות שטוחים על האובייקט), כדי שהקומפוננטות לא ישתנו.
 
+/**
+ * @typedef {{ src: string, alt: string }} CampaignImage
+ *
+ * @typedef {Object} PlanCell
+ * @property {string} label
+ * @property {string} [value]
+ * @property {string} [html]
+ * @property {CampaignImage} [image]
+ *
+ * @typedef {Object} PlanRow
+ * @property {string} title
+ * @property {string} [company]
+ * @property {PlanCell[]} cells
+ *
+ * @typedef {Object} PlansTable
+ * @property {string} title
+ * @property {string} [subtitle]
+ * @property {string[]} headers
+ * @property {PlanRow[]} rows
+ *
+ * @typedef {Object} FindSection
+ * @property {string} title
+ * @property {string} [href]
+ * @property {string} image
+ * @property {string} imageAlt
+ * @property {string} [ariaLabel]
+ * @property {string} [label]
+ * @property {string[]} [stationNames]
+ *
+ * @typedef {Object} Benefits
+ * @property {string} title
+ * @property {{ icon: string, text: string }[]} items
+ *
+ * @typedef {{ icon: string, title: string, desc: string }} StepItem
+ * @typedef {{ q: string, a: string }} FaqItem
+ *
+ * @typedef {Object} Campaign
+ * @property {string} slug
+ * @property {string} title
+ * @property {string} description
+ * @property {string} icon
+ * @property {string} image_url
+ * @property {number} order
+ * @property {string} status
+ * @property {boolean} can_join
+ * @property {boolean} [is_new]
+ * @property {string} [new_badge_text]
+ * @property {string} [providers_line]
+ * @property {string[]} [rating_companies]
+ * @property {string} [join_link]
+ * @property {string} [join_link_diesel]
+ * @property {string} [join_cta_subtitle]
+ * @property {string} [plans_table_note]
+ * @property {string} [plans_table_diesel_note]
+ * @property {FindSection} [find_section]
+ * @property {Benefits} [benefits]
+ * @property {StepItem[]} [steps_override]
+ * @property {FaqItem[]} [faq_override]
+ * @property {PlansTable} [plans_table]
+ * @property {PlansTable} [plans_table_diesel]
+ */
+
+/** @type {Record<string, Campaign>} */
 export const CAMPAIGNS = {
     cellular: {
         slug: 'cellular',
@@ -284,6 +347,10 @@ export const CAMPAIGNS = {
 
 // השוואה גם ב-lowercase: יש slug ב-camelCase (carInsurance), כך שקישור שהועתק
 // באותיות קטנות (/details/carinsurance) לא יחזיר 404.
+/**
+ * @param {string | null | undefined} slug
+ * @returns {Campaign | null}
+ */
 export function getCampaign(slug) {
     const lower = String(slug ?? '').toLowerCase();
     const key = Object.keys(CAMPAIGNS).find((k) => k === slug || k.toLowerCase() === lower);

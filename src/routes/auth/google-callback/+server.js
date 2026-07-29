@@ -15,7 +15,7 @@ export async function GET({ url, cookies, fetch }) {
         // במקום מסך 502 עם JSON גולמי — מפנים ל-/login עם הודעה ידידותית.
         // (מאז חיבור-החשבונות בשרת, "email already taken" כבר לא אמור לקרות,
         //  אבל זו רשת ביטחון לכל כשל אחר.)
-        const msg = String(e?.message || '');
+        const msg = String(/** @type {{ message?: unknown } | undefined} */ (e)?.message || '');
         const code = /already taken|already exist/i.test(msg) ? 'email_taken' : 'failed';
         throw redirect(302, loginWithError(code, returnTo));
     }

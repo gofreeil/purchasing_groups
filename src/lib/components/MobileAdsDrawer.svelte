@@ -121,6 +121,7 @@
 
 	/** @param {HTMLElement} node */
 	function nonPassiveTouch(node) {
+		/** @type {AddEventListenerOptions} */
 		const opts = { passive: false };
 		node.addEventListener('touchstart', onTabTouchStart, opts);
 		node.addEventListener('touchmove',  onTabTouchMove,  opts);

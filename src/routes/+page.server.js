@@ -13,16 +13,23 @@ const LABEL_COL = 1;
 // זה לא באג — התוספת מייצגת חברה נוספת שאינה מופיעה בגיליון הזה. לא להסיר.
 const CAMPAIGN_COLS = { cellular: 4, fuel: 8, diesel: 7, carInsurance: 10 };
 
+/** @type {Record<string, { monthly: number, annual: number }>} */
 const DEFAULT_CAMPAIGNS = {
     cellular: { monthly: 465, annual: 79854 },
     fuel: { monthly: 570, annual: 6840 },
     diesel: { monthly: 0, annual: 0 },
     carInsurance: { monthly: 0, annual: 0 },
 };
-const DEFAULT_MEMBERS = 1050;
+const DEFAULT_MEMBERS = 1070;
 
+/**
+ * @param {string} text
+ * @returns {string[][]}
+ */
 function parseCsv(text) {
+    /** @type {string[][]} */
     const rows = [];
+    /** @type {string[]} */
     let row = [];
     let cell = '';
     let inQuotes = false;
@@ -43,16 +50,23 @@ function parseCsv(text) {
     return rows;
 }
 
+/** @param {string | null | undefined} v */
 const norm = (v) => (v || '').trim();
+/** @param {string | null | undefined} s @param {...string} words */
 const includesAll = (s, ...words) => { const t = norm(s); return words.every((w) => t.includes(w)); };
+/** @param {string} l */
 const isMonthlyRow = (l) => includesAll(l, 'חיסכון') && (l.includes('חודש') || l.includes('חודשי'));
+/** @param {string} l */
 const isAnnualRow = (l) => includesAll(l, 'חיסכון') && (l.includes('שנה') || l.includes('שנתי'));
+/** @param {string | null | undefined} l */
 const isMembersRow = (l) => norm(l).includes('חתמו');
+/** @param {string | null | undefined} v */
 const toNum = (v) => {
     const n = parseFloat(norm(v).replace(/[^\d.-]/g, ''));
     return isNaN(n) ? 0 : Math.round(n);
 };
 
+/** @param {typeof globalThis.fetch} fetch */
 async function loadSheetData(fetch) {
     const aggregated = structuredClone(DEFAULT_CAMPAIGNS);
     let members = DEFAULT_MEMBERS;
@@ -99,6 +113,7 @@ export async function load({ fetch }) {
             fetchSatisfactionResponses(slug, { fetch, pageSize: 500 }).catch(() => []),
         ),
     );
+    /** @type {Record<string, { avg: number, count: number }>} */
     const averageRatings = {};
     activeSlugs.forEach((slug, i) => {
         const rated = responseLists[i].filter((r) => typeof r.level === 'number' && r.level > 0);

@@ -22,6 +22,7 @@
 
     // ─── אדמין: מחיקת תגובה (super_admin בלבד) ───
     let adminIsSuper = $derived(data.user?.app_role === 'super_admin');
+    /** @type {string | null} */
     let deletingId = $state(null);
 
     // ─── לייק + תגובה ציבוריים (לכל משתמש מחובר) ───
@@ -30,13 +31,20 @@
     let showLoginPrompt = $state(false);
 
     // override-ים אופטימיים לפי documentId
+    /** @type {Record<string, { likes: number, liked: boolean }>} */
     let likeOverride = $state({});
+    /** @type {Record<string, boolean>} */
     let likeBusy = $state({});
+    /** @type {Record<string, import('$lib/strapi.js').SatisfactionReply[]>} */
     let repliesOverride = $state({});
+    /** @type {Record<string, boolean>} */
     let replyOpen = $state({});
+    /** @type {Record<string, string>} */
     let replyDraft = $state({});
+    /** @type {Record<string, boolean>} */
     let replyBusy = $state({});
 
+    /** @param {import('$lib/strapi.js').SatisfactionResponse} r */
     function likeState(r) {
         const o = likeOverride[r.documentId];
         if (o) return o;
@@ -46,12 +54,14 @@
         return { likes, liked };
     }
 
+    /** @param {import('$lib/strapi.js').SatisfactionResponse} r */
     function repliesFor(r) {
         const o = repliesOverride[r.documentId];
         if (Array.isArray(o)) return o;
         return Array.isArray(r.replies) ? r.replies : [];
     }
 
+    /** @param {import('$lib/strapi.js').SatisfactionResponse} r */
     async function toggleLike(r) {
         if (!loggedIn) { showLoginPrompt = true; return; }
         if (!r.documentId || likeBusy[r.documentId]) return;
@@ -71,11 +81,13 @@
         }
     }
 
+    /** @param {import('$lib/strapi.js').SatisfactionResponse} r */
     function toggleReplyBox(r) {
         if (!loggedIn) { showLoginPrompt = true; return; }
         replyOpen = { ...replyOpen, [r.documentId]: !replyOpen[r.documentId] };
     }
 
+    /** @param {import('$lib/strapi.js').SatisfactionResponse} r */
     async function submitReply(r) {
         if (!loggedIn) { showLoginPrompt = true; return; }
         const text = (replyDraft[r.documentId] ?? '').trim();
@@ -99,6 +111,7 @@
         }
     }
 
+    /** @param {import('$lib/strapi.js').SatisfactionResponse} r */
     async function deleteResponse(r) {
         if (!r.documentId) return;
         if (!confirm('למחוק את התגובה הזו לצמיתות?')) return;
@@ -108,12 +121,13 @@
             if (!res.ok) throw new Error((await res.text()).slice(0, 200));
             await invalidateAll();
         } catch (e) {
-            alert(`שגיאה במחיקה: ${e.message}`);
+            alert(`שגיאה במחיקה: ${/** @type {Error} */ (e).message}`);
         } finally {
             deletingId = null;
         }
     }
 
+    /** @param {string} iso */
     function formatDate(iso) {
         try {
             const d = new Date(iso);

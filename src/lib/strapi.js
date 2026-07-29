@@ -4,6 +4,11 @@ import { env } from '$env/dynamic/private';
 
 const STRAPI_URL = (env.STRAPI_URL || 'https://api.gofreeil.com').replace(/\/$/, '');
 
+/**
+ * @param {string} path
+ * @param {Record<string, string | number | boolean | null | undefined>} [params]
+ * @param {{ fetch?: typeof fetch }} [opts]
+ */
 export async function strapiGet(path, params = {}, { fetch: f = fetch } = {}) {
     const search = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
@@ -17,6 +22,11 @@ export async function strapiGet(path, params = {}, { fetch: f = fetch } = {}) {
     return res.json();
 }
 
+/**
+ * @param {string} path
+ * @param {unknown} data
+ * @param {{ fetch?: typeof fetch }} [opts]
+ */
 export async function strapiPost(path, data, { fetch: f = fetch } = {}) {
     const url = `${STRAPI_URL}/api/${path}`;
     const res = await f(url, {
@@ -29,6 +39,11 @@ export async function strapiPost(path, data, { fetch: f = fetch } = {}) {
 }
 
 // עדכון רשומה קיימת (משמש את מסך אישור הפרסומות של האדמין).
+/**
+ * @param {string} path
+ * @param {unknown} data
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ */
 export async function strapiPut(path, data, { fetch: f = fetch, jwt = '' } = {}) {
     const url = `${STRAPI_URL}/api/${path}`;
     /** @type {Record<string, string>} */
@@ -44,6 +59,40 @@ export async function strapiPut(path, data, { fetch: f = fetch, jwt = '' } = {})
 }
 
 // תוכן הקמפיינים עבר לפרונט (campaigns.js) - Strapi משמש כאן רק לתגובות שביעות-רצון.
+/**
+ * @typedef {Object} SatisfactionReply
+ * @property {string} text
+ * @property {string} [user_name]
+ * @property {boolean} [is_admin]
+ * @property {string} created_at
+ */
+
+/**
+ * תגובת שביעות-רצון כפי שהיא מוחזרת מ-Strapi.
+ * @typedef {Object} SatisfactionResponse
+ * @property {number} [id]
+ * @property {string} documentId
+ * @property {string} [campaign_slug]
+ * @property {number} level
+ * @property {string | null} [company]
+ * @property {string} [comments]
+ * @property {string} [user_name]
+ * @property {string} [user_city]
+ * @property {string} [admin_reply]
+ * @property {boolean} [admin_liked]
+ * @property {boolean} [is_featured]
+ * @property {string} createdAt
+ * @property {string} submitted_at
+ * @property {number} [likes]
+ * @property {(string | number)[]} [liked_by]
+ * @property {SatisfactionReply[]} [replies]
+ */
+
+/**
+ * @param {string} campaignSlug
+ * @param {{ fetch?: typeof fetch, pageSize?: number }} [opts]
+ * @returns {Promise<SatisfactionResponse[]>}
+ */
 export async function fetchSatisfactionResponses(campaignSlug, { fetch: f = fetch, pageSize = 50 } = {}) {
     const data = await strapiGet('pg-satisfaction-responses', {
         'filters[campaign_slug][$eq]': campaignSlug,

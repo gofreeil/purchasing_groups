@@ -8,6 +8,7 @@
     // loggedIn: האם המשתמש מחובר; loginHref: יעד כפתור ההרשמה.
     let { campaignSlug, ratingCompanies = null, loggedIn = true, loginHref = "/login" } = $props();
 
+    /** @type {Record<number, { face: string, text: string }>} */
     const EMOJI_BY_LEVEL = {
         1: { face: "😞", text: "מאוד לא מרוצה" },
         2: { face: "😐", text: "לא מרוצה" },
@@ -16,6 +17,7 @@
         5: { face: "🤩", text: "מאוד מרוצה!" },
     };
 
+    /** @type {string | null} */
     let selectedCompany = $state(null);
     let rating = $state(0);
     let comments = $state("");
@@ -32,12 +34,14 @@
     let canRate = $derived(companies === null || selectedCompany !== null);
     let currentEmoji = $derived(EMOJI_BY_LEVEL[rating] ?? null);
 
+    /** @param {string} name */
     function selectCompany(name) {
         if (selectedCompany === name) return;
         selectedCompany = name;
         rating = 0;
     }
 
+    /** @param {number} n */
     function tryRate(n) {
         // אורח שלוחץ על דירוג - מציגים הודעת הרשמה ולא מדרגים
         if (!loggedIn) {
