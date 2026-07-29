@@ -177,19 +177,19 @@
 		display: flex;
 		align-items: flex-start;
 		justify-content: center;
-		padding: 3.5rem 1rem;
+		padding: 2rem 0.75rem;
 	}
 	.welcome-content {
 		width: 100%;
-		max-width: 28rem;
+		max-width: none;
 		text-align: center;
 	}
 
 	.welcome-logo {
 		margin: 0 auto 1rem;
 		display: block;
-		width: 5rem;
-		height: 5rem;
+		width: 6rem;
+		height: 6rem;
 		border-radius: 9999px;
 		object-fit: cover;
 		background: #fff;
@@ -203,8 +203,8 @@
 		gap: 0.5rem;
 		color: #fff;
 		font-weight: 900;
-		font-size: 1.5rem;
-		line-height: 2rem;
+		font-size: 1.875rem;
+		line-height: 2.25rem;
 		margin: 0 0 0.75rem;
 	}
 	.welcome-title-back {
@@ -215,16 +215,16 @@
 	}
 
 	.welcome-wave {
-		font-size: 3.75rem;
+		font-size: 4.5rem;
 		line-height: 1;
 		margin-bottom: 1rem;
 	}
 
 	.welcome-text {
 		color: #e5e7eb;
-		font-size: 1rem;
+		font-size: 1.125rem;
 		line-height: 1.625;
-		max-width: 36rem;
+		max-width: 42rem;
 		margin: 0 auto 1.25rem;
 	}
 
@@ -240,21 +240,21 @@
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
-		gap: 0.625rem;
+		gap: 0.5rem;
 	}
 
 	.welcome-tile {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.375rem;
+		gap: 0.5rem;
 		border-radius: 0.75rem;
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		padding: 0.5rem;
 		transition: background 0.2s, border-color 0.2s, transform 0.2s;
 		flex-grow: 0;
-		flex-basis: calc(33.333% - 0.47rem);
+		flex-basis: calc(33.333% - 0.34rem);
 	}
 	.welcome-tile:hover {
 		background: rgba(255, 255, 255, 0.1);
@@ -269,7 +269,7 @@
 	}
 
 	.welcome-tile-title {
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.2;
 		font-weight: 600;
 		color: #e5e7eb;
@@ -317,16 +317,46 @@
 	}
 
 	@media (min-width: 640px) {
+		.welcome-content {
+			max-width: 48rem;
+		}
+		.welcome-inner {
+			padding: 3rem 1rem;
+		}
+		.welcome-grid {
+			gap: 0.75rem;
+		}
 		.welcome-tile {
-			flex-basis: calc(25% - 0.52rem);
+			padding: 0.75rem;
+			flex-basis: calc(25% - 0.57rem);
+		}
+		.welcome-tile-title {
+			font-size: 14px;
+		}
+		.welcome-title {
+			font-size: 2.25rem;
+			line-height: 2.5rem;
+		}
+		.welcome-text {
+			font-size: 1.25rem;
+		}
+		.welcome-wave {
+			font-size: 6rem;
+		}
+		.welcome-logo {
+			width: 7rem;
+			height: 7rem;
 		}
 	}
 	@media (min-width: 768px) {
 		.welcome-inner {
 			align-items: center;
 		}
+		.welcome-content {
+			max-width: 64rem;
+		}
 		.welcome-tile {
-			flex-basis: calc(20% - 0.55rem);
+			flex-basis: calc(20% - 0.6rem);
 		}
 		.welcome-tagline {
 			font-size: 1rem;
