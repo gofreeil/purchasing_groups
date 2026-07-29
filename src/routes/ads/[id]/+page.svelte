@@ -2,6 +2,8 @@
     // דף נחיתה של פרסומת מאושרת - הועתק מ"קהילה בשכונה" והותאם לקבוצות רכישה.
     // עיצוב מינימליסטי: הכותרת, משפט הפתיחה והיתרונות יושבים *ליד* התמונה
     // ולא מתחתיה - כדי לחסוך גלילה. הגולש רואה את כל העיקר במסך הראשון.
+    import Seo from "$lib/components/Seo.svelte";
+
     let { data } = $props();
     let ad = $derived(data.ad);
     let lp = $derived(data.ad.landing ?? {});
@@ -51,12 +53,18 @@
     }
 </script>
 
-<svelte:head>
-    <title>{ad.title} | רכישות קבוצתיות יוצאים לחירות</title>
-    {#if lp.pitch}
-        <meta name="description" content={lp.pitch} />
-    {/if}
-</svelte:head>
+<!-- דף נחיתה של פרסומת נשלח בוואטסאפ ובקבוצות, ולכן הוא צריך תגי שיתוף
+     משלו (כותרת, תיאור ותמונת הפרסומת) ולא של האתר כולו. -->
+<Seo
+    title={`${ad.title} | רכישות קבוצתיות יוצאים לחירות`}
+    description={(lp.pitch || ad.title || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 300)}
+    path={`/ads/${ad.id ?? ''}`}
+    image={heroImage || undefined}
+/>
 
 {#snippet rich(/** @type {string} */ raw)}{#each segments(raw) as s}{#if s.url}<a class="al-link" href={s.url} target="_blank" rel="noopener noreferrer">{s.text} ↗</a>{:else}{s.text}{/if}{/each}{/snippet}
 

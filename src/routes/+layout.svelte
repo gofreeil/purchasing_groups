@@ -8,6 +8,7 @@
 	import RightAdBanner from "$lib/components/RightAdBanner.svelte";
 	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
 	import WelcomeScreen from "$lib/components/WelcomeScreen.svelte";
+	import { OTHER_NETWORK_SITES } from "$lib/seo.js";
 
 	let { data, children } = $props();
 
@@ -129,7 +130,9 @@
 					/>
 				</div>
 				<div class="titles">
-					<h1 class="main-title">{$t.title}</h1>
+					<!-- שם המותג בכותרת הוא <p> ולא <h1>: ה-h1 שייך לכותרת הייחודית של כל דף.
+					     h1 גלובלי זהה בכל הדפים היה מטשטש לגוגל במה כל דף עוסק. -->
+					<p class="main-title">{$t.title}</p>
 					<p class="sub-title">
 						{$t.subtitle}
 					</p>
@@ -280,6 +283,26 @@
 	<!-- Footer -->
 	<footer class="main-footer">
 		<div class="footer-container">
+			<!-- רשת "יוצאים לחירות": קישורי טקסט אמיתיים לכל אתרי הרשת.
+			     זה מה שמאפשר לגוגל ולמנועי ה-AI לזהות את כל האתרים כמותג אחד
+			     ולחלק ביניהם את האמון (entity consolidation), ובמקביל שולח גם
+			     מבקרים אנושיים בין האתרים. -->
+			<nav class="network-links" aria-labelledby="network-links-title">
+				<h2 id="network-links-title" class="network-links-title">רשת יוצאים לחירות</h2>
+				<ul class="network-links-list">
+					{#each OTHER_NETWORK_SITES as site (site.url)}
+						<li>
+							<a
+								href={site.url}
+								title={site.description}
+								target="_blank"
+								rel="noopener noreferrer">{site.name}</a
+							>
+						</li>
+					{/each}
+				</ul>
+			</nav>
+
 			<a
 				href="https://gofreeil.com/"
 				target="_blank"

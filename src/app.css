@@ -914,6 +914,43 @@ a {
     flex-wrap: wrap;
 }
 
+/* שורת הקישורים לאתרי רשת "יוצאים לחירות" — רצועה ברוחב מלא בראש הפוטר */
+.network-links {
+    flex: 1 0 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0 0.6rem;
+}
+
+.network-links-title {
+    margin: 0 0 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: #fbbf24;
+}
+
+.network-links-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.network-links-list a {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #9ca3af;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.network-links-list a:hover {
+    color: #fff;
+}
+
 .footer-brand {
     display: flex;
     align-items: center;

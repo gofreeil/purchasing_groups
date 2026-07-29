@@ -3,6 +3,16 @@
     import { tweened } from "svelte/motion";
     import { cubicOut } from "svelte/easing";
     import { lang, t } from "$lib/i18n.js";
+    import Seo from "$lib/components/Seo.svelte";
+    import JsonLd from "$lib/components/JsonLd.svelte";
+    import {
+        SITE_DESCRIPTION,
+        websiteSchema,
+        organizationSchema,
+        collectionSchema,
+        campaignServiceSchema,
+        faqSchema,
+    } from "$lib/seo.js";
 
     let { data } = $props();
 
@@ -97,7 +107,66 @@
         }
 
     });
+
+    /* ═══════════ SEO ═══════════
+       דף הבית הוא דף הכניסה מגוגל וממנועי ה-AI לשאילתות כמו "קבוצת רכישה סלולר",
+       "הנחה בדלק", "חיסכון בביטוח רכב". ה-JSON-LD מפרט את כל הקבוצות הפעילות
+       כ-ItemList, כך שכל קמפיין יכול להופיע בפני עצמו בתוצאות. */
+    const SEO_TITLE = 'רכישות קבוצתיות — חוסכים יחד בסלולר, בדלק, בביטוח ובחשמל | יוצאים לחירות';
+    const faqs = [
+        {
+            q: 'מה זו רכישה קבוצתית?',
+            a: 'התאגדות של הרבה צרכנים לכוח קנייה אחד. במקום שכל אחד יתמקח בנפרד, הקבוצה מנהלת מול הספק מכרז אחד ומשיגה מחיר שלקוח בודד לא יכול לקבל — למשל קו סלולר בכמה עשרות שקלים בשנה או הנחה קבועה על כל ליטר דלק.'
+        },
+        {
+            q: 'כמה עולה להצטרף?',
+            a: 'ההצטרפות חינם. אין דמי חבר, אין דמי הצטרפות ואין עמלה — ההטבה נובעת מגודל הקבוצה, לא מתשלום שלכם.'
+        },
+        {
+            q: 'האם ההצטרפות מחייבת אותי בהתחייבות לתקופה?',
+            a: 'לא. הקבוצות מתבססות על מסלולים בלי התחייבות, וניתן לעזוב בכל שלב לפי תנאי הספק.'
+        },
+        {
+            q: 'אילו קבוצות רכישה פעילות כרגע?',
+            a: 'קו סלולר זול (רמי לוי, אקס פון, וויקום), הנחה קבועה על דלק בכ-700 תחנות (סונול, דור אלון, טן, תפוז), וביטוח רכב. קבוצות נוספות — חשמל, אינטרנט וקופונים — בהקמה.'
+        },
+        {
+            q: 'איך מצטרפים?',
+            a: 'נכנסים לדף הקבוצה שמעניינת אתכם, קוראים את המסלולים והתנאים וממלאים את טופס ההצטרפות. נציג חוזר אליכם להשלמת התהליך מול הספק.'
+        }
+    ];
+
+    const schemas = $derived([
+        websiteSchema(),
+        organizationSchema(),
+        collectionSchema({
+            name: 'קבוצות הרכישה של יוצאים לחירות',
+            description: SITE_DESCRIPTION,
+            path: '/',
+            items: [...activeCampaigns, ...soonCampaigns].map((c) => ({
+                name: c.title,
+                path: `/details/${c.slug}`
+            }))
+        }),
+        ...activeCampaigns.map((c) =>
+            campaignServiceSchema({
+                name: c.title,
+                description: c.description,
+                path: `/details/${c.slug}`,
+                image: c.image_url
+            })
+        ),
+        faqSchema(faqs)
+    ]);
 </script>
+
+<Seo
+    title={SEO_TITLE}
+    description={SITE_DESCRIPTION}
+    path="/"
+    keywords="רכישה קבוצתית, קבוצת רכישה, כוח קנייה קבוצתי, קו סלולר זול, חבילת סלולר זולה, הנחה בדלק, דלקן, ביטוח רכב זול, חיסכון בחשמל, יוצאים לחירות"
+/>
+<JsonLd data={schemas} />
 
 <div class="top-content">
     <!-- Main Heading - H1 for accessibility -->

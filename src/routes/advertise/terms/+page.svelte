@@ -2,15 +2,17 @@
     // תנאי הפרסום — מקושרים מקופסת התשלום בבילדר, לפני בחירת מסלול ותשלום.
     // זהה בתוכן לדף התנאים בשאר אתרי הרשת.
     import { adPlans } from "$lib/adPlans.js";
+    import Seo from "$lib/components/Seo.svelte";
 
     const contactUrl = "https://freedom.gofreeil.com";
     const email = "freedomhasbegun@gmail.com";
 </script>
 
-<svelte:head>
-    <title>תנאי פרסום | רכישות קבוצתיות</title>
-    <meta name="description" content="תנאי הפרסום באתר הרכישות הקבוצתיות — מה מותר ומה אסור לפרסם, תשלום מראש לפי מסלול, אישור מנהל, ותנאי ההסרה." />
-</svelte:head>
+<Seo
+    title="תנאי פרסום | רכישות קבוצתיות יוצאים לחירות"
+    description="תנאי הפרסום באתר הרכישות הקבוצתיות — מה מותר ומה אסור לפרסם, תשלום מראש לפי מסלול, אישור מנהל, ותנאי ההסרה."
+    path="/advertise/terms"
+/>
 
 <div class="mx-auto max-w-3xl px-4 py-8 md:py-12" dir="rtl">
     <div class="rounded-3xl border border-[#3b5794] bg-[#16264d] shadow-2xl overflow-hidden">

@@ -3,6 +3,9 @@
     import { isLoggedIn } from "$lib/user.js";
     import { fade, slide } from "svelte/transition";
     import { invalidateAll } from "$app/navigation";
+    import Seo from "$lib/components/Seo.svelte";
+    import JsonLd from "$lib/components/JsonLd.svelte";
+    import { campaignServiceSchema, breadcrumbSchema, faqSchema } from "$lib/seo.js";
 
     /** @typedef {import('$lib/strapi.js').SatisfactionResponse} SatisfactionResponse */
     /**
@@ -177,6 +180,53 @@
         };
     });
 
+    /* ═══════════ SEO ═══════════
+       דף הקמפיין הוא דף הנחיתה שנתפס בגוגל לשאילתות כמו "קו סלולר זול",
+       "הנחה בדלק", "ביטוח רכב לחברי קהילה". ה-FAQ של הקמפיין נכנס ל-JSON-LD
+       כדי שגוגל יציג את השאלות בתוצאה, ומנועי AI יצטטו את התשובות. */
+    /** @type {Record<string, string>} */
+    const CAMPAIGN_KEYWORDS = {
+        cellular:
+            "קו סלולר זול, חבילת סלולר זולה, סים זול, רמי לוי סלולר, אקס פון, וויקום, קבוצת רכישה סלולר",
+        fuel: "הנחה בדלק, דלקן, הנחה על בנזין, תדלוק בהנחה, סונול, דור אלון, טן, תפוז, קבוצת רכישה דלק",
+        carInsurance: "ביטוח רכב זול, ביטוח חובה, ביטוח מקיף, קבוצת רכישה ביטוח רכב",
+        electricity: "חיסכון בחשמל, מחיר חשמל, ספק חשמל פרטי, קבוצת רכישה חשמל",
+        internet: "אינטרנט זול, תשתית אינטרנט, קבוצת רכישה אינטרנט",
+        coupons: "קופונים, הנחות לחברי קהילה, מבצעים",
+    };
+
+    const campaignPlainDesc = $derived(
+        String(campaignDesc || "")
+            .replace(/<[^>]*>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim(),
+    );
+    const seoTitle = $derived(`${campaignTitle} — רכישה קבוצתית | ${$t.title}`);
+    const seoDescription = $derived(
+        (campaignPlainDesc ||
+            `${campaignTitle} — קבוצת רכישה של יוצאים לחירות. ההצטרפות חינם, בלי דמי חבר ובלי התחייבות.`
+        ).slice(0, 300),
+    );
+    const seoKeywords = $derived(
+        CAMPAIGN_KEYWORDS[campaign] ?? "רכישה קבוצתית, קבוצת רכישה, חיסכון בהוצאות",
+    );
+    const campaignFaq = $derived(pageData?.faqOverride ?? $t.details?.faq ?? []);
+    const schemas = $derived([
+        campaignServiceSchema({
+            name: campaignTitle,
+            description: seoDescription,
+            path: `/details/${campaign}`,
+            image: campaignImage || undefined,
+            rating: campaignStats.rating,
+            reviewCount: data.ratingCount > 0 ? data.ratingCount : 0,
+        }),
+        breadcrumbSchema([
+            { name: "רכישות קבוצתיות", path: "/" },
+            { name: campaignTitle, path: `/details/${campaign}` },
+        ]),
+        ...(campaignFaq.length ? [faqSchema(campaignFaq)] : []),
+    ]);
+
     async function handleSubmit() {
         if (rating === 0) return;
         submitError = "";
@@ -349,9 +399,14 @@
     }
 </script>
 
-<svelte:head>
-    <title>{campaignTitle} | {$t.title}</title>
-</svelte:head>
+<Seo
+    title={seoTitle}
+    description={seoDescription}
+    path={`/details/${campaign}`}
+    image={campaignImage || undefined}
+    keywords={seoKeywords}
+/>
+<JsonLd data={schemas} />
 
 <div class="details-page" in:fade={{ duration: 300 }}>
     <!-- Hero + Stats unified banner -->

@@ -1,6 +1,13 @@
 <script>
     import { lang, t } from "$lib/i18n.js";
+    import Seo from "$lib/components/Seo.svelte";
 </script>
+
+<Seo
+    title="מדיניות פרטיות | רכישות קבוצתיות יוצאים לחירות"
+    description="מדיניות הפרטיות של אתר הרכישות הקבוצתיות: אילו פרטים נאספים בהצטרפות לקבוצת רכישה, למה הם משמשים, עם מי הם משותפים ואיך מבקשים למחוק אותם."
+    path="/privacy"
+/>
 
 <div
     class="privacy-container"
