@@ -14,6 +14,9 @@
 
     const PAY_WA_NUMBER = "972508750632";
     const CONTACT_EMAIL = "freedomhasbegun@gmail.com";
+    // המסלול שנבחר נשמר ל-localStorage כדי שהבילדר יציג "הפרסום ירוץ עד"
+    // לפי התקופה האמיתית (עד שנה) ולא לפי חודש קבוע
+    const PLAN_DAYS_KEY = "ad_plan_days";
 
     // ---- פרסומת אחת בלבד באתר — אותה מודעה בשני המסכים (כרטיסי מידע) ----
     const packages = [
@@ -73,9 +76,12 @@
         highlightedRow = num;
         if (selectedNum === num) {
             selectedNum = null; // לחיצה על המסלול הפעיל = ביטול
+            try { localStorage.removeItem(PLAN_DAYS_KEY); } catch {}
             return;
         }
         selectedNum = num;
+        const days = rows.find((r) => r.num === num)?.days;
+        if (days) { try { localStorage.setItem(PLAN_DAYS_KEY, String(days)); } catch {} }
         if (tutorialStep !== "done") tutorialStep = "done";
 
         // אישור ויזואלי: וי קופץ, ואז גלילה איטית אל המחשבון והבהוב הסכום
