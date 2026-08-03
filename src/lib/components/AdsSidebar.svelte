@@ -1,5 +1,6 @@
 <script>
 	import { ads } from "$lib/adsData.js";
+	import { adImgFit, parseAdImageFit } from "$lib/adImageFit.js";
 
 	// פרסומות מאושרות של מפרסמים (מ-Strapi) - מוצגות לפני פרסומות השותפים.
 	// הקישור שלהן פנימי - לדף הנחיתה /ads/[id] שנבנה ב-builder.
@@ -15,9 +16,12 @@
 			href: `/ads/${a.id}`,
 			target: "_self",
 			image: a.mainImage,
+			// מיקום+זום מהבילדר: מודעות חדשות מגיעות עם fit ומוצגות במסגרת
+			// קבועה שמכבדת אותו; מודעות ישנות (בלי fit) נשארות בגובה טבעי.
+			fit: a.mainImageFit ? parseAdImageFit(a.mainImageFit) : null,
 			color: a.gradient || "linear-gradient(135deg, #f59e0b, #ea580c)",
 		})),
-		...ads.map((a) => ({ ...a, target: "_blank" })),
+		...ads.map((a) => ({ ...a, target: "_blank", fit: null })),
 	]);
 </script>
 
@@ -32,14 +36,19 @@
 				aria-label="{ad.title} – {ad.description}{ad.target === '_blank' ? ' (נפתח בחלון חדש)' : ''}"
 				class="ad-item"
 			>
-				<div class="ad-image-wrap">
-					<img
-						src={ad.image}
-						alt={ad.title}
-						class="ad-image"
-						class:ad-image-short={ad.id === 5 || ad.id === 10}
-						class:ad-image-trim={ad.id === 1 || ad.id === 3}
-					/>
+				<div class="ad-image-wrap" class:fitted={!!ad.fit}>
+					{#if ad.fit}
+						<!-- המיקום/זום שנבחרו בבילדר מוחלים גם כאן - הדמו הוא מה שרואים -->
+						<img src={ad.image} alt={ad.title} class="ad-image ad-image-fitted" use:adImgFit={ad.fit} />
+					{:else}
+						<img
+							src={ad.image}
+							alt={ad.title}
+							class="ad-image"
+							class:ad-image-short={ad.id === 5 || ad.id === 10}
+							class:ad-image-trim={ad.id === 1 || ad.id === 3}
+						/>
+					{/if}
 					<div class="ad-image-overlay">
 						<h3>{ad.title}</h3>
 						<p>{ad.description}</p>
@@ -132,6 +141,20 @@
 		object-fit: cover;
 		object-position: top;
 		aspect-ratio: 1 / 0.82;
+	}
+
+	/* מסגרת קבועה למודעות שהגיעו עם fit מהבילדר: התמונה ממוקמת אבסולוטית
+	   (adImgFit) ולכן העוטף חייב גובה משלו - ריבוע, כהמלצת הבילדר עצמו
+	   ("עדיף תמונה מרובעת והעיקר במרכז") */
+	.ad-image-wrap.fitted {
+		aspect-ratio: 1 / 1;
+	}
+	/* מראה זהה עוד לפני שהפעולה מדדה את המשבצת - בלי קפיצה בטעינה */
+	.ad-image-fitted {
+		position: absolute;
+		inset: 0;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.ad-image-overlay {

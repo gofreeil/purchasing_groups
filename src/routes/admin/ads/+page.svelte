@@ -1,6 +1,7 @@
 <script>
     import { enhance } from "$app/forms";
     import { adPlans } from "$lib/adPlans.js";
+    import { adImgFit, parseAdImageFit } from "$lib/adImageFit.js";
 
     // מסך אישור פרסומות לאדמין - ממתינות / מאושרות / נדחות.
     let { data, form } = $props();
@@ -60,7 +61,8 @@
             <div class="ad-card">
                 <div class="ad-card-img">
                     {#if ad.mainImage}
-                        <img src={ad.mainImage} alt={ad.title} />
+                        <!-- אותו מיקום/זום שהמפרסם קבע - המנהל מאשר את מה שבאמת יוצג -->
+                        <img src={ad.mainImage} alt={ad.title} use:adImgFit={parseAdImageFit(ad.mainImageFit)} />
                     {:else}
                         <div class="no-img">אין תמונה</div>
                     {/if}
@@ -218,9 +220,12 @@
         border-radius: 0.6rem;
         overflow: hidden;
         background: rgba(0, 0, 0, 0.3);
+        /* עוגן לתמונה הממוקמת אבסולוטית ע"י adImgFit + גובה שלא יקרוס */
+        position: relative;
+        min-height: 160px;
     }
     @media (max-width: 640px) {
-        .ad-card-img { width: 100%; max-height: 180px; }
+        .ad-card-img { width: 100%; height: 180px; max-height: 180px; }
     }
     .ad-card-img img {
         width: 100%;

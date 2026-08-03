@@ -12,9 +12,11 @@
 // לכן פרטי התשלום מהשליחה נארזים בתוך ה-JSON של landing:
 //   landing._payment ("code" = הוזן קוד התנועה, כמו שולם | "pending" = לתיאום)
 //   landing._requestedDurationDays (אחד ממסלולי adPlans) - התקופה שהמפרסם ביקש.
+//   landing._mainImageFit ({ x, y, z }) - מיקום+זום התמונה הראשית מהבילדר.
 
 import { strapiGet, strapiPost, strapiPut } from '$lib/strapi.js';
 import { DEFAULT_PLAN_DAYS, normalizePlanDays } from '$lib/adPlans.js';
+import { parseAdImageFit } from '$lib/adImageFit.js';
 
 const ENDPOINT = 'pg-submitted-ads';
 export const DEFAULT_DURATION_DAYS = DEFAULT_PLAN_DAYS;
@@ -41,6 +43,8 @@ function fromStrapi(row) {
         gradient: row.gradient ?? '',
         logo: row.logo ?? '',
         mainImage: row.main_image ?? '',
+        // מודעות שנשלחו לפני הפיצ'ר - בלי fit; התצוגות משאירות אותן כפי שהיו
+        mainImageFit: row.landing?._mainImageFit ? parseAdImageFit(row.landing._mainImageFit) : undefined,
         landing: row.landing ?? {},
         submittedBy: {
             id: row.submitted_by_id ?? '',
@@ -79,6 +83,7 @@ export async function submitAd(payload, { fetch: f = fetch } = {}) {
                 ...(payload.landing ?? {}),
                 _payment: payload.payment === 'code' ? 'code' : 'pending',
                 _requestedDurationDays: normalizePlanDays(payload.requestedDurationDays),
+                _mainImageFit: parseAdImageFit(payload.mainImageFit),
             },
             submitted_by_id: payload.submittedBy?.id ?? '',
             submitted_by_email: payload.submittedBy?.email ?? '',
@@ -125,6 +130,7 @@ export async function listApproved({ fetch: f = fetch } = {}) {
             hover: a.hoverText,
             gradient: a.gradient,
             mainImage: a.mainImage,
+            mainImageFit: a.mainImageFit,
         }));
         approvedCache = { at: Date.now(), list };
         return list;
