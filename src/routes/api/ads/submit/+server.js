@@ -4,8 +4,14 @@ import { isOwnerCode, notifyOwnerCodeUse } from '$lib/server/adsCode.js';
 import { normalizePlanDays } from '$lib/adPlans.js';
 
 // קליטת פרסומת חדשה מה-builder - נשמרת ב-Strapi במצב "ממתינה לאישור".
-// אין דרישת התחברות (כמו במקור בקהילה בשכונה) - הסינון האמיתי הוא האישור הידני.
+// האישור עצמו ידני. חובה להיות מחובר: מודעה בלי submitted_by היא מודעה בלי
+// בעלים — המפרסם לא יוכל לעולם לראות את הביצועים שלה, לערוך אותה או לחדש.
 export async function POST({ request, fetch, locals }) {
+    const user = locals.user;
+    if (!user) {
+        throw error(401, 'צריך להתחבר לפני השליחה — כך הפרסומת נשמרת על החשבון שלכם ותוכלו לעקוב אחריה ולערוך אותה');
+    }
+
     let payload;
     try {
         payload = await request.json();
@@ -29,13 +35,11 @@ export async function POST({ request, fetch, locals }) {
     try {
         const ad = await submitAd(
             {
-                submittedBy: locals.user
-                    ? {
-                        id: String(locals.user.id ?? ''),
-                        email: locals.user.email ?? '',
-                        name: locals.user.username ?? locals.user.name ?? '',
-                    }
-                    : undefined,
+                submittedBy: {
+                    id: String(user.id ?? ''),
+                    email: user.email ?? '',
+                    name: user.username ?? user.name ?? '',
+                },
                 title: payload.title,
                 subtitle: payload.subtitle,
                 payment: usedOwnerCode ? 'code' : 'pending',
@@ -73,9 +77,7 @@ export async function POST({ request, fetch, locals }) {
             await notifyOwnerCodeUse({
                 adTitle: payload.title,
                 durationDays: requestedDurationDays,
-                submitter: locals.user
-                    ? { name: locals.user.username ?? locals.user.name ?? '', email: locals.user.email ?? '' }
-                    : null,
+                submitter: { name: user.username ?? user.name ?? '', email: user.email ?? '' },
             });
         }
         return json({ ok: true, id: ad.id, status: ad.status });
