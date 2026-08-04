@@ -20,7 +20,7 @@ const DEFAULT_CAMPAIGNS = {
     diesel: { monthly: 0, annual: 0 },
     carInsurance: { monthly: 0, annual: 0 },
 };
-const DEFAULT_MEMBERS = 1070;
+const DEFAULT_MEMBERS = 1078;
 
 /**
  * @param {string} text
