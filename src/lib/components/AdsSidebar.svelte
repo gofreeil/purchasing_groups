@@ -10,7 +10,7 @@
 	let merged = $derived(ads.map((a) => ({ ...a, target: "_blank" })));
 </script>
 
-<aside class="ads-sidebar" aria-label="אתרי יוצאים לחירות">
+<aside class="promo-sidebar" aria-label="אתרי יוצאים לחירות">
 	<h4 class="ads-sidebar-title">מתקדמים לחברה מתוקנת ועצמאית</h4>
 	<div class="ads-sidebar-list">
 		{#each merged as ad (ad.id)}
@@ -19,7 +19,7 @@
 				target={ad.target}
 				rel={ad.target === "_blank" ? "noopener noreferrer" : undefined}
 				aria-label="{ad.title} – {ad.description}{ad.target === '_blank' ? ' (נפתח בחלון חדש)' : ''}"
-				class="ad-item"
+				class="promo-item"
 			>
 				<!-- אין כאן ענף fit: הוא שירת פרסומות מהבילדר, שכבר לא מגיעות
 				     לטור הזה. אתרי הרשת נטענים תמיד בגובה הטבעי. -->
@@ -55,7 +55,7 @@
 </aside>
 
 <style>
-	.ads-sidebar {
+	.promo-sidebar {
 		width: 280px;
 		flex-shrink: 0;
 		position: sticky;
@@ -81,7 +81,7 @@
 		gap: 1rem;
 	}
 
-	.ad-item {
+	.promo-item {
 		display: block;
 		overflow: hidden;
 		border-radius: 12px;
@@ -90,7 +90,7 @@
 		transition: transform 0.2s;
 	}
 
-	.ad-item:hover {
+	.promo-item:hover {
 		transform: scale(1.05);
 	}
 
@@ -108,7 +108,7 @@
 		transition: opacity 1.5s;
 	}
 
-	.ad-item:hover .ad-image {
+	.promo-item:hover .ad-image {
 		opacity: 0;
 	}
 
@@ -144,7 +144,7 @@
 		transition: opacity 1.5s;
 	}
 
-	.ad-item:hover .ad-image-overlay {
+	.promo-item:hover .ad-image-overlay {
 		opacity: 1;
 	}
 
@@ -232,14 +232,14 @@
 	}
 
 	@media (max-width: 768px) {
-		.ads-sidebar {
+		.promo-sidebar {
 			display: none;
 		}
 	}
 
 	/* בטאבלט - מעט צר יותר כדי להשאיר מקום לתוכן */
 	@media (max-width: 1100px) and (min-width: 769px) {
-		.ads-sidebar {
+		.promo-sidebar {
 			width: 212px;
 		}
 	}

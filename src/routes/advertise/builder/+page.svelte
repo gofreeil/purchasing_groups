@@ -1264,7 +1264,7 @@
                                         />
                                     {/if}
                                 </div>
-                                <div class="ad-cta" style:background={gradient}>
+                                <div class="promo-cta" style:background={gradient}>
                                     <p>{cta}</p>
                                 </div>
                             </div>
@@ -1370,7 +1370,7 @@
                                 <p class="hover-text">{hoverText || "הטקסט שמופיע בריחוף"}</p>
                             </div>
                         </div>
-                        <div class="ad-cta" style:background={gradient}>
+                        <div class="promo-cta" style:background={gradient}>
                             <p>{cta}</p>
                         </div>
                     </div>
@@ -2644,11 +2644,11 @@
         margin: 0;
         font-weight: 700;
     }
-    .ad-cta {
+    .promo-cta {
         padding: 0.65rem;
         text-align: center;
     }
-    .ad-cta p {
+    .promo-cta p {
         color: white;
         font-weight: 700;
         font-size: 0.72rem;

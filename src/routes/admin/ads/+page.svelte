@@ -73,9 +73,9 @@
         <p class="empty">אין פרסומות בקטגוריה הזו.</p>
     {/if}
 
-    <div class="ads-list">
+    <div class="promo-list">
         {#each shown as ad, adIndex (ad.id)}
-            <div class="ad-card">
+            <div class="promo-card">
                 <div class="ad-card-img">
                     {#if ad.mainImage}
                         <!-- אותו מיקום/זום שהמפרסם קבע - המנהל מאשר את מה שבאמת יוצג -->
@@ -288,12 +288,12 @@
         padding: 2rem 0;
     }
 
-    .ads-list {
+    .promo-list {
         display: flex;
         flex-direction: column;
         gap: 1rem;
     }
-    .ad-card {
+    .promo-card {
         display: flex;
         gap: 1rem;
         background: rgba(255, 255, 255, 0.03);
@@ -302,7 +302,7 @@
         padding: 1rem;
     }
     @media (max-width: 640px) {
-        .ad-card { flex-direction: column; }
+        .promo-card { flex-direction: column; }
     }
     .ad-card-img {
         width: 120px;
