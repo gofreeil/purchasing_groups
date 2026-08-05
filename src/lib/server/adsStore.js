@@ -58,6 +58,8 @@ function fromStrapi(row) {
         durationDays: row.duration_days ?? DEFAULT_DURATION_DAYS,
         // פרטי התשלום מהשליחה - ארוזים בתוך ה-JSON של landing (אין עמודות חדשות)
         payment: row.landing?._payment === 'code' ? 'code' : 'pending',
+        // המפרסם הקליד את קוד הבעלים — בקשה לפרסום חינם, לא אישור שלה
+        codeRequested: row.landing?._codeRequested === true,
         requestedDurationDays: normalizePlanDays(row.landing?._requestedDurationDays),
     };
 }
@@ -81,7 +83,10 @@ export async function submitAd(payload, { fetch: f = fetch } = {}) {
             main_image: payload.mainImage ?? '',
             landing: {
                 ...(payload.landing ?? {}),
-                _payment: payload.payment === 'code' ? 'code' : 'pending',
+                // הגשה לעולם לא נכנסת כ"שולם". קוד הבעלים הוא *בקשה* לפרסום
+                // חינם, והזכות עצמה ניתנת רק באישור הידני של האדמין.
+                _payment: 'pending',
+                _codeRequested: payload.payment === 'code',
                 _requestedDurationDays: normalizePlanDays(payload.requestedDurationDays),
                 _mainImageFit: parseAdImageFit(payload.mainImageFit),
             },
