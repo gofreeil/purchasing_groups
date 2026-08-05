@@ -1,5 +1,17 @@
 <script>
 	import { onMount } from "svelte";
+	import { adImgFit, parseAdImageFit } from "$lib/adImageFit.js";
+
+	// פרסומות מאושרות של מפרסמים. הטור הימני הוא המקום היחיד שלהן -
+	// הטור השמאלי שמור לאתרי רשת "יוצאים לחירות" בלבד.
+	// הקישור פנימי, לדף הנחיתה /ads/[id] שנבנה ב-builder.
+	let { approvedAds = [] } = $props();
+
+	// קבועות בראש הטור, לא משתתפות בסבב המשבצות הפנויות: מפרסם ששילם
+	// לא אמור להיעלם מהמסך אחרי 14 שניות.
+	let paidAds = $derived(
+		(approvedAds ?? []).filter((/** @type {any} */ a) => a.mainImage),
+	);
 
 	let currentGroup = $state(0);
 	let totalSwaps = $state(0);
@@ -54,6 +66,33 @@
 
 <aside class="right-ad-banner" aria-label="פרסומות">
 	<h4 class="right-ad-title">תוכן שיווקי</h4>
+
+	<!-- פרסומות מאושרות: קבועות, מעל סבב המשבצות הפנויות -->
+	{#if paidAds.length > 0}
+		<div class="paid-ad-list">
+			{#each paidAds as ad (ad.id)}
+				<a class="paid-ad" href="/ads/{ad.id}" aria-label="{ad.title} – {ad.subtitle}">
+					<div class="paid-ad-media">
+						<img
+							src={ad.mainImage}
+							alt={ad.title}
+							loading="lazy"
+							decoding="async"
+							use:adImgFit={parseAdImageFit(ad.mainImageFit)}
+						/>
+						<div class="paid-ad-hover">
+							<strong>{ad.title}</strong>
+							<span>{ad.subtitle}</span>
+						</div>
+					</div>
+					<div class="paid-ad-cta" style="background: {ad.gradient || 'linear-gradient(135deg,#f59e0b,#ea580c)'}">
+						{ad.cta || ad.title}
+					</div>
+				</a>
+			{/each}
+		</div>
+	{/if}
+
 	<div class="right-ad-list" class:fading>
 		{#each displayed as slot, index (currentGroup * 4 + index)}
 			<a
@@ -84,6 +123,75 @@
 </aside>
 
 <style>
+	/* פרסומת משלמת: אותו יחס שהבילדר מציג בתצוגה החיה (144/450), כדי
+	   שהחיתוך והזום שהמפרסם כיוון שם לא יישברו כאן. */
+	.paid-ad-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
+	}
+	.paid-ad {
+		display: block;
+		overflow: hidden;
+		border-radius: 0.5rem;
+		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.35);
+		transition: transform 0.2s ease;
+	}
+	.paid-ad:hover {
+		transform: scale(1.05);
+	}
+	.paid-ad-media {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 144 / 450;
+		overflow: hidden;
+	}
+	.paid-ad-media img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: opacity 1.5s;
+	}
+	.paid-ad:hover .paid-ad-media img {
+		opacity: 0;
+	}
+	.paid-ad-hover {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.25rem;
+		padding: 0 0.75rem;
+		text-align: center;
+		background: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(4px);
+		opacity: 0;
+		transition: opacity 1.5s;
+	}
+	.paid-ad:hover .paid-ad-hover {
+		opacity: 1;
+	}
+	.paid-ad-hover strong {
+		color: #fff;
+		font-size: 0.875rem;
+		font-weight: 700;
+	}
+	.paid-ad-hover span {
+		color: #e5e7eb;
+		font-size: 0.75rem;
+	}
+	.paid-ad-cta {
+		padding: 0.625rem 0.5rem;
+		text-align: center;
+		color: #fff;
+		font-size: 0.75rem;
+		font-weight: 700;
+		line-height: 1.2;
+	}
+
 	.right-ad-banner {
 		width: 144px;
 		flex-shrink: 0;

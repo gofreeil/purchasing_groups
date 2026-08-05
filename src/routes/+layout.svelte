@@ -265,16 +265,17 @@
 	</header>
 
 	<div class="main-layout">
-		<!-- Right Ad Banner (wide screens) -->
-		<RightAdBanner />
+		<!-- ב-RTL הילד הראשון הוא הצד הימני: הפרסומות בימין, אתרי הרשת בשמאל.
+		     approvedAds מגיע ל-RightAdBanner בלבד - אין פרסומות בטור השמאלי. -->
+		<RightAdBanner approvedAds={data?.approvedAds ?? []} />
 
 		<!-- Main Content Area -->
 		<main class="content-area">
 			{@render children()}
 		</main>
 
-		<!-- Sidebar for Ads (desktop) -->
-		<AdsSidebar approvedAds={data?.approvedAds ?? []} />
+		<!-- אתרי "יוצאים לחירות" בלבד (desktop) -->
+		<AdsSidebar />
 	</div>
 
 	<!-- Mobile ads drawer + tab -->

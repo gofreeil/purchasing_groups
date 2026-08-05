@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import { submitAd } from '$lib/server/adsStore.js';
-import { isOwnerCode, notifyOwnerCodeUse } from '$lib/server/adsCode.js';
+import { isOwnerCode, notifyOwnerCodeUse, notifyAdminsNewAd } from '$lib/server/adsCode.js';
 import { normalizePlanDays } from '$lib/adPlans.js';
 
 // קליטת פרסומת חדשה מה-builder - נשמרת ב-Strapi במצב "ממתינה לאישור".
@@ -72,7 +72,15 @@ export async function POST({ request, fetch, locals }) {
             },
             { fetch },
         );
-        // התראה לבעלים על שימוש בקוד — לא חוסמת ולא מפילה את ההגשה
+        // התראה על *כל* בקשת פרסום — קודם היא נשלחה רק על שימוש בקוד בעלים,
+        // כך שמפרסם רגיל הגיש פרסומת ואיש לא ידע עליה. לא חוסמת ולא מפילה.
+        await notifyAdminsNewAd({
+            adTitle: payload.title,
+            durationDays: requestedDurationDays,
+            usedOwnerCode,
+            submitter: { name: user.username ?? user.name ?? '', email: user.email ?? '' },
+        });
+        // התראה נפרדת על שימוש בקוד — נשמרת כדי לא לאבד את ההתראה הייעודית
         if (usedOwnerCode) {
             await notifyOwnerCodeUse({
                 adTitle: payload.title,
