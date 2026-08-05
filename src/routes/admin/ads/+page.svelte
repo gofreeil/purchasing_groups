@@ -10,7 +10,17 @@
     let tab = $state("pending");
 
     let pending = $derived(data.ads.filter((/** @type {any} */ a) => a.status === "pending"));
-    let approved = $derived(data.ads.filter((/** @type {any} */ a) => a.status === "approved"));
+    // המאושרות בסדר התצוגה באתר - כדי שהחצים יזיזו בדיוק את מה שהגולש רואה
+    let approved = $derived(
+        data.ads
+            .filter((/** @type {any} */ a) => a.status === "approved")
+            .sort((/** @type {any} */ a, /** @type {any} */ b) => {
+                const ao = a.order ?? Number.MAX_SAFE_INTEGER;
+                const bo = b.order ?? Number.MAX_SAFE_INTEGER;
+                if (ao !== bo) return ao - bo;
+                return Date.parse(b.submittedAt || 0) - Date.parse(a.submittedAt || 0);
+            }),
+    );
     let rejected = $derived(data.ads.filter((/** @type {any} */ a) => a.status === "rejected"));
     let shown = $derived(tab === "pending" ? pending : tab === "approved" ? approved : rejected);
 
@@ -57,7 +67,7 @@
     {/if}
 
     <div class="ads-list">
-        {#each shown as ad (ad.id)}
+        {#each shown as ad, adIndex (ad.id)}
             <div class="ad-card">
                 <div class="ad-card-img">
                     {#if ad.mainImage}
@@ -102,9 +112,40 @@
                         <p class="ad-reject-reason">סיבת דחייה: {ad.rejectionReason}</p>
                     {/if}
 
+                    {#if ad.status === "approved" && tab === "approved"}
+                        <!-- מקום הפרסומת בטור באתר + החלפת מקום -->
+                        <div class="slot-row">
+                            <span class="slot-badge">{adIndex + 1}</span>
+                            <span class="slot-label">מקום {adIndex + 1} מתוך {shown.length} בטור הפרסומות</span>
+                            <form method="POST" action="?/move" use:enhance>
+                                <input type="hidden" name="id" value={ad.id} />
+                                <input type="hidden" name="dir" value="up" />
+                                <button type="submit" class="a-btn ghost" disabled={adIndex === 0} title="העלה מקום אחד">▲ למעלה</button>
+                            </form>
+                            <form method="POST" action="?/move" use:enhance>
+                                <input type="hidden" name="id" value={ad.id} />
+                                <input type="hidden" name="dir" value="down" />
+                                <button type="submit" class="a-btn ghost" disabled={adIndex === shown.length - 1} title="הורד מקום אחד">▼ למטה</button>
+                            </form>
+                        </div>
+                    {/if}
+
                     <div class="ad-actions">
                         {#if ad.status === "approved"}
                             <a href="/ads/{ad.id}" target="_blank" class="a-btn ghost">פתח את דף הנחיתה ↗</a>
+                            <!-- הורדה מהאתר בלי מחיקה: הפרסומת חוזרת לממתינות -->
+                            <form method="POST" action="?/unapprove" use:enhance>
+                                <input type="hidden" name="id" value={ad.id} />
+                                <button
+                                    type="submit"
+                                    class="a-btn ghost"
+                                    onclick={(e) => {
+                                        if (!confirm("להוריד את הפרסומת מהאתר ולהחזיר אותה לממתינות?")) e.preventDefault();
+                                    }}
+                                >
+                                    ⏸ הורד מהאתר
+                                </button>
+                            </form>
                         {/if}
                         {#if ad.status !== "approved"}
                             <form method="POST" action="?/approve" use:enhance class="approve-form">
@@ -313,6 +354,39 @@
         align-items: center;
         gap: 0.5rem;
         margin-top: 0.75rem;
+    }
+    /* שורת המקום בטור + חצי החלפת מקום */
+    .slot-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        padding-top: 0.6rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .slot-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.6rem;
+        height: 1.6rem;
+        border-radius: 0.5rem;
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.45);
+        color: #a7f3d0;
+        font-weight: 900;
+        font-size: 0.8rem;
+    }
+    .slot-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        opacity: 0.75;
+        margin-inline-end: auto;
+    }
+    .a-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
     }
     .a-btn {
         padding: 0.45rem 1rem;

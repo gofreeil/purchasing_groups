@@ -61,7 +61,18 @@ function fromStrapi(row) {
         // המפרסם הקליד את קוד הבעלים — בקשה לפרסום חינם, לא אישור שלה
         codeRequested: row.landing?._codeRequested === true,
         requestedDurationDays: normalizePlanDays(row.landing?._requestedDurationDays),
+        // מיקום ידני בטור הפרסומות, נקבע במסך הניהול
+        order: typeof row.landing?._order === 'number' ? row.landing._order : undefined,
     };
+}
+
+/** סדר התצוגה: קודם מי שקיבל מיקום ידני, אחריו החדשות ביותר.
+ *  @param {any} a @param {any} b */
+function byDisplayOrder(a, b) {
+    const ao = a.order ?? Number.MAX_SAFE_INTEGER;
+    const bo = b.order ?? Number.MAX_SAFE_INTEGER;
+    if (ao !== bo) return ao - bo;
+    return Date.parse(b.submittedAt || 0) - Date.parse(a.submittedAt || 0);
 }
 
 /**
@@ -127,6 +138,8 @@ export async function listApproved({ fetch: f = fetch } = {}) {
             // אכיפת תוקף בזמן קריאה - פרסומת שפג תוקפה יורדת מהאתר אוטומטית.
             // רשומות ישנות בלי expires_at לא נפסלות.
             .filter((/** @type {any} */ a) => !a.expiresAt || Date.parse(a.expiresAt) > now)
+            // מיקום ידני שנקבע במסך הניהול גובר על סדר התאריכים
+            .sort(byDisplayOrder)
             .map((/** @type {any} */ a) => ({
             id: a.id,
             title: a.title,
@@ -213,4 +226,64 @@ export async function rejectAd(id, { reason = '', fetch: f = fetch, jwt = '' } =
         { fetch: f, jwt },
     );
     invalidateAdsCache();
+}
+
+/**
+ * הורדת פרסומת מהאתר בלי למחוק אותה - חוזרת לממתינות והתוקף מתאפס,
+ * כדי שהמשבצת תתפנה מיד. אישור מחדש מחזיר אותה לאוויר.
+ * @param {string} id
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ */
+export async function unapproveAd(id, { fetch: f = fetch, jwt = '' } = {}) {
+    await strapiPut(
+        `${ENDPOINT}/${encodeURIComponent(id)}`,
+        {
+            ad_status: 'pending',
+            decided_at: '',
+            expires_at: '',
+            rejection_reason: '',
+        },
+        { fetch: f, jwt },
+    );
+    invalidateAdsCache();
+}
+
+/**
+ * מזיזה פרסומת מאושרת מקום אחד למעלה/למטה בסדר התצוגה באתר.
+ * המיקום נשמר ב-landing._order (עמודת json שכבר נושאת מפתחות פנימיים
+ * כמו _payment) - בלי שינוי סכמה ב-Strapi. Strapi מחליף עמודת json
+ * במלואה, ולכן שולחים את כל אובייקט ה-landing.
+ * @param {string} id
+ * @param {'up'|'down'} direction
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ * @returns {Promise<{title:string,position:number,total:number}|null>}
+ */
+export async function moveApprovedAd(id, direction, { fetch: f = fetch, jwt = '' } = {}) {
+    const now = Date.now();
+    const all = await listAllForAdmin({ fetch: f });
+    const list = all
+        .filter((/** @type {any} */ a) => a.status === 'approved')
+        .filter((/** @type {any} */ a) => !a.expiresAt || Date.parse(a.expiresAt) > now)
+        .sort(byDisplayOrder);
+
+    const from = list.findIndex((/** @type {any} */ a) => a.id === id);
+    if (from === -1) return null;
+    const to = direction === 'up' ? from - 1 : from + 1;
+    if (to < 0 || to >= list.length) return null;
+
+    const reordered = [...list];
+    [reordered[from], reordered[to]] = [reordered[to], reordered[from]];
+
+    // כותבים רק את מי שהמיקום שלו באמת השתנה: בפעם הראשונה זו כל הרשימה
+    // (לאף פרסומת אין עדיין _order), ומכאן והלאה שתי הפרסומות שהוחלפו.
+    for (const [i, ad] of reordered.entries()) {
+        if (ad.order === i) continue;
+        await strapiPut(
+            `${ENDPOINT}/${encodeURIComponent(ad.id)}`,
+            { landing: { ...(ad.landing ?? {}), _order: i } },
+            { fetch: f, jwt },
+        );
+    }
+    invalidateAdsCache();
+    return { title: reordered[to].title, position: to + 1, total: reordered.length };
 }
