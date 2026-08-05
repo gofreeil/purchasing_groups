@@ -73,3 +73,12 @@ export async function fetchCurrentUser(jwt, { fetch: f = fetch } = {}) {
 export function isSuperAdmin(user) {
     return !!user && user.app_role === 'super_admin';
 }
+
+/**
+ * אדמין: סופר-אדמין או אדמין שמונה. מסך אישור הפרסומות פתוח לשניהם -
+ * גם אדמין שמונה צריך לאשר, להשהות ולנהל פרסומות שכבר באתר.
+ * @param {{ app_role?: string } | null | undefined} user
+ */
+export function isAdmin(user) {
+    return !!user && (user.app_role === 'super_admin' || user.app_role === 'neighborhood_admin');
+}

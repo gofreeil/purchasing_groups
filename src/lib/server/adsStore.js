@@ -63,6 +63,10 @@ function fromStrapi(row) {
         requestedDurationDays: normalizePlanDays(row.landing?._requestedDurationDays),
         // מיקום ידני בטור הפרסומות, נקבע במסך הניהול
         order: typeof row.landing?._order === 'number' ? row.landing._order : undefined,
+        // השהיה: יורדת מהאתר ושומרת את הימים שנותרו לה
+        paused: row.landing?._paused === true,
+        pausedDaysLeft:
+            typeof row.landing?._pausedDaysLeft === 'number' ? row.landing._pausedDaysLeft : undefined,
     };
 }
 
@@ -138,6 +142,8 @@ export async function listApproved({ fetch: f = fetch } = {}) {
             // אכיפת תוקף בזמן קריאה - פרסומת שפג תוקפה יורדת מהאתר אוטומטית.
             // רשומות ישנות בלי expires_at לא נפסלות.
             .filter((/** @type {any} */ a) => !a.expiresAt || Date.parse(a.expiresAt) > now)
+            // פרסומת מושהית יורדת מהאתר ושומרת את הימים שנותרו לה
+            .filter((/** @type {any} */ a) => !a.paused)
             // מיקום ידני שנקבע במסך הניהול גובר על סדר התאריכים
             .sort(byDisplayOrder)
             .map((/** @type {any} */ a) => ({
@@ -248,6 +254,90 @@ export async function unapproveAd(id, { fetch: f = fetch, jwt = '' } = {}) {
     invalidateAdsCache();
 }
 
+const MIN_DURATION_DAYS = 1;
+const MAX_DURATION_DAYS = 730;
+
+/** מנרמל קלט ימים מהטופס לטווח שפוי. @param {unknown} raw */
+export function normalizeDurationDays(raw) {
+    const n = Math.round(Number(raw));
+    if (!Number.isFinite(n)) return DEFAULT_DURATION_DAYS;
+    return Math.min(MAX_DURATION_DAYS, Math.max(MIN_DURATION_DAYS, n));
+}
+
+/**
+ * קוצב לפרסומת תקופה חדשה. התקופה נספרת מיום האישור, ולכן קציבה קצרה
+ * מהזמן שכבר רץ מורידה את הפרסומת מהאתר מיד - וזו המשמעות של "לקצוב".
+ * @param {string} id
+ * @param {number} days
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ * @returns {Promise<{title:string,expiresAt:string,daysLeft:number}|null>}
+ */
+export async function setAdDuration(id, days, { fetch: f = fetch, jwt = '' } = {}) {
+    const ad = await getAd(id, { fetch: f });
+    if (!ad) return null;
+    const from = ad.decidedAt || ad.submittedAt || new Date().toISOString();
+    const expires = new Date(new Date(from).getTime() + days * 24 * 60 * 60 * 1000);
+    await strapiPut(
+        `${ENDPOINT}/${encodeURIComponent(id)}`,
+        { duration_days: days, expires_at: expires.toISOString() },
+        { fetch: f, jwt },
+    );
+    invalidateAdsCache();
+    return {
+        title: ad.title,
+        expiresAt: expires.toISOString(),
+        daysLeft: Math.ceil((expires.getTime() - Date.now()) / (24 * 60 * 60 * 1000)),
+    };
+}
+
+/**
+ * השהיה: הפרסומת יורדת מהאתר אבל שומרת את הימים שנותרו לה. בשונה
+ * מ"הורד מהאתר" - המפרסם לא מפסיד ימים ששילם עליהם.
+ * @param {string} id
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ * @returns {Promise<{title:string,daysLeft:number}|null>}
+ */
+export async function pauseAd(id, { fetch: f = fetch, jwt = '' } = {}) {
+    const ad = await getAd(id, { fetch: f });
+    if (!ad) return null;
+    if (ad.paused) return { title: ad.title, daysLeft: ad.pausedDaysLeft ?? 0 };
+    const DAY = 24 * 60 * 60 * 1000;
+    const daysLeft = ad.expiresAt
+        ? Math.max(0, Math.ceil((Date.parse(ad.expiresAt) - Date.now()) / DAY))
+        : (ad.durationDays || DEFAULT_DURATION_DAYS);
+    await strapiPut(
+        `${ENDPOINT}/${encodeURIComponent(id)}`,
+        { landing: { ...(ad.landing ?? {}), _paused: true, _pausedDaysLeft: daysLeft } },
+        { fetch: f, jwt },
+    );
+    invalidateAdsCache();
+    return { title: ad.title, daysLeft };
+}
+
+/**
+ * המשך אחרי השהיה: הימים שנשמרו נספרים מחדש מהיום.
+ * @param {string} id
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ * @returns {Promise<{title:string,expiresAt:string,daysLeft:number}|null>}
+ */
+export async function resumeAd(id, { fetch: f = fetch, jwt = '' } = {}) {
+    const ad = await getAd(id, { fetch: f });
+    if (!ad) return null;
+    const DAY = 24 * 60 * 60 * 1000;
+    const daysLeft = ad.pausedDaysLeft ?? ad.durationDays ?? DEFAULT_DURATION_DAYS;
+    const expires = new Date(Date.now() + daysLeft * DAY);
+    const landing = { ...(ad.landing ?? {}) };
+    delete landing._paused;
+    delete landing._pausedDaysLeft;
+    await strapiPut(
+        `${ENDPOINT}/${encodeURIComponent(id)}`,
+        { landing, expires_at: expires.toISOString(), ad_status: 'approved' },
+        { fetch: f, jwt },
+    );
+    invalidateAdsCache();
+    return { title: ad.title, expiresAt: expires.toISOString(), daysLeft };
+}
+
 /**
  * מזיזה פרסומת מאושרת מקום אחד למעלה/למטה בסדר התצוגה באתר.
  * המיקום נשמר ב-landing._order (עמודת json שכבר נושאת מפתחות פנימיים
@@ -264,6 +354,8 @@ export async function moveApprovedAd(id, direction, { fetch: f = fetch, jwt = ''
     const list = all
         .filter((/** @type {any} */ a) => a.status === 'approved')
         .filter((/** @type {any} */ a) => !a.expiresAt || Date.parse(a.expiresAt) > now)
+        // מושהית אינה תופסת מקום בטור
+        .filter((/** @type {any} */ a) => !a.paused)
         .sort(byDisplayOrder);
 
     const from = list.findIndex((/** @type {any} */ a) => a.id === id);

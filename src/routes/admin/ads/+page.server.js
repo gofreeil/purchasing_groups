@@ -1,25 +1,30 @@
 import { error, fail } from '@sveltejs/kit';
-import { isSuperAdmin } from '$lib/auth.js';
+import { isAdmin } from '$lib/auth.js';
 import {
     listAllForAdmin,
     approveAd,
     rejectAd,
     unapproveAd,
     moveApprovedAd,
+    setAdDuration,
+    normalizeDurationDays,
+    pauseAd,
+    resumeAd,
 } from '$lib/server/adsStore.js';
 import { normalizePlanDays, planLabel } from '$lib/adPlans.js';
 
-// מסך אישור פרסומות - super_admin בלבד (גרסה פשוטה של ads-review מקהילה בשכונה).
+// מסך אישור פרסומות (גרסה פשוטה של ads-review מקהילה בשכונה).
+// פתוח לסופר-אדמין וגם לאדמין שמונה - שניהם מאשרים ומנהלים פרסומות.
 
 /** @param {any} locals */
-function ensureSuperAdmin(locals) {
-    if (!isSuperAdmin(locals.user)) {
-        throw error(403, 'נדרשת הרשאת מנהל ראשי');
+function ensureAdsAdmin(locals) {
+    if (!isAdmin(locals.user)) {
+        throw error(403, 'נדרשת הרשאת ניהול');
     }
 }
 
 export async function load({ locals, fetch }) {
-    ensureSuperAdmin(locals);
+    ensureAdsAdmin(locals);
     let ads = [];
     let backendUnavailable = false;
     try {
@@ -33,7 +38,7 @@ export async function load({ locals, fetch }) {
 
 export const actions = {
     approve: async ({ request, locals, fetch }) => {
-        ensureSuperAdmin(locals);
+        ensureAdsAdmin(locals);
         const form = await request.formData();
         const id = String(form.get('id') ?? '');
         if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
@@ -52,7 +57,7 @@ export const actions = {
         }
     },
     reject: async ({ request, locals, fetch }) => {
-        ensureSuperAdmin(locals);
+        ensureAdsAdmin(locals);
         const form = await request.formData();
         const id = String(form.get('id') ?? '');
         const reason = String(form.get('reason') ?? '');
@@ -67,7 +72,7 @@ export const actions = {
     },
     // הורדת פרסומת שכבר באתר - חוזרת לממתינות, בלי למחוק אותה
     unapprove: async ({ request, locals, fetch }) => {
-        ensureSuperAdmin(locals);
+        ensureAdsAdmin(locals);
         const form = await request.formData();
         const id = String(form.get('id') ?? '');
         if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
@@ -79,9 +84,56 @@ export const actions = {
             return fail(502, { error: 'ההורדה נכשלה - נסו שוב' });
         }
     },
+    // קציבת תקופת פרסום - נספרת מיום האישור
+    setDuration: async ({ request, locals, fetch }) => {
+        ensureAdsAdmin(locals);
+        const form = await request.formData();
+        const id = String(form.get('id') ?? '');
+        if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
+        const days = normalizeDurationDays(form.get('days'));
+        try {
+            const r = await setAdDuration(id, days, { fetch, jwt: locals.jwt ?? '' });
+            if (!r) return fail(404, { error: 'הפרסומת לא נמצאה' });
+            const suffix = r.daysLeft < 0 ? ' - התקופה כבר חלפה, הפרסומת ירדה מהאתר' : '';
+            return { success: true, message: `${r.title}: ${days} ימים${suffix}` };
+        } catch (err) {
+            console.error('setDuration failed:', err);
+            return fail(502, { error: 'קציבת התקופה נכשלה - נסו שוב' });
+        }
+    },
+    // השהיה - יורדת מהאתר ושומרת את הימים שנותרו
+    pause: async ({ request, locals, fetch }) => {
+        ensureAdsAdmin(locals);
+        const form = await request.formData();
+        const id = String(form.get('id') ?? '');
+        if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
+        try {
+            const r = await pauseAd(id, { fetch, jwt: locals.jwt ?? '' });
+            if (!r) return fail(404, { error: 'הפרסומת לא נמצאה' });
+            return { success: true, message: `${r.title} הושהתה - ${r.daysLeft} ימים שמורים לה` };
+        } catch (err) {
+            console.error('pause failed:', err);
+            return fail(502, { error: 'ההשהיה נכשלה - נסו שוב' });
+        }
+    },
+    // המשך אחרי השהיה - הימים השמורים נספרים מהיום
+    resume: async ({ request, locals, fetch }) => {
+        ensureAdsAdmin(locals);
+        const form = await request.formData();
+        const id = String(form.get('id') ?? '');
+        if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
+        try {
+            const r = await resumeAd(id, { fetch, jwt: locals.jwt ?? '' });
+            if (!r) return fail(404, { error: 'הפרסומת לא נמצאה' });
+            return { success: true, message: `${r.title} חזרה לאוויר - ${r.daysLeft} ימים` };
+        } catch (err) {
+            console.error('resume failed:', err);
+            return fail(502, { error: 'ההפעלה מחדש נכשלה - נסו שוב' });
+        }
+    },
     // החלפת מקום בסדר התצוגה באתר
     move: async ({ request, locals, fetch }) => {
-        ensureSuperAdmin(locals);
+        ensureAdsAdmin(locals);
         const form = await request.formData();
         const id = String(form.get('id') ?? '');
         const dir = form.get('dir') === 'down' ? 'down' : 'up';

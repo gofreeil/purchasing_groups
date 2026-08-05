@@ -9,6 +9,9 @@
     /** @type {'pending' | 'approved' | 'rejected'} */
     let tab = $state("pending");
 
+    // תקופות שאפשר לקצוב לפרסומת שכבר באתר (נספרות מיום האישור)
+    const DURATION_OPTIONS = [7, 14, 30, 60, 90, 180, 365];
+
     let pending = $derived(data.ads.filter((/** @type {any} */ a) => a.status === "pending"));
     // המאושרות בסדר התצוגה באתר - כדי שהחצים יזיזו בדיוק את מה שהגולש רואה
     let approved = $derived(
@@ -20,6 +23,10 @@
                 if (ao !== bo) return ao - bo;
                 return Date.parse(b.submittedAt || 0) - Date.parse(a.submittedAt || 0);
             }),
+    );
+    // המקומות בטור נספרים רק על מי שבאמת מוצגת - מושהית לא תופסת מקום
+    let liveOrder = $derived(
+        approved.filter((/** @type {any} */ a) => !a.paused).map((/** @type {any} */ a) => a.id),
     );
     let rejected = $derived(data.ads.filter((/** @type {any} */ a) => a.status === "rejected"));
     let shown = $derived(tab === "pending" ? pending : tab === "approved" ? approved : rejected);
@@ -83,6 +90,9 @@
                         <span class="status-pill {ad.status}">
                             {ad.status === "pending" ? "ממתינה" : ad.status === "approved" ? "מאושרת" : "נדחתה"}
                         </span>
+                        {#if ad.status === "approved" && ad.paused}
+                            <span class="status-pill pending">⏸ מושהית — {ad.pausedDaysLeft ?? 0} ימים שמורים</span>
+                        {/if}
                         {#if ad.payment === "code"}
                             <span class="status-pill approved">💳 קוד תנועה — כמו שולם</span>
                         {:else if ad.codeRequested}
@@ -112,20 +122,21 @@
                         <p class="ad-reject-reason">סיבת דחייה: {ad.rejectionReason}</p>
                     {/if}
 
-                    {#if ad.status === "approved" && tab === "approved"}
+                    {#if ad.status === "approved" && tab === "approved" && !ad.paused}
+                        {@const slotIndex = liveOrder.indexOf(ad.id)}
                         <!-- מקום הפרסומת בטור באתר + החלפת מקום -->
                         <div class="slot-row">
-                            <span class="slot-badge">{adIndex + 1}</span>
-                            <span class="slot-label">מקום {adIndex + 1} מתוך {shown.length} בטור הפרסומות</span>
+                            <span class="slot-badge">{slotIndex + 1}</span>
+                            <span class="slot-label">מקום {slotIndex + 1} מתוך {liveOrder.length} בטור הפרסומות</span>
                             <form method="POST" action="?/move" use:enhance>
                                 <input type="hidden" name="id" value={ad.id} />
                                 <input type="hidden" name="dir" value="up" />
-                                <button type="submit" class="a-btn ghost" disabled={adIndex === 0} title="העלה מקום אחד">▲ למעלה</button>
+                                <button type="submit" class="a-btn ghost" disabled={slotIndex === 0} title="העלה מקום אחד">▲ למעלה</button>
                             </form>
                             <form method="POST" action="?/move" use:enhance>
                                 <input type="hidden" name="id" value={ad.id} />
                                 <input type="hidden" name="dir" value="down" />
-                                <button type="submit" class="a-btn ghost" disabled={adIndex === shown.length - 1} title="הורד מקום אחד">▼ למטה</button>
+                                <button type="submit" class="a-btn ghost" disabled={slotIndex === liveOrder.length - 1} title="הורד מקום אחד">▼ למטה</button>
                             </form>
                         </div>
                     {/if}
@@ -133,6 +144,40 @@
                     <div class="ad-actions">
                         {#if ad.status === "approved"}
                             <a href="/ads/{ad.id}" target="_blank" class="a-btn ghost">פתח את דף הנחיתה ↗</a>
+                            <!-- קציבת תקופה: נספרת מיום האישור, ולכן קציבה קצרה
+                                 מהזמן שכבר רץ מורידה את הפרסומת מיד -->
+                            <form method="POST" action="?/setDuration" use:enhance class="approve-form">
+                                <input type="hidden" name="id" value={ad.id} />
+                                <label class="duration-label">
+                                    תקופה:
+                                    <select name="days" class="duration-select">
+                                        {#each DURATION_OPTIONS as d (d)}
+                                            <option value={d} selected={d === ad.durationDays}>{d} ימים</option>
+                                        {/each}
+                                    </select>
+                                </label>
+                                <button type="submit" class="a-btn ghost" title="התקופה נספרת מיום האישור">⏱ קצוב</button>
+                            </form>
+                            {#if ad.paused}
+                                <form method="POST" action="?/resume" use:enhance>
+                                    <input type="hidden" name="id" value={ad.id} />
+                                    <button type="submit" class="a-btn approve" title="הימים השמורים נספרים מהיום">▶ המשך</button>
+                                </form>
+                            {:else}
+                                <!-- השהיה: יורדת מהאתר, הימים שנותרו נשמרים לה -->
+                                <form method="POST" action="?/pause" use:enhance>
+                                    <input type="hidden" name="id" value={ad.id} />
+                                    <button
+                                        type="submit"
+                                        class="a-btn ghost"
+                                        onclick={(e) => {
+                                            if (!confirm("להשהות את הפרסומת? היא תרד מהאתר והימים שנותרו יישמרו לה.")) e.preventDefault();
+                                        }}
+                                    >
+                                        ⏸ השהה
+                                    </button>
+                                </form>
+                            {/if}
                             <!-- הורדה מהאתר בלי מחיקה: הפרסומת חוזרת לממתינות -->
                             <form method="POST" action="?/unapprove" use:enhance>
                                 <input type="hidden" name="id" value={ad.id} />
