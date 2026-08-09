@@ -6,6 +6,8 @@ import {
     rejectAd,
     unapproveAd,
     moveApprovedAd,
+    setAdSlot,
+    computeAdSlots,
     setAdDuration,
     normalizeDurationDays,
     pauseAd,
@@ -25,10 +27,16 @@ function ensureAdsAdmin(locals) {
 
 export async function load({ locals, fetch }) {
     ensureAdsAdmin(locals);
+    /** @type {any[]} */
     let ads = [];
     let backendUnavailable = false;
     try {
         ads = await listAllForAdmin({ fetch });
+        // מספר המקום של כל מאושרת בטור (1..12) - לתג ולבורר "מקום" בכרטיס
+        const slotMap = computeAdSlots(ads.filter((/** @type {any} */ a) => a.status === 'approved'));
+        ads = ads.map((/** @type {any} */ a) =>
+            slotMap.has(a.id) ? { ...a, slot: slotMap.get(a.id) } : a,
+        );
     } catch (err) {
         console.error('admin/ads load failed:', err);
         backendUnavailable = true;
@@ -145,6 +153,26 @@ export const actions = {
         } catch (err) {
             console.error('move failed:', err);
             return fail(502, { error: 'החלפת המקום נכשלה - נסו שוב' });
+        }
+    },
+    // הצבת פרסומת במקום מספרי בטור (1..12); מקום תפוס - השתיים מתחלפות
+    setSlot: async ({ request, locals, fetch }) => {
+        ensureAdsAdmin(locals);
+        const form = await request.formData();
+        const id = String(form.get('id') ?? '');
+        if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
+        try {
+            const r = await setAdSlot(id, Number(form.get('slot')), { fetch, jwt: locals.jwt ?? '' });
+            if (!r) return fail(404, { error: 'הפרסומת לא נמצאה' });
+            return {
+                success: true,
+                message: r.swappedTitle
+                    ? `"${r.title}" עברה למקום ${r.slot}, ו"${r.swappedTitle}" עברה למקום ${r.swappedSlot}`
+                    : `"${r.title}" עברה למקום ${r.slot}`,
+            };
+        } catch (err) {
+            console.error('setSlot failed:', err);
+            return fail(502, { error: 'העברת המקום נכשלה - נסו שוב' });
         }
     },
 };

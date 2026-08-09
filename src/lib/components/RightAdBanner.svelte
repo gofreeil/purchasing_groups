@@ -1,21 +1,18 @@
 <script>
 	import { onMount } from "svelte";
 	import { adImgFit, parseAdImageFit } from "$lib/adImageFit.js";
+	import { AD_SLOT_COUNT } from "$lib/adSlots.js";
 
 	// פרסומות מאושרות של מפרסמים. הטור הימני הוא המקום היחיד שלהן -
 	// הטור השמאלי שמור לאתרי רשת "יוצאים לחירות" בלבד.
 	// הקישור פנימי, לדף הנחיתה /ads/[id] שנבנה ב-builder.
 	let { approvedAds = [] } = $props();
 
-	// קבועות בראש הטור, לא משתתפות בסבב המשבצות הפנויות: מפרסם ששילם
-	// לא אמור להיעלם מהמסך אחרי 14 שניות.
 	let paidAds = $derived(
 		(approvedAds ?? []).filter((/** @type {any} */ a) => a.mainImage),
 	);
 
 	let currentGroup = $state(0);
-	let totalSwaps = $state(0);
-	const MAX_SWAPS = 8;
 
 	// 12 מקומות פרסום פנויים, כל אחד בגוון אחר.
 	const slots = [
@@ -35,6 +32,48 @@
 
 	const VIEW_MS = 14000;   // כמה זמן כל קבוצה נשארת על המסך (החלפה איטית)
 	const FADE_MS = 900;     // אורך הדעיכה בין קבוצה לקבוצה — חייב להתאים ל-CSS
+	const PER_GROUP = 4;     // כמה מקומות (פרסומות ופנויים) נראים בו-זמנית
+
+	/** @typedef {{ num: number, ad?: any, tpl?: (typeof slots)[number] }} BoardCell */
+
+	// לוח 12 המקומות בסדר מספרי: מקום שנתפס מציג את הפרסומת, מקום פנוי
+	// מציג משבצת "יכול להיות שלך". פרסומת מאושרת *תופסת* מקום - סך
+	// הכרטיסים הוא תמיד 12 בדיוק. המספר מגיע מהשרת (נקבע במסך הניהול);
+	// מודעה ותיקה בלי מספר ממלאת את המספר הפנוי הנמוך ביותר.
+	let board = $derived.by(() => {
+		/** @type {Set<number>} */
+		const taken = new Set();
+		for (const a of paidAds) {
+			if (typeof a.slot === "number" && a.slot >= 1) taken.add(a.slot);
+		}
+		let nextFree = 1;
+		/** @type {Map<number, any>} */
+		const byNum = new Map();
+		/** @type {BoardCell[]} */
+		const overflow = [];
+		for (const a of paidAds) {
+			let num = typeof a.slot === "number" && a.slot >= 1 ? a.slot : 0;
+			// בלי מספר, או בהתנגשות נדירה - המספר הפנוי הנמוך ביותר
+			if (num === 0 || byNum.has(num)) {
+				while (taken.has(nextFree)) nextFree++;
+				num = nextFree;
+				taken.add(num);
+			}
+			if (num <= AD_SLOT_COUNT) byNum.set(num, a);
+			else overflow.push({ num, ad: a });
+		}
+		/** @type {BoardCell[]} */
+		const cells = [];
+		for (let n = 1; n <= AD_SLOT_COUNT; n++) {
+			const ad = byNum.get(n);
+			// תבניות הצבע קבועות למספר: משבצת 7 שומרת על הצבעים שלה
+			// גם כשמקומות לפניה נתפסים
+			cells.push(ad ? { num: n, ad } : { num: n, tpl: slots[(n - 1) % slots.length] });
+		}
+		// מעבר ל-12 (גלישה) - בסוף הלוח, כדי שפרסומת לא תיעלם
+		return [...cells, ...overflow];
+	});
+	let groupCount = $derived(Math.max(1, Math.ceil(board.length / PER_GROUP)));
 
 	let fading = $state(false);
 
@@ -42,18 +81,16 @@
 		/** @type {ReturnType<typeof setTimeout> | undefined} */
 		let fadeTimer;
 		// דעיכה החוצה → החלפת הקבוצה בזמן שהטור שקוף → דעיכה פנימה.
-		// כך אין קפיצה: המשבצות לא מתחלפות מול העין אלא מתוך שקיפות מלאה.
+		// כך אין קפיצה: הכרטיסים לא מתחלפים מול העין אלא מתוך שקיפות מלאה.
+		// הסבב רץ כל עוד הדף פתוח: גם הפרסומות המשולמות מתחלפות בו, ולכן
+		// עצירה הייתה מקבעת קבוצה אחת ומסתירה לצמיתות את הפרסומות שבאחרות.
 		const interval = setInterval(() => {
-			if (totalSwaps < MAX_SWAPS) {
-				fading = true;
-				fadeTimer = setTimeout(() => {
-					currentGroup = (currentGroup + 1) % 3;
-					totalSwaps++;
-					fading = false;
-				}, FADE_MS);
-			} else {
-				clearInterval(interval);
-			}
+			if (groupCount <= 1) return;
+			fading = true;
+			fadeTimer = setTimeout(() => {
+				currentGroup = (currentGroup + 1) % groupCount;
+				fading = false;
+			}, FADE_MS);
 		}, VIEW_MS);
 		return () => {
 			clearInterval(interval);
@@ -61,16 +98,27 @@
 		};
 	});
 
-	let displayed = $derived(slots.slice(currentGroup * 4, currentGroup * 4 + 4));
+	// שינוי במספר הקבוצות תוך כדי סבב (למשל אישור פרסומת) לא משאיר את
+	// הטור ריק עד לסיבוב הבא
+	let safeGroup = $derived(currentGroup % groupCount);
+
+	// הקבוצה המוצגת כרגע: 4 מקומות עוקבים לפי הסדר המספרי (1-4, 5-8, 9-12)
+	let displayed = $derived(
+		board.slice(safeGroup * PER_GROUP, (safeGroup + 1) * PER_GROUP),
+	);
 </script>
 
 <aside class="right-ad-banner" aria-label="פרסומות">
 	<h4 class="right-ad-title">תוכן שיווקי</h4>
 
-	<!-- פרסומות מאושרות: קבועות, מעל סבב המשבצות הפנויות -->
-	{#if paidAds.length > 0}
-		<div class="paid-ad-list">
-			{#each paidAds as ad (ad.id)}
+	<!-- לוח 12 המקומות בסדר מספרי, בקבוצות של 4 (1-4, 5-8, 9-12).
+	     כל הכרטיסים מתחלפים בסבב כרגיל - פרסומות ומשבצות פנויות יחד:
+	     פרסומת שנקבעה למקום 5 מופיעה עם קבוצת 5-8, בין 6 ל-8, וסך
+	     המקומות הוא 12 בדיוק. -->
+	<div class="right-ad-list" class:fading>
+		{#each displayed as cell (cell.num)}
+			{#if cell.ad}
+				{@const ad = cell.ad}
 				<a class="paid-ad" href="/ads/{ad.id}" aria-label="{ad.title} – {ad.subtitle}">
 					<div class="paid-ad-media">
 						<img
@@ -89,35 +137,33 @@
 						{ad.cta || ad.title}
 					</div>
 				</a>
-			{/each}
-		</div>
-	{/if}
-
-	<div class="right-ad-list" class:fading>
-		{#each displayed as slot, index (currentGroup * 4 + index)}
-			<a
-				href="/advertise"
-				class="right-ad-card"
-				style="border-color: {slot.border}; background: {slot.bg};"
-				aria-label="מקום פרסום פנוי - לפרטים על פרסום באתר"
-			>
-				<div class="right-ad-num">{currentGroup * 4 + index + 1}</div>
-				<div class="right-ad-emoji">📢</div>
-				<div class="right-ad-vtext">
-					<span class="right-ad-vmain" style="color: {slot.text}">
-						מקום פרסום זה
-					</span>
-					<span class="right-ad-vsub" style="color: {slot.text}">
-						- יכול להיות שלך
-					</span>
-				</div>
-				<span
-					class="right-ad-btn"
-					style="background: {slot.btn}"
+			{:else if cell.tpl}
+				{@const slot = cell.tpl}
+				<a
+					href="/advertise"
+					class="right-ad-card"
+					style="border-color: {slot.border}; background: {slot.bg};"
+					aria-label="מקום פרסום פנוי - לפרטים על פרסום באתר"
 				>
-					לפרטים
-				</span>
-			</a>
+					<!-- מספר המקום הפנוי - בדיוק המספרים שלא נתפסו ע"י פרסומות -->
+					<div class="right-ad-num">{cell.num}</div>
+					<div class="right-ad-emoji">📢</div>
+					<div class="right-ad-vtext">
+						<span class="right-ad-vmain" style="color: {slot.text}">
+							מקום פרסום זה
+						</span>
+						<span class="right-ad-vsub" style="color: {slot.text}">
+							- יכול להיות שלך
+						</span>
+					</div>
+					<span
+						class="right-ad-btn"
+						style="background: {slot.btn}"
+					>
+						לפרטים
+					</span>
+				</a>
+			{/if}
 		{/each}
 	</div>
 </aside>
@@ -125,12 +171,6 @@
 <style>
 	/* פרסומת משלמת: אותו יחס שהבילדר מציג בתצוגה החיה (144/450), כדי
 	   שהחיתוך והזום שהמפרסם כיוון שם לא יישברו כאן. */
-	.paid-ad-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		margin-bottom: 0.75rem;
-	}
 	.paid-ad {
 		display: block;
 		overflow: hidden;
@@ -216,7 +256,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
-		/* דעיכה רכה בין קבוצות המודעות — הערך חייב להתאים ל-FADE_MS שבסקריפט */
+		/* דעיכה רכה בין קבוצות הלוח — כל הקבוצה (פרסומות ומשבצות פנויות)
+		   דועכת ומתחלפת יחד. הערך חייב להתאים ל-FADE_MS שבסקריפט. */
 		opacity: 1;
 		transition: opacity 900ms ease-in-out;
 	}

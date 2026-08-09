@@ -2,6 +2,7 @@
     import { enhance } from "$app/forms";
     import { adPlans } from "$lib/adPlans.js";
     import { adImgFit, parseAdImageFit } from "$lib/adImageFit.js";
+    import { AD_SLOT_COUNT } from "$lib/adSlots.js";
 
     // מסך אישור פרסומות לאדמין - ממתינות / מאושרות / נדחות.
     let { data, form } = $props();
@@ -11,22 +12,21 @@
 
     // תקופות שאפשר לקצוב לפרסומת שכבר באתר (נספרות מיום האישור)
     const DURATION_OPTIONS = [7, 14, 30, 60, 90, 180, 365];
+    // 12 המקומות הממוספרים בטור הפרסומות - בורר "מקום" בכרטיסי המאושרות
+    const SLOT_NUMBERS = Array.from({ length: AD_SLOT_COUNT }, (_, i) => i + 1);
 
     let pending = $derived(data.ads.filter((/** @type {any} */ a) => a.status === "pending"));
-    // המאושרות בסדר התצוגה באתר - כדי שהחצים יזיזו בדיוק את מה שהגולש רואה
+    // המאושרות לפי מספר המקום בטור (מהשרת) - כדי שהחצים יזיזו בדיוק את
+    // מה שהגולש רואה. המספר קבוע לפרסומת, גם דרך השהיה ופקיעה.
     let approved = $derived(
         data.ads
             .filter((/** @type {any} */ a) => a.status === "approved")
             .sort((/** @type {any} */ a, /** @type {any} */ b) => {
-                const ao = a.order ?? Number.MAX_SAFE_INTEGER;
-                const bo = b.order ?? Number.MAX_SAFE_INTEGER;
+                const ao = a.slot ?? Number.MAX_SAFE_INTEGER;
+                const bo = b.slot ?? Number.MAX_SAFE_INTEGER;
                 if (ao !== bo) return ao - bo;
                 return Date.parse(b.submittedAt || 0) - Date.parse(a.submittedAt || 0);
             }),
-    );
-    // המקומות בטור נספרים רק על מי שבאמת מוצגת - מושהית לא תופסת מקום
-    let liveOrder = $derived(
-        approved.filter((/** @type {any} */ a) => !a.paused).map((/** @type {any} */ a) => a.id),
     );
     let rejected = $derived(data.ads.filter((/** @type {any} */ a) => a.status === "rejected"));
     let shown = $derived(tab === "pending" ? pending : tab === "approved" ? approved : rejected);
@@ -122,21 +122,35 @@
                         <p class="ad-reject-reason">סיבת דחייה: {ad.rejectionReason}</p>
                     {/if}
 
-                    {#if ad.status === "approved" && tab === "approved" && !ad.paused}
-                        {@const slotIndex = liveOrder.indexOf(ad.id)}
-                        <!-- מקום הפרסומת בטור באתר + החלפת מקום -->
+                    {#if ad.status === "approved" && tab === "approved"}
+                        <!-- מקום מעל 12 (גלישה) מתווסף לבורר כדי שלא ייעלם -->
+                        {@const slotOptions = ad.slot && !SLOT_NUMBERS.includes(ad.slot)
+                            ? [...SLOT_NUMBERS, ad.slot].sort((/** @type {number} */ a, /** @type {number} */ b) => a - b)
+                            : SLOT_NUMBERS}
+                        <!-- מספר המקום הקבוע של הפרסומת בטור + החלפת מקום.
+                             המספר נשאר לה גם דרך השהיה ופקיעה. -->
                         <div class="slot-row">
-                            <span class="slot-badge">{slotIndex + 1}</span>
-                            <span class="slot-label">מקום {slotIndex + 1} מתוך {liveOrder.length} בטור הפרסומות</span>
+                            <span class="slot-badge">{ad.slot ?? "-"}</span>
+                            <span class="slot-label">מקום {ad.slot ?? "-"} מתוך {AD_SLOT_COUNT} בטור הפרסומות</span>
                             <form method="POST" action="?/move" use:enhance>
                                 <input type="hidden" name="id" value={ad.id} />
                                 <input type="hidden" name="dir" value="up" />
-                                <button type="submit" class="a-btn ghost" disabled={slotIndex === 0} title="העלה מקום אחד">▲ למעלה</button>
+                                <button type="submit" class="a-btn ghost" disabled={adIndex === 0} title="העלה מקום אחד">▲ למעלה</button>
                             </form>
                             <form method="POST" action="?/move" use:enhance>
                                 <input type="hidden" name="id" value={ad.id} />
                                 <input type="hidden" name="dir" value="down" />
-                                <button type="submit" class="a-btn ghost" disabled={slotIndex === liveOrder.length - 1} title="הורד מקום אחד">▼ למטה</button>
+                                <button type="submit" class="a-btn ghost" disabled={adIndex === approved.length - 1} title="הורד מקום אחד">▼ למטה</button>
+                            </form>
+                            <!-- העברה ישירה למקום מספרי; מקום תפוס - השתיים מתחלפות -->
+                            <form method="POST" action="?/setSlot" use:enhance class="slot-form">
+                                <input type="hidden" name="id" value={ad.id} />
+                                <select name="slot" class="duration-select">
+                                    {#each slotOptions as n (n)}
+                                        <option value={n} selected={n === ad.slot} style="background:#fff;color:#111">{n}</option>
+                                    {/each}
+                                </select>
+                                <button type="submit" class="a-btn ghost" title="העבר למקום שנבחר; אם המקום תפוס - שתי הפרסומות מתחלפות">⇄ העבר</button>
                             </form>
                         </div>
                     {/if}
@@ -457,7 +471,8 @@
     }
     .a-btn.ghost:hover { color: #fff; }
     .approve-form,
-    .reject-form {
+    .reject-form,
+    .slot-form {
         display: flex;
         gap: 0.4rem;
         align-items: center;
