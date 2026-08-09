@@ -182,7 +182,12 @@
 		transform: translateX(-50%);
 		margin-bottom: 0.5rem;
 		display: none;
-		white-space: nowrap;
+		/* pre-line + max-content: משפט בשורה אחת נשאר בשורה אחת, אבל ירידות
+		   שורה שהמפרסם הקליד נשמרות, וטקסט ארוך נעצר ב-max-width */
+		white-space: pre-line;
+		width: max-content;
+		max-width: 15rem;
+		text-align: center;
 		background: #111827;
 		color: #fff;
 		font-size: 0.75rem;
