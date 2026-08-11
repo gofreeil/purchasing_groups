@@ -14,7 +14,7 @@
 
 	let currentGroup = $state(0);
 
-	// 12 מקומות פרסום פנויים, כל אחד בגוון אחר.
+	// 16 מקומות פרסום פנויים, כל אחד בגוון אחר.
 	const slots = [
 		{ border: "rgba(249,115,22,0.3)", bg: "rgba(124,45,18,0.1)", text: "#fb923c", btn: "#ea580c" },
 		{ border: "rgba(59,130,246,0.3)", bg: "rgba(30,58,138,0.1)", text: "#60a5fa", btn: "#2563eb" },
@@ -28,17 +28,20 @@
 		{ border: "rgba(234,179,8,0.3)", bg: "rgba(113,63,18,0.1)", text: "#facc15", btn: "#ca8a04" },
 		{ border: "rgba(16,185,129,0.3)", bg: "rgba(6,78,59,0.1)", text: "#34d399", btn: "#059669" },
 		{ border: "rgba(217,70,239,0.3)", bg: "rgba(112,26,117,0.1)", text: "#e879f9", btn: "#c026d3" },
+		{ border: "rgba(6,182,212,0.3)", bg: "rgba(22,78,99,0.1)", text: "#22d3ee", btn: "#0891b2" },
+		{ border: "rgba(244,63,94,0.3)", bg: "rgba(136,19,55,0.1)", text: "#fb7185", btn: "#e11d48" },
+		{ border: "rgba(132,204,22,0.3)", bg: "rgba(54,83,20,0.1)", text: "#a3e635", btn: "#65a30d" },
+		{ border: "rgba(14,165,233,0.3)", bg: "rgba(12,74,110,0.1)", text: "#38bdf8", btn: "#0284c7" },
 	];
 
-	const VIEW_MS = 14000;   // כמה זמן כל קבוצה נשארת על המסך (החלפה איטית)
-	const FADE_MS = 900;     // אורך הדעיכה בין קבוצה לקבוצה — חייב להתאים ל-CSS
+	const VIEW_MS = 7000;    // כמה זמן כל קבוצה נשארת על המסך — חצי מהקצב הישן (14 ש׳)
 	const PER_GROUP = 4;     // כמה מקומות (פרסומות ופנויים) נראים בו-זמנית
 
 	/** @typedef {{ num: number, ad?: any, tpl?: (typeof slots)[number] }} BoardCell */
 
-	// לוח 12 המקומות בסדר מספרי: מקום שנתפס מציג את הפרסומת, מקום פנוי
+	// לוח 16 המקומות בסדר מספרי: מקום שנתפס מציג את הפרסומת, מקום פנוי
 	// מציג משבצת "יכול להיות שלך". פרסומת מאושרת *תופסת* מקום - סך
-	// הכרטיסים הוא תמיד 12 בדיוק. המספר מגיע מהשרת (נקבע במסך הניהול);
+	// הכרטיסים הוא תמיד 16 בדיוק. המספר מגיע מהשרת (נקבע במסך הניהול);
 	// מודעה ותיקה בלי מספר ממלאת את המספר הפנוי הנמוך ביותר.
 	let board = $derived.by(() => {
 		/** @type {Set<number>} */
@@ -70,53 +73,49 @@
 			// גם כשמקומות לפניה נתפסים
 			cells.push(ad ? { num: n, ad } : { num: n, tpl: slots[(n - 1) % slots.length] });
 		}
-		// מעבר ל-12 (גלישה) - בסוף הלוח, כדי שפרסומת לא תיעלם
+		// מעבר ל-16 (גלישה) - בסוף הלוח, כדי שפרסומת לא תיעלם
 		return [...cells, ...overflow];
 	});
 	let groupCount = $derived(Math.max(1, Math.ceil(board.length / PER_GROUP)));
 
-	let fading = $state(false);
-
 	onMount(() => {
-		/** @type {ReturnType<typeof setTimeout> | undefined} */
-		let fadeTimer;
-		// דעיכה החוצה → החלפת הקבוצה בזמן שהטור שקוף → דעיכה פנימה.
-		// כך אין קפיצה: הכרטיסים לא מתחלפים מול העין אלא מתוך שקיפות מלאה.
+		// ההחלפה עצמה היא מיזוג שקיפות (crossfade) שקורה כולו ב-CSS —
+		// כאן רק מקדמים את מספר הקבוצה, בלי מכונת מצבים של דעיכה.
 		// הסבב רץ כל עוד הדף פתוח: גם הפרסומות המשולמות מתחלפות בו, ולכן
 		// עצירה הייתה מקבעת קבוצה אחת ומסתירה לצמיתות את הפרסומות שבאחרות.
 		const interval = setInterval(() => {
 			if (groupCount <= 1) return;
-			fading = true;
-			fadeTimer = setTimeout(() => {
-				currentGroup = (currentGroup + 1) % groupCount;
-				fading = false;
-			}, FADE_MS);
+			currentGroup = (currentGroup + 1) % groupCount;
 		}, VIEW_MS);
-		return () => {
-			clearInterval(interval);
-			clearTimeout(fadeTimer);
-		};
+		return () => clearInterval(interval);
 	});
 
 	// שינוי במספר הקבוצות תוך כדי סבב (למשל אישור פרסומת) לא משאיר את
 	// הטור ריק עד לסיבוב הבא
 	let safeGroup = $derived(currentGroup % groupCount);
 
-	// הקבוצה המוצגת כרגע: 4 מקומות עוקבים לפי הסדר המספרי (1-4, 5-8, 9-12)
-	let displayed = $derived(
-		board.slice(safeGroup * PER_GROUP, (safeGroup + 1) * PER_GROUP),
+	// הלוח בקבוצות של 4 לפי הסדר המספרי (1-4, 5-8, 9-12, 13-16). כל
+	// הקבוצות מרונדרות זו על גבי זו ורק הפעילה נראית, כך שההחלפה היא
+	// מיזוג עדין בין שתי שכבות ולא החלפת תוכן מול העין.
+	let groups = $derived(
+		Array.from({ length: groupCount }, (_, g) =>
+			board.slice(g * PER_GROUP, (g + 1) * PER_GROUP),
+		),
 	);
 </script>
 
 <aside class="right-ad-banner" aria-label="פרסומות">
 	<h4 class="right-ad-title">תוכן שיווקי</h4>
 
-	<!-- לוח 12 המקומות בסדר מספרי, בקבוצות של 4 (1-4, 5-8, 9-12).
+	<!-- לוח 16 המקומות בסדר מספרי, בקבוצות של 4 (1-4, 5-8, 9-12, 13-16).
 	     כל הכרטיסים מתחלפים בסבב כרגיל - פרסומות ומשבצות פנויות יחד:
 	     פרסומת שנקבעה למקום 5 מופיעה עם קבוצת 5-8, בין 6 ל-8, וסך
-	     המקומות הוא 12 בדיוק. -->
-	<div class="right-ad-list" class:fading>
-		{#each displayed as cell (cell.num)}
+	     המקומות הוא 16 בדיוק. כל הקבוצות שוכבות זו על זו באותו תא grid;
+	     ההחלפה היא מיזוג שקיפות איטי בין השכבות - בלי רגע ריק. -->
+	<div class="right-ad-stage">
+		{#each groups as grp, gi}
+		<div class="right-ad-list" class:active={gi === safeGroup}>
+		{#each grp as cell (cell.num)}
 			{#if cell.ad}
 				{@const ad = cell.ad}
 				<a class="paid-ad" href="/ads/{ad.id}" aria-label="{ad.title} – {ad.subtitle}">
@@ -164,6 +163,8 @@
 					</span>
 				</a>
 			{/if}
+		{/each}
+		</div>
 		{/each}
 	</div>
 </aside>
@@ -252,21 +253,35 @@
 		padding: 0 0.5rem;
 	}
 
+	/* מעבר עדין בין קבוצות הלוח: כל הקבוצות שוכבות זו על זו באותו תא
+	   grid, וההחלפה היא מיזוג שקיפות איטי (crossfade) - הקבוצה הנכנסת
+	   מופיעה בהדרגה בזמן שהיוצאת נמוגה. אין רגע שבו הטור ריק, אין הבזק
+	   ואין שום תזוזה. */
+	.right-ad-stage {
+		display: grid;
+	}
 	.right-ad-list {
+		grid-area: 1 / 1;
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
-		/* דעיכה רכה בין קבוצות הלוח — כל הקבוצה (פרסומות ומשבצות פנויות)
-		   דועכת ומתחלפת יחד. הערך חייב להתאים ל-FADE_MS שבסקריפט. */
-		opacity: 1;
-		transition: opacity 900ms ease-in-out;
-	}
-	.right-ad-list.fading {
 		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		transition:
+			opacity 1800ms ease-in-out,
+			visibility 0s linear 1800ms;
+	}
+	.right-ad-list.active {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+		transition: opacity 1800ms ease-in-out;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.right-ad-list {
-			transition-duration: 1ms;
+		.right-ad-list,
+		.right-ad-list.active {
+			transition: none;
 		}
 	}
 
