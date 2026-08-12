@@ -351,7 +351,7 @@
 
 <div class="section-title" style="margin-top: 5rem;">
     <h2
-        style="font-size: 1.8rem; font-family: 'Assistant', sans-serif; background: none; -webkit-text-fill-color: #facc15;"
+        style="font-size: 1.8rem; font-family: 'Heebo', sans-serif; background: none; -webkit-text-fill-color: #facc15;"
     >
         {$t.homepage.nextPurchases}
     </h2>

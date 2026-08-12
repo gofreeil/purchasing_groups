@@ -42,7 +42,7 @@
         min-height: 80vh;
         background: transparent;
         color: var(--text-white);
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Heebo', "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
 
     .content-wrapper {

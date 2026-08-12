@@ -7,9 +7,9 @@
 		<!-- תגי Open Graph / Twitter מוגדרים פר-דף ברכיב <Seo> ($lib/components/Seo.svelte)
 		     ולא כאן: תג גלובלי היה מקדים את התג הפר-דפי ב-HTML, וכל שיתוף של דף קמפיין
 		     בוואטסאפ היה מציג את כותרת דף הבית ואת כתובתו במקום את הקמפיין. -->
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&family=Varela+Round&display=swap" rel="stylesheet">
+		<!-- אין כאן טעינת גופן מגוגל: גופן האתר (Heebo) מתארח אצלנו ומוגדר ב-app.css
+		     ב-@font-face. כך אין preconnect ובקשת stylesheet חוסמת-רינדור לשרת חיצוני,
+		     ולא נמסרות כתובות ה-IP של הגולשים לצד שלישי. -->
 		<!-- Google Analytics — נכס משותף לכל אתרי "יוצאים לחירות". ההפרדה בין
 		     האתרים נעשית לפי hostName, ולכן אותו מזהה משמש את כולם. -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-YTEG7S0H9N"></script>
