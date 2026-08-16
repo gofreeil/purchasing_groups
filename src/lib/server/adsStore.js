@@ -276,7 +276,15 @@ export function withAdImageUrls(ad) {
  */
 export async function getApprovedAdImage(id, kind, { fetch: f = fetch } = {}) {
     const list = await listApproved({ fetch: f });
-    const ad = list.find((/** @type {any} */ a) => a.id === id);
+    let ad = list.find((/** @type {any} */ a) => a.id === id);
+    // listApproved מסננת מושהות ופגות-תוקף ומוגבלת ל-25 הראשונות - אבל דף
+    // הנחיתה /ads/<id> של פרסומת *מושהית* עדיין נטען (הוא חוסם רק פגות תוקף).
+    // בלי הנפילה הזו כל התמונות שלו היו מחזירות 404 והדף היה נשבר.
+    // הנתיב האיטי רץ רק כשהתמונה לא בקאש של הקצה, כלומר כמעט אף פעם.
+    if (!ad) {
+        const direct = await getAd(id, { fetch: f });
+        if (direct?.status === 'approved') ad = direct;
+    }
     if (!ad) return null;
     return decodeDataImage(pickImage(ad, kind));
 }
