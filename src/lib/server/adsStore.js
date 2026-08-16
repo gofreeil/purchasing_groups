@@ -18,6 +18,7 @@ import { strapiGet, strapiPost, strapiPut } from '$lib/strapi.js';
 import { DEFAULT_PLAN_DAYS, normalizePlanDays } from '$lib/adPlans.js';
 import { parseAdImageFit } from '$lib/adImageFit.js';
 import { AD_SLOT_COUNT } from '$lib/adSlots.js';
+import { imageStamp, decodeDataImage } from './inlineImage.js';
 
 const ENDPOINT = 'pg-submitted-ads';
 export const DEFAULT_DURATION_DAYS = DEFAULT_PLAN_DAYS;
@@ -34,6 +35,8 @@ export function invalidateAdsCache() {
 /** @param {any} row - רשומת Strapi v5 (שטוחה, עם documentId) */
 function fromStrapi(row) {
     if (!row) return null;
+    const logo = row.logo ?? '';
+    const mainImage = row.main_image ?? '';
     return {
         id: row.documentId,
         status: row.ad_status ?? 'pending',
@@ -42,8 +45,12 @@ function fromStrapi(row) {
         hoverText: row.hover_text ?? '',
         cta: row.cta ?? '',
         gradient: row.gradient ?? '',
-        logo: row.logo ?? '',
-        mainImage: row.main_image ?? '',
+        logo,
+        mainImage,
+        // חותם התוכן של התמונות, לשימוש כ-?v= בכתובת שלהן: כך אפשר להגיש
+        // אותן בקאש immutable ועדיין להחליף תמונה בלי שגולש יראה ישנה.
+        // ראה adImageUrl / imageStamp.
+        imgVersion: imageStamp(logo, mainImage),
         // מודעות שנשלחו לפני הפיצ'ר - בלי fit; התצוגות משאירות אותן כפי שהיו
         mainImageFit: row.landing?._mainImageFit ? parseAdImageFit(row.landing._mainImageFit) : undefined,
         landing: row.landing ?? {},
@@ -122,7 +129,13 @@ export async function submitAd(payload, { fetch: f = fetch } = {}) {
 }
 
 /**
- * רשימת פרסומות מאושרות - גרסה רזה לסיידבר (בלי פרטי המפרסם).
+ * הפרסומות המאושרות שחיות עכשיו על האתר, בסדר התצוגה (לפי מספר המקום).
+ *
+ * מחזירה את הרשומות המלאות - כולל התמונות כ-base64 - ולא גרסה רזה: כך גם
+ * נתיב התמונה (/api/ad-image) נשען על אותו cache בלי סיבוב נוסף ל-Strapi.
+ * הצמצום לשדות שהרכיבים באמת קוראים נעשה ב-+layout.server.js, שם גם
+ * התמונות מומרות לכתובת - ואסור להחזיר מכאן ישירות לדפדפן.
+ *
  * @param {{ fetch?: typeof fetch }} [opts]
  */
 export async function listApproved({ fetch: f = fetch } = {}) {
@@ -152,20 +165,10 @@ export async function listApproved({ fetch: f = fetch } = {}) {
         // מוצגות סביבן בטור. מחושב בזיכרון בלבד - נתיב קריאה לא כותב
         // ל-Strapi; הקיבוע נעשה בפעולות הניהול.
         const slots = computeSlots(live);
-        const list = live
-            .map((/** @type {any} */ a) => ({
-                id: a.id,
-                title: a.title,
-                subtitle: a.subtitle,
-                cta: a.cta,
-                hover: a.hoverText,
-                gradient: a.gradient,
-                mainImage: a.mainImage,
-                mainImageFit: a.mainImageFit,
-                // מספר המקום בטור (1..12) - נקבע במסך הניהול
-                slot: (slots.get(a.id) ?? 0) + 1,
-            }))
-            .sort((/** @type {any} */ a, /** @type {any} */ b) => a.slot - b.slot);
+        const list = [...live].sort(
+            (/** @type {any} */ a, /** @type {any} */ b) =>
+                (slots.get(a.id) ?? 0) - (slots.get(b.id) ?? 0),
+        );
         approvedCache = { at: Date.now(), list };
         return list;
     } catch (err) {
@@ -175,6 +178,65 @@ export async function listApproved({ fetch: f = fetch } = {}) {
         approvedCache = { at: Date.now(), list: [] };
         return [];
     }
+}
+
+// ============================================================
+// הגשת תמונות הפרסומת ככתובת, לא כ-base64 בתוך הדף
+// ------------------------------------------------------------
+// התמונות שמורות ב-Strapi כ-data:image/...;base64 בתוך הרשומה. כשה-layout
+// החזיר אותן כמות שהן, כל טעינת דף *באתר כולו* סחבה אותן שוב: 1,700KB מתוך
+// דף של 1,777KB היו base64 (96%), וכל תמונה נשלחה פעמיים - פעם ב-HTML של
+// ה-SSR ופעם בנתוני ההידרציה. הכל נספר כ-Fast Origin Transfer של Vercel,
+// ומכסה חודשית שלמה נשרפת בכמה אלפי צפיות.
+//
+// במקום זה ה-layout מחזיר כתובת ל-/api/ad-image/<id>/<kind>, והתמונה נשלפת
+// פעם אחת ונשמרת בקאש של הדפדפן ושל הקצה - כך היא לא נספרת שוב בכל צפייה.
+// ============================================================
+
+/** @typedef {'logo' | 'main'} AdImageKind */
+
+/**
+ * @param {string | undefined} v
+ * @returns {v is AdImageKind}
+ */
+export function isAdImageKind(v) {
+    return v === 'logo' || v === 'main';
+}
+
+/** @param {any} ad @param {AdImageKind} kind @returns {string} */
+function pickImage(ad, kind) {
+    return kind === 'logo' ? (ad.logo ?? '') : (ad.mainImage ?? '');
+}
+
+/**
+ * הכתובת שבה הצרכן (RightAdBanner / המגירה בנייד) ימשוך את התמונה.
+ * ריק נשאר ריק (הצרכן בודק אמת/שקר), וערך שאינו data: - למשל כתובת חיצונית
+ * במודעה ותיקה - עובר כמות שהוא.
+ * @param {any} ad
+ * @param {AdImageKind} kind
+ * @returns {string}
+ */
+export function adImageUrl(ad, kind) {
+    const raw = pickImage(ad, kind);
+    if (!raw) return '';
+    if (!raw.startsWith('data:')) return raw;
+    return `/api/ad-image/${ad.id}/${kind}?v=${ad.imgVersion}`;
+}
+
+/**
+ * הבייטים עצמם, לנתיב שמגיש אותם. נשלף מרשימת המאושרות שב-cache: בלי
+ * round-trip ל-Strapi, וגם כשומר סף - תמונות של פרסומת שלא אושרה (או
+ * שהורדה מהאתר) לא נחשפות דרך ניחוש מזהה.
+ * @param {string} id
+ * @param {AdImageKind} kind
+ * @param {{ fetch?: typeof fetch }} [opts]
+ * @returns {Promise<{ mime: string, bytes: ArrayBuffer } | null>}
+ */
+export async function getApprovedAdImage(id, kind, { fetch: f = fetch } = {}) {
+    const list = await listApproved({ fetch: f });
+    const ad = list.find((/** @type {any} */ a) => a.id === id);
+    if (!ad) return null;
+    return decodeDataImage(pickImage(ad, kind));
 }
 
 /**

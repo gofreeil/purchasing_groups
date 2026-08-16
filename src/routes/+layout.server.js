@@ -1,4 +1,4 @@
-import { listApproved } from '$lib/server/adsStore.js';
+import { listApproved, computeAdSlots, adImageUrl } from '$lib/server/adsStore.js';
 
 // חושף את המשתמש המחובר לכל הדפים דרך data.user,
 // ואת הפרסומות המאושרות של מפרסמים - לסיידבר הפרסומות.
@@ -9,7 +9,29 @@ export async function load({ locals, fetch }) {
     /** @type {any[]} */
     let approvedAds = [];
     try {
-        approvedAds = await listApproved({ fetch });
+        const live = await listApproved({ fetch });
+        // מספר המקום (1..16) קובע גם את סדר הפרסומות וגם אילו משבצות פנויות
+        // מוצגות סביבן בטור - נקבע במסך הניהול ומחושב כאן פעם אחת לרשימה.
+        const slots = computeAdSlots(live);
+        // רק השדות שהרכיבים באמת קוראים (RightAdBanner, MobileAdsDrawer),
+        // והתמונה ככתובת ולא כ-base64: ה-load הזה רץ בכל ניווט בכל עמוד
+        // באתר, ולכן כל בייט שנשלח כאן יוצא מהשרת מחדש בכל צפייה - פעמיים
+        // (ב-HTML של ה-SSR ובנתוני ההידרציה). כך נשרפה מכסת ה-Origin
+        // Transfer של Vercel: 1,700KB מתוך דף של 1,777KB היו תמונות
+        // מוטבעות, ושאר הרשומה (landing, פרטי המפרסם) נסע איתן לחינם.
+        // ראה adImageUrl.
+        approvedAds = live.map((/** @type {any} */ a) => ({
+            id: a.id,
+            title: a.title,
+            subtitle: a.subtitle,
+            cta: a.cta,
+            hover: a.hoverText,
+            gradient: a.gradient,
+            mainImage: adImageUrl(a, 'main'),
+            mainImageFit: a.mainImageFit,
+            // מספר המקום בטור (1..16) - נקבע במסך הניהול
+            slot: slots.get(a.id) ?? 0,
+        }));
     } catch (err) {
         console.warn('layout: loading approved ads failed', err);
     }
