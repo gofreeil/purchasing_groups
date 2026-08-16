@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { getAd } from '$lib/server/adsStore.js';
+import { getAd, withAdImageUrls } from '$lib/server/adsStore.js';
 
 // דף הנחיתה הציבורי של פרסומת מאושרת.
 export async function load({ params, fetch }) {
@@ -9,5 +9,9 @@ export async function load({ params, fetch }) {
     }
     // אסור קאש ציבורי על ה-HTML: הדף מוטמע עם data.user מה-layout,
     // ו-CDN שישמור אותו יגיש את פרטי המשתמש המחובר לגולשים אחרים.
-    return { ad };
+    //
+    // ודווקא בגלל זה התמונות עוברות ככתובת: ה-HTML לעולם לא נשמר בקאש,
+    // ולכן כל בייט מוטבע כאן יצא מהשרת מחדש בכל צפייה. הדף היה הכבד באתר -
+    // 2,020KB, 98% מהם base64. ראה withAdImageUrls.
+    return { ad: withAdImageUrls(ad) };
 }

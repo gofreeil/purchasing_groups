@@ -37,6 +37,14 @@ function fromStrapi(row) {
     if (!row) return null;
     const logo = row.logo ?? '';
     const mainImage = row.main_image ?? '';
+    // גם תמונות דף הנחיתה נכנסות לחותם: כולן מוגשות מאותה כתובת עם אותו ?v=,
+    // ולכן החלפת אחת מהן חייבת להחליף אותו - אחרת קאש ה-immutable יחזיק ישנה.
+    const landingImages = [
+        typeof row.landing?.image === 'string' ? row.landing.image : '',
+        ...(Array.isArray(row.landing?.products)
+            ? row.landing.products.map((/** @type {any} */ p) => p?.image ?? '')
+            : []),
+    ];
     return {
         id: row.documentId,
         status: row.ad_status ?? 'pending',
@@ -50,7 +58,7 @@ function fromStrapi(row) {
         // חותם התוכן של התמונות, לשימוש כ-?v= בכתובת שלהן: כך אפשר להגיש
         // אותן בקאש immutable ועדיין להחליף תמונה בלי שגולש יראה ישנה.
         // ראה adImageUrl / imageStamp.
-        imgVersion: imageStamp(logo, mainImage),
+        imgVersion: imageStamp(logo, mainImage, ...landingImages),
         // מודעות שנשלחו לפני הפיצ'ר - בלי fit; התצוגות משאירות אותן כפי שהיו
         mainImageFit: row.landing?._mainImageFit ? parseAdImageFit(row.landing._mainImageFit) : undefined,
         landing: row.landing ?? {},
@@ -193,19 +201,30 @@ export async function listApproved({ fetch: f = fetch } = {}) {
 // פעם אחת ונשמרת בקאש של הדפדפן ושל הקצה - כך היא לא נספרת שוב בכל צפייה.
 // ============================================================
 
-/** @typedef {'logo' | 'main'} AdImageKind */
+/**
+ * logo/main הן תמונות הכרטיס בטור. landing ו-product-<n> הן של דף הנחיתה
+ * (/ads/<id>) - הדף שאליו מגיעה כל לחיצה על פרסומת, ולכן גם הוא חייב להגיש
+ * תמונות מכתובת ולא מוטבעות. הוא היה הדף הכבד באתר: 2,020KB לצפייה, 98%
+ * מהם base64 - יותר ממה שדף הבית שקל לפני התיקון.
+ * @typedef {'logo' | 'main' | 'landing' | `product-${number}`} AdImageKind
+ */
 
 /**
  * @param {string | undefined} v
  * @returns {v is AdImageKind}
  */
 export function isAdImageKind(v) {
-    return v === 'logo' || v === 'main';
+    if (!v) return false;
+    return v === 'logo' || v === 'main' || v === 'landing' || /^product-\d+$/.test(v);
 }
 
 /** @param {any} ad @param {AdImageKind} kind @returns {string} */
 function pickImage(ad, kind) {
-    return kind === 'logo' ? (ad.logo ?? '') : (ad.mainImage ?? '');
+    if (kind === 'logo') return ad.logo ?? '';
+    if (kind === 'main') return ad.mainImage ?? '';
+    if (kind === 'landing') return ad.landing?.image ?? '';
+    const idx = Number(kind.slice('product-'.length));
+    return ad.landing?.products?.[idx]?.image ?? '';
 }
 
 /**
@@ -221,6 +240,29 @@ export function adImageUrl(ad, kind) {
     if (!raw) return '';
     if (!raw.startsWith('data:')) return raw;
     return `/api/ad-image/${ad.id}/${kind}?v=${ad.imgVersion}`;
+}
+
+/**
+ * אותה רשומה, כשכל שדות התמונה שבה הוחלפו בכתובות - לדף הנחיתה /ads/<id>,
+ * שמחזיר את הפרסומת המלאה ולכן סחב את כל התמונות המוטבעות. חל על פרסומת
+ * מאושרת בלבד, כי הנתיב מגיש מאושרות בלבד.
+ * @param {any} ad
+ * @returns {any}
+ */
+export function withAdImageUrls(ad) {
+    if (!ad || ad.status !== 'approved') return ad;
+    const products = Array.isArray(ad.landing?.products)
+        ? ad.landing.products.map((/** @type {any} */ p, /** @type {number} */ i) => ({
+            ...p,
+            image: p?.image ? adImageUrl(ad, `product-${i}`) : '',
+        }))
+        : [];
+    return {
+        ...ad,
+        logo: adImageUrl(ad, 'logo'),
+        mainImage: adImageUrl(ad, 'main'),
+        landing: { ...ad.landing, image: adImageUrl(ad, 'landing'), products },
+    };
 }
 
 /**
