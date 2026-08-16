@@ -36,12 +36,17 @@ export function imageStamp(...images) {
 }
 
 /**
- * מפרק data:image/...;base64 לבייטים. null לכל ערך שאינו data URI תקין.
+ * מפרק data:image/...;base64 לבייטים. null לכל ערך שאינו data URI של תמונה.
+ *
+ * הסינון ל-image/ בלבד אינו קוסמטי: הטיפוס נלקח מהנתונים ונשלח ככותרת
+ * content-type, והתמונה מוגשת מכתובת שאפשר *לנווט* אליה (בשונה מ-data URI
+ * שיושב בתוך <img> ואינו ניתן לניווט). בלי הסינון, פרסומת שהוזרק לשדה
+ * התמונה שלה data:text/html הייתה הופכת למסמך HTML שרץ בדומיין של האתר.
  * @param {string | undefined | null} raw
  * @returns {{ mime: string, bytes: ArrayBuffer } | null}
  */
 export function decodeDataImage(raw) {
-    const m = /^data:([\w/+.-]+);base64,(.*)$/s.exec(raw ?? '');
+    const m = /^data:(image\/[\w+.-]+);base64,(.*)$/s.exec(raw ?? '');
     if (!m) return null;
     try {
         // atob ולא Buffer: Buffer הוא גלובל של Node שאין לו טיפוסים בפרויקט
@@ -71,6 +76,11 @@ export function immutableImageResponse(img) {
             'content-type': img.mime,
             'content-length': String(img.bytes.byteLength),
             'cache-control': 'public, max-age=31536000, s-maxage=31536000, immutable',
+            // nosniff: הדפדפן לא ינחש טיפוס אחר מהתוכן.
+            // CSP+sandbox: מנטרל הרצת סקריפט גם ב-SVG, שהוא תמונה לכל דבר
+            // אבל יודע להריץ קוד כשמנווטים אליו ישירות.
+            'x-content-type-options': 'nosniff',
+            'content-security-policy': "default-src 'none'; sandbox",
         },
     });
 }
