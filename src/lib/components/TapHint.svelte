@@ -178,13 +178,13 @@
         opacity: 0;
         animation: tap-label 4s ease forwards;
     }
-    /* עולה יחד עם היד (0.36 שנייה), ומהרגע שהיא יוצאת (75% = 3 שניות)
-       נמוג בהדרגה לאורך כל השנייה האחרונה */
+    /* עולה יחד עם היד (0.36 שנייה) ומתחיל לדעוך ב-2.7 שניות - דעיכה איטית
+       של 1.3 שניות, כך שכשהיד יוצאת הבועה כבר בדרך החוצה */
     @keyframes tap-label {
         0% { opacity: 0; transform: translate(-100%, -100%) translateY(10px); }
         9% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
-        75% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
-        88% { opacity: 0.5; transform: translate(-100%, -100%) translateY(3px); }
+        67% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
+        83% { opacity: 0.55; transform: translate(-100%, -100%) translateY(2px); }
         100% { opacity: 0; transform: translate(-100%, -100%) translateY(8px); }
     }
 
@@ -196,8 +196,8 @@
     @keyframes tap-label-desktop {
         0% { opacity: 0; transform: translateY(10px); }
         9% { opacity: 1; transform: translateY(0); }
-        75% { opacity: 1; transform: translateY(0); }
-        88% { opacity: 0.5; transform: translateY(3px); }
+        67% { opacity: 1; transform: translateY(0); }
+        83% { opacity: 0.55; transform: translateY(2px); }
         100% { opacity: 0; transform: translateY(8px); }
     }
 
