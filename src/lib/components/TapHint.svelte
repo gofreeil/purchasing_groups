@@ -17,6 +17,9 @@
     let { label = "" } = $props();
 
     let root = $state();
+    // armed - האלמנטים כבר ב-DOM (שקופים) כדי שהתמונה תרד ותפוענח מראש;
+    // playing - מוסיף את מחלקת ההנפשה. ההפרדה מונעת גמגום בפריים הראשון.
+    let armed = $state(false);
     let playing = $state(false);
     let isDesktop = $state(false);
 
@@ -31,6 +34,8 @@
 
         let hideTimer;
         let settleTimer;
+        let startTimer;
+        let dead = false;
         const stop = () => {
             window.removeEventListener("scroll", check);
             window.removeEventListener("resize", check);
@@ -41,12 +46,21 @@
             if (shown) return stop();
             const r = root.getBoundingClientRect();
             const vh = window.innerHeight || document.documentElement.clientHeight;
+            // מרנדרים כבר כשהכרטיס במרחק מסך אחד, כדי שהדפדפן יספיק להוריד
+            // ולפענח את התמונה לפני שההנפשה מתחילה
+            if (r.top < vh * 2 && r.bottom > -vh) armed = true;
             if (r.top > vh * 0.8 || r.bottom < vh * 0.3) return;
             shown = true;
             stop();
-            playing = true;
-            // 4.2 שניות - היד יוצאת אחרי 3, והכיתוב נשאר עוד שנייה אחריה
-            hideTimer = setTimeout(() => (playing = false), 4200);
+            armed = true;
+            // רגע קצר אחרי הרינדור - הדפדפן כבר צייר את האלמנטים והכין להם
+            // שכבת קומפוזיציה, כך שההנפשה מתחילה חלק ולא מדלגת בפריים הראשון
+            startTimer = setTimeout(() => {
+                if (dead) return;
+                playing = true;
+                // 4.2 שניות - היד יוצאת אחרי 3, והכיתוב נשאר עוד שנייה אחריה
+                hideTimer = setTimeout(() => (playing = false), 4200);
+            }, 50);
         }
         window.addEventListener("scroll", check, { passive: true });
         window.addEventListener("resize", check);
@@ -56,15 +70,23 @@
         settleTimer = setTimeout(check, 700);
 
         return () => {
+            dead = true;
             stop();
             mq.removeEventListener("change", onMq);
+            clearTimeout(startTimer);
             clearTimeout(hideTimer);
         };
     });
 </script>
 
-<div class="tap-hint" class:desktop={isDesktop} bind:this={root} aria-hidden="true">
-    {#if playing}
+<div
+    class="tap-hint"
+    class:desktop={isDesktop}
+    class:play={playing}
+    bind:this={root}
+    aria-hidden="true"
+>
+    {#if armed}
         <span class="tap-ring"></span>
         {#if isDesktop}
             <span class="tap-cursor">
@@ -79,7 +101,14 @@
                 </svg>
             </span>
         {:else}
-            <img class="tap-hand" src="/images/finger.webp" alt="" width="500" height="802" />
+            <img
+                class="tap-hand"
+                src="/images/finger.webp"
+                alt=""
+                width="500"
+                height="802"
+                decoding="async"
+            />
         {/if}
         <span class="tap-label">{label}</span>
     {/if}
@@ -91,9 +120,9 @@
         inset: 0;
         pointer-events: none;
         z-index: 6;
-        /* נקודת ההקשה על הכרטיס - היד/הסמן והטבעות מיושרים אליה.
+        /* נקודת ההקשה על הכרטיס - היד/הסמן והטבעת מיושרים אליה.
            נמוכה מספיק כדי שבועת הכיתוב שמעליה לא תכסה את שם הקבוצה */
-        --tap-x: 66%;
+        --tap-x: 74%;
         --tap-y: 56%;
     }
     .tap-hint.desktop {
@@ -101,108 +130,164 @@
         --tap-y: 52%;
     }
 
-    /* ── טבעות ההקשה ─────────────────────────────────────── */
-    .tap-ring {
+    /* כל החלקים שקופים עד שמופעלת מחלקת play, ומונפשים אך ורק ב-transform
+       וב-opacity - שתי התכונות שהדפדפן מריץ על ה-GPU בלי פריסה או ציור
+       מחדש בכל פריים. will-change מכין להם שכבה מראש כדי שלא תהיה קפיצה
+       בפריים הראשון, גם באמצע גלילה. */
+    .tap-ring,
+    .tap-hand,
+    .tap-cursor,
+    .tap-label {
         position: absolute;
         left: var(--tap-x);
         top: var(--tap-y);
+        opacity: 0;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+    }
+
+    /* ── טבעת ההקשה ──────────────────────────────────────── */
+    .tap-ring {
         width: 48px;
         height: 48px;
         margin: -24px 0 0 -24px;
         border-radius: 50%;
         border: 2px solid rgba(74, 222, 128, 0.95);
         box-shadow: 0 0 16px rgba(74, 222, 128, 0.45);
-        opacity: 0;
-        animation: tap-ring 700ms ease-out 0.75s forwards;
+    }
+    .tap-hint.play .tap-ring {
+        animation: tap-ring 800ms linear 0.8s forwards;
     }
     @keyframes tap-ring {
-        0% { opacity: 0; transform: scale(0.25); }
-        18% { opacity: 0.9; }
-        100% { opacity: 0; transform: scale(1.55); }
+        0% {
+            opacity: 0;
+            transform: scale(0.3);
+            animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        20% {
+            opacity: 0.9;
+            animation-timing-function: cubic-bezier(0.33, 0, 0.67, 1);
+        }
+        100% { opacity: 0; transform: scale(1.5); }
     }
 
     /* ── היד בנייד ───────────────────────────────────────── */
     .tap-hand {
-        position: absolute;
-        left: var(--tap-x);
-        top: var(--tap-y);
         width: 104px;
         height: auto;
         /* קצה האצבע נמצא ב-~10%/1.5% של התמונה - מיישרים אותו לנקודת ההקשה */
         margin: -3px 0 0 -11px;
-        transform-origin: 10% 1.5%;
-        filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55));
-        animation: tap-pointer 3s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
+        filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5));
     }
 
     /* ── סמן העכבר בלפטופ ────────────────────────────────── */
     .tap-cursor {
-        position: absolute;
-        left: var(--tap-x);
-        top: var(--tap-y);
         /* חוד החץ ב-~19%/13% מגודל ה-SVG */
         margin: -4px 0 0 -6px;
         line-height: 0;
-        transform-origin: 19% 13%;
-        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
-        animation: tap-pointer 3s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
     }
 
-    /* כניסה מלמטה-ימין, הקשה אחת (0.75s), החזקה קצרה ויציאה חזרה */
+    .tap-hint.play .tap-hand,
+    .tap-hint.play .tap-cursor {
+        animation: tap-pointer 3s linear forwards;
+    }
+
+    /* כניסה מלמטה-ימין, הקשה אחת (0.85s), החזקה ויציאה חזרה.
+       תזוזה טהורה בלי scale - כך אין רסטור מחדש של הצל בכל פריים,
+       וכל קטע מקבל עקומת האטה משלו כדי שהמעברים לא ייראו קטועים. */
     @keyframes tap-pointer {
-        0% { opacity: 0; transform: translate(34px, 82px) scale(0.9); }
-        12% { opacity: 1; transform: translate(0, 0) scale(1); }
-        20% { transform: translate(0, 0) scale(1); }
-        25% { transform: translate(-1px, -4px) scale(0.93); }
-        31% { transform: translate(0, 0) scale(1); }
-        90% { opacity: 1; transform: translate(0, 0) scale(1); }
-        100% { opacity: 0; transform: translate(26px, 66px) scale(0.94); }
+        0% {
+            opacity: 0;
+            transform: translate3d(30px, 78px, 0);
+            animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        14% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+            animation-timing-function: linear;
+        }
+        23% {
+            transform: translate3d(0, 0, 0);
+            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        28% {
+            transform: translate3d(-2px, -7px, 0);
+            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        35% {
+            transform: translate3d(0, 0, 0);
+            animation-timing-function: linear;
+        }
+        88% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+            animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.55);
+        }
+        100% { opacity: 0; transform: translate3d(24px, 62px, 0); }
     }
 
     /* ── הכיתוב ──────────────────────────────────────────── */
     .tap-label {
-        position: absolute;
-        left: var(--tap-x);
-        top: var(--tap-y);
         /* בועה צמודה לקצה האצבע מעל-משמאל, כך שהאצבע נוגעת בה */
         margin: -4px 0 0 -3px;
-        padding: 0.45rem 0.95rem;
+        padding: 0.5rem 1rem;
         border-radius: 999px;
         background: rgba(10, 20, 36, 0.94);
         border: 1.5px solid rgba(74, 222, 128, 0.8);
         color: #eafff1;
-        font-size: 1.05rem;
+        font-size: 1.25rem;
         font-weight: 800;
         white-space: nowrap;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(74, 222, 128, 0.22);
-        opacity: 0;
-        animation: tap-label 4s ease forwards;
     }
-    /* עולה יחד עם היד (0.36 שנייה) ומתחיל לדעוך ב-2.7 שניות - דעיכה איטית
-       של 1.3 שניות, כך שכשהיד יוצאת הבועה כבר בדרך החוצה */
+    .tap-hint.play .tap-label {
+        animation: tap-label 4s linear forwards;
+    }
+    /* עולה יחד עם היד, מחזיק עד 2.7 שניות ואז נמוג בקצב אחיד עד 4 */
     @keyframes tap-label {
-        0% { opacity: 0; transform: translate(-100%, -100%) translateY(10px); }
-        9% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
-        67% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
-        83% { opacity: 0.55; transform: translate(-100%, -100%) translateY(2px); }
-        100% { opacity: 0; transform: translate(-100%, -100%) translateY(8px); }
+        0% {
+            opacity: 0;
+            transform: translate(-100%, -100%) translateY(10px);
+            animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        11% {
+            opacity: 1;
+            transform: translate(-100%, -100%) translateY(0);
+        }
+        67% {
+            opacity: 1;
+            transform: translate(-100%, -100%) translateY(0);
+        }
+        100% { opacity: 0; transform: translate(-100%, -100%) translateY(6px); }
     }
 
     /* בלפטופ הכיתוב יושב מתחת-מימין לסמן, כמו tooltip שנגרר עם העכבר */
     .tap-hint.desktop .tap-label {
         margin: 18px 0 0 10px;
+    }
+    .tap-hint.play.desktop .tap-label {
         animation-name: tap-label-desktop;
     }
     @keyframes tap-label-desktop {
-        0% { opacity: 0; transform: translateY(10px); }
-        9% { opacity: 1; transform: translateY(0); }
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+            animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        11% { opacity: 1; transform: translateY(0); }
         67% { opacity: 1; transform: translateY(0); }
-        83% { opacity: 0.55; transform: translateY(2px); }
-        100% { opacity: 0; transform: translateY(8px); }
+        100% { opacity: 0; transform: translateY(6px); }
     }
 
+    /* בשורה אחת הבועה מוגבלת ברוחב הכרטיס, ולכן במסכי טלפון הגופן יורד
+       מדרגה כדי שהיא לא תחרוג ממנו */
+    @media (max-width: 430px) {
+        .tap-label { font-size: 1.15rem; padding: 0.45rem 0.85rem; }
+        .tap-hand { width: 98px; }
+    }
     @media (max-width: 380px) {
-        .tap-label { font-size: 0.92rem; padding: 0.38rem 0.75rem; }
+        .tap-label { font-size: 1.05rem; padding: 0.4rem 0.75rem; }
         .tap-hand { width: 92px; }
     }
 </style>
