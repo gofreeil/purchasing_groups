@@ -178,11 +178,13 @@
         opacity: 0;
         animation: tap-label 4s ease forwards;
     }
-    /* עולה יחד עם היד (0.36 שנייה) אבל נשאר שנייה שלמה אחרי שהיא יצאה */
+    /* עולה יחד עם היד (0.36 שנייה), ומהרגע שהיא יוצאת (75% = 3 שניות)
+       נמוג בהדרגה לאורך כל השנייה האחרונה */
     @keyframes tap-label {
         0% { opacity: 0; transform: translate(-100%, -100%) translateY(10px); }
         9% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
-        92% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
+        75% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
+        88% { opacity: 0.5; transform: translate(-100%, -100%) translateY(3px); }
         100% { opacity: 0; transform: translate(-100%, -100%) translateY(8px); }
     }
 
@@ -194,7 +196,8 @@
     @keyframes tap-label-desktop {
         0% { opacity: 0; transform: translateY(10px); }
         9% { opacity: 1; transform: translateY(0); }
-        92% { opacity: 1; transform: translateY(0); }
+        75% { opacity: 1; transform: translateY(0); }
+        88% { opacity: 0.5; transform: translateY(3px); }
         100% { opacity: 0; transform: translateY(8px); }
     }
 
