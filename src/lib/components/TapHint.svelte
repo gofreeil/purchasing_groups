@@ -1,8 +1,15 @@
+<script module>
+    // משותף לכל המופעים: יד אחת בלבד בכל טעינת דף, גם כששני כרטיסים
+    // נמצאים יחד בתצוגה. מתעדכן רק בצד הלקוח (onMount) - לא דולף בין בקשות SSR.
+    let shown = false;
+</script>
+
 <script>
     /**
-     * רמז "לחץ לפרטים ולהצטרפות" שמופיע פעם אחת על כרטיס מבצע ברגע שהגולש גולל אליו.
+     * רמז "לחץ לפרטים ולהצטרפות" שמופיע פעם אחת בכל טעינת דף, על כרטיס המבצע
+     * הראשון שהגולש גולל אליו.
      * בנייד - יד אמיתית (אותה תמונה של gofreeil.com) שנכנסת מלמטה ומקישה על הכרטיס.
-     * בלפטופ - סמן עכבר שמגיע לאותה נקודה ומבצע שתי לחיצות.
+     * בלפטופ - סמן עכבר שמגיע לאותה נקודה ולוחץ.
      * הרמז שקוף ללחיצות (pointer-events: none) כך שהקישור של הכרטיס ממשיך לעבוד.
      */
     import { onMount } from "svelte";
@@ -31,13 +38,14 @@
         };
         // אותה בדיקת-גלילה שבה משתמשת הבלטת הכותרות בדף הבית
         function check() {
+            if (shown) return stop();
             const r = root.getBoundingClientRect();
             const vh = window.innerHeight || document.documentElement.clientHeight;
             if (r.top > vh * 0.8 || r.bottom < vh * 0.3) return;
-            // רץ פעם אחת בלבד לכל כרטיס
+            shown = true;
             stop();
             playing = true;
-            hideTimer = setTimeout(() => (playing = false), 8700);
+            hideTimer = setTimeout(() => (playing = false), 6200);
         }
         window.addEventListener("scroll", check, { passive: true });
         window.addEventListener("resize", check);
@@ -57,7 +65,6 @@
 <div class="tap-hint" class:desktop={isDesktop} bind:this={root} aria-hidden="true">
     {#if playing}
         <span class="tap-ring"></span>
-        <span class="tap-ring ring-2"></span>
         {#if isDesktop}
             <span class="tap-cursor">
                 <svg viewBox="0 0 24 24" width="34" height="34">
@@ -98,17 +105,14 @@
         position: absolute;
         left: var(--tap-x);
         top: var(--tap-y);
-        width: 58px;
-        height: 58px;
-        margin: -29px 0 0 -29px;
+        width: 48px;
+        height: 48px;
+        margin: -24px 0 0 -24px;
         border-radius: 50%;
         border: 2px solid rgba(74, 222, 128, 0.95);
         box-shadow: 0 0 16px rgba(74, 222, 128, 0.45);
         opacity: 0;
-        animation: tap-ring 900ms ease-out 1.36s forwards;
-    }
-    .tap-ring.ring-2 {
-        animation-delay: 2.3s;
+        animation: tap-ring 900ms ease-out 1.15s forwards;
     }
     @keyframes tap-ring {
         0% { opacity: 0; transform: scale(0.25); }
@@ -127,7 +131,7 @@
         margin: -3px 0 0 -11px;
         transform-origin: 10% 1.5%;
         filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55));
-        animation: tap-pointer 8.5s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
+        animation: tap-pointer 6s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
     }
 
     /* ── סמן העכבר בלפטופ ────────────────────────────────── */
@@ -140,21 +144,18 @@
         line-height: 0;
         transform-origin: 19% 13%;
         filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
-        animation: tap-pointer 8.5s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
+        animation: tap-pointer 6s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
     }
 
-    /* כניסה מלמטה-ימין, שתי הקשות (1.36s ו-2.3s), החזקה ארוכה כדי שיספיקו
-       לקרוא את הכיתוב, ויציאה חזרה */
+    /* כניסה מלמטה-ימין, הקשה אחת (1.15s), החזקה שמספיקה לקריאת הכיתוב,
+       ויציאה חזרה */
     @keyframes tap-pointer {
         0% { opacity: 0; transform: translate(34px, 82px) scale(0.9); }
-        8% { opacity: 1; transform: translate(0, 0) scale(1); }
-        13% { transform: translate(0, 0) scale(1); }
-        16% { transform: translate(-1px, -4px) scale(0.93); }
-        19% { transform: translate(0, 0) scale(1); }
+        11% { opacity: 1; transform: translate(0, 0) scale(1); }
+        17% { transform: translate(0, 0) scale(1); }
+        20% { transform: translate(-1px, -4px) scale(0.93); }
         24% { transform: translate(0, 0) scale(1); }
-        27% { transform: translate(-1px, -4px) scale(0.93); }
-        30% { transform: translate(0, 0) scale(1); }
-        90% { opacity: 1; transform: translate(0, 0) scale(1); }
+        88% { opacity: 1; transform: translate(0, 0) scale(1); }
         100% { opacity: 0; transform: translate(26px, 66px) scale(0.94); }
     }
 
@@ -163,8 +164,8 @@
         position: absolute;
         left: var(--tap-x);
         top: var(--tap-y);
-        /* בועה מעל-משמאל לקצה האצבע, כך שהאצבע מצביעה אליה ואל הכרטיס */
-        margin: -12px 0 0 -10px;
+        /* בועה צמודה לקצה האצבע מעל-משמאל, כך שהאצבע נוגעת בה */
+        margin: -4px 0 0 -3px;
         padding: 0.45rem 0.95rem;
         border-radius: 999px;
         background: rgba(10, 20, 36, 0.94);
@@ -175,9 +176,9 @@
         white-space: nowrap;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(74, 222, 128, 0.22);
         opacity: 0;
-        animation: tap-label 8.5s ease forwards;
+        animation: tap-label 6s ease forwards;
     }
-    /* הכיתוב עולה מוקדם ונשאר גלוי כ-6.5 שניות - מספיק זמן לקרוא אותו */
+    /* הכיתוב עולה מוקדם ונשאר גלוי כ-4.5 שניות - מספיק לקריאה בלי להתמשך */
     @keyframes tap-label {
         0%, 8% { opacity: 0; transform: translate(-100%, -100%) translateY(10px); }
         14% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
@@ -187,7 +188,7 @@
 
     /* בלפטופ הכיתוב יושב מתחת-מימין לסמן, כמו tooltip שנגרר עם העכבר */
     .tap-hint.desktop .tap-label {
-        margin: 26px 0 0 14px;
+        margin: 18px 0 0 10px;
         animation-name: tap-label-desktop;
     }
     @keyframes tap-label-desktop {
