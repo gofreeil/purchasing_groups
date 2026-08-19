@@ -4,6 +4,12 @@ import { env } from '$env/dynamic/private';
 
 const STRAPI_URL = (env.STRAPI_URL || 'https://api.gofreeil.com').replace(/\/$/, '');
 
+// תקרת זמן לכל קריאה ל-Strapi. בלעדיה, תקיעה בצד השני - לא שגיאה, פשוט
+// חוסר תגובה - מחזיקה את הבקשה עד מגבלת הריצה של Vercel, והדף מחזיר 500.
+// try/catch לא מגן מפני תקיעה, רק מפני שגיאה: בלי signal ה-catch לא נורה
+// לעולם. עם signal הבקשה נכשלת מהר ונופלת ל-fallback שכבר קיים בכל קורא.
+const REQUEST_TIMEOUT_MS = 3000;
+
 /**
  * @param {string} path
  * @param {Record<string, string | number | boolean | null | undefined>} [params]
@@ -17,7 +23,10 @@ export async function strapiGet(path, params = {}, { fetch: f = fetch } = {}) {
     }
     const qs = search.toString();
     const url = `${STRAPI_URL}/api/${path}${qs ? `?${qs}` : ''}`;
-    const res = await f(url, { headers: { 'Content-Type': 'application/json' } });
+    const res = await f(url, {
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
     if (!res.ok) throw new Error(`Strapi GET ${path} failed: ${res.status} ${res.statusText}`);
     return res.json();
 }
@@ -33,6 +42,7 @@ export async function strapiPost(path, data, { fetch: f = fetch } = {}) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(`Strapi POST ${path} failed: ${res.status} ${res.statusText}`);
     return res.json();
@@ -53,6 +63,7 @@ export async function strapiPut(path, data, { fetch: f = fetch, jwt = '' } = {})
         method: 'PUT',
         headers,
         body: JSON.stringify({ data }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(`Strapi PUT ${path} failed: ${res.status} ${res.statusText}`);
     return res.json();

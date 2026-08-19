@@ -7,6 +7,10 @@ import { env } from '$env/dynamic/private';
 export const AUTH_COOKIE = 'gofreeil-auth';
 export const STRAPI_URL = (env.STRAPI_URL || 'https://api.gofreeil.com').replace(/\/$/, '');
 
+// תקרת זמן לקריאות האימות. הן רצות ב-hooks.server.js על כל בקשה, כך
+// שתקיעה של Strapi בלעדיהן מפילה את כל האתר ולא רק את מסך ההתחברות.
+const REQUEST_TIMEOUT_MS = 3000;
+
 /** אפשרויות העוגיה כפי ש-SvelteKit מצפה להן ב-cookies.set/delete. */
 /** @typedef {Parameters<import('@sveltejs/kit').Cookies['set']>[2]} CookieOptions */
 
@@ -38,7 +42,10 @@ export function authCookieOptions(url) {
  * @param {{ fetch?: typeof fetch }} [opts]
  */
 export async function exchangeOAuthToken(provider, accessToken, { fetch: f = fetch } = {}) {
-    const res = await f(`${STRAPI_URL}/api/auth/${provider}/callback?access_token=${encodeURIComponent(accessToken)}`);
+    const res = await f(
+        `${STRAPI_URL}/api/auth/${provider}/callback?access_token=${encodeURIComponent(accessToken)}`,
+        { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) },
+    );
     if (!res.ok) {
         const txt = await res.text().catch(() => '');
         throw new Error(`${provider} exchange failed: ${res.status} ${txt.slice(0, 200)}`);
@@ -61,9 +68,13 @@ export async function fetchCurrentUser(jwt, { fetch: f = fetch } = {}) {
     try {
         const res = await f(`${STRAPI_URL}/api/users/me?populate=role`, {
             headers: { Authorization: `Bearer ${jwt}` },
+            signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         });
         if (!res.ok) return null;
-        return res.json();
+        // חובה await ולא return ישיר: בלעדיו הדחייה של json() בורחת מה-catch,
+        // כי ה-try כבר הסתיים. הפונקציה הייתה מחזירה promise דחוי, וה-await
+        // ב-hooks.server.js היה זורק — 500 בכל דף, לכל משתמש מחובר.
+        return await res.json();
     } catch {
         return null;
     }

@@ -19,7 +19,15 @@ export async function handle({ event, resolve }) {
 
     const jwt = event.cookies.get(AUTH_COOKIE);
     if (jwt) {
-        event.locals.user = await fetchCurrentUser(jwt, { fetch: event.fetch });
+        // רשת ביטחון אחרונה: הקוד הזה רץ לפני כל דף באתר, ולכן כל חריגה כאן
+        // היא 500 גורף. כשל בזיהוי המשתמש צריך להוריד אותו למצב "לא מחובר",
+        // לא להפיל את הדף.
+        try {
+            event.locals.user = await fetchCurrentUser(jwt, { fetch: event.fetch });
+        } catch (err) {
+            console.warn('hooks: fetchCurrentUser failed', err instanceof Error ? err.message : err);
+            event.locals.user = null;
+        }
         event.locals.jwt = jwt;
     } else {
         event.locals.user = null;

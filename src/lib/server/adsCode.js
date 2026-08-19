@@ -15,6 +15,10 @@ import { env } from '$env/dynamic/private';
 import { planLabelWithPrice } from '$lib/adPlans.js';
 
 const STRAPI_URL = (env.STRAPI_URL || 'https://api.gofreeil.com').replace(/\/$/, '');
+
+// אותה תקרת זמן כמו בשאר הקריאות לשרת: בלעדיה תקיעה של Strapi תופסת את
+// בקשת ההגשה עד מגבלת הריצה, והמפרסם מקבל "השליחה נכשלה" אחרי המתנה ארוכה.
+const REQUEST_TIMEOUT_MS = 3000;
 const SITE_NAME = 'רכישות קבוצתיות';
 
 /** @param {string} v */
@@ -36,7 +40,7 @@ async function api(path, init = {}) {
     const headers = { 'Content-Type': 'application/json', ...(init.headers || {}) };
     const token = env.STRAPI_TOKEN || '';
     if (token) headers.Authorization = `Bearer ${token}`;
-    return fetch(`${STRAPI_URL}${path}`, { ...init, headers });
+    return fetch(`${STRAPI_URL}${path}`, { ...init, headers, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
 }
 
 /** מזהה המשתמש (Strapi) של הבעלים — לפי ADS_NOTIFY_EMAIL. */

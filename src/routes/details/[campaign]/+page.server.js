@@ -6,6 +6,10 @@ import { getCampaign } from '$lib/campaigns.js';
 const DASHBOARD_SHEET_ID = '1YGcal1HFy-q4hLJfBF5uml1CMUO4KqZRYnnp6ZneIH0';
 const DASHBOARD_GID = '0';
 const LABEL_COL = 1;
+
+// תקרת זמן לשליפת הגיליון. הגיליון הוא מקור חיצוני לגמרי (Google), ותקיעה
+// שלו לא אמורה להפיל דף תוכנית - בכשל נשארים מספרי ברירת המחדל שלמעלה.
+const SHEET_TIMEOUT_MS = 3000;
 // carInsurance = עמודה K בגיליון. כל עוד שורת "חתמו" שם היא 0, בלוק הסטטיסטיקות
 // בדף הפרטים נשאר מוסתר (מוצג רק כש-members > 0) — הוא ייפתח מעצמו כשהגיליון יתמלא.
 /** @type {Record<string, number | undefined>} */
@@ -72,7 +76,7 @@ async function loadSheetStats(fetch, campaignSlug) {
     if (col === undefined) return out;
     try {
         const url = `https://docs.google.com/spreadsheets/d/${DASHBOARD_SHEET_ID}/export?format=csv&gid=${DASHBOARD_GID}`;
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: AbortSignal.timeout(SHEET_TIMEOUT_MS) });
         if (!response.ok) return out;
         const rows = parseCsv(await response.text());
         for (const row of rows) {
