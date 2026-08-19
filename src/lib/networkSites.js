@@ -74,7 +74,7 @@ export const networkSites = [
 	},
 	{
 		id: 8,
-		title: 'קבוצת רכישה',
+		title: 'רכישות קבוצתיות',
 		href: 'https://groups.gofreeil.com/',
 		image: '/assets/whatsapp_cta.png',
 		color: 'linear-gradient(135deg, #166534, #064e3b)'
