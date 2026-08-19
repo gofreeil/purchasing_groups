@@ -45,7 +45,7 @@
             shown = true;
             stop();
             playing = true;
-            hideTimer = setTimeout(() => (playing = false), 6200);
+            hideTimer = setTimeout(() => (playing = false), 3200);
         }
         window.addEventListener("scroll", check, { passive: true });
         window.addEventListener("resize", check);
@@ -112,7 +112,7 @@
         border: 2px solid rgba(74, 222, 128, 0.95);
         box-shadow: 0 0 16px rgba(74, 222, 128, 0.45);
         opacity: 0;
-        animation: tap-ring 900ms ease-out 1.15s forwards;
+        animation: tap-ring 700ms ease-out 0.75s forwards;
     }
     @keyframes tap-ring {
         0% { opacity: 0; transform: scale(0.25); }
@@ -131,7 +131,7 @@
         margin: -3px 0 0 -11px;
         transform-origin: 10% 1.5%;
         filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55));
-        animation: tap-pointer 6s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
+        animation: tap-pointer 3s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
     }
 
     /* ── סמן העכבר בלפטופ ────────────────────────────────── */
@@ -144,18 +144,17 @@
         line-height: 0;
         transform-origin: 19% 13%;
         filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
-        animation: tap-pointer 6s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
+        animation: tap-pointer 3s cubic-bezier(0.3, 0.5, 0.35, 1) forwards;
     }
 
-    /* כניסה מלמטה-ימין, הקשה אחת (1.15s), החזקה שמספיקה לקריאת הכיתוב,
-       ויציאה חזרה */
+    /* כניסה מלמטה-ימין, הקשה אחת (0.75s), החזקה קצרה ויציאה חזרה */
     @keyframes tap-pointer {
         0% { opacity: 0; transform: translate(34px, 82px) scale(0.9); }
-        11% { opacity: 1; transform: translate(0, 0) scale(1); }
-        17% { transform: translate(0, 0) scale(1); }
-        20% { transform: translate(-1px, -4px) scale(0.93); }
-        24% { transform: translate(0, 0) scale(1); }
-        88% { opacity: 1; transform: translate(0, 0) scale(1); }
+        12% { opacity: 1; transform: translate(0, 0) scale(1); }
+        20% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(-1px, -4px) scale(0.93); }
+        31% { transform: translate(0, 0) scale(1); }
+        90% { opacity: 1; transform: translate(0, 0) scale(1); }
         100% { opacity: 0; transform: translate(26px, 66px) scale(0.94); }
     }
 
@@ -176,12 +175,12 @@
         white-space: nowrap;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(74, 222, 128, 0.22);
         opacity: 0;
-        animation: tap-label 6s ease forwards;
+        animation: tap-label 3s ease forwards;
     }
-    /* הכיתוב עולה מוקדם ונשאר גלוי כ-4.5 שניות - מספיק לקריאה בלי להתמשך */
+    /* אותה מעטפת בדיוק כמו של היד - עולה ויורד יחד איתה */
     @keyframes tap-label {
-        0%, 8% { opacity: 0; transform: translate(-100%, -100%) translateY(10px); }
-        14% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
+        0% { opacity: 0; transform: translate(-100%, -100%) translateY(10px); }
+        12% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
         90% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
         100% { opacity: 0; transform: translate(-100%, -100%) translateY(8px); }
     }
@@ -192,8 +191,8 @@
         animation-name: tap-label-desktop;
     }
     @keyframes tap-label-desktop {
-        0%, 8% { opacity: 0; transform: translateY(10px); }
-        14% { opacity: 1; transform: translateY(0); }
+        0% { opacity: 0; transform: translateY(10px); }
+        12% { opacity: 1; transform: translateY(0); }
         90% { opacity: 1; transform: translateY(0); }
         100% { opacity: 0; transform: translateY(8px); }
     }
