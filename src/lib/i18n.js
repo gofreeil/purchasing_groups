@@ -158,6 +158,7 @@ export const translations = readable({
             soon: "בקרוב...",
             fuelListOpens: "הרשימה תיפתח ביום רביעי 20/5",
             newBadge: "חדש",
+            tapHint: "לחץ לפרטים ולהצטרפות",
             currency: 'ש"ח'
         },
         satisfaction: {
@@ -370,6 +371,7 @@ export const translations = readable({
             soon: "Soon...",
             fuelListOpens: "List opens Wednesday 20/5",
             newBadge: "New",
+            tapHint: "Tap for details and to join",
             currency: "ILS"
         },
         satisfaction: {
@@ -544,6 +546,7 @@ export const translations = readable({
             soon: "Скоро...",
             fuelListOpens: "Список откроется в среду 20/5",
             newBadge: "Новинка",
+            tapHint: "Нажмите для подробностей и вступления",
             currencyPerYear: "шекелей/год"
         },
         satisfaction: {

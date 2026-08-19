@@ -5,6 +5,7 @@
     import { lang, t } from "$lib/i18n.js";
     import Seo from "$lib/components/Seo.svelte";
     import JsonLd from "$lib/components/JsonLd.svelte";
+    import TapHint from "$lib/components/TapHint.svelte";
     import {
         SITE_DESCRIPTION,
         websiteSchema,
@@ -268,6 +269,7 @@
             {#if campaign.is_new}
                 <div class="new-burst">{campaign.new_badge_text || $t.purchases.newBadge}</div>
             {/if}
+            <TapHint label={$t.purchases.tapHint} />
             <div class="purchase-img-frame" class:fuel-zoom={campaign.slug === 'fuel'}>
                 <img
                     src={campaign.image_url || '/assets/cellular.jpg'}
