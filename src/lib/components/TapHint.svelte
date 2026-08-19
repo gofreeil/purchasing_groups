@@ -45,7 +45,8 @@
             shown = true;
             stop();
             playing = true;
-            hideTimer = setTimeout(() => (playing = false), 3200);
+            // 4.2 שניות - היד יוצאת אחרי 3, והכיתוב נשאר עוד שנייה אחריה
+            hideTimer = setTimeout(() => (playing = false), 4200);
         }
         window.addEventListener("scroll", check, { passive: true });
         window.addEventListener("resize", check);
@@ -175,13 +176,13 @@
         white-space: nowrap;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(74, 222, 128, 0.22);
         opacity: 0;
-        animation: tap-label 3s ease forwards;
+        animation: tap-label 4s ease forwards;
     }
-    /* אותה מעטפת בדיוק כמו של היד - עולה ויורד יחד איתה */
+    /* עולה יחד עם היד (0.36 שנייה) אבל נשאר שנייה שלמה אחרי שהיא יצאה */
     @keyframes tap-label {
         0% { opacity: 0; transform: translate(-100%, -100%) translateY(10px); }
-        12% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
-        90% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
+        9% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
+        92% { opacity: 1; transform: translate(-100%, -100%) translateY(0); }
         100% { opacity: 0; transform: translate(-100%, -100%) translateY(8px); }
     }
 
@@ -192,8 +193,8 @@
     }
     @keyframes tap-label-desktop {
         0% { opacity: 0; transform: translateY(10px); }
-        12% { opacity: 1; transform: translateY(0); }
-        90% { opacity: 1; transform: translateY(0); }
+        9% { opacity: 1; transform: translateY(0); }
+        92% { opacity: 1; transform: translateY(0); }
         100% { opacity: 0; transform: translateY(8px); }
     }
 
