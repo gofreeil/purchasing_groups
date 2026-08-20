@@ -288,6 +288,7 @@
 			     זה מה שמאפשר לגוגל ולמנועי ה-AI לזהות את כל האתרים כמותג אחד
 			     ולחלק ביניהם את האמון (entity consolidation), ובמקביל שולח גם
 			     מבקרים אנושיים בין האתרים. -->
+			<!-- מוסתרת בנייד דרך .network-links ב-app.css: הקישורים נשארים ב-HTML למנועי החיפוש, והרצועה מוצגת רק בדסקטופ. -->
 			<nav class="network-links" aria-labelledby="network-links-title">
 				<h2 id="network-links-title" class="network-links-title">רשת יוצאים לחירות</h2>
 				<ul class="network-links-list">
