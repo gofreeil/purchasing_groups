@@ -6,8 +6,8 @@
 
 <script>
     /**
-     * רמז "לחץ לפרטים ולהצטרפות" שמופיע פעם אחת בכל טעינת דף, על כרטיס המבצע
-     * הראשון שהגולש גולל אליו.
+     * רמז "לחץ לפרטים ולהצטרפות" שמופיע פעם אחת בכל טעינת דף, על הכרטיס
+     * שהגולש עצר עליו (אחרי שהגלילה נרגעה וכשמרכז הכרטיס במרכז המסך).
      * בנייד - יד אמיתית (אותה תמונה של gofreeil.com) שנכנסת מלמטה ומקישה על הכרטיס.
      * בלפטופ - סמן עכבר שמגיע לאותה נקודה ולוחץ.
      * הרמז שקוף ללחיצות (pointer-events: none) כך שהקישור של הכרטיס ממשיך לעבוד.
@@ -24,34 +24,55 @@
     let isDesktop = $state(false);
 
     onMount(() => {
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        // ?hand=1 - מצב בדיקה: הרמז חוזר על כל כרטיס שעוצרים עליו ומתעלם
+        // מהעדפת הפחתת התנועה. משמש לאבחון מרחוק ("אני לא רואה את היד")
+        const forced = new URLSearchParams(location.search).has("hand");
+        if (!forced && window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+            return;
         // מאזינים לשינוי רוחב (כולל מצב מכשיר ב-DevTools) כך שהמעבר יד/עכבר
         // מתעדכן חי ולא נקבע פעם אחת בטעינה
         const mq = window.matchMedia("(min-width: 769px)");
         const onMq = (e) => (isDesktop = e.matches);
         isDesktop = mq.matches;
-        mq.addEventListener("change", onMq);
+        // Safari של iOS 13 ומטה לא תומך ב-addEventListener על MediaQueryList,
+        // ובלי הבדיקה הזו כל ה-onMount היה נופל שם והרמז לא היה מופיע בכלל
+        if (mq.addEventListener) mq.addEventListener("change", onMq);
+        else if (mq.addListener) mq.addListener(onMq);
 
         let hideTimer;
         let settleTimer;
         let startTimer;
         let dead = false;
         const stop = () => {
-            window.removeEventListener("scroll", check);
-            window.removeEventListener("resize", check);
+            window.removeEventListener("scroll", onScroll);
+            window.removeEventListener("resize", onScroll);
             clearTimeout(settleTimer);
         };
-        // אותה בדיקת-גלילה שבה משתמשת הבלטת הכותרות בדף הבית
-        function check() {
-            if (shown) return stop();
+        const viewportH = () =>
+            window.innerHeight || document.documentElement.clientHeight;
+
+        // מרנדרים את האלמנטים (שקופים) כבר כשהכרטיס במרחק מסך אחד, כדי
+        // שהדפדפן יספיק להוריד ולפענח את התמונה לפני שההנפשה מתחילה
+        function prime() {
             const r = root.getBoundingClientRect();
-            const vh = window.innerHeight || document.documentElement.clientHeight;
-            // מרנדרים כבר כשהכרטיס במרחק מסך אחד, כדי שהדפדפן יספיק להוריד
-            // ולפענח את התמונה לפני שההנפשה מתחילה
+            const vh = viewportH();
             if (r.top < vh * 2 && r.bottom > -vh) armed = true;
-            if (r.top > vh * 0.8 || r.bottom < vh * 0.3) return;
-            shown = true;
-            stop();
+        }
+
+        // נורה רק אחרי שהגלילה נעצרה, ורק אם מרכז הכרטיס נמצא במרכז המסך.
+        // כך היד מופיעה על הכרטיס שהגולש באמת עצר עליו, ולא נשרפת על כרטיס
+        // שחלף תוך כדי גלילה מהירה (ואז הוא מגיע ליעד ולא רואה כלום).
+        function fire() {
+            if (dead || playing) return;
+            if (!forced && shown) return stop();
+            const r = root.getBoundingClientRect();
+            const vh = viewportH();
+            const center = r.top + r.height / 2;
+            if (center < vh * 0.3 || center > vh * 0.72) return;
+            if (!forced) {
+                shown = true;
+                stop();
+            }
             armed = true;
             // רגע קצר אחרי הרינדור - הדפדפן כבר צייר את האלמנטים והכין להם
             // שכבת קומפוזיציה, כך שההנפשה מתחילה חלק ולא מדלגת בפריים הראשון
@@ -62,17 +83,27 @@
                 hideTimer = setTimeout(() => (playing = false), 4200);
             }, 50);
         }
-        window.addEventListener("scroll", check, { passive: true });
-        window.addEventListener("resize", check);
-        check();
-        // רענון באמצע הדף משחזר את הגלילה בלי לירות אירוע scroll - בדיקה נוספת
-        // אחרי שהתמונות/הוידאו תפסו את גובהם והפריסה התייצבה
-        settleTimer = setTimeout(check, 700);
+
+        function onScroll() {
+            if (!forced && shown) return stop();
+            prime();
+            // כל אירוע גלילה דוחה את הירי - הוא יקרה רק כשהגלילה שקטה
+            clearTimeout(settleTimer);
+            settleTimer = setTimeout(fire, 160);
+        }
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll);
+        prime();
+        // טעינה שנוחתת כבר על הכרטיסים (רענון באמצע הדף) - בדיקה אחרי
+        // שהתמונות/הוידאו תפסו את גובהם והפריסה התייצבה
+        settleTimer = setTimeout(fire, 700);
 
         return () => {
             dead = true;
             stop();
-            mq.removeEventListener("change", onMq);
+            if (mq.removeEventListener) mq.removeEventListener("change", onMq);
+            else if (mq.removeListener) mq.removeListener(onMq);
             clearTimeout(startTimer);
             clearTimeout(hideTimer);
         };
@@ -117,7 +148,11 @@
 <style>
     .tap-hint {
         position: absolute;
-        inset: 0;
+        /* בכתיב הארוך ולא inset - הרמז עובד גם בדפדפני נייד ישנים */
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
         pointer-events: none;
         z-index: 6;
         /* נקודת ההקשה על הכרטיס - היד/הסמן והטבעת מיושרים אליה.
