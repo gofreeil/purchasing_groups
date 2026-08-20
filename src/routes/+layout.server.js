@@ -1,4 +1,5 @@
 import { listApproved, computeAdSlots, adImageUrl } from '$lib/server/adsStore.js';
+import { isAdmin, isSuperAdmin } from '$lib/auth.js';
 
 // חושף את המשתמש המחובר לכל הדפים דרך data.user,
 // ואת הפרסומות המאושרות של מפרסמים - לסיידבר הפרסומות.
@@ -50,6 +51,11 @@ export async function load({ locals, fetch }) {
                 app_role: u.app_role ?? null,
             }
             : null,
+        // דגלי ההרשאה נגזרים כאן ולא בדפדפן: $lib/auth.js מייבא משתני
+        // סביבה פרטיים ואי אפשר לייבא אותו לתוך קומפוננטה. ההדר צריך רק
+        // לדעת אם להציג את הקישור לפאנל.
+        isAdmin: isAdmin(u),
+        superAdmin: isSuperAdmin(u),
         approvedAds,
     };
 }

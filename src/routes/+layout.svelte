@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from "svelte";
-	import { page } from "$app/stores";
+	import { page, navigating } from "$app/stores";
 	const favicon = "/assets/קבוצות-רכישה.png";
 	import "../app.css?v=1.0.3";
 	import { lang, t } from "$lib/i18n.js";
@@ -34,6 +34,9 @@
 
 	let showLangMenu = $state(false);
 	let showUserMenu = $state(false); // תפריט המשתמש בהדר (החלף פרופיל / התנתק)
+
+	// מסכי הניהול - בלי טורי הפרסומות, לרוחב מלא
+	let isAdminArea = $derived($page.url.pathname.startsWith("/admin"));
 
 	// שם תצוגה ידידותי. לעולם לא להציג מזהה אוטומטי כמו "google_1164663...".
 	// סדר העדפה: שם אמיתי → החלק שלפני @ באימייל → username אנושי → "משתמש".
@@ -116,6 +119,13 @@
 
 <!-- מסך פתיחה אחרי התחברות (מצטרפים / שבים) — גלובלי, מופעל ע"י ?welcome ב-URL -->
 <WelcomeScreen userName={displayName} />
+
+<!-- משוב מיידי על מעבר בין דפים. ה-router של SvelteKit ממתין ל-load של
+     היעד לפני שהוא מחליף את הדף, ולכן בלי הפס הזה לחיצה על כרטיס מבצע
+     נראית מתה כל עוד הנתונים בדרך - וגולשים דיווחו שלא נפתח להם כלום. -->
+{#if $navigating}
+	<div class="route-progress" role="status" aria-label="טוען"></div>
+{/if}
 
 <div class="app-wrapper">
 	<!-- Header -->
@@ -229,6 +239,30 @@
 							<div class="user-dropdown">
 								<a
 									class="user-dropdown-item"
+									href="/profile"
+									onclick={() => (showUserMenu = false)}
+								>
+									👤 {$lang === "he"
+										? "האזור האישי"
+										: $lang === "ru"
+											? "Личный кабинет"
+											: "My area"}
+								</a>
+								{#if data?.isAdmin}
+									<a
+										class="user-dropdown-item"
+										href="/admin"
+										onclick={() => (showUserMenu = false)}
+									>
+										🛠️ {$lang === "he"
+											? "פאנל ניהול"
+											: $lang === "ru"
+												? "Панель управления"
+												: "Admin panel"}
+									</a>
+								{/if}
+								<a
+									class="user-dropdown-item"
 									href={`/login?returnTo=${encodeURIComponent($page.url.pathname)}`}
 									onclick={() => (showUserMenu = false)}
 								>
@@ -264,10 +298,15 @@
 		</div>
 	</header>
 
+	<!-- מסכי הניהול רצים לרוחב מלא: הם טבלאות וכרטיסים צפופים, ושני טורי
+	     הפרסומות היו מוחצים אותם לכ-700px. ממילא אין טעם להציג פרסומות
+	     לצוות האתר. -->
 	<div class="main-layout">
 		<!-- ב-RTL הילד הראשון הוא הצד הימני: הפרסומות בימין, אתרי הרשת בשמאל.
 		     approvedAds מגיע ל-RightAdBanner בלבד - אין פרסומות בטור השמאלי. -->
-		<RightAdBanner approvedAds={data?.approvedAds ?? []} />
+		{#if !isAdminArea}
+			<RightAdBanner approvedAds={data?.approvedAds ?? []} />
+		{/if}
 
 		<!-- Main Content Area -->
 		<main class="content-area">
@@ -275,11 +314,15 @@
 		</main>
 
 		<!-- אתרי "יוצאים לחירות" בלבד (desktop) -->
-		<AdsSidebar />
+		{#if !isAdminArea}
+			<AdsSidebar />
+		{/if}
 	</div>
 
 	<!-- Mobile ads drawer + tab -->
-	<MobileAdsDrawer approvedAds={data?.approvedAds ?? []} />
+	{#if !isAdminArea}
+		<MobileAdsDrawer approvedAds={data?.approvedAds ?? []} />
+	{/if}
 
 	<!-- Footer -->
 	<footer class="main-footer">
@@ -315,6 +358,8 @@
 					src="/assets/yotzim-lecherut.png"
 					alt="יוצאים לחירות"
 					class="footer-brand-img"
+					loading="lazy"
+					decoding="async"
 				/>
 				<span class="footer-brand-text">{$t.footer.clickForActivity}</span>
 			</a>
@@ -347,6 +392,34 @@
 </div>
 
 <style>
+	.route-progress {
+		position: fixed;
+		top: 0;
+		inset-inline: 0;
+		height: 3px;
+		/* מעל ההדר הקבוע (1000) והתפריטים הנפתחים (1001) */
+		z-index: 1400;
+		background: linear-gradient(90deg, #60a5fa, #facc15, #c084fc);
+		background-size: 200% 100%;
+		animation: route-progress-slide 1s linear infinite;
+		pointer-events: none;
+	}
+
+	@keyframes route-progress-slide {
+		from {
+			background-position: 100% 0;
+		}
+		to {
+			background-position: -100% 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.route-progress {
+			animation: none;
+		}
+	}
+
 	.welcome-toast {
 		position: fixed;
 		top: 1rem;
