@@ -24,10 +24,16 @@
 				<!-- אין כאן ענף fit: הוא שירת פרסומות מהבילדר, שכבר לא מגיעות
 				     לטור הזה. אתרי הרשת נטענים תמיד בגובה הטבעי. -->
 				<div class="ad-image-wrap">
+					<!-- loading="lazy" חובה: הטור הזה הוא display:none בנייד, אבל כרום
+					     מוריד תמונות שבתוך display:none בכל זאת - וכך כל גולש נייד סחב
+					     10 תמונות (~25MB) של טור שהוא בכלל לא רואה. עם lazy הן לא
+					     נמשכות כלל, כפי שכבר קורה ב-RightAdBanner. -->
 					<img
 						src={ad.image}
 						alt={ad.title}
 						class="ad-image"
+						loading="lazy"
+						decoding="async"
 						class:ad-image-short={ad.id === 5 || ad.id === 10}
 						class:ad-image-trim={ad.id === 1 || ad.id === 3}
 					/>
@@ -44,13 +50,6 @@
 				</div>
 			</a>
 		{/each}
-
-		<!-- קריאה למפרסמים חדשים - מובילה לדף המחשבון והפרסום -->
-		<a href="/advertise" class="advertise-cta">
-			<span class="advertise-cta-icon">📢</span>
-			<span class="advertise-cta-text">רוצים לפרסם כאן?</span>
-			<span class="advertise-cta-sub">לחצו למחירון ולהעלאת פרסומת</span>
-		</a>
 	</div>
 </aside>
 
@@ -202,38 +201,6 @@
 
 	.ad-cta-bar:hover .ad-tooltip {
 		display: block;
-	}
-
-	/* קריאה למפרסמים חדשים */
-	.advertise-cta {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.2rem;
-		border: 2px dashed rgba(251, 191, 36, 0.4);
-		border-radius: 12px;
-		background: rgba(251, 191, 36, 0.05);
-		padding: 0.9rem 0.75rem;
-		text-decoration: none;
-		transition: all 0.2s;
-	}
-	.advertise-cta:hover {
-		border-color: rgba(251, 191, 36, 0.8);
-		background: rgba(251, 191, 36, 0.1);
-		transform: scale(1.03);
-	}
-	.advertise-cta-icon {
-		font-size: 1.4rem;
-	}
-	.advertise-cta-text {
-		color: #fbbf24;
-		font-weight: 900;
-		font-size: 0.9rem;
-	}
-	.advertise-cta-sub {
-		color: #94a3b8;
-		font-size: 0.7rem;
-		font-weight: 600;
 	}
 
 	@media (max-width: 768px) {
