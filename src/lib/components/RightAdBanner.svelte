@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import { adImgFit, parseAdImageFit } from "$lib/adImageFit.js";
-	import { AD_SLOT_COUNT } from "$lib/adSlots.js";
+	import { AD_SLOT_COUNT, AD_SLOT_COLORS } from "$lib/adSlots.js";
 
 	// פרסומות מאושרות של מפרסמים. הטור הימני הוא המקום היחיד שלהן -
 	// הטור השמאלי שמור לאתרי רשת "יוצאים לחירות" בלבד.
@@ -14,30 +14,14 @@
 
 	let currentGroup = $state(0);
 
-	// 16 מקומות פרסום פנויים, כל אחד בגוון אחר.
-	const slots = [
-		{ border: "rgba(249,115,22,0.3)", bg: "rgba(124,45,18,0.1)", text: "#fb923c", btn: "#ea580c" },
-		{ border: "rgba(59,130,246,0.3)", bg: "rgba(30,58,138,0.1)", text: "#60a5fa", btn: "#2563eb" },
-		{ border: "rgba(34,197,94,0.3)", bg: "rgba(20,83,45,0.1)", text: "#4ade80", btn: "#16a34a" },
-		{ border: "rgba(245,158,11,0.3)", bg: "rgba(120,53,15,0.1)", text: "#fbbf24", btn: "#d97706" },
-		{ border: "rgba(168,85,247,0.3)", bg: "rgba(88,28,135,0.1)", text: "#c084fc", btn: "#9333ea" },
-		{ border: "rgba(239,68,68,0.3)", bg: "rgba(127,29,29,0.1)", text: "#f87171", btn: "#dc2626" },
-		{ border: "rgba(99,102,241,0.3)", bg: "rgba(49,46,129,0.1)", text: "#818cf8", btn: "#4f46e5" },
-		{ border: "rgba(20,184,166,0.3)", bg: "rgba(19,78,74,0.1)", text: "#2dd4bf", btn: "#0d9488" },
-		{ border: "rgba(236,72,153,0.3)", bg: "rgba(131,24,67,0.1)", text: "#f472b6", btn: "#db2777" },
-		{ border: "rgba(234,179,8,0.3)", bg: "rgba(113,63,18,0.1)", text: "#facc15", btn: "#ca8a04" },
-		{ border: "rgba(16,185,129,0.3)", bg: "rgba(6,78,59,0.1)", text: "#34d399", btn: "#059669" },
-		{ border: "rgba(217,70,239,0.3)", bg: "rgba(112,26,117,0.1)", text: "#e879f9", btn: "#c026d3" },
-		{ border: "rgba(6,182,212,0.3)", bg: "rgba(22,78,99,0.1)", text: "#22d3ee", btn: "#0891b2" },
-		{ border: "rgba(244,63,94,0.3)", bg: "rgba(136,19,55,0.1)", text: "#fb7185", btn: "#e11d48" },
-		{ border: "rgba(132,204,22,0.3)", bg: "rgba(54,83,20,0.1)", text: "#a3e635", btn: "#65a30d" },
-		{ border: "rgba(14,165,233,0.3)", bg: "rgba(12,74,110,0.1)", text: "#38bdf8", btn: "#0284c7" },
-	];
+	// צבעי 16 המקומות מגיעים מ-$lib/adSlots.js: ארבע משפחות צבע שחוזרות
+	// כל ארבעה מקומות, כך שכל קבוצה שמוצגת (PER_GROUP) נראית באותן ארבע
+	// משפחות. אותו מקור משמש גם את בורר המקום במסך הניהול.
 
 	const VIEW_MS = 7000;    // כמה זמן כל קבוצה נשארת על המסך — חצי מהקצב הישן (14 ש׳)
 	const PER_GROUP = 4;     // כמה מקומות (פרסומות ופנויים) נראים בו-זמנית
 
-	/** @typedef {{ num: number, ad?: any, tpl?: (typeof slots)[number] }} BoardCell */
+	/** @typedef {{ num: number, ad?: any, tpl?: (typeof AD_SLOT_COLORS)[number] }} BoardCell */
 
 	// לוח 16 המקומות בסדר מספרי: מקום שנתפס מציג את הפרסומת, מקום פנוי
 	// מציג משבצת "יכול להיות שלך". פרסומת מאושרת *תופסת* מקום - סך
@@ -71,7 +55,7 @@
 			const ad = byNum.get(n);
 			// תבניות הצבע קבועות למספר: משבצת 7 שומרת על הצבעים שלה
 			// גם כשמקומות לפניה נתפסים
-			cells.push(ad ? { num: n, ad } : { num: n, tpl: slots[(n - 1) % slots.length] });
+			cells.push(ad ? { num: n, ad } : { num: n, tpl: AD_SLOT_COLORS[(n - 1) % AD_SLOT_COLORS.length] });
 		}
 		// מעבר ל-16 (גלישה) - בסוף הלוח, כדי שפרסומת לא תיעלם
 		return [...cells, ...overflow];

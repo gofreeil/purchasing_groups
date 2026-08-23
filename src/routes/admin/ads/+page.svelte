@@ -2,7 +2,7 @@
     import { enhance } from "$app/forms";
     import { adPlans } from "$lib/adPlans.js";
     import { adImgFit, parseAdImageFit } from "$lib/adImageFit.js";
-    import { AD_SLOT_COUNT } from "$lib/adSlots.js";
+    import { AD_SLOT_COUNT, adSlotColor } from "$lib/adSlots.js";
 
     // מסך אישור פרסומות לאדמין - ממתינות / מאושרות / נדחות.
     let { data, form } = $props();
@@ -130,7 +130,12 @@
                         <!-- מספר המקום הקבוע של הפרסומת בטור + החלפת מקום.
                              המספר נשאר לה גם דרך השהיה ופקיעה. -->
                         <div class="slot-row">
-                            <span class="slot-badge">{ad.slot ?? "-"}</span>
+                            <!-- הצבע זהה לזה שהמקום מקבל בטור הפרסומות
+                                 (adSlots.js), כדי לזהות את המשפחה בלי לספור -->
+                            <span
+                                class="slot-badge"
+                                style="background: {adSlotColor(ad.slot).bg}; border-color: {adSlotColor(ad.slot).border}; color: {adSlotColor(ad.slot).text}"
+                            >{ad.slot ?? "-"}</span>
                             <span class="slot-label">מקום {ad.slot ?? "-"} מתוך {AD_SLOT_COUNT} בטור הפרסומות</span>
                             <form method="POST" action="?/move" use:enhance>
                                 <input type="hidden" name="id" value={ad.id} />
@@ -147,7 +152,9 @@
                                 <input type="hidden" name="id" value={ad.id} />
                                 <select name="slot" class="duration-select">
                                     {#each slotOptions as n (n)}
-                                        <option value={n} selected={n === ad.slot} style="background:#fff;color:#111">{n}</option>
+                                        <!-- הרקע לבן (ברירת המחדל של הבורר במערכת), והמספר
+                                             בצבע המשפחה של אותו מקום - 1/5/9/13 באותו גוון -->
+                                        <option value={n} selected={n === ad.slot} style="background:#fff;color:{adSlotColor(n).btn};font-weight:800">{n}</option>
                                     {/each}
                                 </select>
                                 <button type="submit" class="a-btn ghost" title="העבר למקום שנבחר; אם המקום תפוס - שתי הפרסומות מתחלפות">⇄ העבר</button>
@@ -431,9 +438,11 @@
         width: 1.6rem;
         height: 1.6rem;
         border-radius: 0.5rem;
-        background: rgba(16, 185, 129, 0.2);
-        border: 1px solid rgba(16, 185, 129, 0.45);
-        color: #a7f3d0;
+        /* הצבעים עצמם מוזרקים inline לפי מספר המקום (adSlotColor);
+           כאן רק נשארת נפילה-לברירת-מחדל למקרה שאין מספר */
+        background: rgba(148, 163, 184, 0.15);
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        color: #cbd5e1;
         font-weight: 900;
         font-size: 0.8rem;
     }
