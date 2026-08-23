@@ -20,7 +20,7 @@
  * @property {string} label    תווית קצרה — לסרגל הניווט
  * @property {string} title    כותרת מלאה — לאריח באזור האישי
  * @property {string} desc     משפט הסבר — לאריח באזור האישי
- * @property {'pending'|'expiring'|'ads'|'ratings'} [alert] איזה מונה-המתנה שייך למסך
+ * @property {'pending'|'expiring'|'ads'} [alert] איזה מונה-המתנה שייך למסך
  * @property {'members'} [count] מונה "כמה נתונים יש" (תגית אפורה, לא התראה)
  * @property {boolean} [navOnly] מוצג רק בסרגל הניווט — לא כאריח באזור האישי
  */
@@ -82,7 +82,8 @@ export function adminNav(isAdmin, superAdmin = false) {
             label: 'דירוגים',
             title: 'דירוגי שביעות רצון',
             desc: 'מה החברים כתבו על כל עסקה',
-            alert: 'ratings',
+            // בלי בועת התראה: דירוג אינו משימה שממתינה לטיפול, והמספר
+            // בכותרת הלשונית מספיק. מי שעדיין לא נענה מסומן בכרטיס עצמו.
         },
         {
             href: '/admin/ads',

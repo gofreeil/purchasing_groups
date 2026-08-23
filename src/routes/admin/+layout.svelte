@@ -20,7 +20,7 @@
 
     let isAdmin = $derived(Boolean(data.isAdmin));
     let nav = $derived(adminNav(isAdmin, Boolean(data.superAdmin)));
-    let pending = $derived(data.pending ?? { pending: 0, expiring: 0, ads: 0, ratings: 0, members: 0 });
+    let pending = $derived(data.pending ?? { pending: 0, expiring: 0, ads: 0, members: 0 });
     // ?tab=... הוא מה שקובע איזו לשונית פעילה ב-/admin (ראו admin/+page.svelte)
     let currentTab = $derived($page.url.searchParams.get('tab'));
 

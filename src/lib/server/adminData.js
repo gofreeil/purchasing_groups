@@ -35,17 +35,16 @@ export async function getAllRatings({ fetch: f = fetch } = {}) {
 export const needsReply = (r) => !r?.admin_reply && !(r?.replies?.length > 0);
 
 /**
- * מוני הפרסומות והדירוגים לסרגל הניווט. כל מקור נכשל בנפרד ומחזיר 0.
+ * מונה הפרסומות שממתינות לאישור, לבועה בסרגל הניווט.
+ *
+ * לדירוגים אין בועה בכוונה: דירוג אינו משימה שממתינה לטיפול, והמספר
+ * שבכותרת הלשונית מספיק. needsReply עדיין מסמן כרטיס בודד שלא נענה.
+ *
  * @param {{ fetch?: typeof fetch }} [opts]
  */
 export async function getExternalCounts({ fetch: f = fetch } = {}) {
-    const [ads, ratings] = await Promise.all([
-        listAllForAdmin({ fetch: f })
-            .then((list) => list.filter((/** @type {any} */ a) => a.status === 'pending').length)
-            .catch(() => 0),
-        getAllRatings({ fetch: f })
-            .then((list) => list.filter(needsReply).length)
-            .catch(() => 0),
-    ]);
-    return { ads, ratings };
+    const ads = await listAllForAdmin({ fetch: f })
+        .then((list) => list.filter((/** @type {any} */ a) => a.status === 'pending').length)
+        .catch(() => 0);
+    return { ads };
 }

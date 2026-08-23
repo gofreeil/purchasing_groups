@@ -109,25 +109,24 @@ export async function extendMembership(_id, _months) {
 
 /** מבנה מוני ההמתנה כשאין נתונים — נופלים לזה בכל כשל. */
 export function noPendingCounts() {
-    return { pending: 0, expiring: 0, ads: 0, ratings: 0, members: 0, total: 0 };
+    return { pending: 0, expiring: 0, ads: 0, members: 0, total: 0 };
 }
 
 /**
- * הבועות האדומות בסרגל הניווט של הפאנל.
- * @param {{ ads?: number, ratings?: number }} [extra] מונים שמגיעים ממקורות אמיתיים
+ * הבועות האדומות בסרגל הניווט של הפאנל. רק דברים שבאמת ממתינים לטיפול -
+ * דירוגים אינם ביניהם (המספר שלהם מופיע בכותרת הלשונית בלבד).
+ * @param {{ ads?: number }} [extra] מונים שמגיעים ממקורות אמיתיים
  */
 export async function getPendingCounts(extra = {}) {
     const all = await listAllMemberships();
     const pending = all.filter((m) => m.status === 'pending').length;
     const expiring = all.filter((m) => m.status === 'active' && expiryState(m) === 'soon').length;
     const ads = extra.ads ?? 0;
-    const ratings = extra.ratings ?? 0;
     return {
         pending,
         expiring,
         ads,
-        ratings,
         members: new Set(all.map((m) => m.userId)).size,
-        total: pending + expiring + ads + ratings,
+        total: pending + expiring + ads,
     };
 }
