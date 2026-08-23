@@ -30,6 +30,17 @@
     let memberships = $derived(data.memberships ?? []);
     let summary = $derived(data.summary ?? { totalSaved: 0, monthlySaving: 0, activeCount: 0, totalCount: 0, expiringSoon: 0 });
     let campaigns = $derived(data.campaigns ?? []);
+    let myAds = $derived(data.myAds ?? []);
+
+    /** תווית המצב של פרסומת. "מאושרת" לבדה מטעה: פרסומת מאושרת יכולה
+     *  להיות מושהית או פגת-תוקף, כלומר לא על האתר. @param {any} ad */
+    function adState(ad) {
+        if (ad.status === 'pending') return { label: 'ממתינה לאישור', tone: 'warn' };
+        if (ad.status === 'rejected') return { label: 'נדחתה', tone: 'danger' };
+        if (ad.paused) return { label: 'מושהית', tone: 'muted' };
+        if (!ad.live) return { label: 'פג התוקף', tone: 'muted' };
+        return { label: 'באוויר', tone: 'ok' };
+    }
     let tiles = $derived(adminTiles(Boolean(data.isAdmin), Boolean(data.superAdmin)));
 
     // "חבר מאז" — ההצטרפות הראשונה שלו לאיזושהי עסקה
@@ -187,6 +198,49 @@
                 </div>
             {/if}
         </section>
+
+        <!-- ═══ הפרסומות שלי ═══ -->
+        <!-- מוצג רק למי שיש לו פרסומות. "ערוך" פותח את הפרסומת בעורך
+             עם התוכן שרץ עליה עכשיו, והשליחה מחליפה בדיוק אותה. -->
+        {#if myAds.length}
+            <section>
+                <h2 class="sec-title">📢 הפרסומות שלי</h2>
+                <div class="ads">
+                    {#each myAds as ad (ad.id)}
+                        {@const st = adState(ad)}
+                        <div class="ad-row">
+                            <span class="pill {st.tone}">{st.label}</span>
+                            <span class="ad-body">
+                                <strong>{ad.title || 'ללא כותרת'}</strong>
+                                <span class="ad-meta">
+                                    {#if ad.slot}<span>מקום {ad.slot} בטור</span>{/if}
+                                    {#if ad.slot && ad.expiresAt}<span class="sep">·</span>{/if}
+                                    {#if ad.expiresAt}<span>עד {fmtDate(ad.expiresAt)}</span>{/if}
+                                    {#if ad.replacesTitle}
+                                        <span class="sep">·</span>
+                                        <span>עדכון ל"{ad.replacesTitle}"</span>
+                                    {/if}
+                                </span>
+                                {#if ad.status === 'rejected' && ad.rejectionReason}
+                                    <span class="ad-reason">סיבת הדחייה: {ad.rejectionReason}</span>
+                                {/if}
+                            </span>
+                            <a
+                                class="ad-edit"
+                                href="/advertise/builder?edit={ad.id}"
+                                title="פתיחת הפרסומת בעורך"
+                            >
+                                ✏️ ערוך
+                            </a>
+                        </div>
+                    {/each}
+                </div>
+                <p class="ads-note">
+                    מה שרץ על האתר נשאר באוויר עד שהעדכון יאושר, ואז מתחלף בו —
+                    באותו מקום בטור ועם אותו תאריך סיום.
+                </p>
+            </section>
+        {/if}
 
         <!-- ═══ מה עוד אפשר ═══ -->
         {#if notJoined.length}
@@ -564,6 +618,73 @@
         background: rgba(255, 255, 255, 0.06);
         border-color: rgba(255, 255, 255, 0.15);
         color: #cbd5e1;
+    }
+
+    /* ── הפרסומות שלי ── */
+    .ads {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .ad-row {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.9rem;
+        padding: 0.7rem 0.9rem;
+    }
+    .ad-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        flex: 1;
+        min-width: 0;
+    }
+    .ad-body strong {
+        color: #f1f5f9;
+        font-size: 0.95rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .ad-meta {
+        color: #94a3b8;
+        font-size: 0.78rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+    .ad-meta .sep {
+        opacity: 0.45;
+    }
+    .ad-meta .sep {
+        opacity: 0.45;
+    }
+    .ad-reason {
+        color: #fca5a5;
+        font-size: 0.78rem;
+    }
+    .ad-edit {
+        flex-shrink: 0;
+        background: #facc15;
+        color: #1a1a1a;
+        font-weight: 800;
+        font-size: 0.82rem;
+        text-decoration: none;
+        border-radius: 0.6rem;
+        padding: 0.4rem 0.8rem;
+        transition: background 0.2s;
+    }
+    .ad-edit:hover {
+        background: #fde047;
+    }
+    .ads-note {
+        color: #94a3b8;
+        font-size: 0.78rem;
+        margin: 0.6rem 0 0;
+        line-height: 1.6;
     }
 
     /* ── עסקאות שעוד לא הצטרף אליהן ── */

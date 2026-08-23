@@ -86,6 +86,15 @@ function fromStrapi(row) {
         paused: row.landing?._paused === true,
         pausedDaysLeft:
             typeof row.landing?._pausedDaysLeft === 'number' ? row.landing._pausedDaysLeft : undefined,
+        // ----- עדכון של פרסומת קיימת -----
+        // כשמפרסם עורך פרסומת שלו ושולח, נוצרת רשומה חדשה שמקושרת לישנה.
+        // האישור מוריד את המקושרת ויורש ממנה את המקום בטור ואת תאריך
+        // הסיום, כך שהעדכון נכנס בדיוק במקומה ולא כפרסומת נוספת.
+        replacesAdId: typeof row.landing?._replacesAdId === 'string' ? row.landing._replacesAdId : '',
+        replacesTitle: typeof row.landing?._replacesTitle === 'string' ? row.landing._replacesTitle : '',
+        // הוחלפה בגרסה מעודכנת - היסטוריה, ולא פרסומת שנדחתה. מסוננת
+        // ממסך הניהול ומ"הפרסומות שלי" כדי שלא תיראה כדחייה אמיתית.
+        superseded: row.landing?._superseded === true,
     };
 }
 
@@ -99,11 +108,22 @@ function byDisplayOrder(a, b) {
 }
 
 /**
- * שליחת פרסומת חדשה לבדיקה (ad_status: pending).
+ * שליחת פרסומת לבדיקה (ad_status: pending).
+ *
+ * payload.editOfAdId = עריכה של פרסומת קיימת ("ערוך" על שורה מסוימת
+ * ב"הפרסומות שלי"). הגרסה החדשה נכנסת כבקשה חדשה שמקושרת לישנה, ולא
+ * דורסת אותה: מה שרץ על האתר נשאר באוויר עד שהעדכון יאושר, ורק אז
+ * מתחלף בו - באותו מקום בטור ועם אותו תאריך סיום. מזהה שאינו שייך
+ * למפרסם (טעות או ניחוש) פשוט לא מכובד, והשליחה נכנסת כפרסומת חדשה.
+ *
  * @param {any} payload
  * @param {{ fetch?: typeof fetch }} [opts]
  */
 export async function submitAd(payload, { fetch: f = fetch } = {}) {
+    const target = payload.editOfAdId
+        ? await getOwnAdForEdit(payload.editOfAdId, payload.submittedBy ?? {}, { fetch: f })
+        : null;
+
     const res = await strapiPost(
         ENDPOINT,
         {
@@ -123,6 +143,9 @@ export async function submitAd(payload, { fetch: f = fetch } = {}) {
                 _codeRequested: payload.payment === 'code',
                 _requestedDurationDays: normalizePlanDays(payload.requestedDurationDays),
                 _mainImageFit: parseAdImageFit(payload.mainImageFit),
+                // הקישור לפרסומת שהעדכון בא להחליף. הכותרת נשמרת לצידו
+                // כדי שמסך הניהול יוכל לומר "עדכון ל..." בלי שליפה נוספת.
+                ...(target ? { _replacesAdId: target.id, _replacesTitle: target.title } : {}),
             },
             submitted_by_id: payload.submittedBy?.id ?? '',
             submitted_by_email: payload.submittedBy?.email ?? '',
@@ -133,7 +156,74 @@ export async function submitAd(payload, { fetch: f = fetch } = {}) {
     );
     invalidateAdsCache();
     const row = res?.data;
-    return { id: row?.documentId ?? '', status: 'pending' };
+    const id = row?.documentId ?? '';
+    // עדכונים קודמים לאותה פרסומת שעדיין ממתינים לא נשארים בתור: האדמין
+    // אמור לראות בקשה אחת - האחרונה - ולא שלוש שנראות כפולות.
+    if (target && id) await retireStalePendingEdits(target.id, id, { fetch: f });
+    return { id, status: 'pending', replacesAdId: target?.id ?? '', replacesTitle: target?.title ?? '' };
+}
+
+/**
+ * מוריד מהתור גרסה שהוחלפה: לא "נדחתה" - הוחלפה. הסימון חי בתוך
+ * ה-landing (אין עמודה בסכמה), ולכן חובה לשלוח את כל האובייקט - Strapi
+ * מחליף עמודת json במלואה.
+ * @param {any} ad הרשומה כפי שחזרה מ-fromStrapi (עם landing מלא)
+ * @param {string} successorId
+ * @param {string} reason
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ */
+async function retireAd(ad, successorId, reason, { fetch: f = fetch, jwt = '' } = {}) {
+    await strapiPut(
+        `${ENDPOINT}/${encodeURIComponent(ad.id)}`,
+        {
+            ad_status: 'rejected',
+            decided_at: new Date().toISOString(),
+            rejection_reason: reason,
+            expires_at: '',
+            landing: { ...(ad.landing ?? {}), _superseded: true, _supersededBy: successorId },
+        },
+        { fetch: f, jwt },
+    );
+    invalidateAdsCache();
+}
+
+/**
+ * עדכונים ממתינים ישנים לאותה פרסומת - יורדים מהתור כשנשלח עדכון חדש.
+ * כישלון כאן לא מפיל את השליחה: הגרסה החדשה כבר נשמרה, והכפילות בתור
+ * היא אי-נוחות לאדמין ולא אובדן נתונים.
+ * @param {string} targetId
+ * @param {string} successorId
+ * @param {{ fetch?: typeof fetch }} [opts]
+ */
+async function retireStalePendingEdits(targetId, successorId, { fetch: f = fetch } = {}) {
+    try {
+        /** @type {Record<string, string>} */
+        const params = {
+            'filters[ad_status][$eq]': 'pending',
+            sort: 'submitted_at:desc',
+            'pagination[pageSize]': '50',
+        };
+        // בלי logo ו-main_image: הן ה-base64 הכבד, וכאן צריך רק את הקישור
+        ['ad_status', 'title', 'landing', 'submitted_at'].forEach((fld, i) => {
+            params[`fields[${i}]`] = fld;
+        });
+        const data = await strapiGet(ENDPOINT, params, { fetch: f });
+        const stale = (data?.data ?? [])
+            .map(fromStrapi)
+            .filter(Boolean)
+            .filter(
+                (/** @type {any} */ a) =>
+                    a.id !== successorId && a.replacesAdId === targetId && !a.superseded,
+            );
+        for (const ad of stale) {
+            await retireAd(ad, successorId, 'הוחלפה בגרסה מעודכנת שהמפרסם שלח', { fetch: f });
+        }
+    } catch (err) {
+        console.warn(
+            'adsStore: retireStalePendingEdits failed',
+            err instanceof Error ? err.message : err,
+        );
+    }
 }
 
 /**
@@ -313,7 +403,12 @@ export async function listAllForAdmin({ fetch: f = fetch } = {}) {
         { sort: 'submitted_at:desc', 'pagination[pageSize]': 100 },
         { fetch: f },
     );
-    return (data?.data ?? []).map(fromStrapi).filter(Boolean);
+    // גרסה שהוחלפה בעדכון מאושר לא מוצגת: היא לא "נדחתה" ולא ממתינה -
+    // היא ההיסטוריה של פרסומת שכבר רצה על האתר בגרסה חדשה יותר.
+    return (data?.data ?? [])
+        .map(fromStrapi)
+        .filter(Boolean)
+        .filter((/** @type {any} */ a) => !a.superseded);
 }
 
 /**
@@ -333,10 +428,19 @@ export async function approveAd(id, { durationDays = DEFAULT_DURATION_DAYS, fetc
     let slot;
     /** @type {any} */
     let landing;
+    // הפרסומת שהאישור הזה בא להחליף (עדכון שמפרסם שלח על פרסומת קיימת)
+    /** @type {any} */
+    let replaced = null;
     try {
         const all = await listAllForAdmin({ fetch: f });
         const current = all.find((/** @type {any} */ a) => a.id === id);
         landing = current?.landing;
+        replaced = current?.replacesAdId
+            ? all.find(
+                  (/** @type {any} */ a) =>
+                      a.id === current.replacesAdId && a.status === 'approved',
+              ) ?? null
+            : null;
         const approvedNow = all.filter(
             (/** @type {any} */ a) => a.status === 'approved' && a.id !== id,
         );
@@ -348,24 +452,45 @@ export async function approveAd(id, { durationDays = DEFAULT_DURATION_DAYS, fetc
             slot = 0;
             while (taken.has(slot)) slot++;
         }
+        // עדכון נכנס *במקום* הפרסומת שהוא מחליף - אותה משבצת בדיוק,
+        // גם אם היא תפוסה כרגע על ידה: היא יורדת מיד אחרי האישור.
+        if (replaced && typeof replaced.order === 'number' && replaced.order >= 0) {
+            slot = replaced.order;
+        }
     } catch (err) {
         // כשל בהקצאה לא מפיל אישור - הפרסומת תקבל מספר בפעולת הניהול הבאה
         console.warn('adsStore: slot assignment failed', err instanceof Error ? err.message : err);
     }
+
+    // התקופה שכבר שולמה ממשיכה כרגיל: עדכון תוכן לא מאריך ולא מקצר
+    // אותה, ולכן העדכון יורש את תאריך הסיום של הפרסומת שהוא מחליף.
+    const inheritedExpiry =
+        replaced?.expiresAt && Date.parse(replaced.expiresAt) > Date.now() ? replaced.expiresAt : '';
 
     /** @type {Record<string, unknown>} */
     const data = {
         ad_status: 'approved',
         decided_at: new Date().toISOString(),
         rejection_reason: '',
-        duration_days: days,
-        expires_at: expires.toISOString(),
+        duration_days: inheritedExpiry ? (replaced.durationDays ?? days) : days,
+        expires_at: inheritedExpiry || expires.toISOString(),
     };
     // Strapi מחליף עמודת json במלואה - שולחים את כל ה-landing עם המספר
     if (slot !== undefined && landing !== undefined) {
         data.landing = { ...(landing ?? {}), _order: slot };
     }
     await strapiPut(`${ENDPOINT}/${encodeURIComponent(id)}`, data, { fetch: f, jwt });
+    // רק אחרי שהעדכון באוויר מורידים את הישנה - כך אין רגע שבו המשבצת
+    // ריקה, וכישלון באמצע משאיר את הישנה חיה במקום כלום.
+    if (replaced) {
+        await retireAd(replaced, id, 'הוחלפה בגרסה מעודכנת שאושרה', { fetch: f, jwt }).catch(
+            (/** @type {unknown} */ err) =>
+                console.warn(
+                    'adsStore: retire replaced ad failed',
+                    err instanceof Error ? err.message : err,
+                ),
+        );
+    }
     invalidateAdsCache();
 }
 
@@ -646,4 +771,135 @@ export async function setAdSlot(id, requested, { fetch: f = fetch, jwt = '' } = 
         slot: target + 1,
         ...(occupant ? { swappedTitle: occupant.title, swappedSlot: cur + 1 } : {}),
     };
+}
+
+// ============================================================
+// "הפרסומות שלי" - הפרסומות של המפרסם המחובר, לעריכה מהאזור האישי
+// ------------------------------------------------------------
+// עד כאן פרסומת הייתה חד-כיוונית: המפרסם שולח, האדמין מאשר, וזהו -
+// לתקן כותרת או להחליף תמונה חייב לעבור דרך פאנל Strapi. שלוש
+// הפונקציות כאן פותחות את הכיוון ההפוך: לראות את הפרסומות שלי,
+// ולפתוח אחת מהן בבילדר לעריכה.
+// ============================================================
+
+/**
+ * האם הפרסומת שייכת למפרסם הזה. ההשוואה לפי מזהה המשתמש, ואם אין
+ * התאמה - לפי אימייל: מי שהתחבר פעם ב-Google ופעם בסיסמה מקבל מזהה
+ * אחר, ובלי הנפילה לאימייל הוא היה מאבד גישה לפרסומת שלו.
+ * @param {any} ad
+ * @param {{ id?: string, email?: string }} identity
+ */
+export function sameAdvertiser(ad, identity) {
+    const id = String(identity?.id ?? '').trim();
+    const email = String(identity?.email ?? '').trim().toLowerCase();
+    if (id && String(ad?.submittedBy?.id ?? '').trim() === id) return true;
+    if (email && String(ad?.submittedBy?.email ?? '').trim().toLowerCase() === email) return true;
+    return false;
+}
+
+/**
+ * @typedef {Object} MyAdSummary
+ * @property {string} id
+ * @property {string} title
+ * @property {string} subtitle
+ * @property {'pending'|'approved'|'rejected'} status
+ * @property {number} [slot] מקום בטור (1..12) - למאושרות בלבד
+ * @property {string} expiresAt
+ * @property {boolean} paused
+ * @property {boolean} live מוצגת בפועל על האתר עכשיו
+ * @property {string} rejectionReason
+ * @property {string} replacesTitle כותרת הפרסומת שהעדכון הזה בא להחליף
+ */
+
+/**
+ * כל הפרסומות של המפרסם - לרשימת "הפרסומות שלי" באזור האישי, שם לכל
+ * אחת יש כפתור עריכה משלה.
+ *
+ * השליפה מוגבלת לרשומות שלו ומדלגת על שתי עמודות ה-base64 הכבדות
+ * (logo, main_image): רשומה מלאה שוקלת מאות KB, והאזור האישי לא מציג
+ * את התמונות בכלל. גרסאות שהוחלפו לא נכללות - הן היסטוריה.
+ *
+ * @param {{ id?: string, email?: string }} identity
+ * @param {{ fetch?: typeof fetch }} [opts]
+ * @returns {Promise<MyAdSummary[]>}
+ */
+export async function getMyAds(identity, { fetch: f = fetch } = {}) {
+    const uid = String(identity?.id ?? '').trim();
+    const email = String(identity?.email ?? '').trim();
+    if (!uid && !email) return [];
+
+    /** @type {Record<string, string>} */
+    const params = { sort: 'submitted_at:desc', 'pagination[pageSize]': '50' };
+    [
+        'ad_status',
+        'title',
+        'subtitle',
+        'expires_at',
+        'duration_days',
+        'rejection_reason',
+        'submitted_at',
+        'submitted_by_id',
+        'submitted_by_email',
+        'landing',
+    ].forEach((fld, i) => {
+        params[`fields[${i}]`] = fld;
+    });
+    let i = 0;
+    if (uid) params[`filters[$or][${i++}][submitted_by_id][$eq]`] = uid;
+    if (email) params[`filters[$or][${i++}][submitted_by_email][$eq]`] = email;
+
+    try {
+        const data = await strapiGet(ENDPOINT, params, { fetch: f });
+        const now = Date.now();
+        /** @type {Record<string, number>} */
+        const rank = { approved: 0, pending: 1, rejected: 2 };
+        return (data?.data ?? [])
+            .map(fromStrapi)
+            .filter(Boolean)
+            // הסינון בשרת הוא לפי מזהה *או* אימייל; מוודאים כאן שוב שהשורה
+            // באמת של המפרסם, כדי שגם שינוי בסכמה לא ידליף פרסומת זרה.
+            .filter((/** @type {any} */ a) => !a.superseded && sameAdvertiser(a, identity))
+            .map((/** @type {any} */ a) => ({
+                id: a.id,
+                title: a.title,
+                subtitle: a.subtitle,
+                status: a.status,
+                // המספר נשמר לפרסומת באישור (_order, 0-based); בלי מספר
+                // שמור לא מנחשים - חישוב על רשימה חלקית ייתן מקום שגוי.
+                slot:
+                    a.status === 'approved' && typeof a.order === 'number'
+                        ? a.order + 1
+                        : undefined,
+                expiresAt: a.expiresAt,
+                paused: a.paused === true,
+                live:
+                    a.status === 'approved' &&
+                    !a.paused &&
+                    (!a.expiresAt || Date.parse(a.expiresAt) > now),
+                rejectionReason: a.rejectionReason,
+                replacesTitle: a.replacesTitle,
+            }))
+            .sort(
+                (/** @type {any} */ x, /** @type {any} */ y) =>
+                    (rank[x.status] ?? 9) - (rank[y.status] ?? 9) ||
+                    (x.slot ?? 99) - (y.slot ?? 99),
+            );
+    } catch (err) {
+        console.warn('adsStore: getMyAds failed', err instanceof Error ? err.message : err);
+        return [];
+    }
+}
+
+/**
+ * הפרסומת המלאה לעריכה בבילדר - לבעליה בלבד. הבדיקה נעשית בשרת לפי
+ * זהות המפרסם, כך שאי אפשר למשוך תוכן של פרסומת זרה בניחוש מזהה.
+ * @param {string} id
+ * @param {{ id?: string, email?: string }} identity
+ * @param {{ fetch?: typeof fetch }} [opts]
+ */
+export async function getOwnAdForEdit(id, identity, { fetch: f = fetch } = {}) {
+    if (!id || (!identity?.id && !identity?.email)) return null;
+    const ad = await getAd(id, { fetch: f });
+    if (!ad || ad.superseded) return null;
+    return sameAdvertiser(ad, identity) ? ad : null;
 }

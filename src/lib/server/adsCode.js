@@ -82,7 +82,9 @@ async function resolveAdminUserIds() {
 
 /** הודעה על *כל* בקשת פרסום חדשה — לא רק על שימוש בקוד. בלי זה פרסומת
  *  נשמרה כ"ממתינה לאישור" בשקט ואיש לא ידע עליה.
- *  @param {{ adTitle: string, durationDays: number, usedOwnerCode: boolean, submitter?: { name?: string | null, email?: string | null } | null }} info */
+ *  replacesTitle = עדכון לפרסומת שכבר רצה על האתר; בלי זה ההתראה נראתה
+ *  כבקשה חדשה, והאדמין חשב שהמפרסם מבקש משבצת שנייה.
+ *  @param {{ adTitle: string, durationDays: number, usedOwnerCode: boolean, replacesTitle?: string, submitter?: { name?: string | null, email?: string | null } | null }} info */
 export async function notifyAdminsNewAd(info) {
     try {
         const receivers = await resolveAdminUserIds();
@@ -93,9 +95,11 @@ export async function notifyAdminsNewAd(info) {
         const who = info.submitter?.email
             ? `${info.submitter.name || 'ללא שם'} (${info.submitter.email})`
             : 'משתמש לא מחובר';
+        const isUpdate = Boolean(info.replacesTitle);
         const content =
-            `📢 בקשת פרסום חדשה — ${SITE_NAME}\n` +
+            `${isUpdate ? '✏️ עדכון לפרסומת קיימת' : '📢 בקשת פרסום חדשה'} — ${SITE_NAME}\n` +
             `פרסומת: "${info.adTitle}"\n` +
+            (isUpdate ? `מחליפה את: "${info.replacesTitle}"\n` : '') +
             `מי שלח: ${who}\n` +
             `תקופה מבוקשת: ${planLabelWithPrice(info.durationDays)}\n` +
             `תשלום: ${info.usedOwnerCode ? 'קוד בעלים' : 'ממתין לתשלום'}\n` +

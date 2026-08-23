@@ -90,6 +90,12 @@
                         <span class="status-pill {ad.status}">
                             {ad.status === "pending" ? "ממתינה" : ad.status === "approved" ? "מאושרת" : "נדחתה"}
                         </span>
+                        {#if ad.replacesTitle}
+                            <!-- עדכון שמפרסם שלח על פרסומת שכבר רצה. בלי החיווי
+                                 הזה זה נראה כמו בקשה לפרסומת שנייה, והאישור היה
+                                 מפתיע: הישנה יורדת ברגע שהעדכון מאושר. -->
+                            <span class="status-pill approved">✏️ עדכון ל"{ad.replacesTitle}"</span>
+                        {/if}
                         {#if ad.status === "approved" && ad.paused}
                             <span class="status-pill pending">⏸ מושהית — {ad.pausedDaysLeft ?? 0} ימים שמורים</span>
                         {/if}
@@ -116,6 +122,21 @@
                             {#if ad.landing.website}
                                 · 🌐 <a href={ad.landing.website} target="_blank" rel="noopener noreferrer">{ad.landing.website}</a>
                             {/if}
+                        </p>
+                    {/if}
+                    {#if ad.mine && ad.status !== "rejected"}
+                        <!-- קיצור דרך למי שהפרסומת שלו: אותו מסלול בדיוק כמו
+                             "ערוך" ב"הפרסומות שלי" באזור האישי. -->
+                        <p class="ad-meta">
+                            <a class="ad-edit-link" href="/advertise/builder?edit={ad.id}">
+                                ✏️ ערוך את תוכן הפרסומת
+                            </a>
+                        </p>
+                    {/if}
+                    {#if ad.replacesTitle && ad.status === "pending"}
+                        <p class="ad-meta">
+                            אישור העדכון יוריד את "{ad.replacesTitle}" ויכניס את זו
+                            במקומה — באותו מקום בטור ועם אותו תאריך סיום.
                         </p>
                     {/if}
                     {#if ad.rejectionReason}
@@ -284,6 +305,12 @@
         flex-wrap: wrap;
         justify-content: center;
     }
+    .ad-edit-link {
+        color: #fcd34d;
+        font-weight: 800;
+        text-decoration: none;
+    }
+    .ad-edit-link:hover { text-decoration: underline; }
     .tab-btn {
         padding: 0.5rem 1.1rem;
         border-radius: 999px;

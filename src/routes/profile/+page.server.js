@@ -2,6 +2,7 @@ import { isAdmin, isSuperAdmin } from '$lib/auth.js';
 import { getCampaignList } from '$lib/campaigns.js';
 import { listMembershipsForUser } from '$lib/server/membershipsSource.js';
 import { summarize } from '$lib/memberships.js';
+import { getMyAds } from '$lib/server/adsStore.js';
 
 /**
  * האזור האישי — העסקאות שהמשתמש חבר בהן, ממתי, עד מתי וכמה חסך.
@@ -9,11 +10,17 @@ import { summarize } from '$lib/memberships.js';
  * הרשימה ריקה והמסך מציג "עוד לא הצטרפת לעסקאות". הקמפיינים עצמם
  * מגיעים מ-campaigns.js, כדי שהכותרות והאייקונים יהיו זהים לדף הבית.
  */
-export async function load({ locals }) {
+export async function load({ locals, fetch }) {
     const user = locals.user;
     if (!user) return { authorized: false };
 
     const memberships = await listMembershipsForUser(user).catch(() => []);
+    // הפרסומות של המשתמש - לרשימת "הפרסומות שלי", שם לכל אחת יש כפתור
+    // עריכה. תקלה מול Strapi לא מפילה את האזור האישי: הרשימה פשוט ריקה.
+    const myAds = await getMyAds(
+        { id: String(user.id ?? ''), email: user.email ?? '' },
+        { fetch },
+    ).catch(() => []);
     const joined = new Set(memberships.map((m) => m.campaignSlug));
 
     // רק מה שהמסך באמת קורא — שם, אייקון ותמונה — ולא אובייקט הקמפיין
@@ -32,6 +39,7 @@ export async function load({ locals }) {
     return {
         authorized: true,
         memberships,
+        myAds,
         summary: summarize(memberships),
         campaigns,
         isAdmin: isAdmin(user),

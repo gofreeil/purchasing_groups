@@ -3,6 +3,7 @@
     import { browser } from "$app/environment";
     import { goto } from "$app/navigation";
     import { adPlans, planFor, normalizePlanDays, DEFAULT_PLAN_DAYS } from "$lib/adPlans.js";
+    import { AD_DRAFT_KEY, getAdEditTarget } from "$lib/adDraft.js";
     import {
         AD_BODY_LIMIT, AD_EFFECTIVE_LIMIT, SIDE_IMAGE_MAX_BYTES,
         bodyBytes, fmtWeight, approxDataUrlBytes, compressImageToFit,
@@ -14,7 +15,11 @@
 
     let { data } = $props();
 
-    const LS_KEY = "pg_ad_builder_draft_v1";
+    const LS_KEY = AD_DRAFT_KEY;
+
+    // הפרסומת שנערכת עכשיו - נקבע בבילדר (?edit=) ונוסע איתנו לשליחה,
+    // כך שהאישור יחליף בדיוק אותה ולא יוסיף פרסומת נוספת לידה.
+    let editingAdId = $state("");
     const PAID_KEY = "ad_paid";
     const PAID_AT_KEY = "ad_paid_at";
 
@@ -101,6 +106,9 @@
                 // עותק עמוק — כיווץ תמונות מוצר לא ישנה את המצב שעל המסך
                 products: products.map((p) => ({ ...p })),
             },
+            // עריכה של פרסומת קיימת. השרת מאמת שהיא באמת של המפרסם -
+            // מזהה זר פשוט לא מכובד ונכנס כפרסומת חדשה.
+            editOfAdId: editingAdId,
             // הקוד עצמו נשלח לשרת והוא מאמת אותו שוב — הדגל לא נקבע בדפדפן
             ownerCode: payCodeOk ? payCode : "",
             requestedDurationDays: payDuration,
@@ -295,6 +303,7 @@
     onMount(() => {
         if (!browser) return;
         checkAccess();
+        editingAdId = getAdEditTarget();
 
         // שחזור התקופה שנבחרה במחירון או בביקור קודם - עקבי עם הבילדר
         const storedPlanDays = localStorage.getItem(PLAN_DAYS_KEY);
@@ -457,7 +466,9 @@
     }
 
     function goBack() {
-        goto("/advertise/builder");
+        // ?edit נשמר בחזרה: בלעדיו הבילדר מנקה את יעד העריכה, והשליחה
+        // הבאה הייתה נכנסת כפרסומת חדשה במקום להחליף את הקיימת.
+        goto(editingAdId ? `/advertise/builder?edit=${encodeURIComponent(editingAdId)}` : "/advertise/builder");
     }
 
     // ===== לא מחובר: שומרים טיוטה ומעבירים להתחברות =====
@@ -906,7 +917,7 @@
                 {/if}
 
                 <button type="button" onclick={submitAd} disabled={!canSubmit || submitting} class="submit-btn" class:enabled={canSubmit && !submitting}>
-                    {#if submitting}שולח...{:else}🚀 שליחת הפרסומת לאישור{/if}
+                    {#if submitting}שולח...{:else if editingAdId}💾 שליחת העדכון לאישור{:else}🚀 שליחת הפרסומת לאישור{/if}
                 </button>
             </section>
 
@@ -915,14 +926,20 @@
             <section class="step-card success-card">
                 <div class="done-box">
                     <div class="done-emoji">🎉</div>
-                    <h2>הפרסומת נשלחה לאישור!</h2>
+                    <h2>{editingAdId ? "העדכון נשלח לאישור!" : "הפרסומת נשלחה לאישור!"}</h2>
                     <p>
-                        הצוות שלנו יעבור על הפרסומת ויאשר אותה בהקדם.
-                        ברגע שתאושר - היא תופיע באתר ותקבלו עדכון.
+                        {#if editingAdId}
+                            הפרסומת הקיימת ממשיכה לרוץ על האתר כרגיל. ברגע
+                            שהעדכון יאושר הוא ייכנס במקומה - באותו מקום בטור
+                            ועם אותו תאריך סיום.
+                        {:else}
+                            הצוות שלנו יעבור על הפרסומת ויאשר אותה בהקדם.
+                            ברגע שתאושר - היא תופיע באתר ותקבלו עדכון.
+                        {/if}
                     </p>
                     <div class="done-actions">
                         <a href="/" class="l-btn ghost">לדף הבית</a>
-                        <a href="/advertise" class="l-btn amber">לדף הפרסום</a>
+                        <a href="/profile" class="l-btn amber">לפרסומות שלי</a>
                     </div>
                 </div>
             </section>

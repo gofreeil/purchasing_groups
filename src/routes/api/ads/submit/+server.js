@@ -42,6 +42,9 @@ export async function POST({ request, fetch, locals }) {
                 },
                 title: payload.title,
                 subtitle: payload.subtitle,
+                // עריכה של פרסומת קיימת: המזהה נבדק ב-submitAd מול זהות
+                // המפרסם, ומזהה שאינו שלו נכנס כפרסומת חדשה במקום להחליף.
+                editOfAdId: typeof payload.editOfAdId === 'string' ? payload.editOfAdId : '',
                 payment: usedOwnerCode ? 'code' : 'pending',
                 requestedDurationDays,
                 hoverText: payload.hoverText ?? '',
@@ -78,6 +81,7 @@ export async function POST({ request, fetch, locals }) {
             adTitle: payload.title,
             durationDays: requestedDurationDays,
             usedOwnerCode,
+            replacesTitle: ad.replacesTitle,
             submitter: { name: user.username ?? user.name ?? '', email: user.email ?? '' },
         });
         // התראה נפרדת על שימוש בקוד — נשמרת כדי לא לאבד את ההתראה הייעודית
@@ -88,7 +92,9 @@ export async function POST({ request, fetch, locals }) {
                 submitter: { name: user.username ?? user.name ?? '', email: user.email ?? '' },
             });
         }
-        return json({ ok: true, id: ad.id, status: ad.status });
+        // isUpdate מנסח את מסך התודה: "העדכון נשלח" ולא "הפרסומת נשלחה",
+        // כי מה שרץ על האתר נשאר באוויר עד שהאדמין יאשר את החדשה.
+        return json({ ok: true, id: ad.id, status: ad.status, isUpdate: Boolean(ad.replacesAdId) });
     } catch (err) {
         console.error('ads/submit failed:', err);
         // תקרת koa-body של Strapi (~1MB) — שגיאה שהמפרסם יכול לתקן בעצמו

@@ -4,6 +4,7 @@
     import { goto } from "$app/navigation";
     import { adImgFit, AD_ZOOM_MIN, AD_ZOOM_MAX } from "$lib/adImageFit.js";
     import { normalizePlanDays } from "$lib/adPlans.js";
+    import { AD_DRAFT_KEY, getAdEditTarget, setAdEditTarget, clearAdEditTarget } from "$lib/adDraft.js";
     import {
         AD_EFFECTIVE_LIMIT, MAIN_IMAGE_MAX_BYTES,
         bodyBytes, fmtWeight, approxDataUrlBytes, compressImageToFit, compressLogoFile,
@@ -16,7 +17,7 @@
     let { data } = $props();
 
     // ===== שמירה מקומית =====
-    const LS_KEY = "pg_ad_builder_draft_v1";
+    const LS_KEY = AD_DRAFT_KEY;
     const PAID_KEY = "ad_paid";
     const PAID_AT_KEY = "ad_paid_at";
 
@@ -564,6 +565,58 @@
         accessChecked = true;
     }
 
+    // ===== עריכת פרסומת קיימת =====
+    // הגעה עם ?edit=<id> מ"הפרסומות שלי": התוכן שרץ על האתר נטען מהשרת
+    // ודורס את הטיוטה, כדי שהמפרסם יערוך את מה שבאמת מוצג ולא טיוטה
+    // ישנה שנשארה כאן. המזהה נשמר ונוסע עם השליחה, וכך האישור מחליף
+    // בדיוק את הפרסומת הזו.
+    let editingAdId = $state("");
+    let editLoad = $state(/** @type {'idle'|'loading'|'ok'|'error'} */ ("idle"));
+
+    /** @param {string} id */
+    async function loadAdForEdit(id) {
+        editLoad = "loading";
+        try {
+            const res = await fetch(`/api/ads/mine?id=${encodeURIComponent(id)}`);
+            if (!res.ok) throw new Error(String(res.status));
+            const ad = await res.json();
+
+            logo = ad.logo ?? "";
+            logoOriginal = ad.logo ?? "";
+            mainImage = ad.mainImage ?? "";
+            mainImageObjectX = typeof ad.mainImageFit?.x === "number" ? ad.mainImageFit.x : 50;
+            mainImageObjectY = typeof ad.mainImageFit?.y === "number" ? ad.mainImageFit.y : 50;
+            mainImageZoom = typeof ad.mainImageFit?.z === "number" ? ad.mainImageFit.z : 1;
+            title = ad.title ?? "";
+            subtitle = ad.subtitle ?? "";
+            hoverText = ad.hoverText ?? "";
+            cta = ad.cta || "הקלק לפרטים והזמנות";
+            gradient = ad.gradient || gradient;
+
+            const L = ad.landing ?? {};
+            landingHeadline = L.headline ?? "";
+            landingPitch = L.pitch ?? "";
+            landingExtended = L.extended ?? "";
+            landingImage = L.image ?? "";
+            landingAdvantages = [L.advantages?.[0] ?? "", L.advantages?.[1] ?? "", L.advantages?.[2] ?? ""];
+            uniqueness = L.uniqueness ?? "";
+            phone = L.phone ?? "";
+            whatsapp = L.whatsapp ?? "";
+            website = L.website ?? "";
+            email = L.email ?? "";
+            address = L.address ?? "";
+            hours = L.hours ?? "";
+            products = Array.isArray(L.products) ? L.products : [];
+            nextProductId = (products.reduce((/** @type {number} */ m, /** @type {any} */ p) => Math.max(m, p.id), 0) || 0) + 1;
+
+            editLoad = "ok";
+        } catch {
+            // לא דורסים כלום בכישלון: מוטב שהמפרסם יראה את הטיוטה שלו
+            // עם אזהרה, מאשר טופס ריק שיישלח כפרסומת חדשה.
+            editLoad = "error";
+        }
+    }
+
     // ===== שמירה אוטומטית =====
     onMount(() => {
         if (!browser) return;
@@ -649,6 +702,22 @@
             } catch {}
             // טיוטה ישנה שחורגת מהתקציב מכווצת מיד — לא מחכים לכישלון בסוף
             void repairDraftWeight();
+        }
+
+        // ?edit=<id> חייב לרוץ *אחרי* שחזור הטיוטה - הוא בא לדרוס אותה.
+        // בלי הפרמטר מנקים את היעד: מפרסם שנכנס לבנות פרסומת חדשה אחרי
+        // שערך פעם אחרת לא אמור להחליף בטעות את הקיימת שלו.
+        const editId = new URLSearchParams(location.search).get("edit") ?? "";
+        if (editId) {
+            editingAdId = editId;
+            // חזרה מעורך דף הנחיתה לאותה פרסומת - ממשיכים מהטיוטה
+            // שעל המסך, ולא מושכים מחדש ומאבדים את מה שכבר שונה.
+            const continuing = getAdEditTarget() === editId;
+            setAdEditTarget(editId);
+            if (!continuing) void loadAdForEdit(editId);
+            else editLoad = "ok";
+        } else {
+            clearAdEditTarget();
         }
 
         return () => {
@@ -822,6 +891,33 @@
                 מעצבים את הפרסומת שלכם צעד-צעד - בדיוק כפי שתיראה באתר.
                 <br />כל שינוי נשמר אוטומטית.
             </p>
+
+            <!-- עריכת פרסומת קיימת -->
+            {#if editingAdId}
+                <div class="b-editing" class:b-editing-err={editLoad === "error"}>
+                    <span class="b-cd-icon">
+                        {editLoad === "loading" ? "⏳" : editLoad === "error" ? "⚠️" : "✏️"}
+                    </span>
+                    <div>
+                        <p class="b-cd-title">
+                            {editLoad === "loading"
+                                ? "טוענים את הפרסומת לעריכה..."
+                                : editLoad === "error"
+                                  ? "לא הצלחנו לטעון את הפרסומת"
+                                  : "עריכת פרסומת קיימת"}
+                        </p>
+                        <p class="b-cd-text">
+                            {#if editLoad === "error"}
+                                רעננו את הדף כדי לנסות שוב. שליחה עכשיו תיכנס
+                                כפרסומת חדשה ולא תחליף את הקיימת.
+                            {:else}
+                                מה שרץ על האתר נשאר באוויר עד שהעדכון יאושר, ואז
+                                מתחלף בו — באותו מקום בטור ועם אותו תאריך סיום.
+                            {/if}
+                        </p>
+                    </div>
+                </div>
+            {/if}
 
             <!-- ספירה לאחור ליום העריכה החינמי -->
             {#if paidAt && !freeEditExpired && freeEditUntil}
@@ -1565,7 +1661,7 @@
         line-height: 1.6;
     }
 
-    .b-countdown, .b-expired, .b-autosave {
+    .b-countdown, .b-expired, .b-autosave, .b-editing {
         margin: 1.25rem auto 0;
         max-width: 42rem;
         border-radius: 1rem;
@@ -1581,6 +1677,14 @@
     }
     .b-expired {
         border: 1px solid rgba(239, 68, 68, 0.4);
+        background: rgba(239, 68, 68, 0.1);
+    }
+    .b-editing {
+        border: 2px solid rgba(56, 189, 248, 0.5);
+        background: rgba(56, 189, 248, 0.1);
+    }
+    .b-editing-err {
+        border-color: rgba(239, 68, 68, 0.5);
         background: rgba(239, 68, 68, 0.1);
     }
     .b-autosave {

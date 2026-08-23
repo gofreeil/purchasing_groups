@@ -12,6 +12,7 @@ import {
     normalizeDurationDays,
     pauseAd,
     resumeAd,
+    sameAdvertiser,
 } from '$lib/server/adsStore.js';
 import { normalizePlanDays, planLabel } from '$lib/adPlans.js';
 
@@ -34,9 +35,15 @@ export async function load({ locals, fetch }) {
         ads = await listAllForAdmin({ fetch });
         // מספר המקום של כל מאושרת בטור (1..12) - לתג ולבורר "מקום" בכרטיס
         const slotMap = computeAdSlots(ads.filter((/** @type {any} */ a) => a.status === 'approved'));
-        ads = ads.map((/** @type {any} */ a) =>
-            slotMap.has(a.id) ? { ...a, slot: slotMap.get(a.id) } : a,
-        );
+        // mine = הפרסומת שייכת למנהל המחובר, ולכן הוא רשאי לפתוח אותה
+        // בעורך. עריכה של פרסומת של מפרסם אחר נחסמת בשרת ממילא, ואין
+        // טעם להציג כפתור שיחזיר 404.
+        const identity = { id: String(locals.user?.id ?? ''), email: locals.user?.email ?? '' };
+        ads = ads.map((/** @type {any} */ a) => ({
+            ...a,
+            ...(slotMap.has(a.id) ? { slot: slotMap.get(a.id) } : {}),
+            mine: sameAdvertiser(a, identity),
+        }));
     } catch (err) {
         console.error('admin/ads load failed:', err);
         backendUnavailable = true;
