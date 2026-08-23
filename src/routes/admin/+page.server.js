@@ -1,8 +1,9 @@
 import { fail } from '@sveltejs/kit';
 import { isAdmin, isSuperAdmin } from '$lib/auth.js';
-import { getCampaignList } from '$lib/campaigns.js';
+import { listCampaignsForAdmin } from '$lib/server/campaignsStore.js';
 import { expiryState, savedSoFar } from '$lib/memberships.js';
 import {
+    SOURCE_CONNECTED,
     listAllMemberships,
     listMembers,
     setMembershipStatus,
@@ -19,15 +20,16 @@ export async function load({ locals, fetch }) {
     const user = locals.user;
     if (!isAdmin(user)) return { authorized: false, user: user ?? null };
 
-    // הדירוגים מגיעים מ-Strapi ועלולים ליפול; כל השאר מקומי.
-    const [memberships, members, ratings] = await Promise.all([
+    // הדירוגים ותוכן העסקאות מגיעים מ-Strapi ועלולים ליפול; כל השאר מקומי.
+    const [memberships, members, ratings, campaigns] = await Promise.all([
         listAllMemberships().catch(() => []),
         listMembers().catch(() => []),
         getAllRatings({ fetch }).catch(() => []),
+        listCampaignsForAdmin({ fetch }).catch(() => []),
     ]);
 
     // סיכום פר-עסקה ללשונית "עסקאות": כמה חברים, כמה חיסכון, ומה הדירוג.
-    const deals = getCampaignList().map((c) => {
+    const deals = campaigns.map((c) => {
         const mine = memberships.filter((m) => m.campaignSlug === c.slug);
         const active = mine.filter((m) => m.status === 'active');
         const rated = ratings.filter((r) => r.campaignSlug === c.slug && r.level > 0);
@@ -45,6 +47,8 @@ export async function load({ locals, fetch }) {
             totalSaved: mine.reduce((s, m) => s + savedSoFar(m), 0),
             ratingAvg: rated.length ? rated.reduce((s, r) => s + r.level, 0) / rated.length : 0,
             ratingCount: rated.length,
+            // כמה שדות תוכן נערכו בפאנל (דריסה על הקוד) - תגית בכרטיס
+            editedCount: c.editedKeys?.length ?? 0,
         };
     });
 
@@ -59,6 +63,9 @@ export async function load({ locals, fetch }) {
         authorized: true,
         user,
         superAdmin: isSuperAdmin(user),
+        // כל עוד אין מאגר מאחורי membershipsSource, המסך אומר זאת במפורש
+        // במקום להציג אפסים שנראים כמו נתונים.
+        sourceConnected: SOURCE_CONNECTED,
         memberships,
         members,
         deals,

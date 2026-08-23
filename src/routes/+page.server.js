@@ -1,13 +1,12 @@
 import { fetchSatisfactionResponses } from '$lib/strapi.js';
-import { getCampaignList } from '$lib/campaigns.js';
+import { getMergedCampaignList } from '$lib/server/campaignsStore.js';
+import { fetchDashboardRows } from '$lib/server/dashboardSheet.js';
 
 // ----- Google Sheet: מקור אמת לנתוני חברים וחיסכון -----
 // המבנה (לפי "סיכום רכישות קבוצתיות"):
 //   עמודה B (1) = תוויות שורה ("חתמו", "חיסכון ש"ח בחודש", ...)
 //   עמודה E (4) = סלולר "סכ"ה" | עמודה I (8) = דלק "סכ"ה" | עמודה G (6) = בנזין | עמודה H (7) = סולר
 //   עמודה K (10) = ביטוח רכב (עמודה יחידה, בלי פילוח ספקים)
-const DASHBOARD_SHEET_ID = '1YGcal1HFy-q4hLJfBF5uml1CMUO4KqZRYnnp6ZneIH0';
-const DASHBOARD_GID = '0';
 const LABEL_COL = 1;
 // שים לב: diesel (עמודה H) *נספר בכוונה* בנוסף ל-fuel, למרות ש"סכ"ה דלק" כבר כולל אותו.
 // זה לא באג — התוספת מייצגת חברה נוספת שאינה מופיעה בגיליון הזה. לא להסיר.
@@ -21,34 +20,6 @@ const DEFAULT_CAMPAIGNS = {
     carInsurance: { monthly: 0, annual: 0 },
 };
 const DEFAULT_MEMBERS = 1078;
-
-/**
- * @param {string} text
- * @returns {string[][]}
- */
-function parseCsv(text) {
-    /** @type {string[][]} */
-    const rows = [];
-    /** @type {string[]} */
-    let row = [];
-    let cell = '';
-    let inQuotes = false;
-    for (let i = 0; i < text.length; i++) {
-        const ch = text[i];
-        if (inQuotes) {
-            if (ch === '"') {
-                if (text[i + 1] === '"') { cell += '"'; i++; }
-                else inQuotes = false;
-            } else cell += ch;
-        } else if (ch === '"') inQuotes = true;
-        else if (ch === ',') { row.push(cell); cell = ''; }
-        else if (ch === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
-        else if (ch === '\r') { /* ignore */ }
-        else cell += ch;
-    }
-    if (cell.length || row.length) { row.push(cell); rows.push(row); }
-    return rows;
-}
 
 /** @param {string | null | undefined} v */
 const norm = (v) => (v || '').trim();
@@ -66,48 +37,48 @@ const toNum = (v) => {
     return isNaN(n) ? 0 : Math.round(n);
 };
 
-/** @param {typeof globalThis.fetch} fetch */
+/**
+ * ה-cache והנפילה-לערך-האחרון יושבים ב-dashboardSheet, שמשותף עם דף המבצע.
+ * כאן נשארה רק הקריאה של העמודות הרלוונטיות לדף הבית.
+ * @param {typeof globalThis.fetch} fetch
+ */
 async function loadSheetData(fetch) {
     const aggregated = structuredClone(DEFAULT_CAMPAIGNS);
-    let members = DEFAULT_MEMBERS;
-    try {
-        const url = `https://docs.google.com/spreadsheets/d/${DASHBOARD_SHEET_ID}/export?format=csv&gid=${DASHBOARD_GID}`;
-        const response = await fetch(url);
-        if (response.ok) {
-            const rows = parseCsv(await response.text());
-            for (const row of rows) {
-                const label = row[LABEL_COL] || '';
-                if (!label) continue;
-                if (isMonthlyRow(label)) {
-                    for (const [name, col] of Object.entries(CAMPAIGN_COLS)) {
-                        const v = toNum(row[col]);
-                        if (v > 0) aggregated[name] = { ...aggregated[name], monthly: v };
-                    }
-                } else if (isAnnualRow(label)) {
-                    for (const [name, col] of Object.entries(CAMPAIGN_COLS)) {
-                        const v = toNum(row[col]);
-                        if (v > 0) aggregated[name] = { ...aggregated[name], annual: v };
-                    }
-                }
+    const members = DEFAULT_MEMBERS;
+    for (const row of await fetchDashboardRows(fetch)) {
+        const label = row[LABEL_COL] || '';
+        if (!label) continue;
+        if (isMonthlyRow(label)) {
+            for (const [name, col] of Object.entries(CAMPAIGN_COLS)) {
+                const v = toNum(row[col]);
+                if (v > 0) aggregated[name] = { ...aggregated[name], monthly: v };
+            }
+        } else if (isAnnualRow(label)) {
+            for (const [name, col] of Object.entries(CAMPAIGN_COLS)) {
+                const v = toNum(row[col]);
+                if (v > 0) aggregated[name] = { ...aggregated[name], annual: v };
             }
         }
-    } catch (error) {
-        console.error('Failed to load dashboard sheet:', error);
     }
     return { aggregated, members };
 }
 
-export async function load({ fetch }) {
-    // אסור קאש ציבורי על ה-HTML: הדף מוטמע עם data.user מה-layout,
-    // ו-CDN שישמור אותו יגיש את פרטי המשתמש המחובר לגולשים אחרים.
+// גם הדירוגים נשמרים ל-TTL קצר: אחרי שהגיליון ירד מנתיב הבקשה הם היו
+// הרכיב האיטי שנשאר בו. ממוצע כוכבים מתעדכן דקה אחרי שנשלח סקר חדש -
+// זה מספיק, ולעומת זאת כל צפייה חסכה 3 קריאות ל-Strapi.
+const RATINGS_TTL_MS = 60_000;
+/** @type {{ at: number, value: Record<string, { avg: number, count: number }> } | null} */
+let ratingsCache = null;
 
-    // תוכן הקמפיינים בפרונט (campaigns.js); רק נתוני החיסכון/חברים דינמיים מ-Google Sheet.
-    const finalCampaigns = getCampaignList();
-    const sheet = await loadSheetData(fetch);
+/**
+ * @param {string[]} activeSlugs
+ * @param {typeof globalThis.fetch} fetch
+ */
+async function loadAverageRatings(activeSlugs, fetch) {
+    if (ratingsCache && Date.now() - ratingsCache.at < RATINGS_TTL_MS) return ratingsCache.value;
 
-    // ממוצע דירוג פר-קמפיין מתגובות סקר אמיתיות - בקשות מקבילות, רק לקמפיינים פעילים.
+    // בקשות מקבילות, רק לקמפיינים פעילים.
     // pageSize: 500 כדי לכלול את *כל* הדירוגים בממוצע (עקבי עם דף /responses).
-    const activeSlugs = finalCampaigns.filter((c) => c.status === 'active').map((c) => c.slug);
     const responseLists = await Promise.all(
         activeSlugs.map((slug) =>
             fetchSatisfactionResponses(slug, { fetch, pageSize: 500 }).catch(() => []),
@@ -124,6 +95,27 @@ export async function load({ fetch }) {
             };
         }
     });
+    ratingsCache = { at: Date.now(), value: averageRatings };
+    return averageRatings;
+}
+
+export async function load({ fetch }) {
+    // אסור קאש ציבורי על ה-HTML: הדף מוטמע עם data.user מה-layout,
+    // ו-CDN שישמור אותו יגיש את פרטי המשתמש המחובר לגולשים אחרים.
+
+    // תוכן הקמפיינים בפרונט (campaigns.js), עם דריסות שנערכו בפאנל הניהול;
+    // רק נתוני החיסכון/חברים דינמיים מ-Google Sheet.
+    const finalCampaigns = await getMergedCampaignList({ fetch });
+
+    // ממוצע דירוג פר-קמפיין מתגובות סקר אמיתיות - רק לקמפיינים פעילים.
+    const activeSlugs = finalCampaigns.filter((c) => c.status === 'active').map((c) => c.slug);
+
+    // הגיליון והדירוגים לא תלויים זה בזה. קודם הם רצו בטור, וה-TTFB של דף
+    // הבית היה סכום שניהם; עכשיו הוא הארוך מבין השניים.
+    const [sheet, averageRatings] = await Promise.all([
+        loadSheetData(fetch),
+        loadAverageRatings(activeSlugs, fetch),
+    ]);
 
     return {
         campaigns: finalCampaigns,

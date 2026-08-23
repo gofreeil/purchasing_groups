@@ -19,7 +19,12 @@
     <meta name="robots" content="noindex" />
 </svelte:head>
 
-<div class="mock-note">🧪 <strong>מוקאפ</strong> — כל המספרים כאן נגזרים מנתוני הדוגמה שב-membershipsSource.</div>
+{#if !data.sourceConnected}
+    <div class="no-source">
+        🔌 <strong>מקור הנתונים עדיין לא חובר</strong> — כל המספרים במסך נגזרים מהחברויות בעסקאות,
+        ויתמלאו ברגע שיחובר מקור אמת.
+    </div>
+{/if}
 
 <div class="kpis">
     <div class="kpi"><span>חברים</span><strong>{fmtMoney(totals.members)}</strong></div>
@@ -87,13 +92,14 @@
 </section>
 
 <style>
-    .mock-note {
+    .no-source {
         border-radius: 0.75rem;
-        border: 1px dashed rgba(250, 204, 21, 0.4);
-        background: rgba(250, 204, 21, 0.07);
-        color: #fde68a;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: rgba(59, 130, 246, 0.08);
+        color: #bfdbfe;
         padding: 0.7rem 1rem;
         font-size: 0.82rem;
+        line-height: 1.6;
         margin-bottom: 1rem;
     }
 

@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import { isAdmin } from '$lib/auth.js';
 import { getCampaignList } from '$lib/campaigns.js';
 import { savedSoFar } from '$lib/memberships.js';
-import { listAllMemberships } from '$lib/server/membershipsSource.js';
+import { SOURCE_CONNECTED, listAllMemberships } from '$lib/server/membershipsSource.js';
 
 const MONTHS = 12;
 
@@ -69,6 +69,7 @@ export async function load({ locals }) {
     }));
 
     return {
+        sourceConnected: SOURCE_CONNECTED,
         months,
         deals: [...perDeal.values()].sort((a, b) => b.count - a.count),
         cities,

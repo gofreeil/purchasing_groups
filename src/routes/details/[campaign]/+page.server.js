@@ -1,49 +1,17 @@
 import { error } from '@sveltejs/kit';
 import { fetchSatisfactionResponses } from '$lib/strapi.js';
-import { getCampaign } from '$lib/campaigns.js';
+import { getMergedCampaign } from '$lib/server/campaignsStore.js';
+import { fetchDashboardRows } from '$lib/server/dashboardSheet.js';
 
 // --- Google Sheet: מספר חברים פעילים פר-קמפיין (שורת "חתמו") ---
-const DASHBOARD_SHEET_ID = '1YGcal1HFy-q4hLJfBF5uml1CMUO4KqZRYnnp6ZneIH0';
-const DASHBOARD_GID = '0';
 const LABEL_COL = 1;
 
-// תקרת זמן לשליפת הגיליון. הגיליון הוא מקור חיצוני לגמרי (Google), ותקיעה
-// שלו לא אמורה להפיל דף תוכנית - בכשל נשארים מספרי ברירת המחדל שלמעלה.
-const SHEET_TIMEOUT_MS = 3000;
 // carInsurance = עמודה K בגיליון. כל עוד שורת "חתמו" שם היא 0, בלוק הסטטיסטיקות
 // בדף הפרטים נשאר מוסתר (מוצג רק כש-members > 0) — הוא ייפתח מעצמו כשהגיליון יתמלא.
 /** @type {Record<string, number | undefined>} */
 const CAMPAIGN_COLS = { cellular: 4, fuel: 8, carInsurance: 10 };
 /** @type {Record<string, number>} */
 const DEFAULT_MEMBERS = { cellular: 312, fuel: 198, carInsurance: 0 };
-
-/**
- * @param {string} text
- * @returns {string[][]}
- */
-function parseCsv(text) {
-    /** @type {string[][]} */
-    const rows = [];
-    /** @type {string[]} */
-    let row = [];
-    let cell = '';
-    let inQuotes = false;
-    for (let i = 0; i < text.length; i++) {
-        const ch = text[i];
-        if (inQuotes) {
-            if (ch === '"') {
-                if (text[i + 1] === '"') { cell += '"'; i++; }
-                else inQuotes = false;
-            } else cell += ch;
-        } else if (ch === '"') inQuotes = true;
-        else if (ch === ',') { row.push(cell); cell = ''; }
-        else if (ch === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
-        else if (ch === '\r') { /* ignore */ }
-        else cell += ch;
-    }
-    if (cell.length || row.length) { row.push(cell); rows.push(row); }
-    return rows;
-}
 
 /** @param {string | null | undefined} l */
 const isMembersRow = (l) => (l || '').trim().includes('חתמו');
@@ -74,11 +42,12 @@ async function loadSheetStats(fetch, campaignSlug) {
     };
     const col = CAMPAIGN_COLS[campaignSlug];
     if (col === undefined) return out;
+    // השורות מגיעות מ-dashboardSheet: משיכה אחת ל-5 דקות, משותפת עם דף
+    // הבית. קודם כל כניסה לדף מבצע משכה את ה-CSV מגוגל מחדש (~שנייה),
+    // וה-router של SvelteKit ממתין ל-load לפני שהוא מחליף את הדף - כך
+    // שלחיצה על כרטיס בדף הבית נראתה מתה 1.5-2 שניות.
     try {
-        const url = `https://docs.google.com/spreadsheets/d/${DASHBOARD_SHEET_ID}/export?format=csv&gid=${DASHBOARD_GID}`;
-        const response = await fetch(url, { signal: AbortSignal.timeout(SHEET_TIMEOUT_MS) });
-        if (!response.ok) return out;
-        const rows = parseCsv(await response.text());
+        const rows = await fetchDashboardRows(fetch);
         for (const row of rows) {
             const label = row[LABEL_COL];
             if (isMembersRow(label)) {
@@ -100,8 +69,9 @@ export async function load({ params, fetch }) {
     // אסור קאש ציבורי על ה-HTML: הדף מוטמע עם data.user מה-layout,
     // ו-CDN שישמור אותו יגיש את פרטי המשתמש המחובר לגולשים אחרים.
 
-    // תוכן הקמפיין מגיע מהפרונט (campaigns.js) - לא תלוי ב-Strapi.
-    const campaign = getCampaign(params.campaign);
+    // תוכן הקמפיין מגיע מהפרונט (campaigns.js), עם דריסות שנערכו בפאנל
+    // הניהול. Strapi שלא זמין פשוט לא מחזיר דריסות - הדף עדיין מלא.
+    const campaign = await getMergedCampaign(params.campaign, { fetch });
     if (!campaign) {
         throw error(404, 'Campaign not found');
     }

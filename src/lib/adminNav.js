@@ -62,7 +62,7 @@ export function adminNav(isAdmin, superAdmin = false) {
             icon: '🤝',
             label: 'עסקאות',
             title: 'העסקאות הקבוצתיות',
-            desc: 'כמה חברים, כמה חיסכון ומה מצב כל עסקה',
+            desc: 'עריכת תוכן העסקאות, וכמה חברים וחיסכון יש בכל אחת',
         },
         {
             href: '/admin?tab=expiring',

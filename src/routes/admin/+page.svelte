@@ -135,10 +135,12 @@
         {/if}
     </div>
 {:else}
-    <div class="mock-note">
-        🧪 <strong>מוקאפ</strong> — נתוני החברים והעסקאות כאן הם דוגמה שנוצרת בקוד
-        (<code>src/lib/server/membershipsSource.js</code>). הדירוגים והפרסומות כבר אמיתיים.
-    </div>
+    {#if !data.sourceConnected}
+        <div class="no-source">
+            🔌 <strong>מקור הנתונים של החברים והעסקאות עדיין לא חובר</strong> — הלשוניות ממתינים,
+            חברים, עסקאות ופקיעות יתמלאו ברגע שיחובר. הדירוגים והפרסומות כבר עובדים על נתונים אמיתיים.
+        </div>
+    {/if}
 
     {#if form?.message}<div class="alert ok">{form.message}</div>{/if}
     {#if form?.error}<div class="alert error">{form.error}</div>{/if}
@@ -167,7 +169,9 @@
         <!-- ═══ ממתינים לאישור ═══ -->
         <h2 class="tab-title">⏳ הרשמות שממתינות לאישור ({pendingList.length})</h2>
         {#if !pendingList.length}
-            <p class="empty">אין הרשמות שממתינות לטיפול 🎉</p>
+            <p class="empty">
+                {data.sourceConnected ? 'אין הרשמות שממתינות לטיפול 🎉' : 'אין נתונים להציג — מקור הנתונים לא חובר'}
+            </p>
         {:else}
             <div class="list">
                 {#each pendingList as m (m.id)}
@@ -216,7 +220,9 @@
         </div>
 
         {#if !filteredMembers.length}
-            <p class="empty">לא נמצאו חברים שמתאימים לחיפוש</p>
+            <p class="empty">
+                {data.sourceConnected ? 'לא נמצאו חברים שמתאימים לחיפוש' : 'אין נתונים להציג — מקור הנתונים לא חובר'}
+            </p>
         {:else}
             <div class="list">
                 {#each filteredMembers as p (p.id)}
@@ -282,6 +288,8 @@
                         {/if}
                         {#if d.pendingCount}<span class="pill warn">{d.pendingCount} ממתינים</span>{/if}
                         {#if d.expiringCount}<span class="pill danger">{d.expiringCount} לקראת פקיעה</span>{/if}
+                        {#if d.editedCount}<span class="pill muted">✏️ {d.editedCount} שדות נערכו</span>{/if}
+                        <a class="edit-link" href="/admin/deals/{d.slug}">✏️ ערוך תוכן</a>
                         <a class="deal-link" href="/details/{d.slug}">לדף העסקה ←</a>
                     </div>
                 </div>
@@ -292,7 +300,9 @@
         <h2 class="tab-title">⏰ עסקאות שעומדות לפוג ({expiringList.length})</h2>
         <p class="tab-sub">מי שהתקופה שלו נגמרת ב-45 הימים הקרובים — כדאי לפנות אליו לפני שהוא נושר.</p>
         {#if !expiringList.length}
-            <p class="empty">אף חברות לא עומדת לפוג בקרוב 👌</p>
+            <p class="empty">
+                {data.sourceConnected ? 'אף חברות לא עומדת לפוג בקרוב 👌' : 'אין נתונים להציג — מקור הנתונים לא חובר'}
+            </p>
         {:else}
             <div class="list">
                 {#each expiringList as m (m.id)}
@@ -397,22 +407,15 @@
     }
 
     /* ── הודעות ── */
-    .mock-note {
+    .no-source {
         border-radius: 0.75rem;
-        border: 1px dashed rgba(250, 204, 21, 0.4);
-        background: rgba(250, 204, 21, 0.07);
-        color: #fde68a;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: rgba(59, 130, 246, 0.08);
+        color: #bfdbfe;
         padding: 0.7rem 1rem;
         font-size: 0.82rem;
+        line-height: 1.6;
         margin-bottom: 1rem;
-    }
-    .mock-note code {
-        background: rgba(0, 0, 0, 0.35);
-        border-radius: 0.3rem;
-        padding: 0.05rem 0.35rem;
-        font-size: 0.78rem;
-        direction: ltr;
-        display: inline-block;
     }
     .alert {
         border-radius: 0.75rem;
@@ -844,6 +847,19 @@
         font-size: 0.78rem;
         font-weight: 700;
         color: #93c5fd;
+    }
+    .edit-link {
+        border-radius: 0.6rem;
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        background: rgba(250, 204, 21, 0.1);
+        color: #fde68a;
+        font-size: 0.78rem;
+        font-weight: 800;
+        padding: 0.3rem 0.75rem;
+    }
+    .edit-link:hover {
+        background: rgba(250, 204, 21, 0.18);
+        color: #fff;
     }
     .deal-link:hover {
         color: #dbeafe;

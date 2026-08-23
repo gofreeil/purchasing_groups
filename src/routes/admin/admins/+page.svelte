@@ -27,9 +27,12 @@
     <meta name="robots" content="noindex" />
 </svelte:head>
 
-<div class="mock-note">
-    🧪 <strong>מוקאפ</strong> — ההרשאה האמיתית נקבעת בשדה <code>app_role</code> ב-Strapi. השינוי כאן לא נשמר עדיין.
-</div>
+{#if !data.sourceConnected}
+    <div class="no-source">
+        🔌 <strong>רשימת בעלי ההרשאות עדיין לא נשלפת</strong> — התפקיד נקבע בשדה
+        <code>app_role</code> של המשתמש ב-Strapi, ושם גם משנים אותו כרגע. למטה מוצג המנהל המחובר בלבד.
+    </div>
+{/if}
 
 {#if form?.message}<div class="alert ok">{form.message}</div>{/if}
 {#if form?.error}<div class="alert error">{form.error}</div>{/if}
@@ -64,16 +67,17 @@
 </div>
 
 <style>
-    .mock-note {
+    .no-source {
         border-radius: 0.75rem;
-        border: 1px dashed rgba(250, 204, 21, 0.4);
-        background: rgba(250, 204, 21, 0.07);
-        color: #fde68a;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: rgba(59, 130, 246, 0.08);
+        color: #bfdbfe;
         padding: 0.7rem 1rem;
         font-size: 0.82rem;
+        line-height: 1.6;
         margin-bottom: 1rem;
     }
-    .mock-note code {
+    .no-source code {
         background: rgba(0, 0, 0, 0.35);
         border-radius: 0.3rem;
         padding: 0.05rem 0.35rem;

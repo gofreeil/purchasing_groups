@@ -5,6 +5,7 @@
     import { page } from '$app/stores';
     import { goto, afterNavigate, invalidate } from '$app/navigation';
     import { adminNav, isActiveNav } from '$lib/adminNav.js';
+    import { displayName } from '$lib/displayName.js';
 
     /** @type {{ children: import('svelte').Snippet, data: any }} */
     let { children, data } = $props();
@@ -46,7 +47,7 @@
                         <span class="role-pill" class:super={data.superAdmin}>
                             {data.superAdmin ? '👑 סופר-אדמין' : '🛡️ אדמין'}
                         </span>
-                        <span class="who">{data.user?.name || data.user?.username || ''} · {data.user?.email || ''}</span>
+                        <span class="who">{displayName(data.user)} · {data.user?.email || ''}</span>
                     </p>
                 </div>
             </div>
