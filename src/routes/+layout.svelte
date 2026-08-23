@@ -221,19 +221,35 @@
 
 				{#if data?.user}
 					<div class="user-menu">
-						<button
-							class="login-header-btn user-menu-btn"
-							onclick={() => (showUserMenu = !showUserMenu)}
-							title={data.user.email || displayName}
-							aria-label={displayName}
-						>
-							{#if data.user.avatar_url}
-								<img class="user-avatar" src={data.user.avatar_url} alt="" referrerpolicy="no-referrer" />
-							{:else}
-								<span class="user-avatar user-avatar-fallback" aria-hidden="true">{avatarInitial}</span>
-							{/if}
-							<span class="chevron">⌄</span>
-						</button>
+						<!-- לחיצה על התמונה עצמה = מעבר ישיר לאזור האישי. החץ שלידה
+						     פותח את שאר התפריט (ניהול / החלפת פרופיל / התנתקות). -->
+						<div class="login-header-btn user-menu-btn">
+							<a
+								class="user-avatar-link"
+								href="/profile"
+								title={data.user.email || displayName}
+								aria-label={displayName}
+								onclick={() => (showUserMenu = false)}
+							>
+								{#if data.user.avatar_url}
+									<img class="user-avatar" src={data.user.avatar_url} alt="" referrerpolicy="no-referrer" />
+								{:else}
+									<span class="user-avatar user-avatar-fallback" aria-hidden="true">{avatarInitial}</span>
+								{/if}
+							</a>
+							<button
+								class="user-menu-toggle"
+								onclick={() => (showUserMenu = !showUserMenu)}
+								aria-expanded={showUserMenu}
+								aria-label={$lang === "he"
+									? "תפריט משתמש"
+									: $lang === "ru"
+										? "Меню пользователя"
+										: "User menu"}
+							>
+								<span class="chevron">⌄</span>
+							</button>
+						</div>
 
 						{#if showUserMenu}
 							<div class="user-dropdown">
@@ -561,6 +577,23 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding: 0.3rem 0.6rem;
+	}
+	.user-avatar-link {
+		display: flex;
+		align-items: center;
+		text-decoration: none;
+		border-radius: 50%;
+	}
+	.user-menu-toggle {
+		background: none;
+		border: none;
+		color: inherit;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		line-height: 1;
 	}
 	.user-avatar {
 		width: 2.75rem;
