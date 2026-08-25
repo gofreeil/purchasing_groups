@@ -335,9 +335,9 @@
 		{/if}
 	</div>
 
-	<!-- Mobile ads drawer + tab -->
+	<!-- מגירת אתרי הרשת בנייד: אתרי "יוצאים לחירות" בלבד, בלי approvedAds -->
 	{#if !isAdminArea}
-		<MobileAdsDrawer approvedAds={data?.approvedAds ?? []} />
+		<MobileAdsDrawer />
 	{/if}
 
 	<!-- Footer -->

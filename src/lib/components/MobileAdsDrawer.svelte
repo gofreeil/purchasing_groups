@@ -2,25 +2,23 @@
 	import { onMount } from "svelte";
 	import { ads } from "$lib/adsData.js";
 
-	// פרסומות מאושרות של מפרסמים - מוצגות לפני פרסומות השותפים גם בנייד.
-	let { approvedAds = [] } = $props();
+	// נעילה מכוונת, כמו ב-AdsSidebar: המגירה בנייד מציגה אך ורק את אתרי
+	// רשת "יוצאים לחירות". פרסומות בתשלום מוצגות בנייד רק בתוך התוכניות
+	// עצמן - ניסיון להעביר לכאן approvedAds ייכשל בבדיקה במקום להיבלע בשקט.
+	/** @type {{ approvedAds?: never }} */
+	let {} = $props();
 
-	let merged = $derived([
-		...approvedAds.map((/** @type {any} */ a) => ({
-			id: `sub-${a.id}`,
-			title: a.title,
-			description: a.subtitle,
-			cta: a.cta || a.title,
-			hover: a.hover || undefined,
-			href: `/ads/${a.id}`,
-			target: "_self",
-			image: a.mainImage,
-		})),
-		...ads.map((a) => ({ ...a, target: "_blank" })),
-	]);
+	let merged = $derived(ads.map((a) => ({ ...a, target: "_blank" })));
 
 	let open = $state(false);
 	let collapsed = $state(false);
+
+	// תמונות הפרסומות נכנסות ל-DOM רק אחרי שהגולש נגע בלשונית. loading="lazy"
+	// לבדו לא הספיק: המגירה הסגורה יושבת ב-left שלילי *צמוד* לקצה המסך, וזה
+	// בתוך מרווח הטעינה-מראש של כרום - כך שהוא הוריד את כל התמונות בכל טעינת
+	// דף בנייד (נמדד: ~25MB). הכרטיס עצמו והקישור נשארים ב-SSR, ורק ה-img
+	// נדחה, כדי לא לפגוע בסריקה של הקישורים.
+	let adImagesReady = $state(false);
 
 	function closeAll() {
 		open = false;
@@ -72,6 +70,7 @@
 
 	/** @param {TouchEvent} e */
 	function onTabTouchStart(e) {
+		adImagesReady = true;
 		tabTouchStartX = e.touches[0].clientX;
 		tabTouchStartY = e.touches[0].clientY;
 		tabDragStartClientY = e.touches[0].clientY;
@@ -173,6 +172,7 @@
 	}
 
 	function onTabClick() {
+		adImagesReady = true;
 		if (tabSwipeHandled) {
 			tabSwipeHandled = false;
 			return;
@@ -238,12 +238,18 @@
 					onclick={closeAll}
 				>
 					<div class="benefit-img-wrap">
-						<img
-							src={ad.image}
-							alt={ad.title}
-							class="benefit-img"
-							decoding="async"
-						/>
+						<!-- ראה adImagesReady. הריבוע 88px שמסביב קבוע, ולכן אין קפיצת
+						     תצוגה כשהתמונה נכנסת; loading="lazy" מדלג בנוסף על הכרטיסים
+						     שנמצאים מתחת לגלילה ברשימה. -->
+						{#if adImagesReady}
+							<img
+								src={ad.image}
+								alt={ad.title}
+								class="benefit-img"
+								decoding="async"
+								loading="lazy"
+							/>
+						{/if}
 					</div>
 					<div class="benefit-body">
 						<p class="benefit-title">{ad.title}</p>
