@@ -3,6 +3,7 @@
     import { adPlans } from "$lib/adPlans.js";
     import { adImgFit, parseAdImageFit } from "$lib/adImageFit.js";
     import { AD_SLOT_COUNT, adSlotColor } from "$lib/adSlots.js";
+    import AdCardPreview from "$lib/components/AdCardPreview.svelte";
 
     // מסך אישור פרסומות לאדמין - ממתינות / מאושרות / נדחות.
     let { data, form } = $props();
@@ -37,6 +38,76 @@
         const d = new Date(iso);
         if (isNaN(d.getTime())) return "";
         return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
+    }
+
+    // מי תופסת כל מקום בטור - גם מושהית שומרת את המקום שלה
+    let slotOccupants = $derived(
+        new Map(
+            approved
+                .filter((/** @type {any} */ a) => typeof a.slot === "number")
+                .map((/** @type {any} */ a) => [a.slot, { id: a.id, title: a.title }]),
+        ),
+    );
+    /** @param {string} t */
+    function shortTitle(t) {
+        return t.length > 22 ? t.slice(0, 21) + "…" : t;
+    }
+    /** תווית אפשרות בבורר המקום - מקום תפוס מסומן עם שם הפרסומת שיושבת בו
+     * @param {number} n @param {string} selfId */
+    function slotOptionLabel(n, selfId) {
+        const occ = slotOccupants.get(n);
+        if (!occ) return `${n}`;
+        if (occ.id === selfId) return `${n} — המקום הנוכחי`;
+        return `${n} ⚠ תפוס: ${shortTitle(occ.title)}`;
+    }
+    // אזהרה חיה ליד הבורר ברגע שנבחר מקום תפוס (לפי מזהה הפרסומת)
+    /** @type {Record<string, string>} */
+    let slotWarning = $state({});
+    /** @param {Event} e @param {any} self */
+    function onSlotPick(e, self) {
+        const n = Number(/** @type {HTMLSelectElement} */ (e.currentTarget).value);
+        const occ = slotOccupants.get(n);
+        slotWarning = {
+            ...slotWarning,
+            [self.id]:
+                occ && occ.id !== self.id
+                    ? `מקום ${n} תפוס ע"י "${shortTitle(occ.title)}" — לחיצה על "העבר" תחליף ביניהן`
+                    : "",
+        };
+    }
+    /** אישור אחרון לפני העברה למקום תפוס - אישור = החלפה, ביטול = כלום לא זז
+     * @param {MouseEvent} e @param {any} self */
+    function confirmSlotMove(e, self) {
+        const formEl = /** @type {HTMLButtonElement} */ (e.currentTarget).form;
+        const sel = formEl?.elements.namedItem("slot");
+        const n = Number(/** @type {HTMLSelectElement | null} */ (sel)?.value);
+        const occ = slotOccupants.get(n);
+        if (!occ || occ.id === self.id) return;
+        const ok = confirm(
+            `⚠ מקום ${n} כבר תפוס על ידי "${occ.title}".\n\n` +
+                `אישור — החלפה: "${self.title}" תעבור למקום ${n}, ו"${occ.title}" תעבור למקום ${self.slot ?? "-"}.\n` +
+                `ביטול — ההעברה מתבטלת ושתי הפרסומות נשארות במקומן.`,
+        );
+        if (!ok) e.preventDefault();
+    }
+
+    // תצוגה מקדימה של הכרטיס כפי שהוא באמת מוצג בטור הפרסומות באתר:
+    // ריחוף על כותרת פרסומת מאושרת (דסקטופ) או הקשה עליה (נייד/דסקטופ)
+    /** @type {{ ad: any, x: number, y: number } | null} */
+    let hoverPreview = $state(null);
+    /** @type {any} */
+    let modalPreviewAd = $state(null);
+    const PREVIEW_W = 144, PREVIEW_H = 490; // מידות הכרטיס האמיתי בטור (144px + יחס 144/450)
+    /** @param {MouseEvent} e @param {any} ad */
+    function openHoverPreview(e, ad) {
+        // מסך מגע - אין ריחוף אמיתי; ההקשה פותחת את המודאל במקום
+        if (window.matchMedia("(hover: none)").matches) return;
+        const r = /** @type {HTMLElement} */ (e.currentTarget).getBoundingClientRect();
+        // הכרטיס צף משמאל לכותרת, מוצמד לגבולות המסך (fixed) - כדי
+        // ששום מכל גלילה לא יחתוך אותו
+        const y = Math.max(8, Math.min(window.innerHeight - PREVIEW_H - 8, r.top + r.height / 2 - PREVIEW_H / 2));
+        const x = Math.max(8, r.left - PREVIEW_W - 16);
+        hoverPreview = { ad, x, y };
     }
 </script>
 
@@ -86,7 +157,20 @@
                 </div>
                 <div class="ad-card-body">
                     <div class="ad-card-head">
-                        <h2>{ad.title}</h2>
+                        {#if ad.status === "approved"}
+                            <!-- ריחוף = הכרטיס האמיתי צף ליד הכותרת (דסקטופ);
+                                 הקשה = מודאל עם הכרטיס (נייד ודסקטופ) -->
+                            <button
+                                type="button"
+                                class="ad-title-btn"
+                                onmouseenter={(e) => openHoverPreview(e, ad)}
+                                onmouseleave={() => (hoverPreview = null)}
+                                onclick={() => { hoverPreview = null; modalPreviewAd = ad; }}
+                                title="תצוגה מקדימה של הפרסומת כפי שהיא מוצגת באתר"
+                            >{ad.title}</button>
+                        {:else}
+                            <h2>{ad.title}</h2>
+                        {/if}
                         <span class="status-pill {ad.status}">
                             {ad.status === "pending" ? "ממתינה" : ad.status === "approved" ? "מאושרת" : "נדחתה"}
                         </span>
@@ -171,14 +255,24 @@
                             <!-- העברה ישירה למקום מספרי; מקום תפוס - השתיים מתחלפות -->
                             <form method="POST" action="?/setSlot" use:enhance class="slot-form">
                                 <input type="hidden" name="id" value={ad.id} />
-                                <select name="slot" class="duration-select">
+                                <select name="slot" class="duration-select" onchange={(e) => onSlotPick(e, ad)}>
                                     {#each slotOptions as n (n)}
                                         <!-- הרקע לבן (ברירת המחדל של הבורר במערכת), והמספר
-                                             בצבע המשפחה של אותו מקום - 1/5/9/13 באותו גוון -->
-                                        <option value={n} selected={n === ad.slot} style="background:#fff;color:{adSlotColor(n).btn};font-weight:800">{n}</option>
+                                             בצבע המשפחה של אותו מקום - 1/5/9/13 באותו גוון.
+                                             מקום שתפוס ע"י פרסומת אחרת - אדום, עם שמה -->
+                                        {@const occ = slotOccupants.get(n)}
+                                        {@const takenByOther = !!occ && occ.id !== ad.id}
+                                        <option
+                                            value={n}
+                                            selected={n === ad.slot}
+                                            style="background:{takenByOther ? '#fee2e2' : '#fff'};color:{takenByOther ? '#991b1b' : adSlotColor(n).btn};font-weight:800"
+                                        >{slotOptionLabel(n, ad.id)}</option>
                                     {/each}
                                 </select>
-                                <button type="submit" class="a-btn ghost" title="העבר למקום שנבחר; אם המקום תפוס - שתי הפרסומות מתחלפות">⇄ העבר</button>
+                                <button type="submit" class="a-btn ghost" onclick={(e) => confirmSlotMove(e, ad)} title="העבר למקום שנבחר; מקום תפוס - תתבקש לאשר החלפה בין השתיים">⇄ העבר</button>
+                                {#if slotWarning[ad.id]}
+                                    <span class="slot-warning">⚠ {slotWarning[ad.id]}</span>
+                                {/if}
                             </form>
                         </div>
                     {/if}
@@ -263,7 +357,38 @@
             </div>
         {/each}
     </div>
+
+    <!-- תצוגה מקדימה צפה בריחוף על כותרת פרסומת מאושרת (דסקטופ בלבד) -->
+    {#if hoverPreview}
+        <div class="hover-preview" style="left:{hoverPreview.x}px; top:{hoverPreview.y}px">
+            <AdCardPreview ad={hoverPreview.ad} />
+        </div>
+    {/if}
+
+    <!-- מודאל תצוגה מקדימה בהקשה על הכותרת (נייד ודסקטופ) -->
+    {#if modalPreviewAd}
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+        <div class="preview-backdrop" role="presentation" onclick={() => (modalPreviewAd = null)}>
+            <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+            <div
+                class="preview-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-label="תצוגה מקדימה של הפרסומת"
+                tabindex="-1"
+                onclick={(e) => e.stopPropagation()}
+            >
+                <AdCardPreview ad={modalPreviewAd} />
+                <div class="preview-actions">
+                    <a href="/ads/{modalPreviewAd.id}" target="_blank" rel="noopener" class="a-btn ghost">פתח דף נחיתה</a>
+                    <button type="button" class="a-btn ghost" onclick={() => (modalPreviewAd = null)}>✕ סגור</button>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
+
+<svelte:window onkeydown={(e) => { if (e.key === "Escape") { modalPreviewAd = null; hoverPreview = null; } }} />
 
 <style>
     .ads-admin {
@@ -397,6 +522,23 @@
         color: #fff;
         margin: 0;
     }
+    /* כותרת פרסומת מאושרת - כפתור שנראה כמו הכותרת, עם רמז קו-תחתון
+       מנוקד שיש כאן תצוגה מקדימה */
+    .ad-title-btn {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: right;
+        text-decoration: underline dotted rgba(255, 255, 255, 0.35);
+        text-underline-offset: 4px;
+    }
+    .ad-title-btn:hover { color: #fcd34d; }
     .status-pill {
         font-size: 0.7rem;
         font-weight: 900;
@@ -545,4 +687,51 @@
         width: 170px;
     }
     .reject-input:focus { border-color: rgba(239, 68, 68, 0.5); }
+
+    /* אזהרת מקום תפוס ליד בורר המקום */
+    .slot-warning {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #fcd34d;
+        line-height: 1.3;
+        max-width: 180px;
+    }
+
+    /* התצוגה המקדימה הצפה בריחוף - מחוץ לכל מכל גלילה (fixed) */
+    .hover-preview {
+        position: fixed;
+        z-index: 40;
+        pointer-events: none;
+        filter: drop-shadow(0 25px 25px rgba(0, 0, 0, 0.5));
+    }
+    /* במסכים צרים אין ריחוף אמיתי - המודאל מחליף אותה */
+    @media (max-width: 768px) {
+        .hover-preview { display: none; }
+    }
+
+    /* מודאל התצוגה המקדימה */
+    .preview-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+    .preview-dialog {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        margin: auto 0;
+    }
+    .preview-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 </style>
