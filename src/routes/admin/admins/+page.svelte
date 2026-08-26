@@ -2,6 +2,9 @@
     import { enhance } from '$app/forms';
     import { fmtDate } from '$lib/memberships.js';
 
+    // setRole מחזיר בינתיים רק fail עם error, ולכן הטיפוס שנגזר מהאקשן לא
+    // מכיר message; ההרחבה שומרת את שורת ההצלחה מוכנה ליום שהחיבור יתווסף.
+    /** @type {{ data: any, form: any }} */
     let { data, form } = $props();
     let busy = $state('');
 

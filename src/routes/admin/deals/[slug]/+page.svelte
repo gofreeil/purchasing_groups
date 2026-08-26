@@ -12,6 +12,7 @@
     let editedKeys = $derived(new Set(campaign.editedKeys ?? []));
     let saving = $state(false);
 
+    /** @type {Record<string, string>} */
     const STATUS_HE = {
         active: 'פעילה באתר',
         soon: 'בקרוב',

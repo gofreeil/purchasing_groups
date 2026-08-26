@@ -32,15 +32,18 @@
         // מאזינים לשינוי רוחב (כולל מצב מכשיר ב-DevTools) כך שהמעבר יד/עכבר
         // מתעדכן חי ולא נקבע פעם אחת בטעינה
         const mq = window.matchMedia("(min-width: 769px)");
-        const onMq = (e) => (isDesktop = e.matches);
+        const onMq = (/** @type {MediaQueryListEvent | MediaQueryList} */ e) => (isDesktop = e.matches);
         isDesktop = mq.matches;
         // Safari של iOS 13 ומטה לא תומך ב-addEventListener על MediaQueryList,
         // ובלי הבדיקה הזו כל ה-onMount היה נופל שם והרמז לא היה מופיע בכלל
         if (mq.addEventListener) mq.addEventListener("change", onMq);
         else if (mq.addListener) mq.addListener(onMq);
 
+        /** @type {ReturnType<typeof setTimeout> | undefined} */
         let hideTimer;
+        /** @type {ReturnType<typeof setTimeout> | undefined} */
         let settleTimer;
+        /** @type {ReturnType<typeof setTimeout> | undefined} */
         let startTimer;
         let dead = false;
         const stop = () => {

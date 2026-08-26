@@ -166,7 +166,8 @@ export async function saveCampaignOverride(slug, patch, { fetch: f = fetch, jwt 
     const data = { slug, title: patch.title || CAMPAIGNS[slug].title };
     /** @type {string[]} */
     const edited = [];
-    const base = CAMPAIGNS[slug];
+    // הרחבת הטיפוס מאפשרת גישה לפי מפתח דינמי (field.key) בלולאה למטה
+    const base = /** @type {Record<string, any>} */ (CAMPAIGNS[slug]);
     for (const field of EDITABLE_FIELDS) {
         if (!(field.key in patch)) continue;
         const value = patch[field.key];
