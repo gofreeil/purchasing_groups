@@ -52,13 +52,39 @@
     function shortTitle(t) {
         return t.length > 22 ? t.slice(0, 21) + "…" : t;
     }
-    /** תווית אפשרות בבורר המקום - מקום תפוס מסומן עם שם הפרסומת שיושבת בו
+    // הטור מציג רביעייה עוקבת אחת בכל רגע (1-4, אחריה 5-8...) - הבורר מקובץ
+    // לפי הרביעיות האלו; צבעי המשפחות עצמם נשארים מ-adSlotColor כמו בטור
+    const GROUP_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח"];
+    const POS_NAMES = ["עליונה", "שנייה", "שלישית", "תחתונה"];
+    /** @param {number} n */
+    function slotGroup(n) {
+        return Math.ceil(n / 4);
+    }
+    /** @param {number} n */
+    function slotPosName(n) {
+        return POS_NAMES[(n - 1) % 4];
+    }
+    /** אפשרויות הבורר מקובצות לרביעיות - כל קבוצה מקבלת כותרת optgroup משלה
+     * @param {number[]} options */
+    function groupSlotOptions(options) {
+        /** @type {Map<number, number[]>} */
+        const byGroup = new Map();
+        for (const n of options) {
+            const g = slotGroup(n);
+            byGroup.set(g, [...(byGroup.get(g) ?? []), n]);
+        }
+        return [...byGroup.entries()]
+            .sort((a, b) => a[0] - b[0])
+            .map(([g, nums]) => ({ letter: GROUP_LETTERS[g - 1] ?? String(g), nums }));
+    }
+    /** תווית אפשרות בבורר המקום: מספר + מיקום ברביעייה; מקום תפוס מסומן עם שם הפרסומת שיושבת בו
      * @param {number} n @param {string} selfId */
     function slotOptionLabel(n, selfId) {
+        const base = `${n} · ${slotPosName(n)}`;
         const occ = slotOccupants.get(n);
-        if (!occ) return `${n}`;
-        if (occ.id === selfId) return `${n} — המקום הנוכחי`;
-        return `${n} ⚠ תפוס: ${shortTitle(occ.title)}`;
+        if (!occ) return `${base} — פנוי`;
+        if (occ.id === selfId) return `${base} — המקום הנוכחי`;
+        return `${base} ⚠ ${shortTitle(occ.title)}`;
     }
     // אזהרה חיה ליד הבורר ברגע שנבחר מקום תפוס (לפי מזהה הפרסומת)
     /** @type {Record<string, string>} */
@@ -256,17 +282,22 @@
                             <form method="POST" action="?/setSlot" use:enhance class="slot-form">
                                 <input type="hidden" name="id" value={ad.id} />
                                 <select name="slot" class="duration-select" onchange={(e) => onSlotPick(e, ad)}>
-                                    {#each slotOptions as n (n)}
-                                        <!-- הרקע לבן (ברירת המחדל של הבורר במערכת), והמספר
-                                             בצבע המשפחה של אותו מקום - 1/5/9/13 באותו גוון.
-                                             מקום שתפוס ע"י פרסומת אחרת - אדום, עם שמה -->
-                                        {@const occ = slotOccupants.get(n)}
-                                        {@const takenByOther = !!occ && occ.id !== ad.id}
-                                        <option
-                                            value={n}
-                                            selected={n === ad.slot}
-                                            style="background:{takenByOther ? '#fee2e2' : '#fff'};color:{takenByOther ? '#991b1b' : adSlotColor(n).btn};font-weight:800"
-                                        >{slotOptionLabel(n, ad.id)}</option>
+                                    <!-- כל רביעייה עוקבת (מה שמוצג יחד בטור) תחת כותרת משלה.
+                                         הרקע לבן (ברירת המחדל של הבורר במערכת), והמספר
+                                         בצבע המשפחה של אותו מקום - 1/5/9/13 באותו גוון.
+                                         מקום שתפוס ע"י פרסומת אחרת - אדום, עם שמה -->
+                                    {#each groupSlotOptions(slotOptions) as grp (grp.letter)}
+                                        <optgroup label="— רביעייה {grp.letter}׳ (מוצגות יחד) —">
+                                            {#each grp.nums as n (n)}
+                                                {@const occ = slotOccupants.get(n)}
+                                                {@const takenByOther = !!occ && occ.id !== ad.id}
+                                                <option
+                                                    value={n}
+                                                    selected={n === ad.slot}
+                                                    style="background:{takenByOther ? '#fee2e2' : '#fff'};color:{takenByOther ? '#991b1b' : adSlotColor(n).btn};font-weight:800"
+                                                >{slotOptionLabel(n, ad.id)}</option>
+                                            {/each}
+                                        </optgroup>
                                     {/each}
                                 </select>
                                 <button type="submit" class="a-btn ghost" onclick={(e) => confirmSlotMove(e, ad)} title="העבר למקום שנבחר; מקום תפוס - תתבקש לאשר החלפה בין השתיים">⇄ העבר</button>
