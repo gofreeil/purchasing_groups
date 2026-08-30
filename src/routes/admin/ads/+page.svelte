@@ -40,6 +40,21 @@
         return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
     }
 
+    // חלון הקציבה: כל פרטי התקופה והתשלום של הפרסומת + קציבה מהירה
+    // במסלולים או תאריך תפוגה שרירותי. נפתח מכפתור "קצוב" (סופר-אדמין בלבד).
+    /** @type {any} */
+    let durationModal = $state(null);
+    /** תאריך ISO → ערך של <input type="date">. @param {string} [iso] */
+    const toDateInput = (iso) => (iso ? iso.slice(0, 10) : "");
+    /** ימים שנותרו לפרסומת - לחלון הקציבה. @param {any} ad */
+    const daysLeftOf = (ad) =>
+        ad?.expiresAt ? Math.ceil((Date.parse(ad.expiresAt) - Date.now()) / 86400000) : null;
+    /** סגירת החלון עם שליחת טופס מתוכו - הנתונים כבר נתפסו ע"י enhance */
+    function closeOnSubmit() {
+        durationModal = null;
+        return async (/** @type {{ update: () => Promise<void> }} */ { update }) => update();
+    }
+
     // מי תופסת כל מקום בטור - גם מושהית שומרת את המקום שלה
     let slotOccupants = $derived(
         new Map(
@@ -311,20 +326,12 @@
                     <div class="ad-actions">
                         {#if ad.status === "approved"}
                             <a href="/ads/{ad.id}" target="_blank" class="a-btn ghost">פתח את דף הנחיתה ↗</a>
-                            <!-- קציבת תקופה: נספרת מיום האישור, ולכן קציבה קצרה
-                                 מהזמן שכבר רץ מורידה את הפרסומת מיד -->
-                            <form method="POST" action="?/setDuration" use:enhance class="approve-form">
-                                <input type="hidden" name="id" value={ad.id} />
-                                <label class="duration-label">
-                                    תקופה:
-                                    <select name="days" class="duration-select">
-                                        {#each DURATION_OPTIONS as d (d)}
-                                            <option value={d} selected={d === ad.durationDays}>{d} ימים</option>
-                                        {/each}
-                                    </select>
-                                </label>
-                                <button type="submit" class="a-btn ghost" title="התקופה נספרת מיום האישור">⏱ קצוב</button>
-                            </form>
+                            <!-- חלון הקציבה: פרטי תשלום ותאריכים + שינוי תקופה/תפוגה.
+                                 שמור לסופר-אדמין - אדמין רגיל לא רואה את הכפתור -->
+                            {#if data.superAdmin}
+                                <button type="button" class="a-btn ghost" onclick={() => durationModal = ad}
+                                        title="פרטי התקופה והתשלום + שינוי תקופה או תאריך תפוגה">⏱ קצוב</button>
+                            {/if}
                             {#if ad.paused}
                                 <form method="POST" action="?/resume" use:enhance>
                                     <input type="hidden" name="id" value={ad.id} />
@@ -419,9 +426,104 @@
     {/if}
 </div>
 
-<svelte:window onkeydown={(e) => { if (e.key === "Escape") { modalPreviewAd = null; hoverPreview = null; } }} />
+<!-- חלון הקציבה: כל מה שצריך לדעת על התקופה והתשלום של הפרסומת,
+     ושתי דרכי שינוי - מסלול ימים (נספר מיום האישור) או תאריך תפוגה שרירותי -->
+{#if durationModal}
+    {@const m = durationModal}
+    {@const mPlan = adPlans.find((/** @type {any} */ p) => p.days === m.requestedDurationDays)}
+    {@const mDaysLeft = daysLeftOf(m)}
+    {@const mDurOptions = m.durationDays && !DURATION_OPTIONS.includes(m.durationDays)
+        ? [...DURATION_OPTIONS, m.durationDays].sort((a, b) => a - b)
+        : DURATION_OPTIONS}
+    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+    <div class="qm-overlay" role="presentation" onclick={() => durationModal = null}>
+        <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+        <div class="qm-dialog" role="dialog" aria-modal="true" aria-label="קציבת תקופת פרסום" tabindex="-1"
+             onclick={(e) => e.stopPropagation()}>
+            <div class="qm-head">
+                <h3>⏱ קציבת תקופה - {m.title}</h3>
+                <button type="button" class="a-btn ghost" onclick={() => durationModal = null}>✕</button>
+            </div>
+            <!-- מה המפרסם שילם ומתי - כל הנתונים במקום אחד -->
+            <dl class="qm-facts">
+                <dt>מפרסם</dt>
+                <dd>{m.submittedBy?.name || '-'}
+                    {#if m.submittedBy?.email}<span class="qm-dim">· {m.submittedBy.email}</span>{/if}
+                </dd>
+                <dt>מסלול שנרכש</dt>
+                <dd>{mPlan ? `${mPlan.label} - ${mPlan.price} ₪` : `${m.requestedDurationDays || '-'} ימים`}</dd>
+                <dt>סטטוס תשלום</dt>
+                <dd class={m.payment === 'code' ? 'qm-paid' : 'qm-unpaid'}>
+                    {m.payment === 'code' ? '✓ שולם (אושר בקוד)' : '⏳ לתיאום מול המפרסם'}
+                </dd>
+                <dt>הוגש</dt><dd>{fmtDate(m.submittedAt) || '-'}</dd>
+                <dt>פורסם</dt><dd>{fmtDate(m.decidedAt) || '-'}</dd>
+                <dt>פג בתאריך</dt><dd>{fmtDate(m.expiresAt) || '-'}</dd>
+                <dt>נותרו</dt>
+                <dd>{mDaysLeft === null ? '-' : `${mDaysLeft} ימים`}
+                    {#if m.durationDays}<span class="qm-dim">מתוך {m.durationDays}</span>{/if}
+                    {#if m.paused}<span class="qm-dim">(מושהית)</span>{/if}
+                </dd>
+            </dl>
+            <!-- דרך 1: קציבה במסלול ימים, נספרת מיום האישור -->
+            <form method="POST" action="?/setDuration" use:enhance={closeOnSubmit} class="qm-row">
+                <input type="hidden" name="id" value={m.id} />
+                <label class="duration-label">
+                    תקופה מיום האישור:
+                    <select name="days" class="duration-select">
+                        {#each mDurOptions as d (d)}
+                            <option value={d} selected={d === m.durationDays}>{d} ימים</option>
+                        {/each}
+                    </select>
+                </label>
+                <button type="submit" class="a-btn approve">קצוב</button>
+            </form>
+            <!-- דרך 2: תאריך תפוגה שרירותי - הפרסומת יורדת בסוף היום שנבחר -->
+            <form method="POST" action="?/setExpiry" use:enhance={closeOnSubmit} class="qm-row">
+                <input type="hidden" name="id" value={m.id} />
+                <label class="duration-label">
+                    או תאריך תפוגה:
+                    <input type="date" name="expires" required value={toDateInput(m.expiresAt)} class="duration-select" />
+                </label>
+                <button type="submit" class="a-btn approve">קבע תאריך</button>
+            </form>
+            <p class="qm-note">
+                קציבה במסלול נספרת מיום האישור, ולכן מסלול קצר מהזמן שכבר עבר מוריד את הפרסומת מיד.
+                תאריך ידני קובע את התפוגה לסוף היום שנבחר - גם אחורה (הורדה מיידית) וגם קדימה.
+            </p>
+        </div>
+    </div>
+{/if}
+
+<svelte:window onkeydown={(e) => { if (e.key === "Escape") { durationModal = null; modalPreviewAd = null; hoverPreview = null; } }} />
 
 <style>
+    /* --- חלון הקציבה (סופר-אדמין) --- */
+    .qm-overlay {
+        position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.7);
+        display: flex; align-items: center; justify-content: center;
+        padding: 16px; overflow-y: auto;
+    }
+    .qm-dialog {
+        width: 100%; max-width: 430px; margin: auto 0;
+        background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px; padding: 20px; color: #e5e7eb;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+    .qm-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+    .qm-head h3 { margin: 0; font-size: 1rem; color: #fff; }
+    .qm-facts {
+        display: grid; grid-template-columns: auto 1fr; gap: 6px 12px;
+        margin: 0 0 16px; font-size: 0.8rem;
+    }
+    .qm-facts dt { color: #94a3b8; font-weight: 700; }
+    .qm-facts dd { margin: 0; }
+    .qm-dim { color: #64748b; }
+    .qm-paid { color: #6ee7b7; font-weight: 800; }
+    .qm-unpaid { color: #fcd34d; font-weight: 800; }
+    .qm-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .qm-note { margin: 12px 0 0; font-size: 0.7rem; color: #64748b; line-height: 1.5; }
+
     .ads-admin {
         max-width: 56rem;
         margin: 0 auto;

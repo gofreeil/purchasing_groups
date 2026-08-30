@@ -569,6 +569,35 @@ export async function setAdDuration(id, days, { fetch: f = fetch, jwt = '' } = {
 }
 
 /**
+ * קובע תאריך תפוגה שרירותי (מחלון הקציבה). המשך (duration_days) נגזר
+ * ממנו ביחס ליום האישור, כדי שהתצוגה תמשיך להציג משך עקבי.
+ * @param {string} id
+ * @param {string} expiresIso
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ * @returns {Promise<{title:string,expiresAt:string,daysLeft:number}|null>}
+ */
+export async function setAdExpiry(id, expiresIso, { fetch: f = fetch, jwt = '' } = {}) {
+    const ad = await getAd(id, { fetch: f });
+    if (!ad) return null;
+    const expires = new Date(expiresIso);
+    if (isNaN(expires.getTime())) return null;
+    const DAY = 24 * 60 * 60 * 1000;
+    const from = ad.decidedAt || ad.submittedAt || new Date().toISOString();
+    const days = Math.max(0, Math.ceil((expires.getTime() - Date.parse(from)) / DAY));
+    await strapiPut(
+        `${ENDPOINT}/${encodeURIComponent(id)}`,
+        { duration_days: days, expires_at: expires.toISOString() },
+        { fetch: f, jwt },
+    );
+    invalidateAdsCache();
+    return {
+        title: ad.title,
+        expiresAt: expires.toISOString(),
+        daysLeft: Math.ceil((expires.getTime() - Date.now()) / DAY),
+    };
+}
+
+/**
  * השהיה: הפרסומת יורדת מהאתר אבל שומרת את הימים שנותרו לה. בשונה
  * מ"הורד מהאתר" - המפרסם לא מפסיד ימים ששילם עליהם.
  * @param {string} id

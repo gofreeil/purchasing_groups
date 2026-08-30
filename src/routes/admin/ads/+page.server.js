@@ -1,5 +1,5 @@
 import { error, fail } from '@sveltejs/kit';
-import { isAdmin } from '$lib/auth.js';
+import { isAdmin, isSuperAdmin } from '$lib/auth.js';
 import {
     listAllForAdmin,
     approveAd,
@@ -9,6 +9,7 @@ import {
     setAdSlot,
     computeAdSlots,
     setAdDuration,
+    setAdExpiry,
     normalizeDurationDays,
     pauseAd,
     resumeAd,
@@ -48,7 +49,8 @@ export async function load({ locals, fetch }) {
         console.error('admin/ads load failed:', err);
         backendUnavailable = true;
     }
-    return { ads, backendUnavailable };
+    // חלון הקציבה (תקופה/תפוגה שרירותית) שמור לסופר-אדמין
+    return { ads, backendUnavailable, superAdmin: isSuperAdmin(locals.user) };
 }
 
 export const actions = {
@@ -99,9 +101,12 @@ export const actions = {
             return fail(502, { error: 'ההורדה נכשלה - נסו שוב' });
         }
     },
-    // קציבת תקופת פרסום - נספרת מיום האישור
+    // קציבת תקופת פרסום - נספרת מיום האישור. שמורה לסופר-אדמין
     setDuration: async ({ request, locals, fetch }) => {
         ensureAdsAdmin(locals);
+        if (!isSuperAdmin(locals.user)) {
+            return fail(403, { error: 'קציבת תקופה שמורה לסופר-אדמין' });
+        }
         const form = await request.formData();
         const id = String(form.get('id') ?? '');
         if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
@@ -116,6 +121,30 @@ export const actions = {
             return fail(502, { error: 'קציבת התקופה נכשלה - נסו שוב' });
         }
     },
+    // תאריך תפוגה שרירותי מחלון הקציבה - הפרסומת יורדת בסוף היום שנבחר. שמור לסופר-אדמין
+    setExpiry: async ({ request, locals, fetch }) => {
+        ensureAdsAdmin(locals);
+        if (!isSuperAdmin(locals.user)) {
+            return fail(403, { error: 'קביעת תאריך תפוגה שמורה לסופר-אדמין' });
+        }
+        const form = await request.formData();
+        const id = String(form.get('id') ?? '');
+        const expires = String(form.get('expires') ?? '');
+        if (!id || !expires) return fail(400, { error: 'חסר תאריך תפוגה' });
+        const d = new Date(`${expires}T23:59:59`);
+        if (isNaN(d.getTime())) return fail(400, { error: 'תאריך לא תקין' });
+        try {
+            const r = await setAdExpiry(id, d.toISOString(), { fetch, jwt: locals.jwt ?? '' });
+            if (!r) return fail(404, { error: 'הפרסומת לא נמצאה' });
+            const day = new Date(r.expiresAt).toLocaleDateString('he-IL');
+            const suffix = r.daysLeft < 0 ? ' - התאריך שנקבע כבר עבר, הפרסומת ירדה מהאתר' : '';
+            return { success: true, message: `${r.title}: תפוגה נקבעה ל-${day}${suffix}` };
+        } catch (err) {
+            console.error('setExpiry failed:', err);
+            return fail(502, { error: 'קביעת התאריך נכשלה - נסו שוב' });
+        }
+    },
+
     // השהיה - יורדת מהאתר ושומרת את הימים שנותרו
     pause: async ({ request, locals, fetch }) => {
         ensureAdsAdmin(locals);
