@@ -29,6 +29,7 @@ export function GET({ setHeaders }) {
 			changefreq: 'weekly',
 			priority: c.status === 'active' ? '0.9' : '0.5'
 		})),
+		{ loc: `${SITE_URL}/about`, changefreq: 'monthly', priority: '0.5' },
 		{ loc: `${SITE_URL}/advertise`, changefreq: 'monthly', priority: '0.4' },
 		{ loc: `${SITE_URL}/privacy`, changefreq: 'yearly', priority: '0.2' },
 		{ loc: `${SITE_URL}/advertise/terms`, changefreq: 'yearly', priority: '0.2' }

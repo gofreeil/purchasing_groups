@@ -388,6 +388,8 @@
 			>
 
 			<nav class="footer-links" aria-label="ניווט תחתון">
+				<a href="/about">{$t.footer.aboutUs}</a>
+				<span class="dot">|</span>
 				<a href="/privacy">{$t.footer.privacy}</a>
 				<span class="dot">|</span>
 				<a
