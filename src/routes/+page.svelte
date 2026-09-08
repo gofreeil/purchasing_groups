@@ -6,6 +6,7 @@
     import Seo from "$lib/components/Seo.svelte";
     import JsonLd from "$lib/components/JsonLd.svelte";
     import TapHint from "$lib/components/TapHint.svelte";
+    import { readJoined } from "$lib/joined.js";
     import {
         SITE_DESCRIPTION,
         websiteSchema,
@@ -16,6 +17,14 @@
     } from "$lib/seo.js";
 
     let { data } = $props();
+
+    // קבוצות שהגולש כבר לחץ בהן על טופס ההצטרפות (עוגייה, ראה $lib/joined.js) -
+    // היד המצביעה על הכרטיס שלהן הופכת ליד שמסמנת "בוצע". נקרא רק בצד הלקוח.
+    /** @type {Set<string>} */
+    let joined = $state(new Set());
+    onMount(() => {
+        joined = readJoined();
+    });
 
     // קמפיינים פעילים/בקרוב - מבנה/תוכן מ-Strapi
     let activeCampaigns = $derived((data.campaigns ?? []).filter((c) => c.status === 'active'));
@@ -269,7 +278,11 @@
             {#if campaign.is_new}
                 <div class="new-burst">{campaign.new_badge_text || $t.purchases.newBadge}</div>
             {/if}
-            <TapHint label={$t.purchases.tapHint} />
+            <TapHint
+                label={$t.purchases.tapHint}
+                done={joined.has(campaign.slug)}
+                doneLabel={$t.purchases.tapHintDone}
+            />
             <div class="purchase-img-frame" class:fuel-zoom={campaign.slug === 'fuel'}>
                 <img
                     src={campaign.image_url || '/assets/cellular.jpg'}

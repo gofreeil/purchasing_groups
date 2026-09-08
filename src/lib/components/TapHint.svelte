@@ -1,20 +1,18 @@
-<script module>
-    // משותף לכל המופעים: יד אחת בלבד בכל טעינת דף, גם כששני כרטיסים
-    // נמצאים יחד בתצוגה. מתעדכן רק בצד הלקוח (onMount) - לא דולף בין בקשות SSR.
-    let shown = false;
-</script>
-
 <script>
     /**
-     * רמז "לחץ לפרטים ולהצטרפות" שמופיע פעם אחת בכל טעינת דף, על הכרטיס
-     * שהגולש עצר עליו (אחרי שהגלילה נרגעה וכשמרכז הכרטיס במרכז המסך).
+     * רמז "לחץ לפרטים ולהצטרפות" על כרטיס קבוצת רכישה בדף הבית.
+     * כל כרטיס פעיל מקבל מופע משלו; הרמז מתנגן כשהכרטיס נראה על המסך וחוזר
+     * על עצמו כל repeatMs (ברירת מחדל 10 שניות) כל עוד הכרטיס בתצוגה.
      * בנייד - יד אמיתית (אותה תמונה של gofreeil.com) שנכנסת מלמטה ומקישה על הכרטיס.
      * בלפטופ - סמן עכבר שמגיע לאותה נקודה ולוחץ.
+     * במצב done (הגולש כבר השאיר פרטים - ראה $lib/joined.js) אותה יד, באותו גודל
+     * ובאותה צורה, מסמנת "בוצע": תג ✓ ירוק על קצה האצבע במקום טבעת ההקשה, וכיתוב
+     * doneLabel במקום label.
      * הרמז שקוף ללחיצות (pointer-events: none) כך שהקישור של הכרטיס ממשיך לעבוד.
      */
     import { onMount } from "svelte";
 
-    let { label = "" } = $props();
+    let { label = "", done = false, doneLabel = "", repeatMs = 10000 } = $props();
 
     let root = $state();
     // armed - האלמנטים כבר ב-DOM (שקופים) כדי שהתמונה תרד ותפוענח מראש;
@@ -23,9 +21,12 @@
     let playing = $state(false);
     let isDesktop = $state(false);
 
+    // משך הניגון: היד יוצאת אחרי 3 שניות והכיתוב נשאר עוד שנייה אחריה
+    const PLAY_MS = 4200;
+
     onMount(() => {
-        // ?hand=1 - מצב בדיקה: הרמז חוזר על כל כרטיס שעוצרים עליו ומתעלם
-        // מהעדפת הפחתת התנועה. משמש לאבחון מרחוק ("אני לא רואה את היד")
+        // ?hand=1 - מצב בדיקה: מתעלם מהעדפת הפחתת התנועה.
+        // משמש לאבחון מרחוק ("אני לא רואה את היד")
         const forced = new URLSearchParams(location.search).has("hand");
         if (!forced && window.matchMedia("(prefers-reduced-motion: reduce)").matches)
             return;
@@ -42,73 +43,67 @@
         /** @type {ReturnType<typeof setTimeout> | undefined} */
         let hideTimer;
         /** @type {ReturnType<typeof setTimeout> | undefined} */
-        let settleTimer;
-        /** @type {ReturnType<typeof setTimeout> | undefined} */
         let startTimer;
+        /** @type {ReturnType<typeof setInterval> | undefined} */
+        let loop;
         let dead = false;
-        const stop = () => {
-            window.removeEventListener("scroll", onScroll);
-            window.removeEventListener("resize", onScroll);
-            clearTimeout(settleTimer);
-        };
-        const viewportH = () =>
-            window.innerHeight || document.documentElement.clientHeight;
 
-        // מרנדרים את האלמנטים (שקופים) כבר כשהכרטיס במרחק מסך אחד, כדי
-        // שהדפדפן יספיק להוריד ולפענח את התמונה לפני שההנפשה מתחילה
-        function prime() {
-            const r = root.getBoundingClientRect();
-            const vh = viewportH();
-            if (r.top < vh * 2 && r.bottom > -vh) armed = true;
-        }
-
-        // נורה רק אחרי שהגלילה נעצרה, ורק אם מרכז הכרטיס נמצא במרכז המסך.
-        // כך היד מופיעה על הכרטיס שהגולש באמת עצר עליו, ולא נשרפת על כרטיס
-        // שחלף תוך כדי גלילה מהירה (ואז הוא מגיע ליעד ולא רואה כלום).
-        function fire() {
+        function play() {
             if (dead || playing) return;
-            if (!forced && shown) return stop();
-            const r = root.getBoundingClientRect();
-            const vh = viewportH();
-            const center = r.top + r.height / 2;
-            if (center < vh * 0.3 || center > vh * 0.72) return;
-            if (!forced) {
-                shown = true;
-                stop();
-            }
             armed = true;
             // רגע קצר אחרי הרינדור - הדפדפן כבר צייר את האלמנטים והכין להם
             // שכבת קומפוזיציה, כך שההנפשה מתחילה חלק ולא מדלגת בפריים הראשון
             startTimer = setTimeout(() => {
                 if (dead) return;
                 playing = true;
-                // 4.2 שניות - היד יוצאת אחרי 3, והכיתוב נשאר עוד שנייה אחריה
-                hideTimer = setTimeout(() => (playing = false), 4200);
+                hideTimer = setTimeout(() => (playing = false), PLAY_MS);
             }, 50);
         }
 
-        function onScroll() {
-            if (!forced && shown) return stop();
-            prime();
-            // כל אירוע גלילה דוחה את הירי - הוא יקרה רק כשהגלילה שקטה
-            clearTimeout(settleTimer);
-            settleTimer = setTimeout(fire, 160);
+        function stopLoop() {
+            clearInterval(loop);
+            loop = undefined;
+            clearTimeout(startTimer);
         }
 
-        window.addEventListener("scroll", onScroll, { passive: true });
-        window.addEventListener("resize", onScroll);
-        prime();
-        // טעינה שנוחתת כבר על הכרטיסים (רענון באמצע הדף) - בדיקה אחרי
-        // שהתמונות/הוידאו תפסו את גובהם והפריסה התייצבה
-        settleTimer = setTimeout(fire, 700);
+        // הרמז רץ רק כשהכרטיס נראה (לפחות חצי ממנו) - נכנס לתצוגה: ניגון ראשון
+        // אחרי חצי שנייה של התייצבות ואז חזרה כל repeatMs; יצא מהתצוגה: עצירה.
+        // כך כל כרטיס פעיל מקבל את היד שלו, ולא נשרפים ניגונים על כרטיסים שלא רואים.
+        const io = new IntersectionObserver(
+            (entries) => {
+                for (const e of entries) {
+                    if (e.isIntersecting) {
+                        if (loop) continue;
+                        startTimer = setTimeout(play, 500);
+                        loop = setInterval(play, repeatMs);
+                    } else {
+                        stopLoop();
+                    }
+                }
+            },
+            { threshold: 0.5 },
+        );
+        io.observe(root);
+        // טעינה מוקדמת של התמונה כשהכרטיס במרחק מסך אחד, כדי שהניגון הראשון לא יגמגם
+        const primer = new IntersectionObserver(
+            (entries) => {
+                if (entries.some((e) => e.isIntersecting)) {
+                    armed = true;
+                    primer.disconnect();
+                }
+            },
+            { rootMargin: "100% 0px" },
+        );
+        primer.observe(root);
 
         return () => {
             dead = true;
-            stop();
+            io.disconnect();
+            primer.disconnect();
+            stopLoop();
+            clearTimeout(hideTimer);
             if (mq.removeEventListener) mq.removeEventListener("change", onMq);
             else if (mq.removeListener) mq.removeListener(onMq);
-            clearTimeout(startTimer);
-            clearTimeout(hideTimer);
         };
     });
 </script>
@@ -117,11 +112,28 @@
     class="tap-hint"
     class:desktop={isDesktop}
     class:play={playing}
+    class:done
     bind:this={root}
     aria-hidden="true"
 >
     {#if armed}
-        <span class="tap-ring"></span>
+        {#if done}
+            <!-- במקום טבעת ההקשה: תג ✓ ירוק שנשאר על קצה האצבע כל זמן הניגון -->
+            <span class="tap-check">
+                <svg viewBox="0 0 24 24" width="30" height="30">
+                    <path
+                        d="M5 12.5 L10 17.5 L19 7.5"
+                        fill="none"
+                        stroke="#052e16"
+                        stroke-width="3.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </span>
+        {:else}
+            <span class="tap-ring"></span>
+        {/if}
         {#if isDesktop}
             <span class="tap-cursor">
                 <svg viewBox="0 0 24 24" width="34" height="34">
@@ -135,6 +147,7 @@
                 </svg>
             </span>
         {:else}
+            <!-- אותה תמונה, אותו גודל ואותו מיקום בשני המצבים (מצביעה / בוצע) -->
             <img
                 class="tap-hand"
                 src="/images/finger.webp"
@@ -144,7 +157,7 @@
                 decoding="async"
             />
         {/if}
-        <span class="tap-label">{label}</span>
+        <span class="tap-label">{done ? doneLabel : label}</span>
     {/if}
 </div>
 
@@ -173,6 +186,7 @@
        מחדש בכל פריים. will-change מכין להם שכבה מראש כדי שלא תהיה קפיצה
        בפריים הראשון, גם באמצע גלילה. */
     .tap-ring,
+    .tap-check,
     .tap-hand,
     .tap-cursor,
     .tap-label {
@@ -207,6 +221,38 @@
             animation-timing-function: cubic-bezier(0.33, 0, 0.67, 1);
         }
         100% { opacity: 0; transform: scale(1.5); }
+    }
+
+    /* ── תג "בוצע" (מצב done) ─────────────────────────────
+       באותו גודל ובאותה נקודה של טבעת ההקשה, כך שהיד נוגעת בו בדיוק
+       כמו שהיא נוגעת בטבעת במצב הרגיל */
+    .tap-check {
+        width: 48px;
+        height: 48px;
+        margin: -24px 0 0 -24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #4ade80;
+        border: 2px solid #eafff1;
+        box-shadow: 0 0 18px rgba(74, 222, 128, 0.7), 0 6px 14px rgba(0, 0, 0, 0.4);
+    }
+    .tap-check svg { display: block; }
+    .tap-hint.play .tap-check {
+        animation: tap-check 3.4s linear 0.8s forwards;
+    }
+    /* קופץ פנימה ברגע ההקשה, נשאר עם היד ונמוג יחד עם הכיתוב */
+    @keyframes tap-check {
+        0% {
+            opacity: 0;
+            transform: scale(0.3);
+            animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        12% { opacity: 1; transform: scale(1.1); }
+        20% { transform: scale(1); }
+        80% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0; transform: scale(1); }
     }
 
     /* ── היד בנייד ───────────────────────────────────────── */
@@ -278,6 +324,13 @@
         font-weight: 800;
         white-space: nowrap;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(74, 222, 128, 0.22);
+    }
+    /* במצב "בוצע" הבועה ירוקה מלאה - אותו גודל, רק צבע הפוך */
+    .tap-hint.done .tap-label {
+        background: #16a34a;
+        border-color: #bbf7d0;
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 18px rgba(74, 222, 128, 0.5);
     }
     .tap-hint.play .tap-label {
         animation: tap-label 4s linear forwards;

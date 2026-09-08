@@ -160,6 +160,7 @@ export const translations = readable({
             fuelListOpens: "הרשימה תיפתח ביום רביעי 20/5",
             newBadge: "חדש",
             tapHint: "לחץ לפרטים ולהצטרפות",
+            tapHintDone: "בוצע ✓ השארת פרטים",
             currency: 'ש"ח'
         },
         satisfaction: {
@@ -214,6 +215,7 @@ export const translations = readable({
             ],
             surveyTitle: "ספרו לנו על החוויה שלכם",
             joinCta: "למילוי הטופס",
+            joinCtaAction: "מלאו טופס קצר ונציג יחזור אליכם",
             backToHome: "אל הדף הקודם →"
         }
     },
@@ -374,6 +376,7 @@ export const translations = readable({
             fuelListOpens: "List opens Wednesday 20/5",
             newBadge: "New",
             tapHint: "Tap for details and to join",
+            tapHintDone: "Done ✓ details submitted",
             currency: "ILS"
         },
         satisfaction: {
@@ -550,6 +553,7 @@ export const translations = readable({
             fuelListOpens: "Список откроется в среду 20/5",
             newBadge: "Новинка",
             tapHint: "Нажмите для подробностей и вступления",
+            tapHintDone: "Готово ✓ данные отправлены",
             currencyPerYear: "шекелей/год"
         },
         satisfaction: {

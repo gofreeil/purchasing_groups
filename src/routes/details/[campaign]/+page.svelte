@@ -6,6 +6,7 @@
     import Seo from "$lib/components/Seo.svelte";
     import JsonLd from "$lib/components/JsonLd.svelte";
     import { campaignServiceSchema, breadcrumbSchema, faqSchema } from "$lib/seo.js";
+    import { markJoined } from "$lib/joined.js";
 
     /** @typedef {import('$lib/strapi.js').SatisfactionResponse} SatisfactionResponse */
     /**
@@ -356,6 +357,7 @@
             await new Promise((r) => setTimeout(r, 500));
             joinCtaClicked = false;
         }
+        markJoined(campaign);
         window.open(joinLink, "_blank", "noopener");
     }
 
@@ -395,6 +397,7 @@
             await new Promise((r) => setTimeout(r, 500));
             joinCtaClicked = false;
         }
+        markJoined(campaign);
         window.open(joinLink, "_blank", "noopener");
     }
 </script>
@@ -613,10 +616,11 @@
                 class:clicked={joinCtaClicked}
                 bind:this={joinCtaEl}
                 aria-label={$t.details.joinCta}
+                onclick={() => markJoined(campaign)}
             >
                 <div class="join-cta-content">
                     <h3>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</h3>
-                    <p>טופס הצטרפות</p>
+                    <p>{$t.details.joinCtaAction}</p>
                 </div>
             </a>
             <span class="join-cta-hand">👉</span>
@@ -675,10 +679,11 @@
                 rel="noopener"
                 class="join-cta-banner"
                 aria-label="טופס הצטרפות להנחה בסולר"
+                onclick={() => markJoined(campaign)}
             >
                 <div class="join-cta-content">
                     <h3>הנחה בסולר</h3>
-                    <p>טופס הצטרפות</p>
+                    <p>{$t.details.joinCtaAction}</p>
                 </div>
             </a>
             <span class="join-cta-hand">👉</span>
