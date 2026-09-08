@@ -6,7 +6,9 @@
     import Seo from "$lib/components/Seo.svelte";
     import JsonLd from "$lib/components/JsonLd.svelte";
     import { campaignServiceSchema, breadcrumbSchema, faqSchema } from "$lib/seo.js";
-    import { markJoined } from "$lib/joined.js";
+    import { onMount } from "svelte";
+    import { markJoined, readJoined } from "$lib/joined.js";
+    import TapHint from "$lib/components/TapHint.svelte";
 
     /** @typedef {import('$lib/strapi.js').SatisfactionResponse} SatisfactionResponse */
     /**
@@ -148,6 +150,16 @@
         annualSavingsText: STATS[campaign]?.annualSavingsText ?? null,
     });
     let joinLink = $derived(data.campaign?.join_link ?? "");
+    // "השארתי פרטים" (עוגייה, ראה $lib/joined.js) - היד על באנר הטופס הופכת ל"בוצע",
+    // גם מיד אחרי הלחיצה הנוכחית וגם בביקורים הבאים
+    let joined = $state(false);
+    onMount(() => {
+        joined = readJoined().has(campaign);
+    });
+    function noteJoined() {
+        markJoined(campaign);
+        joined = true;
+    }
     let joinLinkDiesel = $derived(data.campaign?.join_link_diesel ?? "");
 
     // pageData ממופה משדות ה-JSON שבסכמת Strapi לשמות המקוריים שמשמשים את ה-template למטה.
@@ -357,7 +369,7 @@
             await new Promise((r) => setTimeout(r, 500));
             joinCtaClicked = false;
         }
-        markJoined(campaign);
+        noteJoined();
         window.open(joinLink, "_blank", "noopener");
     }
 
@@ -397,7 +409,7 @@
             await new Promise((r) => setTimeout(r, 500));
             joinCtaClicked = false;
         }
-        markJoined(campaign);
+        noteJoined();
         window.open(joinLink, "_blank", "noopener");
     }
 </script>
@@ -616,8 +628,9 @@
                 class:clicked={joinCtaClicked}
                 bind:this={joinCtaEl}
                 aria-label={$t.details.joinCta}
-                onclick={() => markJoined(campaign)}
+                onclick={noteJoined}
             >
+                <TapHint label={$t.purchases.tapHintForm} done={joined} doneLabel={$t.purchases.tapHintDone} />
                 <div class="join-cta-content">
                     <h3>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</h3>
                     <p>{$t.details.joinCtaAction}</p>
@@ -679,8 +692,9 @@
                 rel="noopener"
                 class="join-cta-banner"
                 aria-label="טופס הצטרפות להנחה בסולר"
-                onclick={() => markJoined(campaign)}
+                onclick={noteJoined}
             >
+                <TapHint label={$t.purchases.tapHintForm} done={joined} doneLabel={$t.purchases.tapHintDone} />
                 <div class="join-cta-content">
                     <h3>הנחה בסולר</h3>
                     <p>{$t.details.joinCtaAction}</p>
@@ -1595,6 +1609,8 @@
     }
 
     .join-cta-banner {
+        /* עוגן ליד המצביעה (TapHint - absolute על כל הבאנר) */
+        position: relative;
         flex: 1;
         display: block;
         padding: 1.4rem 1.8rem;

@@ -161,6 +161,7 @@ export const translations = readable({
             newBadge: "חדש",
             tapHint: "לחץ לפרטים ולהצטרפות",
             tapHintDone: "בוצע ✓ השארת פרטים",
+            tapHintForm: "לחץ למילוי הטופס",
             currency: 'ש"ח'
         },
         satisfaction: {
@@ -377,6 +378,7 @@ export const translations = readable({
             newBadge: "New",
             tapHint: "Tap for details and to join",
             tapHintDone: "Done ✓ details submitted",
+            tapHintForm: "Tap to fill in the form",
             currency: "ILS"
         },
         satisfaction: {
@@ -554,6 +556,7 @@ export const translations = readable({
             newBadge: "Новинка",
             tapHint: "Нажмите для подробностей и вступления",
             tapHintDone: "Готово ✓ данные отправлены",
+            tapHintForm: "Нажмите, чтобы заполнить форму",
             currencyPerYear: "шекелей/год"
         },
         satisfaction: {
