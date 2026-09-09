@@ -9,6 +9,7 @@
     import { onMount } from "svelte";
     import { markJoined, readJoined } from "$lib/joined.js";
     import TapHint from "$lib/components/TapHint.svelte";
+    import DoneHand from "$lib/components/DoneHand.svelte";
 
     /** @typedef {import('$lib/strapi.js').SatisfactionResponse} SatisfactionResponse */
     /**
@@ -630,7 +631,11 @@
                 aria-label={$t.details.joinCta}
                 onclick={noteJoined}
             >
-                <TapHint label={$t.purchases.tapHintForm} done={joined} doneLabel={$t.purchases.tapHintDone} />
+                {#if joined}
+                    <DoneHand label={$t.purchases.doneShort} title={$t.purchases.tapHintDone} />
+                {:else}
+                    <TapHint label={$t.purchases.tapHintForm} />
+                {/if}
                 <div class="join-cta-content">
                     <h3>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</h3>
                     <p>{$t.details.joinCtaAction}</p>
@@ -694,7 +699,11 @@
                 aria-label="טופס הצטרפות להנחה בסולר"
                 onclick={noteJoined}
             >
-                <TapHint label={$t.purchases.tapHintForm} done={joined} doneLabel={$t.purchases.tapHintDone} />
+                {#if joined}
+                    <DoneHand label={$t.purchases.doneShort} title={$t.purchases.tapHintDone} />
+                {:else}
+                    <TapHint label={$t.purchases.tapHintForm} />
+                {/if}
                 <div class="join-cta-content">
                     <h3>הנחה בסולר</h3>
                     <p>{$t.details.joinCtaAction}</p>

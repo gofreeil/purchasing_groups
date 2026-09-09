@@ -172,8 +172,6 @@ export const CAMPAIGNS = {
         order: 2,
         status: 'active',
         can_join: true,
-        is_new: true,
-        new_badge_text: 'חדש!',
         rating_companies: ['בנזין', 'סולר'],
         join_link: 'https://forms.gle/2Y9SdUfqkJd5mPaS7',
         join_link_diesel: 'https://docs.google.com/forms/d/e/1FAIpQLScz6iFzBwX7oGYXdh98Y9aah_RgWXINtbsJ5u05wWYE8anVUA/viewform?usp=publish-editor',

@@ -5,14 +5,12 @@
      * על עצמו כל repeatMs (ברירת מחדל 10 שניות) כל עוד הכרטיס בתצוגה.
      * בנייד - יד אמיתית (אותה תמונה של gofreeil.com) שנכנסת מלמטה ומקישה על הכרטיס.
      * בלפטופ - סמן עכבר שמגיע לאותה נקודה ולוחץ.
-     * במצב done (הגולש כבר השאיר פרטים - ראה $lib/joined.js) אותה יד, באותו גודל
-     * ובאותה צורה, מסמנת "בוצע": תג ✓ ירוק על קצה האצבע במקום טבעת ההקשה, וכיתוב
-     * doneLabel במקום label.
+     * לקבוצה שהגולש כבר השאיר בה פרטים לא מציגים את הרמז אלא את DoneHand (יד "בוצע" קבועה).
      * הרמז שקוף ללחיצות (pointer-events: none) כך שהקישור של הכרטיס ממשיך לעבוד.
      */
     import { onMount } from "svelte";
 
-    let { label = "", done = false, doneLabel = "", repeatMs = 10000 } = $props();
+    let { label = "", repeatMs = 10000 } = $props();
 
     let root = $state();
     // armed - האלמנטים כבר ב-DOM (שקופים) כדי שהתמונה תרד ותפוענח מראש;
@@ -112,28 +110,11 @@
     class="tap-hint"
     class:desktop={isDesktop}
     class:play={playing}
-    class:done
     bind:this={root}
     aria-hidden="true"
 >
     {#if armed}
-        {#if done}
-            <!-- במקום טבעת ההקשה: תג ✓ ירוק שנשאר על קצה האצבע כל זמן הניגון -->
-            <span class="tap-check">
-                <svg viewBox="0 0 24 24" width="30" height="30">
-                    <path
-                        d="M5 12.5 L10 17.5 L19 7.5"
-                        fill="none"
-                        stroke="#052e16"
-                        stroke-width="3.2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
-                </svg>
-            </span>
-        {:else}
-            <span class="tap-ring"></span>
-        {/if}
+        <span class="tap-ring"></span>
         {#if isDesktop}
             <span class="tap-cursor">
                 <svg viewBox="0 0 24 24" width="34" height="34">
@@ -147,7 +128,6 @@
                 </svg>
             </span>
         {:else}
-            <!-- אותה תמונה, אותו גודל ואותו מיקום בשני המצבים (מצביעה / בוצע) -->
             <img
                 class="tap-hand"
                 src="/images/finger.webp"
@@ -157,7 +137,7 @@
                 decoding="async"
             />
         {/if}
-        <span class="tap-label">{done ? doneLabel : label}</span>
+        <span class="tap-label">{label}</span>
     {/if}
 </div>
 
@@ -186,7 +166,6 @@
        מחדש בכל פריים. will-change מכין להם שכבה מראש כדי שלא תהיה קפיצה
        בפריים הראשון, גם באמצע גלילה. */
     .tap-ring,
-    .tap-check,
     .tap-hand,
     .tap-cursor,
     .tap-label {
@@ -221,38 +200,6 @@
             animation-timing-function: cubic-bezier(0.33, 0, 0.67, 1);
         }
         100% { opacity: 0; transform: scale(1.5); }
-    }
-
-    /* ── תג "בוצע" (מצב done) ─────────────────────────────
-       באותו גודל ובאותה נקודה של טבעת ההקשה, כך שהיד נוגעת בו בדיוק
-       כמו שהיא נוגעת בטבעת במצב הרגיל */
-    .tap-check {
-        width: 48px;
-        height: 48px;
-        margin: -24px 0 0 -24px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #4ade80;
-        border: 2px solid #eafff1;
-        box-shadow: 0 0 18px rgba(74, 222, 128, 0.7), 0 6px 14px rgba(0, 0, 0, 0.4);
-    }
-    .tap-check svg { display: block; }
-    .tap-hint.play .tap-check {
-        animation: tap-check 3.4s linear 0.8s forwards;
-    }
-    /* קופץ פנימה ברגע ההקשה, נשאר עם היד ונמוג יחד עם הכיתוב */
-    @keyframes tap-check {
-        0% {
-            opacity: 0;
-            transform: scale(0.3);
-            animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        12% { opacity: 1; transform: scale(1.1); }
-        20% { transform: scale(1); }
-        80% { opacity: 1; transform: scale(1); }
-        100% { opacity: 0; transform: scale(1); }
     }
 
     /* ── היד בנייד ───────────────────────────────────────── */
@@ -324,13 +271,6 @@
         font-weight: 800;
         white-space: nowrap;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(74, 222, 128, 0.22);
-    }
-    /* במצב "בוצע" הבועה ירוקה מלאה - אותו גודל, רק צבע הפוך */
-    .tap-hint.done .tap-label {
-        background: #16a34a;
-        border-color: #bbf7d0;
-        color: #ffffff;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 18px rgba(74, 222, 128, 0.5);
     }
     .tap-hint.play .tap-label {
         animation: tap-label 4s linear forwards;

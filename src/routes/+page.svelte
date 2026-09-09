@@ -6,6 +6,7 @@
     import Seo from "$lib/components/Seo.svelte";
     import JsonLd from "$lib/components/JsonLd.svelte";
     import TapHint from "$lib/components/TapHint.svelte";
+    import DoneHand from "$lib/components/DoneHand.svelte";
     import { readJoined } from "$lib/joined.js";
     import {
         SITE_DESCRIPTION,
@@ -278,11 +279,11 @@
             {#if campaign.is_new}
                 <div class="new-burst">{campaign.new_badge_text || $t.purchases.newBadge}</div>
             {/if}
-            <TapHint
-                label={$t.purchases.tapHint}
-                done={joined.has(campaign.slug)}
-                doneLabel={$t.purchases.tapHintDone}
-            />
+            {#if joined.has(campaign.slug)}
+                <DoneHand label={$t.purchases.doneShort} title={$t.purchases.tapHintDone} />
+            {:else}
+                <TapHint label={$t.purchases.tapHint} />
+            {/if}
             <div class="purchase-img-frame" class:fuel-zoom={campaign.slug === 'fuel'}>
                 <img
                     src={campaign.image_url || '/assets/cellular.jpg'}
