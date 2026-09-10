@@ -6,6 +6,9 @@
      * בנייד - יד אמיתית (אותה תמונה של gofreeil.com) שנכנסת מלמטה ומקישה על הכרטיס.
      * בלפטופ - סמן עכבר שמגיע לאותה נקודה ולוחץ.
      * לקבוצה שהגולש כבר השאיר בה פרטים לא מציגים את הרמז אלא את DoneHand (יד "בוצע" קבועה).
+     * הפחתת תנועה (prefers-reduced-motion - למשל "הסרת אנימציות" בנגישות של גלקסי, או מצב
+     * חיסכון בסוללה): הרמז עדיין מוצג באותו קצב, אבל בלי תזוזה - היד והכיתוב רק מופיעים
+     * ונמוגים במקום. בעבר הרמז לא הוצג שם בכלל והגולשים לא ידעו היכן ללחוץ.
      * הרמז שקוף ללחיצות (pointer-events: none) כך שהקישור של הכרטיס ממשיך לעבוד.
      */
     import { onMount } from "svelte";
@@ -18,16 +21,24 @@
     let armed = $state(false);
     let playing = $state(false);
     let isDesktop = $state(false);
+    // המכשיר מבקש הפחתת תנועה - מנגנים גרסה סטטית (opacity בלבד, בלי transform)
+    let reducedMotion = $state(false);
 
     // משך הניגון: היד יוצאת אחרי 3 שניות והכיתוב נשאר עוד שנייה אחריה
     const PLAY_MS = 4200;
 
     onMount(() => {
-        // ?hand=1 - מצב בדיקה: מתעלם מהעדפת הפחתת התנועה.
+        // ?hand=1 - מצב בדיקה: מתעלם מהעדפת הפחתת התנועה ומנגן את ההנפשה המלאה.
         // משמש לאבחון מרחוק ("אני לא רואה את היד")
         const forced = new URLSearchParams(location.search).has("hand");
-        if (!forced && window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-            return;
+        // הפחתת תנועה לא מכבה את הרמז - רק מחליפה את ההנפשה בהופעה/היעלמות סטטית.
+        // (מכשירי גלקסי עם "הסרת אנימציות" או חיסכון בסוללה מדווחים כך, ובלי זה
+        // המשתמשים שם לא ראו את היד בכלל)
+        const rm = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const onRm = (/** @type {MediaQueryListEvent | MediaQueryList} */ e) => (reducedMotion = !forced && e.matches);
+        reducedMotion = !forced && rm.matches;
+        if (rm.addEventListener) rm.addEventListener("change", onRm);
+        else if (rm.addListener) rm.addListener(onRm);
         // מאזינים לשינוי רוחב (כולל מצב מכשיר ב-DevTools) כך שהמעבר יד/עכבר
         // מתעדכן חי ולא נקבע פעם אחת בטעינה
         const mq = window.matchMedia("(min-width: 769px)");
@@ -102,6 +113,8 @@
             clearTimeout(hideTimer);
             if (mq.removeEventListener) mq.removeEventListener("change", onMq);
             else if (mq.removeListener) mq.removeListener(onMq);
+            if (rm.removeEventListener) rm.removeEventListener("change", onRm);
+            else if (rm.removeListener) rm.removeListener(onRm);
         };
     });
 </script>
@@ -109,6 +122,7 @@
 <div
     class="tap-hint"
     class:desktop={isDesktop}
+    class:reduced={reducedMotion}
     class:play={playing}
     bind:this={root}
     aria-hidden="true"
@@ -309,6 +323,34 @@
         11% { opacity: 1; transform: translateY(0); }
         67% { opacity: 1; transform: translateY(0); }
         100% { opacity: 0; transform: translateY(6px); }
+    }
+
+    /* ── הפחתת תנועה ─────────────────────────────────────── */
+    /* אותו תזמון בדיוק, אבל opacity בלבד: היד/הסמן והכיתוב מופיעים במקומם
+       הסופי, מחזיקים ונמוגים. הטבעת (שכולה תנועת scale) לא מוצגת.
+       הכיתוב שומר על ההיסט הקבוע שלו (מעל-משמאל לאצבע בנייד) בלי לנוע. */
+    .tap-hint.reduced.play .tap-ring {
+        animation: none;
+    }
+    .tap-hint.reduced.play .tap-hand,
+    .tap-hint.reduced.play .tap-cursor {
+        animation: tap-fade 3s linear forwards;
+    }
+    .tap-hint.reduced .tap-label {
+        transform: translate(-100%, -100%);
+    }
+    .tap-hint.reduced.desktop .tap-label {
+        transform: none;
+    }
+    .tap-hint.reduced.play .tap-label,
+    .tap-hint.reduced.play.desktop .tap-label {
+        animation: tap-fade 4s linear forwards;
+    }
+    @keyframes tap-fade {
+        0% { opacity: 0; }
+        12% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { opacity: 0; }
     }
 
     /* בשורה אחת הבועה מוגבלת ברוחב הכרטיס, ולכן במסכי טלפון הגופן יורד
