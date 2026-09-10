@@ -24,8 +24,8 @@
     // המכשיר מבקש הפחתת תנועה - מנגנים גרסה סטטית (opacity בלבד, בלי transform)
     let reducedMotion = $state(false);
 
-    // משך הניגון: היד יוצאת אחרי 3 שניות והכיתוב נשאר עוד שנייה אחריה
-    const PLAY_MS = 4200;
+    // משך הניגון: היד והכיתוב נמוגים יחד אחרי 3 שניות (ועוד מרווח קטן לסיום ההנפשה)
+    const PLAY_MS = 3200;
     // הרגע שבו האצבע/הסמן חוזרים למטה ונוגעים בכרטיס (35% מהנפשת tap-pointer של 3 שניות) -
     // אז הכרטיס עצמו מקבל "לחיצה" (מחלקת tap-pressed על ההורה, ראה app.css)
     const PRESS_AT_MS = 1000;
@@ -191,7 +191,7 @@
            נמוכה מספיק כדי שבועת הכיתוב שמעליה לא תכסה את שם הקבוצה
            ואת שורת התיאור שמתחתיו */
         --tap-x: 74%;
-        --tap-y: 63%;
+        --tap-y: 69%;
     }
     .tap-hint.desktop {
         --tap-x: 55%;
@@ -310,9 +310,9 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(74, 222, 128, 0.22);
     }
     .tap-hint.play .tap-label {
-        animation: tap-label 4s linear forwards;
+        animation: tap-label 3s linear forwards;
     }
-    /* עולה יחד עם היד, מחזיק עד 2.7 שניות ואז נמוג בקצב אחיד עד 4 */
+    /* עולה יחד עם היד, מחזיק עד ~2 שניות ואז נמוג יחד איתה עד 3 */
     @keyframes tap-label {
         0% {
             opacity: 0;
@@ -367,7 +367,7 @@
     }
     .tap-hint.reduced.play .tap-label,
     .tap-hint.reduced.play.desktop .tap-label {
-        animation: tap-fade 4s linear forwards;
+        animation: tap-fade 3s linear forwards;
     }
     @keyframes tap-fade {
         0% { opacity: 0; }
