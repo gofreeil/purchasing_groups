@@ -26,6 +26,10 @@
 
     // משך הניגון: היד יוצאת אחרי 3 שניות והכיתוב נשאר עוד שנייה אחריה
     const PLAY_MS = 4200;
+    // הרגע שבו האצבע/הסמן חוזרים למטה ונוגעים בכרטיס (35% מהנפשת tap-pointer של 3 שניות) -
+    // אז הכרטיס עצמו מקבל "לחיצה" (מחלקת tap-pressed על ההורה, ראה app.css)
+    const PRESS_AT_MS = 1000;
+    const PRESS_MS = 450;
 
     onMount(() => {
         // ?hand=1 - מצב בדיקה: מתעלם מהעדפת הפחתת התנועה ומנגן את ההנפשה המלאה.
@@ -52,7 +56,21 @@
         /** @type {ReturnType<typeof setTimeout> | undefined} */
         let hideTimer;
         /** @type {ReturnType<typeof setTimeout> | undefined} */
+        let pressTimer;
+        /** @type {ReturnType<typeof setTimeout> | undefined} */
+        let unpressTimer;
+        /** @type {ReturnType<typeof setTimeout> | undefined} */
         let startTimer;
+
+        // אפקט הלחיצה על הכרטיס/הבאנר שהרמז יושב עליו: מוסיפים מחלקה להורה
+        // לרגע קצר. ההורה הוא תמיד העוגן (position: relative) של הרמז.
+        // בהפחתת תנועה אין לחיצה - זו תזוזה.
+        function press() {
+            const host = root?.parentElement;
+            if (!host || reducedMotion) return;
+            host.classList.add("tap-pressed");
+            unpressTimer = setTimeout(() => host.classList.remove("tap-pressed"), PRESS_MS);
+        }
         /** @type {ReturnType<typeof setInterval> | undefined} */
         let loop;
         let dead = false;
@@ -65,6 +83,7 @@
             startTimer = setTimeout(() => {
                 if (dead) return;
                 playing = true;
+                pressTimer = setTimeout(press, PRESS_AT_MS);
                 hideTimer = setTimeout(() => (playing = false), PLAY_MS);
             }, 50);
         }
@@ -111,6 +130,9 @@
             primer.disconnect();
             stopLoop();
             clearTimeout(hideTimer);
+            clearTimeout(pressTimer);
+            clearTimeout(unpressTimer);
+            root?.parentElement?.classList.remove("tap-pressed");
             if (mq.removeEventListener) mq.removeEventListener("change", onMq);
             else if (mq.removeListener) mq.removeListener(onMq);
             if (rm.removeEventListener) rm.removeEventListener("change", onRm);
@@ -166,9 +188,10 @@
         pointer-events: none;
         z-index: 6;
         /* נקודת ההקשה על הכרטיס - היד/הסמן והטבעת מיושרים אליה.
-           נמוכה מספיק כדי שבועת הכיתוב שמעליה לא תכסה את שם הקבוצה */
+           נמוכה מספיק כדי שבועת הכיתוב שמעליה לא תכסה את שם הקבוצה
+           ואת שורת התיאור שמתחתיו */
         --tap-x: 74%;
-        --tap-y: 56%;
+        --tap-y: 63%;
     }
     .tap-hint.desktop {
         --tap-x: 55%;

@@ -1387,3 +1387,15 @@ a {
         font-size: 2.2rem;
     }
 }
+
+/* ── "לחיצה" של היד המצביעה ─────────────────────────────────────────
+   TapHint מוסיף את המחלקה לכרטיס/לבאנר שהוא יושב עליו לרגע שבו האצבע
+   נוגעת בו (ראה PRESS_AT_MS ברכיב). הכרטיס שוקע מעט ומתאושש, כמו לחיצה אמיתית. */
+.tap-pressed {
+    animation: tap-pressed 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+@keyframes tap-pressed {
+    0%   { transform: translateY(0) scale(1); }
+    40%  { transform: translateY(3px) scale(0.965); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(74, 222, 128, 0.7); }
+    100% { transform: translateY(0) scale(1); }
+}
