@@ -1,5 +1,6 @@
 <script>
     import { page } from '$app/stores';
+    import { enhance } from '$app/forms';
     import { adminTiles } from '$lib/adminNav.js';
     import {
         STATUS_HE,
@@ -12,7 +13,7 @@
         activeMonths,
     } from '$lib/memberships.js';
 
-    let { data } = $props();
+    let { data, form } = $props();
 
     // שם תצוגה ידידותי — אותה לוגיקה כמו בהדר: לעולם לא מזהה אוטומטי
     // מסוג "google_1164663...".
@@ -204,7 +205,17 @@
              עם התוכן שרץ עליה עכשיו, והשליחה מחליפה בדיוק אותה. -->
         {#if myAds.length}
             <section>
-                <h2 class="sec-title">📢 הפרסומות שלי</h2>
+                <h2 class="sec-title">
+                    📢 הפרסומות שלי
+                    {#if data.isAdmin}
+                        <a class="ads-admin-link" href="/admin/ads">🛠 לניהול הפרסומות</a>
+                    {/if}
+                </h2>
+                {#if form?.message}
+                    <p class="ads-flash ok">{form.message}</p>
+                {:else if form?.error}
+                    <p class="ads-flash danger">{form.error}</p>
+                {/if}
                 <div class="ads">
                     {#each myAds as ad (ad.id)}
                         {@const st = adState(ad)}
@@ -225,6 +236,17 @@
                                     <span class="ad-reason">סיבת הדחייה: {ad.rejectionReason}</span>
                                 {/if}
                             </span>
+                            <!-- אדמין מאשר ישר מכאן, בלי לעבור למסך הניהול.
+                                 המסלול = מה שנבחר בשליחה; לשינוי מסלול - במסך הניהול. -->
+                            {#if data.isAdmin && ad.status === 'pending'}
+                                <form method="POST" action="?/approve" use:enhance>
+                                    <input type="hidden" name="id" value={ad.id} />
+                                    <input type="hidden" name="durationDays" value={ad.requestedDurationDays ?? ''} />
+                                    <button type="submit" class="ad-approve" title="אישור ופרסום">
+                                        ✅ אשר
+                                    </button>
+                                </form>
+                            {/if}
                             <a
                                 class="ad-edit"
                                 href="/advertise/builder?edit={ad.id}"
@@ -679,6 +701,49 @@
     }
     .ad-edit:hover {
         background: #fde047;
+    }
+    .ad-approve {
+        flex-shrink: 0;
+        background: rgba(34, 197, 94, 0.18);
+        border: 1px solid rgba(34, 197, 94, 0.45);
+        color: #86efac;
+        font-weight: 800;
+        font-size: 0.82rem;
+        border-radius: 0.6rem;
+        padding: 0.4rem 0.8rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .ad-approve:hover {
+        background: rgba(34, 197, 94, 0.32);
+    }
+    .ads-admin-link {
+        margin-inline-start: 0.6rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #93c5fd;
+        text-decoration: none;
+    }
+    .ads-admin-link:hover {
+        color: #bfdbfe;
+        text-decoration: underline;
+    }
+    .ads-flash {
+        border-radius: 0.7rem;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin: 0 0 0.6rem;
+    }
+    .ads-flash.ok {
+        background: rgba(34, 197, 94, 0.12);
+        border: 1px solid rgba(34, 197, 94, 0.35);
+        color: #86efac;
+    }
+    .ads-flash.danger {
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.35);
+        color: #fca5a5;
     }
     .ads-note {
         color: #94a3b8;

@@ -1,8 +1,10 @@
+import { fail } from '@sveltejs/kit';
 import { isAdmin, isSuperAdmin } from '$lib/auth.js';
 import { getCampaignList } from '$lib/campaigns.js';
 import { listMembershipsForUser } from '$lib/server/membershipsSource.js';
 import { summarize } from '$lib/memberships.js';
-import { getMyAds } from '$lib/server/adsStore.js';
+import { approveAd, getMyAds } from '$lib/server/adsStore.js';
+import { normalizePlanDays, planLabel } from '$lib/adPlans.js';
 
 /**
  * האזור האישי — העסקאות שהמשתמש חבר בהן, ממתי, עד מתי וכמה חסך.
@@ -46,3 +48,23 @@ export async function load({ locals, fetch }) {
         superAdmin: isSuperAdmin(user),
     };
 }
+
+export const actions = {
+    // אישור מהיר מ"הפרסומות שלי" - לאדמין שגם מפרסם בעצמו, כדי לא לעבור
+    // למסך הניהול בשביל פרסומת אחת. אותה לוגיקה בדיוק כמו ב-/admin/ads:
+    // המסלול = מה שהמפרסם בחר בשליחה (הבחירה המפורשת נשארת במסך הניהול).
+    approve: async ({ request, locals, fetch }) => {
+        if (!isAdmin(locals.user)) return fail(403, { error: 'נדרשת הרשאת ניהול' });
+        const form = await request.formData();
+        const id = String(form.get('id') ?? '');
+        if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
+        const durationDays = normalizePlanDays(form.get('durationDays'));
+        try {
+            await approveAd(id, { durationDays, fetch, jwt: locals.jwt ?? '' });
+            return { message: `הפרסומת אושרה ופורסמה ל-${planLabel(durationDays)} ✅` };
+        } catch (err) {
+            console.error('profile approve failed:', err);
+            return fail(502, { error: 'האישור נכשל - נסו שוב' });
+        }
+    },
+};

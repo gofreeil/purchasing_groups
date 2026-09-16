@@ -834,6 +834,7 @@ export function sameAdvertiser(ad, identity) {
  * @property {'pending'|'approved'|'rejected'} status
  * @property {number} [slot] מקום בטור (1..12) - למאושרות בלבד
  * @property {string} expiresAt
+ * @property {number} requestedDurationDays המסלול שנבחר בשליחה - ברירת המחדל לאישור מהיר
  * @property {boolean} paused
  * @property {boolean} live מוצגת בפועל על האתר עכשיו
  * @property {string} rejectionReason
@@ -900,6 +901,8 @@ export async function getMyAds(identity, { fetch: f = fetch } = {}) {
                         ? a.order + 1
                         : undefined,
                 expiresAt: a.expiresAt,
+                // המסלול שהמפרסם בחר בשליחה - ברירת המחדל לאישור מהיר מהפרופיל
+                requestedDurationDays: a.requestedDurationDays,
                 paused: a.paused === true,
                 live:
                     a.status === 'approved' &&
