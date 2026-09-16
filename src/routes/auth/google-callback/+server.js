@@ -25,7 +25,10 @@ export async function GET({ url, cookies, fetch }) {
     cookies.delete('oauth-return-to', { ...authCookieOptions(url) });
     cookies.delete('oauth-provider', { ...authCookieOptions(url) });
     // התחברות מפורשת מדף ההתחברות (Google/Facebook) → מסך "ברוכים השבים"
-    // (אותו דפוס כמו withWelcome בדף ההתחברות של שאר אתרי הרשת)
+    // (אותו דפוס כמו withWelcome בדף ההתחברות של שאר אתרי הרשת).
+    // הרשמה בלחיצה ממסך "עוד רגע ואתם בפנים" (community-callback) כבר שותלת
+    // welcome=new ביעד - לא דורסים אותו ב-back.
+    if (/[?&]welcome=/.test(returnTo)) throw redirect(302, returnTo);
     const sep = returnTo.includes('?') ? '&' : '?';
     throw redirect(302, `${returnTo}${sep}welcome=back`);
 }

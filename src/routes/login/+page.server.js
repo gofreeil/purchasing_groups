@@ -1,5 +1,24 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { AUTH_COOKIE, STRAPI_URL, authCookieOptions } from '$lib/auth.js';
+import { displayName } from '$lib/displayName.js';
+
+/**
+ * זיהוי מראש דרך העוגייה המשותפת gofreeil-auth (.gofreeil.com): hooks.server.js
+ * כבר אימת אותה מול Strapi ומילא את locals.user, ולכן מי שכבר מחובר באתר אחר
+ * של יוצאים לחירות רואה "המשך כ-<שם>" בלחיצה אחת. עוגייה מתה או חסרה → null,
+ * וכפתור ה-SSO מוצג כאפשרות משנית בלבד (לא כהבטחה שתיכשל).
+ */
+export function load({ locals }) {
+    /** @type {string | null} */
+    let ssoName = null;
+    try {
+        const u = locals.user;
+        if (u?.email || u?.username) ssoName = displayName(u, 'חבר הקהילה');
+    } catch {
+        /* מציגים את הדף הרגיל */
+    }
+    return { ssoName };
+}
 
 export const actions = {
     local: async ({ request, url, cookies, fetch }) => {
