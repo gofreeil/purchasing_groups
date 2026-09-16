@@ -10,6 +10,8 @@
     import { markJoined, readJoined } from "$lib/joined.js";
     import TapHint from "$lib/components/TapHint.svelte";
     import DoneHand from "$lib/components/DoneHand.svelte";
+    import ShareResponseButton from "$lib/components/ShareResponseButton.svelte";
+    import { responseOgMeta, responseSharePath } from "$lib/shareResponse.js";
 
     /** @typedef {import('$lib/strapi.js').SatisfactionResponse} SatisfactionResponse */
     /**
@@ -156,6 +158,31 @@
     let joined = $state(false);
     onMount(() => {
         joined = readJoined().has(campaign);
+    });
+
+    // ─── שיתוף חכם של תגובה (?r=<documentId>) ───
+    // מי שהגיע מקישור משותף נוחת ישירות על התגובה, מודגשת.
+    let sharedResponse = $derived(data.sharedResponse ?? null);
+    let sharedOg = $derived(
+        sharedResponse ? responseOgMeta({ campaignTitle, response: sharedResponse }) : null,
+    );
+    // עיקרי הקבוצה שמצורפים לטקסט השיתוף של כל תגובה
+    let shareHighlights = $derived.by(() => {
+        /** @type {string[]} */
+        const out = [];
+        if (campaignStats.members > 0) out.push(`${campaignStats.members.toLocaleString('he-IL')} חברים פעילים`);
+        if (campaignStats.savingsText) out.push(campaignStats.savingsText);
+        else if (campaignStats.savings > 0) out.push(`חיסכון ממוצע של ${campaignStats.savings} ש"ח בחודש`);
+        if (data.ratingCount > 0) out.push(`דירוג ${data.averageRating.toFixed(1)}/5 מ-${data.ratingCount} חברים`);
+        return out;
+    });
+    onMount(() => {
+        if (!sharedResponse) return;
+        const el = document.getElementById(`response-${sharedResponse.documentId}`);
+        if (!el) return;
+        // מחכים לאנימציית הכניסה של הדף כדי שהגלילה תיפול על המקום הנכון
+        const timer = setTimeout(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }), 350);
+        return () => clearTimeout(timer);
     });
     function noteJoined() {
         markJoined(campaign);
@@ -416,9 +443,10 @@
 </script>
 
 <Seo
-    title={seoTitle}
-    description={seoDescription}
+    title={sharedOg?.title ?? seoTitle}
+    description={sharedOg?.description ?? seoDescription}
     path={`/details/${campaign}`}
+    ogPath={sharedResponse ? responseSharePath(campaign, sharedResponse.documentId) : ''}
     image={campaignImage || undefined}
     keywords={seoKeywords}
 />
@@ -746,7 +774,13 @@
                 <h3 class="responses-title">תגובות מובילות</h3>
                 {#each allResponses as r (r.id)}
                     {@const rKey = String(r.documentId)}
-                    <div class="response-item" class:featured={r.is_featured}>
+                    {@const shareable = r.documentId ? { ...r, documentId: r.documentId } : null}
+                    <div
+                        class="response-item"
+                        class:featured={r.is_featured}
+                        class:shared={sharedResponse?.documentId === r.documentId}
+                        id={`response-${rKey}`}
+                    >
                         <div class="response-header">
                             <span class="response-stars">{'★'.repeat(r.level)}{'☆'.repeat(5 - r.level)}</span>
                             {#if r.company}
@@ -779,6 +813,16 @@
                             <div class="response-admin-reply">
                                 <span class="admin-reply-label">תגובת האדמין:</span>
                                 <p class="admin-reply-text">{r.admin_reply}</p>
+                            </div>
+                        {/if}
+                        {#if shareable}
+                            <div class="response-share-row">
+                                <ShareResponseButton
+                                    campaignSlug={campaign}
+                                    {campaignTitle}
+                                    response={shareable}
+                                    highlights={shareHighlights}
+                                />
                             </div>
                         {/if}
                         {#if adminIsSuper}
@@ -2219,6 +2263,24 @@
     .response-item.featured {
         border-color: rgba(250, 204, 21, 0.45);
         background: rgba(250, 204, 21, 0.05);
+    }
+    /* תגובה שהגיעו אליה מקישור משותף (?r=) - זוהרת כדי שהעין תיפול עליה */
+    .response-item.shared {
+        border-color: rgba(37, 211, 102, 0.75);
+        box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.35), 0 0 22px rgba(37, 211, 102, 0.25);
+        animation: shared-response-glow 1.6s ease-in-out 3;
+    }
+    @keyframes shared-response-glow {
+        0%, 100% { box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.35), 0 0 22px rgba(37, 211, 102, 0.25); }
+        50% { box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.7), 0 0 34px rgba(37, 211, 102, 0.5); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .response-item.shared { animation: none; }
+    }
+    .response-share-row {
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 0.7rem;
     }
     .response-pin,
     .response-like {

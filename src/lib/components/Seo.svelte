@@ -7,11 +7,16 @@
 	// ============================================================
 	import { SITE_NAME, DEFAULT_OG_IMAGE, canonical } from '$lib/seo.js';
 
-	/** @type {{ title: string, description: string, path?: string, image?: string, type?: string, keywords?: string, noindex?: boolean }} */
+	// ogPath - נתיב נפרד ל-og:url בלבד (למשל /details/x?r=<id> לשיתוף תגובה):
+	// ה-canonical נשאר נקי כדי שגוגל יאחד את הדף, אבל פייסבוק/וואטסאפ סורקים
+	// את og:url - ולכן הוא חייב להצביע על הכתובת עם הפרמטר, אחרת התצוגה
+	// המקדימה תיפול חזרה לכותרת הכללית של הדף.
+	/** @type {{ title: string, description: string, path?: string, ogPath?: string, image?: string, type?: string, keywords?: string, noindex?: boolean }} */
 	let {
 		title,
 		description,
 		path = '/',
+		ogPath = '',
 		image = DEFAULT_OG_IMAGE,
 		type = 'website',
 		keywords = '',
@@ -19,6 +24,7 @@
 	} = $props();
 
 	const url = $derived(canonical(path));
+	const ogUrl = $derived(ogPath ? canonical(ogPath) : url);
 	const robots = $derived(
 		noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1'
 	);
@@ -36,7 +42,7 @@
 	<meta property="og:locale" content="he_IL" />
 	<meta property="og:title" content={title} />
 	<meta property="og:description" content={description} />
-	<meta property="og:url" content={url} />
+	<meta property="og:url" content={ogUrl} />
 	<meta property="og:image" content={absImage} />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={title} />

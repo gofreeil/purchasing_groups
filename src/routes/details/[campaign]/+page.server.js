@@ -65,7 +65,7 @@ async function loadSheetStats(fetch, campaignSlug) {
     return out;
 }
 
-export async function load({ params, fetch }) {
+export async function load({ params, url, fetch }) {
     // אסור קאש ציבורי על ה-HTML: הדף מוטמע עם data.user מה-layout,
     // ו-CDN שישמור אותו יגיש את פרטי המשתמש המחובר לגולשים אחרים.
 
@@ -101,7 +101,19 @@ export async function load({ params, fetch }) {
     });
     const topResponses = sorted.slice(0, 3);
 
+    // שיתוף חכם של תגובה: /details/<campaign>?r=<documentId> (ראה $lib/shareResponse.js).
+    // התגובה המשותפת נכנסת לתגי ה-OG של הדף ומודגשת ברשימה - גם אם היא
+    // לא בין 3 המובילות, כדי שמי שלחץ על הקישור יראה בדיוק אותה.
+    const sharedId = (url.searchParams.get('r') || '').trim();
+    const sharedResponse = sharedId
+        ? responses.find((r) => String(r.documentId) === sharedId) ?? null
+        : null;
+    if (sharedResponse && !topResponses.some((r) => r.documentId === sharedResponse.documentId)) {
+        topResponses.unshift(sharedResponse);
+    }
+
     return {
+        sharedResponse,
         campaign,
         activeMembers: sheetStats.activeMembers,
         sheetMonthlySavings: sheetStats.monthlySavings,

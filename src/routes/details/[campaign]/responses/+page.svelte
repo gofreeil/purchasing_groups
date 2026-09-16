@@ -1,8 +1,16 @@
 <script>
     import RatingForm from "$lib/components/RatingForm.svelte";
+    import ShareResponseButton from "$lib/components/ShareResponseButton.svelte";
     import { invalidateAll } from "$app/navigation";
 
     let { data } = $props();
+
+    // עיקרי הקבוצה שמצורפים לטקסט "שיתוף חכם" של כל תגובה
+    let shareHighlights = $derived(
+        data.ratingCount > 0
+            ? [`דירוג ${data.averageRating.toFixed(1)}/5 מ-${data.ratingCount} חברים`]
+            : [],
+    );
 
     // שם תצוגה ידידותי. לעולם לא להציג מזהה אוטומטי כמו "google_1164663...".
     const AUTO_ID = /^(google|facebook|apple|community|local)[_-]/i;
@@ -233,6 +241,12 @@
                             <span class="action-icon">💬</span>
                             <span class="action-label">הגב{reps.length > 0 ? ` (${reps.length})` : ''}</span>
                         </button>
+                        <ShareResponseButton
+                            campaignSlug={data.campaign?.slug ?? ''}
+                            campaignTitle={data.campaign?.title ?? ''}
+                            response={r}
+                            highlights={shareHighlights}
+                        />
                     </div>
 
                     {#if reps.length > 0}
