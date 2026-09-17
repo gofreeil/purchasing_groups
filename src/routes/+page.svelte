@@ -235,7 +235,7 @@
     <div class="banner-container-with-hands">
         <span class="side-hand">👈</span>
         <a
-            href="https://chat.whatsapp.com/BqskoqeF8XXBL0WnwdYIPx"
+            href="https://chat.whatsapp.com/FE9orNZKb8RGCEXLRiLMtC"
             target="_blank"
             class="centered-ad-banner"
             aria-label="הצטרף לקבוצת הוואטסאפ"
