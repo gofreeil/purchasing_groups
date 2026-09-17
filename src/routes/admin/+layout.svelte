@@ -21,6 +21,10 @@
     let isAdmin = $derived(Boolean(data.isAdmin));
     let nav = $derived(adminNav(isAdmin, Boolean(data.superAdmin)));
     let pending = $derived(data.pending ?? { pending: 0, expiring: 0, ads: 0, members: 0 });
+    // הפס הקבוע של התנועה - כניסות ולחיצות - בכל מסך של הפאנל, לכל אדמין.
+    // במסך הסטטיסטיקה עצמו הוא מיותר: שם המספרים פרוסים במלואם.
+    let traffic = $derived(data.traffic ?? null);
+    let showTraffic = $derived(!!traffic && $page.url.pathname !== '/admin/stats');
     // ?tab=... הוא מה שקובע איזו לשונית פעילה ב-/admin (ראו admin/+page.svelte)
     let currentTab = $derived($page.url.searchParams.get('tab'));
 
@@ -78,6 +82,30 @@
                 </a>
             {/each}
         </nav>
+
+        <!-- תנועה באתר במבט אחד. הפירוט המלא (גרף, לפי מבצע, דפים) ב-/admin/stats -->
+        {#if showTraffic && traffic}
+            <a class="traffic-strip" href="/admin/stats" aria-label="תנועה באתר - לפירוט">
+                <span class="ts-group">
+                    <span class="ts-icon" aria-hidden="true">🚪</span>
+                    <span class="ts-label">כניסות לאתר</span>
+                    <span class="ts-item"><strong>{traffic.visitsToday}</strong> היום</span>
+                    <span class="ts-item"><strong>{traffic.visits7}</strong> 7 ימים</span>
+                    <span class="ts-item"><strong>{traffic.visits30}</strong> 30 יום</span>
+                </span>
+                <span class="ts-group">
+                    <span class="ts-icon" aria-hidden="true">🤝</span>
+                    <span class="ts-label">לחצו על מבצע</span>
+                    <span class="ts-item"><strong>{traffic.dealClicks30}</strong> 30 יום</span>
+                </span>
+                <span class="ts-group">
+                    <span class="ts-icon" aria-hidden="true">📝</span>
+                    <span class="ts-label">לחצו על טופס ההצטרפות</span>
+                    <span class="ts-item"><strong>{traffic.joinClicks30}</strong> 30 יום</span>
+                </span>
+                <span class="ts-more">📈 לפירוט</span>
+            </a>
+        {/if}
     {/if}
 
     {@render children()}
@@ -218,6 +246,55 @@
         padding: 0.1rem 0.4rem;
         font-size: 0.68rem;
         font-weight: 800;
+    }
+
+    /* ── פס התנועה ── */
+    .traffic-strip {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 1.25rem;
+        margin: -0.5rem 0 1.5rem;
+        padding: 0.6rem 1rem;
+        border-radius: 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+        font-size: 0.8rem;
+        color: #d1d5db;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .traffic-strip:hover {
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .ts-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem 0.6rem;
+    }
+    .ts-icon {
+        font-size: 1rem;
+    }
+    .ts-label {
+        font-weight: 700;
+        color: #9ca3af;
+    }
+    .ts-item strong {
+        color: var(--accent-yellow);
+        font-weight: 900;
+        font-size: 0.95rem;
+    }
+    .ts-more {
+        margin-inline-start: auto;
+        font-weight: 700;
+        color: #93c5fd;
+        white-space: nowrap;
+    }
+    @media (max-width: 640px) {
+        .ts-more {
+            margin-inline-start: 0;
+        }
     }
 
     .sr-only {

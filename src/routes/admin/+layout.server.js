@@ -1,6 +1,7 @@
 import { isAdmin, isSuperAdmin } from '$lib/auth.js';
 import { getPendingCounts, noPendingCounts } from '$lib/server/membershipsSource.js';
 import { getExternalCounts } from '$lib/server/adminData.js';
+import { getSiteStats, siteStatsStrip } from '$lib/server/siteStats.js';
 
 /**
  * מעטפת מסכי הניהול. ההרשאה עצמה נאכפת בכל מסך בנפרד (כדי לשמור על מסך
@@ -19,10 +20,18 @@ export async function load({ locals, fetch, depends }) {
         return { isAdmin: false, superAdmin: false, pending: noPendingCounts() };
     }
 
-    // כשל בכל אחד מהמקורות לא מפיל את הפאנל — הבועות פשוט מתאפסות.
-    const pending = await getExternalCounts({ fetch })
-        .then((extra) => getPendingCounts(extra))
-        .catch(() => noPendingCounts());
+    // כשל בכל אחד מהמקורות לא מפיל את הפאנל — הבועות פשוט מתאפסות,
+    // והפס הקבוע של התנועה (כניסות / לחיצות) פשוט לא מוצג.
+    const [pending, traffic] = await Promise.all([
+        getExternalCounts({ fetch })
+            .then((extra) => getPendingCounts(extra))
+            .catch(() => noPendingCounts()),
+        locals.jwt
+            ? getSiteStats({ fetch, jwt: locals.jwt })
+                  .then(siteStatsStrip)
+                  .catch(() => null)
+            : Promise.resolve(null),
+    ]);
 
-    return { isAdmin: true, superAdmin: isSuperAdmin(user), pending };
+    return { isAdmin: true, superAdmin: isSuperAdmin(user), pending, traffic };
 }

@@ -95,14 +95,12 @@ export function adminNav(isAdmin, superAdmin = false) {
             alert: 'ads',
         },
         {
-            // באזור האישי הנתונים כבר פרוסים בכרטיס החיסכון — אריח מיותר
             href: '/admin/stats',
             path: '/admin/stats',
             icon: '📈',
             label: 'סטטיסטיקה',
             title: 'סטטיסטיקה',
-            desc: 'צמיחה, חיסכון מצטבר ופילוח העסקאות',
-            navOnly: true,
+            desc: 'כמה נכנסו לאתר, לחצו על מבצע ועל טופס ההצטרפות',
         },
         ...(superAdmin
             ? [

@@ -8,6 +8,7 @@
     import TapHint from "$lib/components/TapHint.svelte";
     import DoneHand from "$lib/components/DoneHand.svelte";
     import { readJoined } from "$lib/joined.js";
+    import { track } from "$lib/track.js";
     import {
         SITE_DESCRIPTION,
         websiteSchema,
@@ -275,6 +276,7 @@
                 href={`/details/${campaign.slug}`}
                 class="purchase-link-overlay"
                 aria-label={campaign.title}
+                onclick={() => track('deal_click', campaign.slug)}
             ></a>
             {#if campaign.is_new}
                 <div class="new-burst">{campaign.new_badge_text || $t.purchases.newBadge}</div>
@@ -526,7 +528,7 @@
         width: 380px;
         height: 110px;
         border-radius: 15px;
-        background-image: url("/assets/screenshot-2.png");
+        background-image: url("/assets/screenshot-2.webp");
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;

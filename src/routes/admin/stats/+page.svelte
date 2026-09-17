@@ -12,6 +12,34 @@
     let peak = $derived(Math.max(1, ...months.map((/** @type {any} */ m) => m.joins)));
     let maxDeal = $derived(Math.max(1, ...deals.map((/** @type {any} */ d) => d.count)));
     let maxCity = $derived(Math.max(1, ...cities.map((/** @type {any} */ c) => c.count)));
+
+    // ── תנועה באתר ──
+    let traffic = $derived(data.siteTraffic ?? null);
+    /** @type {{ key: 'visits' | 'pageviews' | 'dealClicks' | 'joinClicks', icon: string, label: string, hint: string }[]} */
+    const TRAFFIC_ROWS = [
+        { key: 'visits', icon: '🚪', label: 'כניסות לאתר', hint: 'גולש אחד = כניסה אחת, גם אם עבר בין כמה דפים' },
+        { key: 'pageviews', icon: '👁️', label: 'צפיות בדפים', hint: 'כל דף שנפתח' },
+        { key: 'dealClicks', icon: '🤝', label: 'לחיצות על מבצע', hint: 'לחיצה על כרטיס מבצע בדף הבית' },
+        { key: 'joinClicks', icon: '📝', label: 'לחיצות על טופס ההצטרפות', hint: 'לחיצה על הטופס בדף המבצע' },
+    ];
+    let dailyPeak = $derived(
+        Math.max(1, ...((traffic?.daily ?? []).map((/** @type {any} */ d) => d.visit))),
+    );
+    let trafficDeals = $derived(traffic?.deals ?? []);
+    let trafficPages = $derived(traffic?.pages ?? []);
+    let maxPage = $derived(Math.max(1, ...trafficPages.map((/** @type {any} */ p) => p.views)));
+
+    /** אחוז המרה: כמה מהלוחצים על המבצע המשיכו לטופס. @param {number} clicks @param {number} joins */
+    const conversion = (clicks, joins) => (clicks > 0 ? Math.round((joins / clicks) * 100) : 0);
+    /** @param {string} day YYYY-MM-DD → "17.9" */
+    const shortDay = (day) => {
+        const [, m, d] = day.split('-');
+        return `${Number(d)}.${Number(m)}`;
+    };
+    /** @param {string} day YYYY-MM-DD → תאריך מלא בעברית */
+    const longDay = (day) => new Date(`${day}T12:00:00`).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
+    /** @param {string} path */
+    const pageName = (path) => (path === '/' ? 'דף הבית' : path);
 </script>
 
 <svelte:head>
@@ -19,9 +47,115 @@
     <meta name="robots" content="noindex" />
 </svelte:head>
 
+<!-- ═══ תנועה באתר: כניסות, צפיות, לחיצות על מבצע ועל טופס ההצטרפות ═══ -->
+<section class="traffic">
+    <h2>🌐 תנועה באתר</h2>
+    {#if !traffic}
+        <div class="no-source">
+            🔌 <strong>מוני התנועה עדיין לא מחוברים</strong> — הספירה נשמרת ב-Strapi
+            (pg-site-events) ותופיע כאן ברגע שה-backend ייפרס עם המונים.
+        </div>
+    {:else}
+        <div class="traffic-table-wrap">
+            <table class="traffic-table">
+                <thead>
+                    <tr>
+                        <th class="th-name"></th>
+                        <th>היום</th>
+                        <th>7 ימים</th>
+                        <th>30 יום</th>
+                        <th class="th-all">סה"כ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each TRAFFIC_ROWS as row (row.key)}
+                        {@const v = traffic[row.key]}
+                        <tr>
+                            <th class="row-head" title={row.hint}>
+                                <span aria-hidden="true">{row.icon}</span> {row.label}
+                            </th>
+                            <td>{fmtMoney(v.today)}</td>
+                            <td>{fmtMoney(v.d7)}</td>
+                            <td>{fmtMoney(v.d30)}</td>
+                            <td class="td-all">{fmtMoney(v.all)}</td>
+                        </tr>
+                    {/each}
+                    <tr class="conv-row">
+                        <th class="row-head" title="כמה מהלוחצים על מבצע המשיכו לטופס ההצטרפות">
+                            <span aria-hidden="true">🎯</span> המרה: מבצע → טופס
+                        </th>
+                        <td>{conversion(traffic.dealClicks.today, traffic.joinClicks.today)}%</td>
+                        <td>{conversion(traffic.dealClicks.d7, traffic.joinClicks.d7)}%</td>
+                        <td>{conversion(traffic.dealClicks.d30, traffic.joinClicks.d30)}%</td>
+                        <td class="td-all">{conversion(traffic.dealClicks.all, traffic.joinClicks.all)}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="traffic-note">
+            {#if traffic.since}נספר מאז {longDay(traffic.since)}.{:else}עדיין לא נרשמה תנועה.{/if}
+            לא כולל גלישה של הצוות (אדמינים) ובוטים. "היום" לפי שעון ישראל.
+        </p>
+
+        <h3>🚪 כניסות לאתר ב-30 הימים האחרונים</h3>
+        <div class="chart">
+            {#each traffic.daily as d, i (d.day)}
+                <div
+                    class="col"
+                    title="{longDay(d.day)}: {d.visit} כניסות · {d.pageview} צפיות · {d.deal_click} לחיצות על מבצע · {d.join_click} לחיצות על טופס"
+                >
+                    <span class="col-val">{d.visit || ''}</span>
+                    <div class="col-bar" style="height:{(d.visit / dailyPeak) * 100}%"></div>
+                    <span class="col-label" class:hidden={i % 5 !== 4 && i !== traffic.daily.length - 1}>{shortDay(d.day)}</span>
+                </div>
+            {/each}
+        </div>
+
+        <div class="two-up">
+            <section>
+                <h3>🤝 לפי מבצע</h3>
+                <div class="rows deals-table">
+                    <div class="deal-head">
+                        <span class="row-name"></span>
+                        <span class="deal-col" title="לחיצות על כרטיס המבצע: 30 יום / סה&quot;כ">מבצע</span>
+                        <span class="deal-col" title="לחיצות על טופס ההצטרפות: 30 יום / סה&quot;כ">טופס</span>
+                        <span class="deal-conv" title="כמה מהלוחצים על המבצע המשיכו לטופס (30 יום)">המרה</span>
+                    </div>
+                    {#each trafficDeals as d (d.slug)}
+                        <div class="row">
+                            <span class="row-name"><span aria-hidden="true">{d.icon}</span> {d.title}</span>
+                            <span class="deal-col"><strong>{fmtMoney(d.dealClicks30)}</strong><small>/ {fmtMoney(d.dealClicks)}</small></span>
+                            <span class="deal-col"><strong>{fmtMoney(d.joinClicks30)}</strong><small>/ {fmtMoney(d.joinClicks)}</small></span>
+                            <span class="deal-conv">{conversion(d.dealClicks30, d.joinClicks30)}%</span>
+                        </div>
+                    {/each}
+                    {#if !trafficDeals.length}<p class="empty">עדיין לא נרשמו לחיצות</p>{/if}
+                    <p class="deal-legend">מספר גדול = 30 הימים האחרונים · קטן = מאז ומתמיד</p>
+                </div>
+            </section>
+
+            <section>
+                <h3>👁️ הדפים הנצפים (30 יום)</h3>
+                <div class="rows">
+                    {#each trafficPages as p (p.path)}
+                        <div class="row">
+                            <span class="row-name" title={p.path}>{pageName(p.path)}</span>
+                            <div class="row-track"><div class="row-fill alt" style="width:{(p.views / maxPage) * 100}%"></div></div>
+                            <span class="row-val">{fmtMoney(p.views)}</span>
+                        </div>
+                    {/each}
+                    {#if !trafficPages.length}<p class="empty">עדיין לא נרשמו צפיות</p>{/if}
+                </div>
+            </section>
+        </div>
+    {/if}
+</section>
+
+<h2 class="part-title">🤝 חברויות בעסקאות</h2>
+
 {#if !data.sourceConnected}
     <div class="no-source">
-        🔌 <strong>מקור הנתונים עדיין לא חובר</strong> — כל המספרים במסך נגזרים מהחברויות בעסקאות,
+        🔌 <strong>מקור הנתונים עדיין לא חובר</strong> — כל המספרים מכאן ולמטה נגזרים מהחברויות בעסקאות,
         ויתמלאו ברגע שיחובר מקור אמת.
     </div>
 {/if}
@@ -147,6 +281,131 @@
         font-weight: 800;
         color: #fff;
         margin: 0 0 0.85rem;
+    }
+    section h3 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: #e5e7eb;
+        margin: 0 0 0.7rem;
+    }
+    .part-title {
+        font-size: 1.15rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0 0 1rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* ── תנועה באתר ── */
+    .traffic {
+        margin-bottom: 2.5rem;
+    }
+    .traffic > h2 {
+        font-size: 1.15rem;
+    }
+    .traffic .chart {
+        margin-bottom: 1.5rem;
+    }
+    .traffic-table-wrap {
+        overflow-x: auto;
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.03);
+    }
+    .traffic-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        text-align: center;
+    }
+    .traffic-table th,
+    .traffic-table td {
+        padding: 0.65rem 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        white-space: nowrap;
+    }
+    .traffic-table thead th {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-gray);
+        background: rgba(255, 255, 255, 0.03);
+    }
+    .traffic-table tbody tr:last-child th,
+    .traffic-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+    .traffic-table .row-head {
+        text-align: right;
+        font-weight: 700;
+        color: #e5e7eb;
+        white-space: normal;
+        min-width: 11rem;
+    }
+    .traffic-table td {
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: #fff;
+    }
+    .traffic-table .th-all,
+    .traffic-table .td-all {
+        background: rgba(250, 204, 21, 0.06);
+    }
+    .traffic-table .td-all {
+        color: var(--accent-yellow);
+    }
+    .traffic-table .conv-row td {
+        font-size: 0.9rem;
+        color: #86efac;
+    }
+    .traffic-table .conv-row .row-head {
+        color: #bbf7d0;
+    }
+    .traffic-note {
+        margin: 0.6rem 0.25rem 1.5rem;
+        font-size: 0.75rem;
+        color: var(--text-gray);
+        line-height: 1.6;
+    }
+    .col-label.hidden {
+        visibility: hidden;
+    }
+    .deal-head {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--text-gray);
+        padding-bottom: 0.35rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .deal-col {
+        flex: 0 0 5.5rem;
+        text-align: center;
+        color: #fff;
+    }
+    .deal-col strong {
+        font-weight: 800;
+    }
+    .deal-col small {
+        color: var(--text-gray);
+        font-size: 0.7rem;
+        margin-inline-start: 0.25rem;
+    }
+    .deal-conv {
+        flex: 0 0 3.2rem;
+        text-align: center;
+        font-weight: 800;
+        color: #86efac;
+    }
+    .deals-table .row-name {
+        flex: 1;
+    }
+    .deal-legend {
+        margin: 0.5rem 0 0;
+        font-size: 0.68rem;
+        color: #6b7280;
     }
     .two-up {
         display: grid;

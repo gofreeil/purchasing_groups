@@ -1,6 +1,8 @@
 <script>
 	import { onMount } from "svelte";
 	import { page, navigating } from "$app/stores";
+	import { afterNavigate } from "$app/navigation";
+	import { trackPageview } from "$lib/track.js";
 	const favicon = "/assets/קבוצות-רכישה.png";
 	import "../app.css?v=1.0.3";
 	import { lang, t } from "$lib/i18n.js";
@@ -30,6 +32,13 @@
 			document.documentElement.lang = $lang;
 			document.documentElement.dir = $lang === "he" ? "rtl" : "ltr";
 		}
+	});
+
+	// מוני התנועה (מסך הסטטיסטיקה בפאנל): כניסה לאתר + צפייה בדף על כל
+	// ניווט, כולל הטעינה הראשונה. הצוות לא נספר - השרת ממילא מסנן אותו,
+	// ולא לשלוח כלל חוסך לו בקשה על כל דף.
+	afterNavigate(() => {
+		if (!data?.isAdmin) trackPageview(window.location.pathname);
 	});
 
 	let showLangMenu = $state(false);

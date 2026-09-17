@@ -8,6 +8,7 @@
     import { campaignServiceSchema, breadcrumbSchema, faqSchema } from "$lib/seo.js";
     import { onMount } from "svelte";
     import { markJoined, readJoined } from "$lib/joined.js";
+    import { track } from "$lib/track.js";
     import TapHint from "$lib/components/TapHint.svelte";
     import DoneHand from "$lib/components/DoneHand.svelte";
     import ShareResponseButton from "$lib/components/ShareResponseButton.svelte";
@@ -184,9 +185,12 @@
         const timer = setTimeout(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }), 350);
         return () => clearTimeout(timer);
     });
+    // כל דרכי ההגעה לטופס עוברות כאן (הבאנר, שלב 1, הגלילה לטופס, סולר) -
+    // ולכן זה גם המקום היחיד שסופר "לחיצה על טופס ההצטרפות".
     function noteJoined() {
         markJoined(campaign);
         joined = true;
+        track('join_click', campaign);
     }
     let joinLinkDiesel = $derived(data.campaign?.join_link_diesel ?? "");
 
