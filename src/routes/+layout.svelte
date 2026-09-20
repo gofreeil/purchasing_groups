@@ -1,4 +1,5 @@
 <script>
+	import { headerHeight } from '$lib/actions/headerHeight';
 	import { onMount } from "svelte";
 	import { page, navigating } from "$app/stores";
 	import { afterNavigate } from "$app/navigation";
@@ -138,7 +139,7 @@
 
 <div class="app-wrapper">
 	<!-- Header -->
-	<header class="main-header">
+	<header use:headerHeight class="main-header">
 		<div class="header-container">
 			<a href="/" class="right-branding">
 				<div class="logo-container">

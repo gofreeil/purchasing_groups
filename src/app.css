@@ -1399,3 +1399,12 @@ a {
     40%  { transform: translateY(3px) scale(0.965); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(74, 222, 128, 0.7); }
     100% { transform: translateY(0) scale(1); }
 }
+
+/* ===== גלילה ליעד מתחת להדר הדביק =====
+   ההדר מודד את עצמו (use:headerHeight) וכותב --header-height על ה-:root.
+   כל קפיצה לעוגן / scrollIntoView / :target נעצרת מתחת להדר עם רווח נשימה,
+   ולא מדביקה את היעד לראש החלון מאחורי ההדר. זה המקום היחיד לפצות על ההדר —
+   scroll-mt / scroll-margin-top על אלמנטים מצטבר לזה, אז לא משתמשים בהם לשם כך. */
+html {
+    scroll-padding-top: calc(var(--header-height, 90px) + 1.25rem);
+}
