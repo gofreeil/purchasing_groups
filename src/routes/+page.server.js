@@ -19,7 +19,7 @@ const DEFAULT_CAMPAIGNS = {
     diesel: { monthly: 0, annual: 0 },
     carInsurance: { monthly: 0, annual: 0 },
 };
-const DEFAULT_MEMBERS = 1657;
+const DEFAULT_MEMBERS = 1987;
 
 /** @param {string | null | undefined} v */
 const norm = (v) => (v || '').trim();
