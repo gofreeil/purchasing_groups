@@ -461,7 +461,7 @@
     <section class="hero-card">
         <div class="hero">
             <div class="hero-image">
-                <img src={campaignImage} alt={campaignTitle} />
+                <img src={campaignImage} alt={campaignTitle} width="220" height="220" fetchpriority="high" decoding="async" />
             </div>
             <div class="hero-content">
                 <h1>{campaignTitle}</h1>
@@ -583,12 +583,12 @@
                         class="coverage-banner"
                         aria-label={pageData.findSection.ariaLabel}
                     >
-                        <img src={pageData.findSection.image} alt={pageData.findSection.imageAlt} />
+                        <img src={pageData.findSection.image} alt={pageData.findSection.imageAlt} width={pageData.findSection.imageWidth} height={pageData.findSection.imageHeight} loading="lazy" decoding="async" />
                         <span class="coverage-banner-label">{pageData.findSection.label}</span>
                     </a>
                 {:else}
                     <div class="coverage-banner coverage-banner-static">
-                        <img src={pageData.findSection.image} alt={pageData.findSection.imageAlt} />
+                        <img src={pageData.findSection.image} alt={pageData.findSection.imageAlt} width={pageData.findSection.imageWidth} height={pageData.findSection.imageHeight} loading="lazy" decoding="async" />
                         {#if pageData.findSection.stationNames}
                             <span class="coverage-banner-label">{pageData.findSection.stationNames.join(' · ')}</span>
                         {:else if pageData.findSection.label}
@@ -628,7 +628,7 @@
                                 {#each row.cells as cell}
                                     <td data-label={cell.label}>
                                         {#if cell.image}
-                                            <img src={cell.image.src} alt={cell.image.alt} class="plans-table-logo" />
+                                            <img src={cell.image.src} alt={cell.image.alt} class="plans-table-logo" width={cell.image.width} height={cell.image.height} loading="lazy" decoding="async" />
                                         {:else if cell.html}
                                             {@html cell.html}
                                         {:else}
@@ -698,7 +698,7 @@
                                 {#each row.cells as cell}
                                     <td data-label={cell.label}>
                                         {#if cell.image}
-                                            <img src={cell.image.src} alt={cell.image.alt} class="plans-table-logo" />
+                                            <img src={cell.image.src} alt={cell.image.alt} class="plans-table-logo" width={cell.image.width} height={cell.image.height} loading="lazy" decoding="async" />
                                         {:else if cell.html}
                                             {@html cell.html}
                                         {:else}

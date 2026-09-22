@@ -6,7 +6,7 @@
 // המבנה זהה לזה שה-API של Strapi החזיר (שדות שטוחים על האובייקט), כדי שהקומפוננטות לא ישתנו.
 
 /**
- * @typedef {{ src: string, alt: string }} CampaignImage
+ * @typedef {{ src: string, alt: string, width?: number, height?: number }} CampaignImage
  *
  * @typedef {Object} PlanCell
  * @property {string} label
@@ -29,6 +29,8 @@
  * @property {string} title
  * @property {string} [href]
  * @property {string} image
+ * @property {number} [imageWidth]
+ * @property {number} [imageHeight]
  * @property {string} imageAlt
  * @property {string} [ariaLabel]
  * @property {string} [label]
@@ -74,7 +76,7 @@ export const CAMPAIGNS = {
         title: 'קו הסלולר הזול במדינה!',
         description: 'החל מ-15 ש"ח לחודש, ללא התחייבות, ללא דמי הצטרפות',
         icon: '📱',
-        image_url: '/assets/cellular.jpg',
+        image_url: '/assets/cellular.webp',
         order: 1,
         status: 'active',
         can_join: true,
@@ -85,7 +87,9 @@ export const CAMPAIGNS = {
         find_section: {
             title: 'בדוק את הרשתות המומלצות בשכונה/ עבודה שלך',
             href: 'https://tiber.co.il/Home/Antenna',
-            image: '/assets/coverage-banner.png',
+            image: '/assets/coverage-banner.webp',
+            imageWidth: 1200,
+            imageHeight: 800,
             imageAlt: 'בדיקת קליטה סלולרית',
             ariaLabel: 'לבדיקת קליטה ב-tiber.co.il',
             label: 'לבדיקת קליטה ↗',
@@ -115,7 +119,7 @@ export const CAMPAIGNS = {
                         { label: 'עלות ממוצעת לקו לשנה', value: '14.9' },
                         { label: 'עלות סים', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
                         { label: 'עלות משלוח', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
-                        { label: 'רוכב על רשת', image: { src: '/images/פלאפון.jfif', alt: 'פלאפון' } },
+                        { label: 'רוכב על רשת', image: { src: '/images/pelephone.webp', alt: 'פלאפון', width: 276, height: 183 } },
                     ],
                 },
                 {
@@ -129,7 +133,7 @@ export const CAMPAIGNS = {
                         { label: 'עלות ממוצעת לקו לשנה', html: '16.4 <span class="plan-note">(עלות קו ל-2 מכשירים 15 ש"ח כל אחד)</span>' },
                         { label: 'עלות סים', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
                         { label: 'עלות משלוח', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
-                        { label: 'רוכב על רשת', image: { src: '/images/פלאפון.jfif', alt: 'פלאפון' } },
+                        { label: 'רוכב על רשת', image: { src: '/images/pelephone.webp', alt: 'פלאפון', width: 276, height: 183 } },
                     ],
                 },
                 {
@@ -143,7 +147,7 @@ export const CAMPAIGNS = {
                         { label: 'עלות ממוצעת לקו לשנה', value: 'מחיר קבוע 19.9' },
                         { label: 'עלות סים', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
                         { label: 'עלות משלוח', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
-                        { label: 'רוכב על רשת', image: { src: '/images/סלקום.jfif', alt: 'סלקום' } },
+                        { label: 'רוכב על רשת', image: { src: '/images/cellcom.webp', alt: 'סלקום', width: 283, height: 178 } },
                     ],
                 },
                 {
@@ -157,7 +161,7 @@ export const CAMPAIGNS = {
                         { label: 'עלות ממוצעת לקו לשנה', value: '18.9' },
                         { label: 'עלות סים', value: '4.9 ש"ח' },
                         { label: 'עלות משלוח', value: '14.9 ש"ח' },
-                        { label: 'רוכב על רשת', image: { src: '/images/סלקום.jfif', alt: 'סלקום' } },
+                        { label: 'רוכב על רשת', image: { src: '/images/cellcom.webp', alt: 'סלקום', width: 283, height: 178 } },
                     ],
                 },
             ],
@@ -168,7 +172,7 @@ export const CAMPAIGNS = {
         title: 'הנחה בדלק לכל החיים!',
         description: 'הנחה של 31 אגורות על כל ליטר בנזין מהמחיר היציג של סונול כל ימי חייך. ניתן לממש ב-555 תחנות ברחבי הארץ של דור אלון, טן, תפוז וסונול!',
         icon: '⛽',
-        image_url: '/assets/fuel.jpg',
+        image_url: '/assets/fuel.webp',
         order: 2,
         status: 'active',
         can_join: true,
@@ -180,7 +184,9 @@ export const CAMPAIGNS = {
         plans_table_diesel_note: 'אין כפל מבצעים. המשתמש מקבל את ההנחה מהמחיר היציג של סונול ללא קשר לאופן המילוי - שירות עצמי או מלא.',
         find_section: {
             title: 'מצא את התחנות הקרובות אליך',
-            image: '/images/gas-stations.png',
+            image: '/images/gas-stations.webp',
+            imageWidth: 1200,
+            imageHeight: 822,
             imageAlt: 'תחנות דלק',
             stationNames: ['סונול', 'דור אלון', 'טן', 'תפוז'],
         },
@@ -218,7 +224,7 @@ export const CAMPAIGNS = {
                         { label: 'הנחה לליטר בנזין', value: '31 אגורות' },
                         { label: 'בסיס ההנחה', value: 'מהמחיר היציג של סונול' },
                         { label: 'מס׳ תחנות זמינות', value: '245' },
-                        { label: 'לוגו', image: { src: '/images/sonol.png', alt: 'סונול' } },
+                        { label: 'לוגו', image: { src: '/images/sonol.webp', alt: 'סונול', width: 225, height: 225 } },
                     ],
                 },
                 {
@@ -228,7 +234,7 @@ export const CAMPAIGNS = {
                         { label: 'הנחה לליטר בנזין', value: '31 אגורות' },
                         { label: 'בסיס ההנחה', value: 'מהמחיר היציג של סונול' },
                         { label: 'מס׳ תחנות זמינות', value: '220' },
-                        { label: 'לוגו', image: { src: '/images/dor-alon.png', alt: 'דור אלון' } },
+                        { label: 'לוגו', image: { src: '/images/dor-alon.webp', alt: 'דור אלון', width: 225, height: 225 } },
                     ],
                 },
                 {
@@ -238,7 +244,7 @@ export const CAMPAIGNS = {
                         { label: 'הנחה לליטר בנזין', value: '32 אגורות' },
                         { label: 'בסיס ההנחה', value: 'מהמחיר היציג של סונול' },
                         { label: 'מס׳ תחנות זמינות', value: '77' },
-                        { label: 'לוגו', image: { src: '/images/ten.jfif', alt: 'טן' } },
+                        { label: 'לוגו', image: { src: '/images/ten.webp', alt: 'טן', width: 225, height: 225 } },
                     ],
                 },
                 {
@@ -248,7 +254,7 @@ export const CAMPAIGNS = {
                         { label: 'הנחה לליטר בנזין', value: '32 אגורות' },
                         { label: 'בסיס ההנחה', value: 'מהמחיר היציג של סונול' },
                         { label: 'מס׳ תחנות זמינות', value: '13' },
-                        { label: 'לוגו', image: { src: '/images/tapuz.png', alt: 'תפוז' } },
+                        { label: 'לוגו', image: { src: '/images/tapuz.webp', alt: 'תפוז', width: 204, height: 192 } },
                     ],
                 },
             ],
@@ -269,7 +275,7 @@ export const CAMPAIGNS = {
                         { label: 'רשת תחנות', html: 'סונול / דור אלון / טן' },
                         { label: 'הנחה לליטר סולר', value: '3.76' },
                         { label: 'בסיס ההנחה', value: 'מהמחיר היציג של סונול' },
-                        { label: 'לוגו', html: '<span class="multi-logos"><img src="/images/sonol.png" alt="סונול" class="plans-table-logo" /><img src="/images/dor-alon.png" alt="דור אלון" class="plans-table-logo" /><img src="/images/ten.jfif" alt="טן" class="plans-table-logo" /></span>' },
+                        { label: 'לוגו', html: '<span class="multi-logos"><img src="/images/sonol.webp" alt="סונול" class="plans-table-logo" width="225" height="225" loading="lazy" decoding="async" /><img src="/images/dor-alon.webp" alt="דור אלון" class="plans-table-logo" width="225" height="225" loading="lazy" decoding="async" /><img src="/images/ten.webp" alt="טן" class="plans-table-logo" width="225" height="225" loading="lazy" decoding="async" /></span>' },
                     ],
                 },
             ],
@@ -280,7 +286,7 @@ export const CAMPAIGNS = {
         title: 'אינטרנט ביתי הזול במדינה!',
         description: 'צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.',
         icon: '🌐',
-        image_url: '/assets/internet.jpg',
+        image_url: '/assets/internet.webp',
         order: 3,
         status: 'soon',
         can_join: false,
@@ -290,7 +296,7 @@ export const CAMPAIGNS = {
         title: 'ביטוח רכב הזול במדינה!',
         description: 'הצעה אישית לביטוח רכב קבוצתי המשתלם במדינה!<br />כולל הטבות ייחודיות רק לחברי הקבוצה',
         icon: '🚗',
-        image_url: '/assets/car_insurance.png',
+        image_url: '/assets/car_insurance.webp',
         order: 4,
         status: 'active',
         can_join: true,
@@ -326,7 +332,7 @@ export const CAMPAIGNS = {
         title: 'מערכת חשמל עצמאית המשתלמת במדינה!',
         description: 'צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.',
         icon: '⚡',
-        image_url: '/assets/electricity.jpg',
+        image_url: '/assets/electricity.webp',
         order: 5,
         status: 'soon',
         can_join: false,
@@ -336,7 +342,7 @@ export const CAMPAIGNS = {
         title: 'רכישת קופוני הנחה ברשתות המזון',
         description: 'צוותנו פועלים לאתר את העסקה המשתלמת ביותר עבורנו.',
         icon: '🎟️',
-        image_url: '/assets/coupons.jpg',
+        image_url: '/assets/coupons.webp',
         order: 6,
         status: 'soon',
         can_join: false,

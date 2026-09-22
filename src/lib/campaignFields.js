@@ -24,7 +24,7 @@ export const EDITABLE_FIELDS = [
     { key: 'title', label: 'כותרת', type: 'text', group: 'basic', hint: 'מה שמופיע על הכרטיס ובראש דף העסקה' },
     { key: 'description', label: 'תיאור קצר', type: 'textarea', group: 'basic', hint: 'שורת המשנה על הכרטיס' },
     { key: 'icon', label: 'אייקון', type: 'text', group: 'basic', hint: 'אימוג׳י בודד, למשל 📱' },
-    { key: 'image_url', label: 'תמונת הכרטיס', type: 'text', group: 'basic', hint: 'נתיב מתוך static, למשל /assets/cellular.jpg' },
+    { key: 'image_url', label: 'תמונת הכרטיס', type: 'text', group: 'basic', hint: 'נתיב מתוך static, למשל /assets/cellular.webp' },
     { key: 'order', label: 'סדר תצוגה', type: 'number', group: 'basic', hint: 'מספר קטן = מוקדם יותר ברשימה' },
 
     // ── מצב ──

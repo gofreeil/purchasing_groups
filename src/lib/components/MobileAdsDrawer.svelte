@@ -246,6 +246,8 @@
 								src={ad.image}
 								alt={ad.title}
 								class="benefit-img"
+								width={ad.width}
+								height={ad.height}
 								decoding="async"
 								loading="lazy"
 							/>

@@ -23,7 +23,7 @@
 
 	const WELCOME_MS = 7000;
 	// לוגו האתר — המשתנה היחיד שמשתנה בין אתרי הרשת
-	const LOGO_SRC = '/assets/קבוצות-רכישה.png';
+	const LOGO_SRC = '/assets/קבוצות-רכישה.webp';
 
 	/** @type {'new' | 'back' | null} */
 	let kind = $state(null);
@@ -87,7 +87,7 @@
 		<div class="welcome-inner">
 			<div class="welcome-content">
 				{#if kind === 'new'}
-					<img src={LOGO_SRC} alt="לוגו האתר" class="welcome-logo" />
+					<img src={LOGO_SRC} alt="לוגו רכישות קבוצתיות" class="welcome-logo" width="384" height="384" decoding="async" />
 					<h2 class="welcome-title">
 						<span class="welcome-emoji" aria-hidden="true">🎉</span>
 						<span>ברוכים המצטרפים</span>
@@ -116,7 +116,7 @@
 							title={site.title}
 						>
 							<div class="welcome-tile-img" style="background: {site.color}">
-								<img src={site.image} alt={site.title} loading="lazy" />
+								<img src={site.image} alt={site.title} width={site.width} height={site.height} loading="lazy" decoding="async" />
 							</div>
 							<span class="welcome-tile-title">{site.title}</span>
 						</a>

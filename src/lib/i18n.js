@@ -8,7 +8,7 @@ export const translations = readable({
         subtitle: "הצטרף והוזל עכשיו את ההוצאות החודשיות שלך",
         addOffer: "+ הוסף הצעה",
         login: "התחברות",
-        logoAlt: "לוגו",
+        logoAlt: "רכישות קבוצתיות - לדף הבית",
         currency: 'ש"ח',
         sidebar: {
             whatsapp: 'הצטרף עכשיו לקבוצת <span class="hl-whatsapp">הווצאפ</span> המשותפת שלנו והיה חלק מהמהפכה הצרכנית',
@@ -226,7 +226,7 @@ export const translations = readable({
         subtitle: "Join and reduce your monthly expenses now",
         addOffer: "+ Add Offer",
         login: "Login",
-        logoAlt: "Logo",
+        logoAlt: "Group Purchasing - home page",
         currency: 'ILS',
         sidebar: {
             whatsapp: 'Join our shared <span class="hl-whatsapp">WhatsApp</span> group now and be part of the consumer revolution',
@@ -407,7 +407,7 @@ export const translations = readable({
         subtitle: "Присоединяйтесь и сократите свои ежемесячные расходы сейчас",
         addOffer: "+ Добавить предложение",
         login: "Войти",
-        logoAlt: "Логотип",
+        logoAlt: "Групповые покупки - на главную",
         currency: 'шек.',
         sidebar: {
             whatsapp: 'Присоединяйтесь к нашей общей группе в <span class="hl-whatsapp">WhatsApp</span> сейчас и станьте частью потребительской революции',

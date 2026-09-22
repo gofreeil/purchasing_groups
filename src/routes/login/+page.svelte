@@ -63,7 +63,7 @@
                     {#if loading === 'sso'}
                         <span class="spinner dark"></span>
                     {:else}
-                        <img src="/assets/yotzim-lecherut.png" alt="יוצאים לחירות" />
+                        <img src="/assets/yotzim-lecherut.webp" alt="לוגו יוצאים לחירות" width="480" height="274" decoding="async" />
                     {/if}
                 </span>
                 המשך כ-{data.ssoName} 🕊️
@@ -126,7 +126,7 @@
                     {#if loading === 'sso'}
                         <span class="spinner dark"></span>
                     {:else}
-                        <img src="/assets/yotzim-lecherut.png" alt="יוצאים לחירות" />
+                        <img src="/assets/yotzim-lecherut.webp" alt="לוגו יוצאים לחירות" width="480" height="274" decoding="async" />
                     {/if}
                 </span>
                 כניסה דרך קהילת יוצאים לחירות (חשבון קיים או קוד ב-SMS)

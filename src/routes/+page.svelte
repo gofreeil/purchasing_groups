@@ -267,7 +267,7 @@
 </div>
 
 <div class="purchases-list">
-    {#each activeCampaigns as campaign}
+    {#each activeCampaigns as campaign, i}
         {@const sheet = data.sheetData?.[campaign.slug]}
         {@const liveRating = data.averageRatings?.[campaign.slug]}
         {@const card = { ...(CARD_CONFIG[campaign.slug] ?? {}), ...(liveRating ? { rating: liveRating.avg } : {}) }}
@@ -287,10 +287,17 @@
                 <TapHint label={$t.purchases.tapHint} />
             {/if}
             <div class="purchase-img-frame" class:fuel-zoom={campaign.slug === 'fuel'}>
+                <!-- הכרטיס הראשון הוא התמונה הראשונה שנראית במסך (LCP) - נטען מיד;
+                     השאר מתחת לקפל ונטענים בעצלות. width/height משריינים מקום. -->
                 <img
-                    src={campaign.image_url || '/assets/cellular.jpg'}
+                    src={campaign.image_url || '/assets/cellular.webp'}
                     alt={campaign.title}
                     class="purchase-img"
+                    width="100"
+                    height="100"
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={i === 0 ? 'high' : 'auto'}
+                    decoding="async"
                 />
             </div>
             <div class="purchase-info">
@@ -347,9 +354,13 @@
             <div class="purchase-card">
                 <div class="purchase-img-frame">
                     <img
-                        src={campaign.image_url || '/assets/internet.jpg'}
+                        src={campaign.image_url || '/assets/internet.webp'}
                         alt={campaign.title}
                         class="purchase-img"
+                        width="100"
+                        height="100"
+                        loading="lazy"
+                        decoding="async"
                     />
                 </div>
                 <div class="purchase-info">

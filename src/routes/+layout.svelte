@@ -144,9 +144,13 @@
 			<a href="/" class="right-branding">
 				<div class="logo-container">
 					<img
-						src="/assets/קבוצות-רכישה.png"
+						src="/assets/קבוצות-רכישה.webp"
 						alt={$t.logoAlt}
 						class="main-logo"
+						width="384"
+						height="384"
+						fetchpriority="high"
+						decoding="async"
 					/>
 				</div>
 				<div class="titles">
@@ -168,19 +172,25 @@
 						{#if $lang === "he"}
 							<img
 								src="https://flagcdn.com/24x18/il.png"
-								alt="IL"
+								alt=""
+								width="24"
+								height="18"
 								class="flag-icon"
 							/> <span class="lang-name">עברית</span>
 						{:else if $lang === "en"}
 							<img
 								src="https://flagcdn.com/24x18/us.png"
-								alt="US"
+								alt=""
+								width="24"
+								height="18"
 								class="flag-icon"
 							/> <span class="lang-name">English</span>
 						{:else}
 							<img
 								src="https://flagcdn.com/24x18/ru.png"
-								alt="RU"
+								alt=""
+								width="24"
+								height="18"
 								class="flag-icon"
 							/> <span class="lang-name">Русский</span>
 						{/if}
@@ -197,7 +207,10 @@
 							>
 								<img
 									src="https://flagcdn.com/24x18/il.png"
-									alt="IL"
+									alt=""
+									width="24"
+									height="18"
+									loading="lazy"
 									class="flag-icon"
 								/> עברית
 							</button>
@@ -209,7 +222,10 @@
 							>
 								<img
 									src="https://flagcdn.com/24x18/us.png"
-									alt="US"
+									alt=""
+									width="24"
+									height="18"
+									loading="lazy"
 									class="flag-icon"
 								/> English
 							</button>
@@ -221,7 +237,10 @@
 							>
 								<img
 									src="https://flagcdn.com/24x18/ru.png"
-									alt="RU"
+									alt=""
+									width="24"
+									height="18"
+									loading="lazy"
 									class="flag-icon"
 								/> Русский
 							</button>
@@ -242,7 +261,7 @@
 								onclick={() => (showUserMenu = false)}
 							>
 								{#if data.user.avatar_url}
-									<img class="user-avatar" src={data.user.avatar_url} alt="" referrerpolicy="no-referrer" />
+									<img class="user-avatar" src={data.user.avatar_url} alt="" width="44" height="44" decoding="async" referrerpolicy="no-referrer" />
 								{:else}
 									<span class="user-avatar user-avatar-fallback" aria-hidden="true">{avatarInitial}</span>
 								{/if}
@@ -381,9 +400,11 @@
 				class="footer-brand"
 			>
 				<img
-					src="/assets/yotzim-lecherut.png"
-					alt="יוצאים לחירות"
+					src="/assets/yotzim-lecherut.webp"
+					alt="לוגו יוצאים לחירות"
 					class="footer-brand-img"
+					width="480"
+					height="274"
 					loading="lazy"
 					decoding="async"
 				/>

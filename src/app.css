@@ -301,28 +301,28 @@ a {
 
 /* Backgrounds for ads - will use your images */
 .neighborhoods-ad {
-    background-image: url('/assets/news/ועדי שכונות.png');
+    background-image: url('/assets/news/vaadei-shchunot.webp');
     background-size: 100% 100%;
 }
 
 .groups-ad {
-    background-image: url('/assets/screenshot-2.png');
+    background-image: url('/assets/screenshot-2.webp');
     background-size: 100% 100%;
 }
 
 .special-ad {
-    background-image: url('/assets/screenshot-2.png');
+    background-image: url('/assets/screenshot-2.webp');
     background-size: 100% 100%;
 }
 
 .investment-ad {
     background-color: #1e293b;
-    background-image: url('/assets/partners/investments.png');
+    background-image: url('/assets/partners/investments.webp');
     background-size: 100% 100%;
 }
 
 .investments-community-ad {
-    background-image: url('/assets/partners/השקעות קבוצתיות.png');
+    background-image: url('/assets/partners/investments.webp');
     background-size: 100% 100%;
 }
 
@@ -359,7 +359,7 @@ a {
     /* המרה מקטן יותר מהצד */
     height: 150px;
     border-radius: 20px;
-    background-image: url('/assets/screenshot-2.png');
+    background-image: url('/assets/screenshot-2.webp');
     background-size: cover;
     background-position: center;
     position: relative;

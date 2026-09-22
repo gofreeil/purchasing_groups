@@ -18,6 +18,8 @@
  * @property {string} title
  * @property {string} href
  * @property {string} image
+ * @property {number} width   - מידות התמונה בפיקסלים, כדי שהדפדפן ישריין מקום לפני הטעינה
+ * @property {number} height
  * @property {string} color
  */
 
@@ -27,63 +29,81 @@ export const networkSites = [
 		id: 1,
 		title: 'בתי הפיוס',
 		href: 'https://chachmim.gofreeil.com/',
-		image: '/assets/bati-hapius.png',
+		image: '/assets/bati-hapius.webp',
+		width: 720,
+		height: 720,
 		color: 'linear-gradient(135deg, #ea580c, #dc2626)'
 	},
 	{
 		id: 2,
 		title: 'הגמ"ח הארצי',
 		href: 'https://gemach.gofreeil.com/',
-		image: '/assets/gemach-harzi.png',
+		image: '/assets/gemach-harzi.webp',
+		width: 720,
+		height: 480,
 		color: 'linear-gradient(135deg, #db2777, #c026d3, #7e22ce)'
 	},
 	{
 		id: 3,
 		title: 'קהילה בשכונה',
 		href: 'https://community.gofreeil.com/',
-		image: '/assets/community-neighborhood.png',
+		image: '/assets/community-neighborhood.webp',
+		width: 720,
+		height: 480,
 		color: 'linear-gradient(135deg, #3b82f6, #9333ea)'
 	},
 	{
 		id: 4,
 		title: 'ועדי שכונות',
 		href: 'https://neighborhoods.gofreeil.com/',
-		image: '/assets/news/vaadei-shchunot.png',
+		image: '/assets/news/vaadei-shchunot.webp',
+		width: 720,
+		height: 390,
 		color: 'linear-gradient(135deg, #2563eb, #0891b2)'
 	},
 	{
 		id: 5,
 		title: 'מבקר רשויות המדינה',
 		href: 'https://criticism.gofreeil.com/',
-		image: '/assets/mevaker-rashuyot.png',
+		image: '/assets/mevaker-rashuyot.webp',
+		width: 720,
+		height: 722,
 		color: 'linear-gradient(135deg, #1d4ed8, #4338ca)'
 	},
 	{
 		id: 6,
 		title: 'דירוג ציבורי',
 		href: 'https://rating.gofreeil.com/',
-		image: '/assets/public-rating.jpeg',
+		image: '/assets/public-rating.webp',
+		width: 720,
+		height: 1080,
 		color: 'linear-gradient(135deg, #4f46e5, #2563eb)'
 	},
 	{
 		id: 7,
 		title: 'משאלי העם',
 		href: 'https://referendum.gofreeil.com/',
-		image: '/assets/referendum.png',
+		image: '/assets/referendum.webp',
+		width: 720,
+		height: 480,
 		color: 'linear-gradient(135deg, #9333ea, #4338ca)'
 	},
 	{
 		id: 8,
 		title: 'רכישות קבוצתיות',
 		href: 'https://groups.gofreeil.com/',
-		image: '/assets/whatsapp_cta.png',
+		image: '/assets/whatsapp_cta.webp',
+		width: 493,
+		height: 504,
 		color: 'linear-gradient(135deg, #166534, #064e3b)'
 	},
 	{
 		id: 9,
 		title: 'בעלי מקצוע כשירים',
 		href: 'https://index.gofreeil.com/',
-		image: '/assets/professionals.png',
+		image: '/assets/professionals.webp',
+		width: 584,
+		height: 330,
 		color: 'linear-gradient(135deg, #eab308, #f97316)'
 	},
 	{
@@ -91,6 +111,8 @@ export const networkSites = [
 		title: 'חנות החירות',
 		href: 'https://shop.gofreeil.com/',
 		image: '/assets/shop.webp',
+		width: 640,
+		height: 427,
 		color: 'linear-gradient(135deg, #059669, #0f766e)'
 	}
 ];

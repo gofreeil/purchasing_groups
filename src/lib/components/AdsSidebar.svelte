@@ -32,6 +32,8 @@
 						src={ad.image}
 						alt={ad.title}
 						class="ad-image"
+						width={ad.width}
+						height={ad.height}
 						loading="lazy"
 						decoding="async"
 						class:ad-image-short={ad.id === 5 || ad.id === 10}
