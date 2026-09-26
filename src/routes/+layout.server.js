@@ -1,5 +1,6 @@
 import { listApproved, computeAdSlots, adImageUrl } from '$lib/server/adsStore.js';
 import { isAdmin, isSuperAdmin } from '$lib/auth.js';
+import { getSiteContent } from '$lib/server/siteContentStore.js';
 
 // חושף את המשתמש המחובר לכל הדפים דרך data.user,
 // ואת הפרסומות המאושרות של מפרסמים - לסיידבר הפרסומות.
@@ -57,5 +58,7 @@ export async function load({ locals, fetch }) {
         isAdmin: isAdmin(u),
         superAdmin: isSuperAdmin(u),
         approvedAds,
+        // כיתובים שנערכו בפאנל - נכנסים ל-$t דרך textOverrides (ראו siteTexts.js)
+        siteTexts: (await getSiteContent({ fetch })).texts,
     };
 }

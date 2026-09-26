@@ -1,4 +1,5 @@
 import { writable, readable, derived } from 'svelte/store';
+import { applyTextOverrides } from './siteTexts.js';
 
 export const lang = writable('he');
 
@@ -583,8 +584,13 @@ export const translations = readable({
     }
 });
 
-export const t = derived([lang, translations], ([$lang, $translations]) => {
+// כיתובים שנערכו בפאנל (עברית בלבד) - ה-layout מציב אותם מנתוני השרת.
+// ראו siteTexts.js.
+/** @type {import('svelte/store').Writable<Record<string, string>>} */
+export const textOverrides = writable({});
+
+export const t = derived([lang, translations, textOverrides], ([$lang, $translations, $overrides]) => {
     /** @type {any} */
     const trans = $translations;
-    return trans[$lang];
+    return $lang === 'he' ? applyTextOverrides(trans.he, $overrides) : trans[$lang];
 });

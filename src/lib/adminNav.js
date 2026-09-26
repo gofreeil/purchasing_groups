@@ -105,6 +105,14 @@ export function adminNav(isAdmin, superAdmin = false) {
         ...(superAdmin
             ? [
                   {
+                      href: '/admin/texts',
+                      path: '/admin/texts',
+                      icon: '✏️',
+                      label: 'כיתובים',
+                      title: 'כיתובי האתר',
+                      desc: 'עריכת מונה החברים והכיתובים באתר',
+                  },
+                  {
                       href: '/admin/admins',
                       path: '/admin/admins',
                       icon: '🔑',

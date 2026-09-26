@@ -1,6 +1,7 @@
 import { fetchSatisfactionResponses } from '$lib/strapi.js';
 import { getMergedCampaignList } from '$lib/server/campaignsStore.js';
 import { fetchDashboardRows } from '$lib/server/dashboardSheet.js';
+import { getSiteContent, DEFAULT_MEMBERS } from '$lib/server/siteContentStore.js';
 
 // ----- Google Sheet: מקור אמת לנתוני חברים וחיסכון -----
 // המבנה (לפי "סיכום רכישות קבוצתיות"):
@@ -19,7 +20,6 @@ const DEFAULT_CAMPAIGNS = {
     diesel: { monthly: 0, annual: 0 },
     carInsurance: { monthly: 0, annual: 0 },
 };
-const DEFAULT_MEMBERS = 1987;
 
 /** @param {string | null | undefined} v */
 const norm = (v) => (v || '').trim();
@@ -112,15 +112,16 @@ export async function load({ fetch }) {
 
     // הגיליון והדירוגים לא תלויים זה בזה. קודם הם רצו בטור, וה-TTFB של דף
     // הבית היה סכום שניהם; עכשיו הוא הארוך מבין השניים.
-    const [sheet, averageRatings] = await Promise.all([
+    const [sheet, averageRatings, siteContent] = await Promise.all([
         loadSheetData(fetch),
         loadAverageRatings(activeSlugs, fetch),
+        getSiteContent({ fetch }),
     ]);
 
     return {
         campaigns: finalCampaigns,
         sheetData: sheet.aggregated,
-        members: sheet.members,
+        members: siteContent.members ?? sheet.members,
         averageRatings,
     };
 }

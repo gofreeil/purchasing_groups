@@ -6,7 +6,7 @@
 	import { trackPageview } from "$lib/track.js";
 	const favicon = "/assets/קבוצות-רכישה.png";
 	import "../app.css?v=1.0.3";
-	import { lang, t } from "$lib/i18n.js";
+	import { lang, t, textOverrides } from "$lib/i18n.js";
 	import AdsSidebar from "$lib/components/AdsSidebar.svelte";
 	import RightAdBanner from "$lib/components/RightAdBanner.svelte";
 	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
@@ -14,6 +14,13 @@
 	import { OTHER_NETWORK_SITES } from "$lib/seo.js";
 
 	let { data, children } = $props();
+
+	// כיתובים שנערכו בפאנל. ההצבה הישירה מכסה את ה-SSR (שם $effect לא
+	// רץ), וה-effect מעדכן אחרי שמירה/ניווט בלי רענון.
+	textOverrides.set(data?.siteTexts ?? {});
+	$effect.pre(() => {
+		textOverrides.set(data?.siteTexts ?? {});
+	});
 
 	/**
 	 * @param {string} newLang
