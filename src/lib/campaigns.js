@@ -52,6 +52,7 @@
  * @property {number} order
  * @property {string} status
  * @property {boolean} can_join
+ * @property {boolean} [frozen] מבצע מוקפא: בדף הבית הכרטיס בשחור-לבן, "לא זמין", ולחיצה מציגה הודעה במקום לעבור לדף העסקה
  * @property {boolean} [is_new]
  * @property {string} [new_badge_text]
  * @property {string} [providers_line]
@@ -176,6 +177,8 @@ export const CAMPAIGNS = {
         order: 2,
         status: 'active',
         can_join: true,
+        // מוקפא זמנית (ספטמבר 2026) - להסרה כשהמבצע חוזר
+        frozen: true,
         rating_companies: ['בנזין', 'סולר'],
         join_link: 'https://forms.gle/2Y9SdUfqkJd5mPaS7',
         join_link_diesel: 'https://docs.google.com/forms/d/e/1FAIpQLScz6iFzBwX7oGYXdh98Y9aah_RgWXINtbsJ5u05wWYE8anVUA/viewform?usp=publish-editor',

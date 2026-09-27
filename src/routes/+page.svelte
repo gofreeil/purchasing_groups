@@ -24,6 +24,20 @@
     // היד המצביעה על הכרטיס שלהן הופכת ליד שמסמנת "בוצע". נקרא רק בצד הלקוח.
     /** @type {Set<string>} */
     let joined = $state(new Set());
+
+    // מבצע מוקפא (campaign.frozen): לחיצה על הכרטיס מציגה הודעה קצרה
+    // במקום לעבור לדף העסקה
+    /** @type {string | null} */
+    let frozenNoticeSlug = $state(null);
+    /** @type {ReturnType<typeof setTimeout> | undefined} */
+    let frozenNoticeTimer;
+    /** @param {MouseEvent} e @param {string} slug */
+    function onFrozenClick(e, slug) {
+        e.preventDefault();
+        frozenNoticeSlug = slug;
+        clearTimeout(frozenNoticeTimer);
+        frozenNoticeTimer = setTimeout(() => (frozenNoticeSlug = null), 3500);
+    }
     onMount(() => {
         joined = readJoined();
     });
@@ -266,18 +280,23 @@
     <h2>{$t.homepage.ourPurchases}</h2>
 </div>
 
+{#if frozenNoticeSlug}
+    <div class="frozen-notice" role="status">❄️ {$t.purchases.frozenNotice}</div>
+{/if}
+
 <div class="purchases-list">
     {#each activeCampaigns as campaign, i}
         {@const sheet = data.sheetData?.[campaign.slug]}
         {@const liveRating = data.averageRatings?.[campaign.slug]}
         {@const card = { ...(CARD_CONFIG[campaign.slug] ?? {}), ...(liveRating ? { rating: liveRating.avg } : {}) }}
-        <div class="purchase-card" style="margin-bottom: 3rem;">
+        <div class="purchase-card" class:frozen={campaign.frozen} style="margin-bottom: 3rem;">
             <a
                 href={`/details/${campaign.slug}`}
                 class="purchase-link-overlay"
                 aria-label={campaign.title}
-                onclick={() => track('deal_click', campaign.slug)}
+                onclick={(e) => (campaign.frozen ? onFrozenClick(e, campaign.slug) : track('deal_click', campaign.slug))}
             ></a>
+
             {#if campaign.is_new}
                 <div class="new-burst">{campaign.new_badge_text || $t.purchases.newBadge}</div>
             {/if}
@@ -308,12 +327,16 @@
                 <div class="status-col">
                     <span class="status-line">
                         <span class="status-label">{$t.purchases.status}</span>
-                        <span class="status-value" style="color: #4ade80;">{$t.purchases.active}</span>
+                        {#if campaign.frozen}
+                            <span class="status-value" style="color: #999;">{$t.purchases.unavailable}</span>
+                        {:else}
+                            <span class="status-value" style="color: #4ade80;">{$t.purchases.active}</span>
+                        {/if}
                     </span>
                     <span class="status-line">
                         <span class="status-label">{$t.purchases.canJoin}</span>
-                        <span class="status-value" style="color: {campaign.can_join ? '#4ade80' : '#999'};">
-                            {campaign.can_join ? $t.purchases.yes : $t.purchases.no}
+                        <span class="status-value" style="color: {campaign.can_join && !campaign.frozen ? '#4ade80' : '#999'};">
+                            {campaign.can_join && !campaign.frozen ? $t.purchases.yes : $t.purchases.no}
                         </span>
                     </span>
                 </div>
@@ -671,6 +694,28 @@
         position: absolute;
         inset: 0;
         z-index: 1;
+    }
+
+    /* מבצע מוקפא - הכרטיס כולו בשחור-לבן */
+    .purchase-card.frozen {
+        filter: grayscale(1);
+    }
+    .frozen-notice {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9000;
+        padding: 0.7rem 1.4rem;
+        border-radius: 0.9rem;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(147, 197, 253, 0.5);
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.05rem;
+        white-space: nowrap;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
     }
 
     .purchase-status {
