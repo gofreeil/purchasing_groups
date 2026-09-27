@@ -41,7 +41,11 @@
         // במצב עריכה אין ניווט בכלל. כרטיסים שמכוסים בקישור שקוף (כמו כרטיסי
         // העסקאות) "בולעים" את הלחיצה - מחפשים את הכיתוב שמתחת לסמן ומעבירים
         // אליו את הפוקוס, עם הסמן במקום שנלחץ.
-        if (target?.closest('a')) e.preventDefault();
+        if (target?.closest('a')) {
+            // גם בלי ניווט - שלא ירוצו מטפלי הלחיצה של הקישור (מעקב, הודעת "מוקפא")
+            e.preventDefault();
+            e.stopPropagation();
+        }
         if (target?.closest(EDITABLE_SELECTOR)) return;
         const hit = /** @type {HTMLElement | undefined} */ (
             document.elementsFromPoint(e.clientX, e.clientY).find((el) => el.matches(EDITABLE_SELECTOR))
@@ -411,6 +415,9 @@
     }
     :global([data-se-key]),
     :global([data-site-edit][contenteditable]) {
+        /* אזורים שמעבירים לחיצות הלאה (pointer-events:none, כמו בלוק הסטטוס
+           בכרטיסי העסקאות) - הכיתוב עצמו כן תופס את הלחיצה */
+        pointer-events: auto;
         outline: 1px dashed rgba(245, 158, 11, 0.6);
         outline-offset: 2px;
         border-radius: 2px;
