@@ -1,5 +1,6 @@
 <script>
     import { get } from 'svelte/store';
+    import { page } from '$app/stores';
     import { lang, t } from '$lib/i18n.js';
     import { flattenTexts } from '$lib/siteTexts.js';
 
@@ -31,11 +32,54 @@
     /** @type {{ el: HTMLElement, original: string } | null} */
     let membersEl = null;
 
+    const EDITABLE_SELECTOR = `[${KEY_ATTR}],[data-site-edit][contenteditable]`;
+
     /** @param {MouseEvent} e */
     function blockLinks(e) {
-        // קישור שמכיל כיתוב נערך - לחיצה עליו עורכת ולא מנווטת
         const target = /** @type {HTMLElement | null} */ (e.target);
-        if (target?.closest(`[${KEY_ATTR}],[data-site-edit]`)) e.preventDefault();
+        if (target?.closest('[data-se-ui]')) return;
+        // במצב עריכה אין ניווט בכלל. כרטיסים שמכוסים בקישור שקוף (כמו כרטיסי
+        // העסקאות) "בולעים" את הלחיצה - מחפשים את הכיתוב שמתחת לסמן ומעבירים
+        // אליו את הפוקוס, עם הסמן במקום שנלחץ.
+        if (target?.closest('a')) e.preventDefault();
+        if (target?.closest(EDITABLE_SELECTOR)) return;
+        const hit = /** @type {HTMLElement | undefined} */ (
+            document.elementsFromPoint(e.clientX, e.clientY).find((el) => el.matches(EDITABLE_SELECTOR))
+        );
+        if (!hit) return;
+        e.preventDefault();
+        e.stopPropagation();
+        hit.focus();
+        const range = document.caretRangeFromPoint?.(e.clientX, e.clientY);
+        if (range && hit.contains(range.startContainer)) {
+            const sel = window.getSelection();
+            sel?.removeAllRanges();
+            sel?.addRange(range);
+        }
+    }
+
+    // שדות טקסט של עסקה שנערכים מתוך הדף - נשמרים כדריסה של העסקה
+    // (campaignsStore), כמו במסך עריכת העסקה בפאנל
+    const CAMPAIGN_TEXT_FIELDS = [
+        'title',
+        'description',
+        'providers_line',
+        'join_cta_subtitle',
+        'new_badge_text',
+        'plans_table_note',
+        'plans_table_diesel_note',
+    ];
+
+    /** כיתובי העסקאות שבדף הנוכחי, כ-{ path, value } עם מפתח campaign:<slug>:<שדה> */
+    function campaignTexts() {
+        const pageData = /** @type {any} */ (get(page).data);
+        const list = [...(pageData?.campaigns ?? []), ...(pageData?.campaign ? [pageData.campaign] : [])];
+        return list.flatMap((c) =>
+            CAMPAIGN_TEXT_FIELDS.filter((f) => typeof c?.[f] === 'string').map((f) => ({
+                path: `campaign:${c.slug}:${f}`,
+                value: c[f],
+            })),
+        );
     }
 
     function countChanges() {
@@ -49,7 +93,7 @@
         // ערך → תור מפתחות; ערך שמופיע בכמה מפתחות משויך לפי סדר ההופעה בדף
         /** @type {Map<string, string[]>} */
         const byValue = new Map();
-        for (const { path, value } of flattenTexts(get(t))) {
+        for (const { path, value } of [...flattenTexts(get(t)), ...campaignTexts()]) {
             const v = value.trim();
             if (!v || v.includes('<')) continue; // כיתובים עם HTML - דרך מסך הניהול
             const q = byValue.get(v);
