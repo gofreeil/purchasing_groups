@@ -128,6 +128,17 @@
     {/each}
 
     <div class="bar">
+        {#if !data.editVerified}
+            <input
+                class="code"
+                name="code"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                maxlength="6"
+                placeholder="קוד Authenticator"
+                required
+            />
+        {/if}
         <button class="save" disabled={saving}>{saving ? 'שומר…' : '💾 שמור'}</button>
     </div>
 </form>
@@ -285,6 +296,13 @@
         justify-content: center;
         padding: 0.75rem 0;
         background: linear-gradient(transparent, rgba(2, 6, 23, 0.9) 40%);
+    }
+    .bar .code {
+        width: 11rem;
+        margin-inline-end: 0.6rem;
+        direction: ltr;
+        text-align: center;
+        letter-spacing: 0.15em;
     }
     .save {
         border: none;

@@ -1,10 +1,11 @@
 import { listApproved, computeAdSlots, adImageUrl } from '$lib/server/adsStore.js';
 import { isAdmin, isSuperAdmin } from '$lib/auth.js';
 import { getSiteContent } from '$lib/server/siteContentStore.js';
+import { isTotpVerified } from '$lib/server/superAdminTotp.js';
 
 // חושף את המשתמש המחובר לכל הדפים דרך data.user,
 // ואת הפרסומות המאושרות של מפרסמים - לסיידבר הפרסומות.
-export async function load({ locals, fetch }) {
+export async function load({ locals, cookies, fetch }) {
     const u = locals.user;
 
     // כשל בטעינת הפרסומות לא מפיל את האתר - פשוט לא מציגים אותן.
@@ -57,6 +58,8 @@ export async function load({ locals, fetch }) {
         // לדעת אם להציג את הקישור לפאנל.
         isAdmin: isAdmin(u),
         superAdmin: isSuperAdmin(u),
+        // קוד Google Authenticator אומת - גלגל השיניים נכנס ישר למצב עריכה
+        editVerified: await isTotpVerified({ locals, cookies }),
         approvedAds,
         // כיתובים שנערכו בפאנל - נכנסים ל-$t דרך textOverrides (ראו siteTexts.js)
         siteTexts: (await getSiteContent({ fetch })).texts,

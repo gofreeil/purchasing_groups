@@ -4,6 +4,7 @@ import { isSuperAdmin } from '$lib/auth.js';
 import { translations } from '$lib/i18n.js';
 import { flattenTexts } from '$lib/siteTexts.js';
 import { getSiteContent, saveSiteContent, DEFAULT_MEMBERS } from '$lib/server/siteContentStore.js';
+import { isTotpVerified, verifyTotp } from '$lib/server/superAdminTotp.js';
 
 /** הטקסטים בעברית כפי שהם בקוד - ברירות המחדל שהעריכה דורסת. */
 const defaultTexts = () => flattenTexts(/** @type {any} */ (get(translations)).he);
@@ -29,10 +30,17 @@ export async function load({ locals, fetch }) {
 }
 
 export const actions = {
-    save: async ({ request, locals, fetch }) => {
+    save: async (event) => {
+        const { request, locals, fetch } = event;
         if (!isSuperAdmin(locals.user)) return fail(403, { error: 'אין הרשאה' });
 
         const fd = await request.formData();
+
+        // אותו אימות דו-שלבי כמו בגלגל השיניים - אחרת המסך הזה היה עוקף אותו
+        if (!(await isTotpVerified(event))) {
+            const verified = await verifyTotp(event, String(fd.get('code') ?? ''));
+            if (!verified.ok) return fail(verified.status, { error: verified.error });
+        }
 
         /** @type {Record<string, string>} */
         const texts = {};

@@ -252,7 +252,7 @@
         aria-label="מספר חברים"
     >
         <div class="counter-merge-wrapper fade-scale-in">
-            <div class="count-big-number" aria-live="polite">
+            <div class="count-big-number" aria-live="polite" data-site-edit="members">
                 {Math.floor($count)}
             </div>
             <div class="count-label-text">

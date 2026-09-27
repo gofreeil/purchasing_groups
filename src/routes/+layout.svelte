@@ -11,6 +11,7 @@
 	import RightAdBanner from "$lib/components/RightAdBanner.svelte";
 	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
 	import WelcomeScreen from "$lib/components/WelcomeScreen.svelte";
+	import SiteEditor from "$lib/components/SiteEditor.svelte";
 	import { OTHER_NETWORK_SITES } from "$lib/seo.js";
 
 	let { data, children } = $props();
@@ -136,6 +137,9 @@
 
 <!-- מסך פתיחה אחרי התחברות (מצטרפים / שבים) — גלובלי, מופעל ע"י ?welcome ב-URL -->
 <WelcomeScreen userName={displayName} />
+{#if data?.superAdmin && !isAdminArea}
+	<SiteEditor verified={data.editVerified} />
+{/if}
 
 <!-- משוב מיידי על מעבר בין דפים. ה-router של SvelteKit ממתין ל-load של
      היעד לפני שהוא מחליף את הדף, ולכן בלי הפס הזה לחיצה על כרטיס מבצע
