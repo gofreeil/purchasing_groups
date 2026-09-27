@@ -856,16 +856,12 @@
                         <!-- הקוד הוא בקשה, לא זכות: אסור להבטיח כאן "כמו ששולם" -->
                         <p class="pay-ok">✅ הקוד התקבל — בקשה לפרסום חינם ל{payDurationLabel} תישלח לאישור המנהל.</p>
                     {:else}
+                        <!-- כפתור הוואטסאפ עבר למסך "נשלח": כשהיה כאן, מפרסמים יצאו לוואטסאפ
+                             ולא חזרו ללחוץ "שליחה" — והבקשה מעולם לא הגיעה למנהל. -->
                         <p class="pay-sub">
                             המודעה תעלה לאוויר אחרי אישור מנהל, בהתאם לתשלום.
-                            לתיאום התשלום:
+                            מיד אחרי השליחה יופיע כאן כפתור לתיאום התשלום בוואטסאפ.
                         </p>
-                        <a
-                            href={"https://wa.me/972508750632?text=" + encodeURIComponent(`שלום, אני מעלה פרסומת באתר קבוצות הרכישה ורוצה לתאם תשלום עבור ${payPlan.title} (${payPlan.price} ₪)`)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="pay-wa"
-                        >💬 לתיאום תשלום בוואטסאפ</a>
                         <form class="pay-code" onsubmit={tryPayCode}>
                             <input
                                 type="text"
@@ -937,6 +933,14 @@
                             ברגע שתאושר - היא תופיע באתר ותקבלו עדכון.
                         {/if}
                     </p>
+                    {#if !payCodeOk}
+                        <a
+                            href={"https://wa.me/972508750632?text=" + encodeURIComponent(`שלום, שלחתי פרסומת באתר קבוצות הרכישה ורוצה לתאם תשלום עבור ${payPlan.title} (${payPlan.price} ₪)`)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="pay-wa"
+                        >💬 לתיאום תשלום בוואטסאפ</a>
+                    {/if}
                     <div class="done-actions">
                         <a href="/" class="l-btn ghost">לדף הבית</a>
                         <a href="/profile" class="l-btn amber">לפרסומות שלי</a>
