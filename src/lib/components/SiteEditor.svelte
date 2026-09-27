@@ -83,10 +83,11 @@
     }
 
     function countChanges() {
-        let n = 0;
-        for (const [el, info] of wrapped) if (el.innerText.trim() !== info.original) n++;
-        if (membersEl && membersEl.el.innerText.trim() !== membersEl.original) n++;
-        changedCount = n;
+        // לפי מפתח ולא לפי הופעה - כיתוב שחוזר בכמה כרטיסים הוא שינוי אחד
+        const keys = new Set();
+        for (const [el, info] of wrapped) if (el.innerText.trim() !== info.original) keys.add(info.key);
+        if (membersEl && membersEl.el.innerText.trim() !== membersEl.original) keys.add('members');
+        changedCount = keys.size;
     }
 
     function enterEditMode() {
@@ -112,7 +113,9 @@
             if (!parent || parent.closest('[data-se-ui],script,style,textarea,button,select,option,[data-site-edit]')) continue;
             const text = (node.textContent ?? '').trim();
             const q = text && byValue.get(text);
-            if (q && q.length) toWrap.push({ node, key: /** @type {string} */ (q.shift()), text });
+            // כיתוב שחוזר בדף (למשל "סטטוס:" בכל כרטיס עסקה) - כל ההופעות
+            // נערכות. אחרי שנגמרו המפתחות בתור, ההופעות הבאות שייכות לאחרון.
+            if (q && q.length) toWrap.push({ node, key: /** @type {string} */ (q.length > 1 ? q.shift() : q[0]), text });
         }
 
         wrapped = new Map();
@@ -123,7 +126,13 @@
             span.setAttribute('spellcheck', 'false');
             span.textContent = text;
             node.replaceWith(span);
-            span.addEventListener('input', countChanges);
+            span.addEventListener('input', () => {
+                // אותו כיתוב בשאר הדף מתעדכן יחד, כדי שלא ייראה כאילו רק הופעה אחת השתנתה
+                for (const [other, info] of wrapped) {
+                    if (other !== span && info.key === key) other.textContent = span.innerText;
+                }
+                countChanges();
+            });
             wrapped.set(span, { key, original: text, node });
         }
 
