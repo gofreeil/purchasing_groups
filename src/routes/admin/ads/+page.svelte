@@ -55,14 +55,30 @@
         return async (/** @type {{ update: () => Promise<void> }} */ { update }) => update();
     }
 
-    // מי תופסת כל מקום בטור - גם מושהית שומרת את המקום שלה
-    let slotOccupants = $derived(
-        new Map(
-            approved
-                .filter((/** @type {any} */ a) => typeof a.slot === "number")
-                .map((/** @type {any} */ a) => [a.slot, { id: a.id, title: a.title }]),
-        ),
-    );
+    // מי תופסת כל מקום בטור - גם מושהית שומרת את המקום שלה.
+    // extra = שכפל פרסומת: המקום תפוס בעותק נוסף של פרסומת שמקומה הראשי אחר
+    let slotOccupants = $derived.by(() => {
+        /** @type {Map<number, {id: string, title: string, extra?: boolean}>} */
+        const m = new Map();
+        for (const a of approved) {
+            if (typeof a.slot === "number") m.set(a.slot, { id: a.id, title: a.title });
+        }
+        for (const a of approved) {
+            for (const n of a.extraSlots ?? []) {
+                if (!m.has(n)) m.set(n, { id: a.id, title: a.title, extra: true });
+            }
+        }
+        return m;
+    });
+    /** שכפל פרסומת - המקומות הפנויים: קודם אלה שבאותה רביעייה (אותה משבצת
+     *  בטור - שם הפרסומת נשארת קבועה בסבב), אחריהם כל השאר
+     * @param {{slot?: number}} ad */
+    function dupOptions(ad) {
+        const free = SLOT_NUMBERS.filter((n) => !slotOccupants.has(n));
+        const pos = typeof ad.slot === "number" ? (ad.slot - 1) % 4 : -1;
+        const same = free.filter((n) => (n - 1) % 4 === pos);
+        return { same, rest: free.filter((n) => !same.includes(n)) };
+    }
     /** @param {string} t */
     function shortTitle(t) {
         return t.length > 22 ? t.slice(0, 21) + "…" : t;
@@ -99,8 +115,8 @@
         const base = `${n} · ${slotPosName(n)}`;
         const occ = slotOccupants.get(n);
         if (!occ) return `${base} — פנוי`;
-        if (occ.id === selfId) return `${base} — המקום הנוכחי`;
-        return `${base} ⚠ ${shortTitle(occ.title)}`;
+        if (occ.id === selfId) return occ.extra ? `${base} — שכפול שלה` : `${base} — המקום הנוכחי`;
+        return `${base} ⚠ ${occ.extra ? 'שכפול: ' : ''}${shortTitle(occ.title)}`;
     }
     // אזהרה חיה ליד הבורר ברגע שנבחר מקום תפוס (לפי מזהה הפרסומת)
     /** @type {Record<string, string>} */
@@ -112,9 +128,11 @@
         slotWarning = {
             ...slotWarning,
             [self.id]:
-                occ && occ.id !== self.id
-                    ? `מקום ${n} תפוס ע"י "${shortTitle(occ.title)}" — לחיצה על "העבר" תחליף ביניהן`
-                    : "",
+                !occ || occ.id === self.id
+                    ? ""
+                    : occ.extra
+                      ? `מקום ${n} הוא שכפול של "${shortTitle(occ.title)}" — לחיצה על "העבר" תבטל את השכפול הזה`
+                      : `מקום ${n} תפוס ע"י "${shortTitle(occ.title)}" — לחיצה על "העבר" תחליף ביניהן`,
         };
     }
     /** אישור אחרון לפני העברה למקום תפוס - אישור = החלפה, ביטול = כלום לא זז
@@ -125,6 +143,15 @@
         const n = Number(/** @type {HTMLSelectElement | null} */ (sel)?.value);
         const occ = slotOccupants.get(n);
         if (!occ || occ.id === self.id) return;
+        if (occ.extra) {
+            const okDup = confirm(
+                `⚠ מקום ${n} הוא שכפול של "${occ.title}".\n\n` +
+                    `אישור — "${self.title}" תעבור למקום ${n}, והשכפול של "${occ.title}" שם יבוטל (המקום הראשי שלה לא זז).\n` +
+                    `ביטול — ההעברה מתבטלת.`,
+            );
+            if (!okDup) e.preventDefault();
+            return;
+        }
         const ok = confirm(
             `⚠ מקום ${n} כבר תפוס על ידי "${occ.title}".\n\n` +
                 `אישור — החלפה: "${self.title}" תעבור למקום ${n}, ו"${occ.title}" תעבור למקום ${self.slot ?? "-"}.\n` +
@@ -322,6 +349,64 @@
                                 {/if}
                             </form>
                         </div>
+                        <!-- שכפל פרסומת (סופר-אדמין): אותה פרסומת גם במקומות נוספים - למשל
+                             2 ו-6 (אותה רביעייה), כך שהיא נשארת באותה משבצת ולא מתחלפת בסבב.
+                             תג ⧉ = שכפול קיים; לחיצה עליו מבטלת אותו -->
+                        {#if data.superAdmin && typeof ad.slot === "number"}
+                            {@const dup = dupOptions(ad)}
+                            {#if (ad.extraSlots ?? []).length + dup.same.length + dup.rest.length > 0}
+                                <div class="slot-row">
+                                    {#each ad.extraSlots ?? [] as n (n)}
+                                        <form method="POST" action="?/removeExtraSlot" use:enhance>
+                                            <input type="hidden" name="id" value={ad.id} />
+                                            <input type="hidden" name="slot" value={n} />
+                                            <button
+                                                type="submit"
+                                                class="slot-badge"
+                                                style="background: {adSlotColor(n).bg}; border-color: {adSlotColor(n).border}; color: {adSlotColor(n).text}; cursor: pointer"
+                                                title="שכפול במקום {n} (המשבצת ה{slotPosName(n)} בטור) - לחיצה מבטלת את השכפול"
+                                            >⧉ {n} ✕</button>
+                                        </form>
+                                    {/each}
+                                    {#if dup.same.length + dup.rest.length > 0}
+                                        <form method="POST" action="?/addExtraSlot" use:enhance>
+                                            <input type="hidden" name="id" value={ad.id} />
+                                            <select
+                                                name="slot"
+                                                class="duration-select"
+                                                aria-label="שכפל פרסומת"
+                                                onchange={(e) => e.currentTarget.form?.requestSubmit()}
+                                            >
+                                                <option value="" selected disabled>⧉ שכפל פרסומת</option>
+                                                {#if dup.same.length > 1}
+                                                    <option value="same" style="background:#fff;color:#111;font-weight:800">
+                                                        ★ קבועה בכל הרביעייה ({dup.same.join(", ")})
+                                                    </option>
+                                                {/if}
+                                                {#if dup.same.length > 0}
+                                                    <optgroup label="★ אותה רביעייה (אותה משבצת)">
+                                                        {#each dup.same as n (n)}
+                                                            <option value={n} style="background:#fff;color:{adSlotColor(n).btn};font-weight:800">
+                                                                {n} · {slotPosName(n)}
+                                                            </option>
+                                                        {/each}
+                                                    </optgroup>
+                                                {/if}
+                                                {#each groupSlotOptions(dup.rest) as grp (grp.letter)}
+                                                    <optgroup label="— רביעייה {grp.letter}׳ —">
+                                                        {#each grp.nums as n (n)}
+                                                            <option value={n} style="background:#fff;color:{adSlotColor(n).btn};font-weight:800">
+                                                                {n} · {slotPosName(n)}
+                                                            </option>
+                                                        {/each}
+                                                    </optgroup>
+                                                {/each}
+                                            </select>
+                                        </form>
+                                    {/if}
+                                </div>
+                            {/if}
+                        {/if}
                     {/if}
 
                     <div class="ad-actions">

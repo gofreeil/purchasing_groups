@@ -82,6 +82,10 @@ function fromStrapi(row) {
         // השהיה ופקיעה. undefined = פרסומת ותיקה שטרם הוקצה לה מספר
         // (מקבלת אחד בפעולת הניהול/האישור הבאה, לפי מקומה הנוכחי על האתר).
         order: typeof row.landing?._order === 'number' ? row.landing._order : undefined,
+        // שכפל פרסומת: מקומות נוספים בטור (0-based) שבהם אותה פרסומת מוצגת
+        // בנוסף למקומה - למשל 2 ו-6, כך שהיא לא מתחלפת בסבב הרביעיות. נקבע
+        // בידי סופר-אדמין; מקום ראשי של פרסומת אחרת גובר עליו.
+        extraSlots: parseExtraSlots(row.landing?._extraSlots),
         // השהיה: יורדת מהאתר ושומרת את הימים שנותרו לה
         paused: row.landing?._paused === true,
         pausedDaysLeft:
@@ -461,6 +465,7 @@ export async function approveAd(id, { durationDays = DEFAULT_DURATION_DAYS, fetc
         );
         const slots = await ensureSlotsPersisted(approvedNow, { fetch: f, jwt });
         const taken = new Set(slots.values());
+        for (const a of approvedNow) for (const n of a.extraSlots ?? []) taken.add(n);
         if (typeof current?.order === 'number' && current.order >= 0 && !taken.has(current.order)) {
             slot = current.order;
         } else {
@@ -492,7 +497,12 @@ export async function approveAd(id, { durationDays = DEFAULT_DURATION_DAYS, fetc
     };
     // Strapi מחליף עמודת json במלואה - שולחים את כל ה-landing עם המספר
     if (slot !== undefined && landing !== undefined) {
-        data.landing = { ...(landing ?? {}), _order: slot };
+        data.landing = {
+            ...(landing ?? {}),
+            _order: slot,
+            // עדכון יורש גם את השכפולים של הפרסומת שהוא מחליף
+            ...(replaced?.extraSlots?.length ? { _extraSlots: replaced.extraSlots } : {}),
+        };
     }
     await strapiPut(`${ENDPOINT}/${encodeURIComponent(id)}`, data, { fetch: f, jwt });
     // רק אחרי שהעדכון באוויר מורידים את הישנה - כך אין רגע שבו המשבצת
@@ -699,6 +709,10 @@ function computeSlots(list) {
             taken.add(ad.order);
         }
     }
+    // מקומות השכפול שמורים - פרסומת בלי מספר לא נוחתת עליהם
+    for (const ad of display) {
+        for (const n of ad.extraSlots ?? []) taken.add(n);
+    }
     let next = 0;
     for (const ad of display) {
         if (bySlot.has(ad.id)) continue;
@@ -716,6 +730,61 @@ function computeSlots(list) {
  */
 export function computeAdSlots(list) {
     return new Map([...computeSlots(list)].map(([id, s]) => [id, s + 1]));
+}
+
+/**
+ * מקומות השכפול השמורים ב-landing._extraSlots (0-based, בלי כפילויות).
+ * @param {unknown} raw
+ * @returns {number[]}
+ */
+function parseExtraSlots(raw) {
+    if (!Array.isArray(raw)) return [];
+    const nums = raw.filter(
+        (n) => typeof n === 'number' && Number.isInteger(n) && n >= 0 && n < AD_SLOT_COUNT,
+    );
+    return [...new Set(nums)].sort((a, b) => a - b);
+}
+
+/**
+ * שכפל פרסומת: המקומות הנוספים האפקטיביים של כל פרסומת (1-based). מקום
+ * ראשי של פרסומת אחרת גובר על שכפול, ובהתנגשות בין שני שכפולים - הראשונה
+ * בסדר התצוגה.
+ * @param {any[]} list
+ * @param {Map<string, number>} [slots] תוצאת computeSlots
+ * @returns {Map<string, number[]>}
+ */
+export function computeAdExtraSlots(list, slots = computeSlots(list)) {
+    const taken = new Set(slots.values());
+    /** @type {Map<string, number[]>} */
+    const out = new Map();
+    for (const ad of [...list].sort(byDisplayOrder)) {
+        /** @type {number[]} */
+        const mine = [];
+        for (const n of ad.extraSlots ?? []) {
+            if (taken.has(n)) continue;
+            taken.add(n);
+            mine.push(n + 1);
+        }
+        if (mine.length > 0) out.set(ad.id, mine);
+    }
+    return out;
+}
+
+/**
+ * כותב את מקומות השכפול של פרסומת, יחד עם המקום הראשי שלה - כי Strapi
+ * מחליף את עמודת ה-landing במלואה, ו-_order שנכתב רגע קודם
+ * (ensureSlotsPersisted) עוד לא נמצא בעותק שבזיכרון.
+ * @param {any} ad
+ * @param {number} order
+ * @param {number[]} extra
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ */
+async function writeSlots(ad, order, extra, { fetch: f = fetch, jwt = '' } = {}) {
+    await strapiPut(
+        `${ENDPOINT}/${encodeURIComponent(ad.id)}`,
+        { landing: { ...(ad.landing ?? {}), _order: order, _extraSlots: extra } },
+        { fetch: f, jwt },
+    );
 }
 
 /**
@@ -805,9 +874,31 @@ export async function setAdSlot(id, requested, { fetch: f = fetch, jwt = '' } = 
 
     const occupant =
         list.find((/** @type {any} */ a) => a.id !== id && slots.get(a.id) === target) ?? null;
+    // מקום שהוא שכפול של הפרסומת עצמה - הראשי והשכפול מתחלפים, והיא
+    // ממשיכה לתפוס את אותם מקומות. שכפול של פרסומת אחרת - מתפנה עבורה.
+    /** @type {number[]} */
+    const ownExtras = ad.extraSlots ?? [];
+    const extraOwner = occupant
+        ? null
+        : (list.find(
+              (/** @type {any} */ a) => a.id !== id && (a.extraSlots ?? []).includes(target),
+          ) ?? null);
+    const opts = { fetch: f, jwt };
     await Promise.all([
-        writeOrder(ad, target, { fetch: f, jwt }),
-        ...(occupant ? [writeOrder(occupant, cur, { fetch: f, jwt })] : []),
+        ownExtras.includes(target)
+            ? writeSlots(ad, target, ownExtras.map((n) => (n === target ? cur : n)), opts)
+            : writeOrder(ad, target, opts),
+        ...(occupant ? [writeOrder(occupant, cur, opts)] : []),
+        ...(extraOwner
+            ? [
+                  writeSlots(
+                      extraOwner,
+                      slots.get(extraOwner.id) ?? 0,
+                      (extraOwner.extraSlots ?? []).filter((/** @type {number} */ n) => n !== target),
+                      opts,
+                  ),
+              ]
+            : []),
     ]);
     invalidateAdsCache();
     return {
@@ -815,6 +906,89 @@ export async function setAdSlot(id, requested, { fetch: f = fetch, jwt = '' } = 
         slot: target + 1,
         ...(occupant ? { swappedTitle: occupant.title, swappedSlot: cur + 1 } : {}),
     };
+}
+
+/**
+ * שכפל פרסומת: מוסיף לפרסומת מאושרת מקום נוסף בטור, כך שהיא מוצגת בכמה
+ * רביעיות - למשל 2 ו-6, והיא נשארת באותה משבצת בלי להתחלף. רק מקום פנוי:
+ * מקום של פרסומת אחרת (גם מושהית/פגה) או שכפול שלה - נדחה.
+ * 'same' = כל המקומות הפנויים באותה רביעייה - אותה משבצת בטור (2 → 6, 10...),
+ * כך שהפרסומת קבועה בטור לאורך כל הסבב.
+ * @param {string} id
+ * @param {number|'same'} requested
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ * @returns {Promise<{ok:true,title:string,slots:number[]}|{ok:false,error:string}|null>}
+ */
+export async function addAdExtraSlot(id, requested, { fetch: f = fetch, jwt = '' } = {}) {
+    const same = requested === 'same';
+    const n = same ? 0 : Math.round(Number(requested));
+    if (!same && (!Number.isFinite(n) || n < 1 || n > AD_SLOT_COUNT)) {
+        return { ok: false, error: `מקום לא תקין - בחרו מספר בין 1 ל-${AD_SLOT_COUNT}` };
+    }
+    const list = await listApprovedForSlots({ fetch: f });
+    const ad = list.find((/** @type {any} */ a) => a.id === id);
+    if (!ad) return null;
+    const slots = await ensureSlotsPersisted(list, { fetch: f, jwt });
+    const own = slots.get(id) ?? 0;
+    /** @type {number[]} */
+    const mine = ad.extraSlots ?? [];
+    /** @param {number} t */
+    const occupantOf = (t) =>
+        list.find(
+            (/** @type {any} */ a) =>
+                a.id !== id && (slots.get(a.id) === t || (a.extraSlots ?? []).includes(t)),
+        ) ?? null;
+
+    /** @type {number[]} */
+    let targets;
+    if (same) {
+        targets = [];
+        for (let t = own % 4; t < AD_SLOT_COUNT; t += 4) {
+            if (t !== own && !mine.includes(t) && !occupantOf(t)) targets.push(t);
+        }
+        if (targets.length === 0) {
+            return {
+                ok: false,
+                error: `אין מקום פנוי נוסף ברביעייה של המקום הזה - "${ad.title}" כבר שם או שהמקומות תפוסים`,
+            };
+        }
+    } else {
+        const target = n - 1;
+        if (own === target || mine.includes(target)) {
+            return { ok: false, error: `"${ad.title}" כבר מוצגת במקום ${n}` };
+        }
+        const occupant = occupantOf(target);
+        if (occupant) {
+            return {
+                ok: false,
+                error: `מקום ${n} תפוס בידי "${occupant.title}" - העבירו אותה קודם או בחרו מקום פנוי`,
+            };
+        }
+        targets = [target];
+    }
+    await writeSlots(ad, own, [...mine, ...targets].sort((a, b) => a - b), { fetch: f, jwt });
+    invalidateAdsCache();
+    return { ok: true, title: ad.title, slots: targets.map((t) => t + 1) };
+}
+
+/**
+ * מבטל שכפול: מסיר מקום נוסף מהפרסומת. המקום הראשי שלה לא זז.
+ * @param {string} id
+ * @param {number} requested
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ * @returns {Promise<{title:string,slot:number}|null>}
+ */
+export async function removeAdExtraSlot(id, requested, { fetch: f = fetch, jwt = '' } = {}) {
+    const n = Math.round(Number(requested));
+    const list = await listApprovedForSlots({ fetch: f });
+    const ad = list.find((/** @type {any} */ a) => a.id === id);
+    /** @type {number[]} */
+    const mine = ad?.extraSlots ?? [];
+    if (!ad || !mine.includes(n - 1)) return null;
+    const slots = await ensureSlotsPersisted(list, { fetch: f, jwt });
+    await writeSlots(ad, slots.get(id) ?? 0, mine.filter((x) => x !== n - 1), { fetch: f, jwt });
+    invalidateAdsCache();
+    return { title: ad.title, slot: n };
 }
 
 // ============================================================

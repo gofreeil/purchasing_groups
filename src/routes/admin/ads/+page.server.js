@@ -7,7 +7,10 @@ import {
     unapproveAd,
     moveApprovedAd,
     setAdSlot,
+    addAdExtraSlot,
+    removeAdExtraSlot,
     computeAdSlots,
+    computeAdExtraSlots,
     setAdDuration,
     setAdExpiry,
     normalizeDurationDays,
@@ -36,6 +39,8 @@ export async function load({ locals, fetch }) {
         ads = await listAllForAdmin({ fetch });
         // מספר המקום של כל מאושרת בטור (1..12) - לתג ולבורר "מקום" בכרטיס
         const slotMap = computeAdSlots(ads.filter((/** @type {any} */ a) => a.status === 'approved'));
+        // שכפל פרסומת - המקומות הנוספים האפקטיביים (1-based) של כל מאושרת
+        const extraMap = computeAdExtraSlots(ads.filter((/** @type {any} */ a) => a.status === 'approved'));
         // mine = הפרסומת שייכת למנהל המחובר, ולכן הוא רשאי לפתוח אותה
         // בעורך. עריכה של פרסומת של מפרסם אחר נחסמת בשרת ממילא, ואין
         // טעם להציג כפתור שיחזיר 404.
@@ -43,6 +48,8 @@ export async function load({ locals, fetch }) {
         ads = ads.map((/** @type {any} */ a) => ({
             ...a,
             ...(slotMap.has(a.id) ? { slot: slotMap.get(a.id) } : {}),
+            // גובר על extraSlots הגולמי (0-based) של הרשומה
+            extraSlots: extraMap.get(a.id) ?? [],
             mine: sameAdvertiser(a, identity),
         }));
     } catch (err) {
@@ -209,6 +216,48 @@ export const actions = {
         } catch (err) {
             console.error('setSlot failed:', err);
             return fail(502, { error: 'העברת המקום נכשלה - נסו שוב' });
+        }
+    },
+    // שכפל פרסומת: אותה פרסומת במקום נוסף בטור (סופר-אדמין)
+    addExtraSlot: async ({ request, locals, fetch }) => {
+        ensureAdsAdmin(locals);
+        if (!isSuperAdmin(locals.user)) return fail(403, { error: 'שכפל פרסומת שמור לסופר-אדמין' });
+        const form = await request.formData();
+        const id = String(form.get('id') ?? '');
+        if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
+        const raw = String(form.get('slot') ?? '');
+        try {
+            const r = await addAdExtraSlot(id, raw === 'same' ? 'same' : Number(raw), {
+                fetch,
+                jwt: locals.jwt ?? '',
+            });
+            if (!r) return fail(404, { error: 'הפרסומת לא נמצאה' });
+            if (!r.ok) return fail(409, { error: r.error });
+            return {
+                success: true,
+                message: `"${r.title}" שוכפלה גם ${r.slots.length > 1 ? 'למקומות' : 'למקום'} ${r.slots.join(', ')}`,
+            };
+        } catch (err) {
+            console.error('addExtraSlot failed:', err);
+            return fail(502, { error: 'השכפול נכשל - נסו שוב' });
+        }
+    },
+    removeExtraSlot: async ({ request, locals, fetch }) => {
+        ensureAdsAdmin(locals);
+        if (!isSuperAdmin(locals.user)) return fail(403, { error: 'שכפל פרסומת שמור לסופר-אדמין' });
+        const form = await request.formData();
+        const id = String(form.get('id') ?? '');
+        if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
+        try {
+            const r = await removeAdExtraSlot(id, Number(form.get('slot')), {
+                fetch,
+                jwt: locals.jwt ?? '',
+            });
+            if (!r) return fail(404, { error: 'השכפול לא נמצא' });
+            return { success: true, message: `השכפול של "${r.title}" במקום ${r.slot} בוטל` };
+        } catch (err) {
+            console.error('removeExtraSlot failed:', err);
+            return fail(502, { error: 'ביטול השכפול נכשל - נסו שוב' });
         }
     },
 };

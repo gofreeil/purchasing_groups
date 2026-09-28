@@ -49,6 +49,13 @@
 			if (num <= AD_SLOT_COUNT) byNum.set(num, a);
 			else overflow.push({ num, ad: a });
 		}
+		// שכפל פרסומת: אותה פרסומת גם במקומות הנוספים שלה (למשל 2 ו-6 -
+		// נשארת באותה משבצת בכל הסבב). מקום ראשי של אחרת גובר.
+		for (const a of paidAds) {
+			for (const n of a.extraSlots ?? []) {
+				if (n >= 1 && n <= AD_SLOT_COUNT && !byNum.has(n)) byNum.set(n, a);
+			}
+		}
 		/** @type {BoardCell[]} */
 		const cells = [];
 		for (let n = 1; n <= AD_SLOT_COUNT; n++) {

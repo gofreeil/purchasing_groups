@@ -1,4 +1,4 @@
-import { listApproved, computeAdSlots, adImageUrl } from '$lib/server/adsStore.js';
+import { listApproved, computeAdSlots, computeAdExtraSlots, adImageUrl } from '$lib/server/adsStore.js';
 import { isAdmin, isSuperAdmin } from '$lib/auth.js';
 import { getSiteContent } from '$lib/server/siteContentStore.js';
 import { isTotpVerified } from '$lib/server/superAdminTotp.js';
@@ -16,6 +16,7 @@ export async function load({ locals, cookies, fetch }) {
         // מספר המקום (1..16) קובע גם את סדר הפרסומות וגם אילו משבצות פנויות
         // מוצגות סביבן בטור - נקבע במסך הניהול ומחושב כאן פעם אחת לרשימה.
         const slots = computeAdSlots(live);
+        const extras = computeAdExtraSlots(live);
         // רק השדות שהרכיבים באמת קוראים (RightAdBanner, MobileAdsDrawer),
         // והתמונה ככתובת ולא כ-base64: ה-load הזה רץ בכל ניווט בכל עמוד
         // באתר, ולכן כל בייט שנשלח כאן יוצא מהשרת מחדש בכל צפייה - פעמיים
@@ -35,6 +36,8 @@ export async function load({ locals, cookies, fetch }) {
             mainImageFit: a.mainImageFit,
             // מספר המקום בטור (1..16) - נקבע במסך הניהול
             slot: slots.get(a.id) ?? 0,
+            // שכפל פרסומת - מקומות נוספים שבהם אותה פרסומת מוצגת
+            extraSlots: extras.get(a.id) ?? [],
             // כרטיס מוצר מחנות החירות (מסונכרן מקהילה בשכונה) - מוצג בלי רצועת המחיר
             shop: Boolean(a.landing?._shopProduct),
         }));
