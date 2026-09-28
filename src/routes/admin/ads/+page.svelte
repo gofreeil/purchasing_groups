@@ -67,13 +67,14 @@
     function shortTitle(t) {
         return t.length > 22 ? t.slice(0, 21) + "…" : t;
     }
-    // הטור מציג רביעייה עוקבת אחת בכל רגע (1-4, אחריה 5-8...) - הבורר מקובץ
-    // לפי הרביעיות האלו; צבעי המשפחות עצמם נשארים מ-adSlotColor כמו בטור
+    // רביעייה = המקומות שמתחלפים באותה משבצת בטור: א׳ = 1,5,9,13 (העליונה),
+    // ב׳ = 2,6,10,14, ג׳ = 3,7,11,15, ד׳ = 4,8,12,16 (התחתונה) - הבורר מקובץ
+    // לפי הרביעיות האלו; הצבעים נשארים מ-adSlotColor כמו בטור (גוון לכל רביעייה)
     const GROUP_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח"];
     const POS_NAMES = ["עליונה", "שנייה", "שלישית", "תחתונה"];
     /** @param {number} n */
     function slotGroup(n) {
-        return Math.ceil(n / 4);
+        return ((n - 1) % 4) + 1;
     }
     /** @param {number} n */
     function slotPosName(n) {
@@ -297,12 +298,12 @@
                             <form method="POST" action="?/setSlot" use:enhance class="slot-form">
                                 <input type="hidden" name="id" value={ad.id} />
                                 <select name="slot" class="duration-select" onchange={(e) => onSlotPick(e, ad)}>
-                                    <!-- כל רביעייה עוקבת (מה שמוצג יחד בטור) תחת כותרת משלה.
+                                    <!-- כל רביעייה (1/5/9/13 וכו׳ - אותה משבצת בטור) תחת כותרת משלה.
                                          הרקע לבן (ברירת המחדל של הבורר במערכת), והמספר
                                          בצבע המשפחה של אותו מקום - 1/5/9/13 באותו גוון.
                                          מקום שתפוס ע"י פרסומת אחרת - אדום, עם שמה -->
                                     {#each groupSlotOptions(slotOptions) as grp (grp.letter)}
-                                        <optgroup label="— רביעייה {grp.letter}׳ (מוצגות יחד) —">
+                                        <optgroup label="— רביעייה {grp.letter}׳ · המשבצת ה{slotPosName(grp.nums[0])} בטור —">
                                             {#each grp.nums as n (n)}
                                                 {@const occ = slotOccupants.get(n)}
                                                 {@const takenByOther = !!occ && occ.id !== ad.id}
