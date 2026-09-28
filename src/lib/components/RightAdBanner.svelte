@@ -116,9 +116,12 @@
 							<span>{ad.subtitle}</span>
 						</div>
 					</div>
+					<!-- כרטיס מוצר מהחנות - בלי רצועת המחיר ("₪.. · לצפייה בחנות") -->
+					{#if !ad.shop}
 					<div class="paid-ad-cta" style="background: {ad.gradient || 'linear-gradient(135deg,#f59e0b,#ea580c)'}">
 						{ad.cta || ad.title}
 					</div>
+					{/if}
 				</a>
 			{:else if cell.tpl}
 				{@const slot = cell.tpl}

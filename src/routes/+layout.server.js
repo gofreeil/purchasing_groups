@@ -35,6 +35,8 @@ export async function load({ locals, cookies, fetch }) {
             mainImageFit: a.mainImageFit,
             // מספר המקום בטור (1..16) - נקבע במסך הניהול
             slot: slots.get(a.id) ?? 0,
+            // כרטיס מוצר מחנות החירות (מסונכרן מקהילה בשכונה) - מוצג בלי רצועת המחיר
+            shop: Boolean(a.landing?._shopProduct),
         }));
     } catch (err) {
         console.warn('layout: loading approved ads failed', err);
