@@ -108,6 +108,23 @@ function byDisplayOrder(a, b) {
 }
 
 /**
+ * מסנן גרסאות שהוחלפו: מי שסומנה _superseded, וגם מי שיש לה ברשימה יורשת
+ * מאושרת (עדכון שלה שכבר אושר) - גם אם סימון ההחלפה לא נכתב, למשל כשה-PUT
+ * של ההורדה נכשל אחרי שהאישור כבר עבר. בלי זה אותה פרסומת הופיעה פעמיים:
+ * הגרסה החדשה "באוויר" והישנה "פג התוקף", באותו מקום בטור.
+ * @param {any[]} list
+ * @returns {any[]}
+ */
+function withoutReplaced(list) {
+    const replaced = new Set(
+        list
+            .filter((/** @type {any} */ a) => a.status === 'approved' && a.replacesAdId && !a.superseded)
+            .map((/** @type {any} */ a) => a.replacesAdId),
+    );
+    return list.filter((/** @type {any} */ a) => !a.superseded && !replaced.has(a.id));
+}
+
+/**
  * שליחת פרסומת לבדיקה (ad_status: pending).
  *
  * payload.editOfAdId = עריכה של פרסומת קיימת ("ערוך" על שורה מסוימת
@@ -179,7 +196,9 @@ async function retireAd(ad, successorId, reason, { fetch: f = fetch, jwt = '' } 
             ad_status: 'rejected',
             decided_at: new Date().toISOString(),
             rejection_reason: reason,
-            expires_at: '',
+            // null ולא '' - Strapi פוסל מחרוזת ריקה בשדה datetime, וההורדה
+            // הייתה נכשלת בשקט אחרי שהעדכון כבר אושר
+            expires_at: null,
             landing: { ...(ad.landing ?? {}), _superseded: true, _supersededBy: successorId },
         },
         { fetch: f, jwt },
@@ -251,9 +270,8 @@ export async function listApproved({ fetch: f = fetch } = {}) {
             { fetch: f },
         );
         const now = Date.now();
-        const live = (data?.data ?? [])
-            .map(fromStrapi)
-            .filter(Boolean)
+        // גרסה שהוחלפה בעדכון מאושר לא מוצגת לצד היורשת שלה
+        const live = withoutReplaced((data?.data ?? []).map(fromStrapi).filter(Boolean))
             // אכיפת תוקף בזמן קריאה - פרסומת שפג תוקפה יורדת מהאתר אוטומטית.
             // רשומות ישנות בלי expires_at לא נפסלות.
             .filter((/** @type {any} */ a) => !a.expiresAt || Date.parse(a.expiresAt) > now)
@@ -405,10 +423,7 @@ export async function listAllForAdmin({ fetch: f = fetch } = {}) {
     );
     // גרסה שהוחלפה בעדכון מאושר לא מוצגת: היא לא "נדחתה" ולא ממתינה -
     // היא ההיסטוריה של פרסומת שכבר רצה על האתר בגרסה חדשה יותר.
-    return (data?.data ?? [])
-        .map(fromStrapi)
-        .filter(Boolean)
-        .filter((/** @type {any} */ a) => !a.superseded);
+    return withoutReplaced((data?.data ?? []).map(fromStrapi).filter(Boolean));
 }
 
 /**
@@ -523,8 +538,8 @@ export async function unapproveAd(id, { fetch: f = fetch, jwt = '' } = {}) {
         `${ENDPOINT}/${encodeURIComponent(id)}`,
         {
             ad_status: 'pending',
-            decided_at: '',
-            expires_at: '',
+            decided_at: null,
+            expires_at: null,
             rejection_reason: '',
         },
         { fetch: f, jwt },
@@ -883,12 +898,11 @@ export async function getMyAds(identity, { fetch: f = fetch } = {}) {
         const now = Date.now();
         /** @type {Record<string, number>} */
         const rank = { approved: 0, pending: 1, rejected: 2 };
-        return (data?.data ?? [])
-            .map(fromStrapi)
-            .filter(Boolean)
+        // גרסה שהוחלפה בעדכון מאושר יורדת מהרשימה - הפרסומת מופיעה פעם אחת
+        return withoutReplaced((data?.data ?? []).map(fromStrapi).filter(Boolean))
             // הסינון בשרת הוא לפי מזהה *או* אימייל; מוודאים כאן שוב שהשורה
             // באמת של המפרסם, כדי שגם שינוי בסכמה לא ידליף פרסומת זרה.
-            .filter((/** @type {any} */ a) => !a.superseded && sameAdvertiser(a, identity))
+            .filter((/** @type {any} */ a) => sameAdvertiser(a, identity))
             .map((/** @type {any} */ a) => ({
                 id: a.id,
                 title: a.title,

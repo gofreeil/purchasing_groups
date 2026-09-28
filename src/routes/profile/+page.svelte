@@ -227,7 +227,7 @@
                                     {#if ad.slot}<span>מקום {ad.slot} בטור</span>{/if}
                                     {#if ad.slot && ad.expiresAt}<span class="sep">·</span>{/if}
                                     {#if ad.expiresAt}<span>עד {fmtDate(ad.expiresAt)}</span>{/if}
-                                    {#if ad.replacesTitle}
+                                    {#if ad.status === 'pending' && ad.replacesTitle}
                                         <span class="sep">·</span>
                                         <span>עדכון ל"{ad.replacesTitle}"</span>
                                     {/if}
@@ -236,24 +236,88 @@
                                     <span class="ad-reason">סיבת הדחייה: {ad.rejectionReason}</span>
                                 {/if}
                             </span>
-                            <!-- אדמין מאשר ישר מכאן, בלי לעבור למסך הניהול.
-                                 המסלול = מה שנבחר בשליחה; לשינוי מסלול - במסך הניהול. -->
-                            {#if data.isAdmin && ad.status === 'pending'}
-                                <form method="POST" action="?/approve" use:enhance>
-                                    <input type="hidden" name="id" value={ad.id} />
-                                    <input type="hidden" name="durationDays" value={ad.requestedDurationDays ?? ''} />
-                                    <button type="submit" class="ad-approve" title="אישור ופרסום">
-                                        ✅ אשר
-                                    </button>
-                                </form>
-                            {/if}
-                            <a
-                                class="ad-edit"
-                                href="/advertise/builder?edit={ad.id}"
-                                title="פתיחת הפרסומת בעורך"
-                            >
-                                ✏️ ערוך
-                            </a>
+                            <span class="ad-actions">
+                                <!-- קיצורי הניהול לאדמין - הפעולות השכיחות ישר מכאן,
+                                     בלי לעבור למסך הניהול. המסלול = מה שנבחר בשליחה;
+                                     שינוי מסלול, מקום בטור וקציבה - במסך הניהול. -->
+                                {#if data.isAdmin}
+                                    {#if ad.status === 'pending'}
+                                        <form method="POST" action="?/approve" use:enhance>
+                                            <input type="hidden" name="id" value={ad.id} />
+                                            <input type="hidden" name="durationDays" value={ad.requestedDurationDays ?? ''} />
+                                            <button type="submit" class="ad-btn ok" title="אישור ופרסום">✅ אשר</button>
+                                        </form>
+                                    {:else if ad.status === 'approved' && !ad.live && !ad.paused}
+                                        <!-- פג התוקף: אישור מחדש = תקופה חדשה מהיום, באותו מקום -->
+                                        <form method="POST" action="?/approve" use:enhance>
+                                            <input type="hidden" name="id" value={ad.id} />
+                                            <input type="hidden" name="durationDays" value={ad.requestedDurationDays ?? ''} />
+                                            <button type="submit" class="ad-btn ok" title="תקופה חדשה מהיום, באותו מקום בטור">🔄 חדש</button>
+                                        </form>
+                                    {/if}
+                                    {#if ad.status === 'approved'}
+                                        {#if ad.paused}
+                                            <form method="POST" action="?/resume" use:enhance>
+                                                <input type="hidden" name="id" value={ad.id} />
+                                                <button type="submit" class="ad-btn ok" title="הימים השמורים נספרים מהיום">▶ המשך</button>
+                                            </form>
+                                        {:else if ad.live}
+                                            <form method="POST" action="?/pause" use:enhance>
+                                                <input type="hidden" name="id" value={ad.id} />
+                                                <button
+                                                    type="submit"
+                                                    class="ad-btn ghost"
+                                                    title="יורדת מהאתר, הימים שנותרו נשמרים לה"
+                                                    onclick={(e) => {
+                                                        if (!confirm('להשהות את הפרסומת? היא תרד מהאתר והימים שנותרו יישמרו לה.')) e.preventDefault();
+                                                    }}
+                                                >⏸ השהה</button>
+                                            </form>
+                                        {/if}
+                                        <form method="POST" action="?/unapprove" use:enhance>
+                                            <input type="hidden" name="id" value={ad.id} />
+                                            <button
+                                                type="submit"
+                                                class="ad-btn ghost"
+                                                title="חוזרת לממתינות בלי מחיקה"
+                                                onclick={(e) => {
+                                                    if (!confirm('להוריד את הפרסומת מהאתר ולהחזיר אותה לממתינות?')) e.preventDefault();
+                                                }}
+                                            >⬇ הורד</button>
+                                        </form>
+                                    {/if}
+                                    {#if ad.status !== 'rejected'}
+                                        <form method="POST" action="?/reject" use:enhance>
+                                            <input type="hidden" name="id" value={ad.id} />
+                                            <input type="hidden" name="reason" value="" />
+                                            <button
+                                                type="submit"
+                                                class="ad-btn danger"
+                                                title="דחייה עם סיבה (לא חובה)"
+                                                onclick={(e) => {
+                                                    const reason = prompt('סיבת הדחייה (אפשר להשאיר ריק):', '');
+                                                    if (reason === null) {
+                                                        e.preventDefault();
+                                                        return;
+                                                    }
+                                                    const input = e.currentTarget.form?.elements.namedItem('reason');
+                                                    if (input instanceof HTMLInputElement) input.value = reason;
+                                                }}
+                                            >❌ דחה</button>
+                                        </form>
+                                    {/if}
+                                {/if}
+                                {#if ad.live}
+                                    <a class="ad-btn ghost" href="/ads/{ad.id}" target="_blank" title="דף הנחיתה באתר">👁 צפה</a>
+                                {/if}
+                                <a
+                                    class="ad-edit"
+                                    href="/advertise/builder?edit={ad.id}"
+                                    title="פתיחת הפרסומת בעורך"
+                                >
+                                    ✏️ ערוך
+                                </a>
+                            </span>
                         </div>
                     {/each}
                 </div>
@@ -702,20 +766,62 @@
     .ad-edit:hover {
         background: #fde047;
     }
-    .ad-approve {
+    /* קיצורי הניהול - כפתורים קטנים זה לצד זה, נשברים לשורה בנייד */
+    .ad-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.35rem;
         flex-shrink: 0;
-        background: rgba(34, 197, 94, 0.18);
-        border: 1px solid rgba(34, 197, 94, 0.45);
-        color: #86efac;
+    }
+    .ad-actions form {
+        display: contents;
+    }
+    .ad-btn {
+        font: inherit;
         font-weight: 800;
-        font-size: 0.82rem;
+        font-size: 0.78rem;
         border-radius: 0.6rem;
-        padding: 0.4rem 0.8rem;
+        padding: 0.35rem 0.6rem;
         cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+        border: 1px solid transparent;
         transition: background 0.2s;
     }
-    .ad-approve:hover {
+    .ad-btn.ok {
+        background: rgba(34, 197, 94, 0.18);
+        border-color: rgba(34, 197, 94, 0.45);
+        color: #86efac;
+    }
+    .ad-btn.ok:hover {
         background: rgba(34, 197, 94, 0.32);
+    }
+    .ad-btn.ghost {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.15);
+        color: #e2e8f0;
+    }
+    .ad-btn.ghost:hover {
+        background: rgba(255, 255, 255, 0.14);
+    }
+    .ad-btn.danger {
+        background: rgba(239, 68, 68, 0.12);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #fca5a5;
+    }
+    .ad-btn.danger:hover {
+        background: rgba(239, 68, 68, 0.26);
+    }
+    @media (max-width: 640px) {
+        .ad-row {
+            flex-wrap: wrap;
+        }
+        .ad-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
     }
     .ads-admin-link {
         margin-inline-start: 0.6rem;

@@ -3,7 +3,14 @@ import { isAdmin, isSuperAdmin } from '$lib/auth.js';
 import { getCampaignList } from '$lib/campaigns.js';
 import { listMembershipsForUser } from '$lib/server/membershipsSource.js';
 import { summarize } from '$lib/memberships.js';
-import { approveAd, getMyAds } from '$lib/server/adsStore.js';
+import {
+    approveAd,
+    getMyAds,
+    pauseAd,
+    rejectAd,
+    resumeAd,
+    unapproveAd,
+} from '$lib/server/adsStore.js';
 import { normalizePlanDays, planLabel } from '$lib/adPlans.js';
 
 /**
@@ -49,22 +56,85 @@ export async function load({ locals, fetch }) {
     };
 }
 
+/**
+ * קיצורי הניהול מ"הפרסומות שלי" - לאדמין שגם מפרסם בעצמו, כדי לא לעבור
+ * למסך הניהול בשביל פרסומת אחת. אותן פונקציות בדיוק כמו ב-/admin/ads;
+ * ההרשאה נבדקת בתוך כל פעולה, לא רק ב-load. כל התוצאות באותה צורה:
+ * { message } בהצלחה, fail עם { error } בכישלון.
+ * @param {any} locals
+ * @param {Request} request
+ * @returns {Promise<{ id: string, form: FormData, jwt: string } | { error: string, status: number }>}
+ */
+async function adAction(locals, request) {
+    if (!isAdmin(locals.user)) return { error: 'נדרשת הרשאת ניהול', status: 403 };
+    const form = await request.formData();
+    const id = String(form.get('id') ?? '');
+    if (!id) return { error: 'חסר מזהה פרסומת', status: 400 };
+    return { id, form, jwt: locals.jwt ?? '' };
+}
+
 export const actions = {
-    // אישור מהיר מ"הפרסומות שלי" - לאדמין שגם מפרסם בעצמו, כדי לא לעבור
-    // למסך הניהול בשביל פרסומת אחת. אותה לוגיקה בדיוק כמו ב-/admin/ads:
+    // אישור (או חידוש של פרסומת שפג תוקפה - אותה פעולה, תוקף חדש מהיום).
     // המסלול = מה שהמפרסם בחר בשליחה (הבחירה המפורשת נשארת במסך הניהול).
     approve: async ({ request, locals, fetch }) => {
-        if (!isAdmin(locals.user)) return fail(403, { error: 'נדרשת הרשאת ניהול' });
-        const form = await request.formData();
-        const id = String(form.get('id') ?? '');
-        if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
-        const durationDays = normalizePlanDays(form.get('durationDays'));
+        const a = await adAction(locals, request);
+        if ('error' in a) return fail(a.status, { error: a.error });
+        const durationDays = normalizePlanDays(a.form.get('durationDays'));
         try {
-            await approveAd(id, { durationDays, fetch, jwt: locals.jwt ?? '' });
+            await approveAd(a.id, { durationDays, fetch, jwt: a.jwt });
             return { message: `הפרסומת אושרה ופורסמה ל-${planLabel(durationDays)} ✅` };
         } catch (err) {
             console.error('profile approve failed:', err);
             return fail(502, { error: 'האישור נכשל - נסו שוב' });
+        }
+    },
+    reject: async ({ request, locals, fetch }) => {
+        const a = await adAction(locals, request);
+        if ('error' in a) return fail(a.status, { error: a.error });
+        try {
+            await rejectAd(a.id, { reason: String(a.form.get('reason') ?? ''), fetch, jwt: a.jwt });
+            return { message: 'הפרסומת נדחתה' };
+        } catch (err) {
+            console.error('profile reject failed:', err);
+            return fail(502, { error: 'הדחייה נכשלה - נסו שוב' });
+        }
+    },
+    // השהיה - יורדת מהאתר והימים שנותרו נשמרים לה
+    pause: async ({ request, locals, fetch }) => {
+        const a = await adAction(locals, request);
+        if ('error' in a) return fail(a.status, { error: a.error });
+        try {
+            const r = await pauseAd(a.id, { fetch, jwt: a.jwt });
+            if (!r) return fail(404, { error: 'הפרסומת לא נמצאה' });
+            return { message: `${r.title} הושהתה - ${r.daysLeft} ימים שמורים לה` };
+        } catch (err) {
+            console.error('profile pause failed:', err);
+            return fail(502, { error: 'ההשהיה נכשלה - נסו שוב' });
+        }
+    },
+    // המשך אחרי השהיה - הימים השמורים נספרים מהיום
+    resume: async ({ request, locals, fetch }) => {
+        const a = await adAction(locals, request);
+        if ('error' in a) return fail(a.status, { error: a.error });
+        try {
+            const r = await resumeAd(a.id, { fetch, jwt: a.jwt });
+            if (!r) return fail(404, { error: 'הפרסומת לא נמצאה' });
+            return { message: `${r.title} חזרה לאוויר - ${r.daysLeft} ימים` };
+        } catch (err) {
+            console.error('profile resume failed:', err);
+            return fail(502, { error: 'ההפעלה מחדש נכשלה - נסו שוב' });
+        }
+    },
+    // הורדה מהאתר בלי מחיקה - חוזרת לממתינות
+    unapprove: async ({ request, locals, fetch }) => {
+        const a = await adAction(locals, request);
+        if ('error' in a) return fail(a.status, { error: a.error });
+        try {
+            await unapproveAd(a.id, { fetch, jwt: a.jwt });
+            return { message: 'הפרסומת הורדה מהאתר וחזרה לממתינות' };
+        } catch (err) {
+            console.error('profile unapprove failed:', err);
+            return fail(502, { error: 'ההורדה נכשלה - נסו שוב' });
         }
     },
 };
