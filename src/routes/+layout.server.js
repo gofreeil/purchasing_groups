@@ -34,6 +34,10 @@ export async function load({ locals, cookies, fetch }) {
             gradient: a.gradient,
             mainImage: adImageUrl(a, 'main'),
             mainImageFit: a.mainImageFit,
+            // לוגו המפרסם והעיצוב מהבילדר (פרסומת שהופצה מקהילה בשכונה נושאת
+            // אותו ב-_adStyle) - בלעדיהם הכרטיס היה תמונה חשופה, בלי כותרת
+            logo: adImageUrl(a, 'logo'),
+            adStyle: a.landing?._adStyle ?? null,
             // מספר המקום בטור (1..16) - נקבע במסך הניהול
             slot: slots.get(a.id) ?? 0,
             // שכפל פרסומת - מקומות נוספים שבהם אותה פרסומת מוצגת
