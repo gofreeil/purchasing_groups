@@ -20,13 +20,20 @@ export function load({ locals }) {
     return { ssoName };
 }
 
+/**
+ * מבנה אחיד לכל כשלי ההתחברות - כך הדף יכול לקרוא identifier/badCredentials בלי ענפים.
+ * @param {number} status @param {string} error @param {string} [identifier] @param {boolean} [badCredentials]
+ */
+const failLogin = (status, error, identifier = '', badCredentials = false) =>
+    fail(status, { error, identifier, badCredentials });
+
 export const actions = {
     local: async ({ request, url, cookies, fetch }) => {
         const form = await request.formData();
         const identifier = String(form.get('identifier') || '').trim();
         const password = String(form.get('password') || '');
         const returnTo = String(form.get('returnTo') || '/');
-        if (!identifier || !password) return fail(400, { error: 'אימייל וסיסמה נדרשים' });
+        if (!identifier || !password) return failLogin(400, 'אימייל וסיסמה נדרשים', identifier);
 
         const res = await fetch(`${STRAPI_URL}/api/auth/local`, {
             method: 'POST',
@@ -35,11 +42,27 @@ export const actions = {
         });
         if (!res.ok) {
             const json = await res.json().catch(() => ({}));
-            const msg = json?.error?.message || 'אימייל או סיסמה שגויים';
-            return fail(401, { error: msg, identifier });
+            const raw = String(json?.error?.message || '');
+            // "Invalid identifier or password" גם כשהחשבון נוצר דרך Google/Facebook (אין לו
+            // סיסמה) - לכן ההודעה מציעה את שתי הדרכים: כפתורי הספקים, או שחזור סיסמה.
+            if (!raw || /invalid identifier or password/i.test(raw)) {
+                return failLogin(401, 'האימייל או הסיסמה לא תואמים.', identifier, true);
+            }
+            if (/not confirmed/i.test(raw)) {
+                return failLogin(
+                    401,
+                    'כתובת האימייל עדיין לא אושרה. חפש במייל את הקישור לאישור, או בחר סיסמה חדשה כדי להמשיך.',
+                    identifier,
+                    true,
+                );
+            }
+            if (/blocked/i.test(raw)) {
+                return failLogin(403, 'החשבון הזה נחסם על ידי מנהל האתר.', identifier);
+            }
+            return failLogin(401, raw, identifier);
         }
         const data = await res.json();
-        if (!data?.jwt) return fail(502, { error: 'Strapi לא החזיר JWT' });
+        if (!data?.jwt) return failLogin(502, 'Strapi לא החזיר JWT', identifier);
 
         cookies.set(AUTH_COOKIE, data.jwt, authCookieOptions(url));
         // התחברות מפורשת בסיסמה מדף ההתחברות → מסך "ברוכים השבים"

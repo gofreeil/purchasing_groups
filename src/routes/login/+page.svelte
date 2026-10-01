@@ -25,6 +25,14 @@
 
     /** @type {'google' | 'facebook' | 'sso' | null} */
     let loading = $state(null);
+
+    // האימייל שהוקלד נשלח לדף השחזור - לא צריך להקליד אותו פעמיים.
+    let identifier = $state(form?.identifier ?? '');
+    const forgotHref = $derived(
+        identifier.includes('@')
+            ? `/forgot-password?email=${encodeURIComponent(identifier.trim())}`
+            : '/forgot-password',
+    );
 </script>
 
 <svelte:head><title>התחברות | רכישות קבוצתיות</title></svelte:head>
@@ -147,13 +155,16 @@
             <input
                 type="text"
                 name="identifier"
-                value={form?.identifier ?? ''}
+                bind:value={identifier}
                 autocomplete="username"
                 required
             />
         </label>
         <label>
-            <span>סיסמה</span>
+            <span class="pw-row">
+                סיסמה
+                <a class="forgot-link" href={forgotHref}>שכחתי סיסמה</a>
+            </span>
             <input
                 type="password"
                 name="password"
@@ -162,7 +173,21 @@
             />
         </label>
         {#if form?.error}
-            <div class="form-error">{form.error}</div>
+            <div class="form-error" role="alert">
+                {form.error}
+                {#if form.badCredentials}
+                    <ul class="recover-hints">
+                        <li>
+                            נרשמת בעבר עם <strong>Google</strong> או <strong>Facebook</strong>? אז אין לך סיסמה —
+                            היכנס עם הכפתורים שלמעלה.
+                        </li>
+                        <li>
+                            שכחת את הסיסמה?
+                            <a href={forgotHref}>שלחו לי קישור לבחירת סיסמה חדשה</a>
+                        </li>
+                    </ul>
+                {/if}
+            </div>
         {/if}
         <button type="submit" class="local-submit">התחבר</button>
     </form>
@@ -370,6 +395,29 @@
         padding: 0.55rem 0.8rem;
         border-radius: 8px;
         font-size: 0.9rem;
+    }
+    .local-form label span.pw-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+    .forgot-link {
+        color: #fde68a;
+        font-size: 0.82rem;
+        text-decoration: underline;
+    }
+    .recover-hints {
+        margin: 0.55rem 0 0;
+        padding: 0 1.1rem 0 0;
+        color: rgba(255, 255, 255, 0.85);
+        line-height: 1.65;
+    }
+    .recover-hints li + li {
+        margin-top: 0.35rem;
+    }
+    .recover-hints a {
+        color: #fde68a;
+        font-weight: 700;
     }
     .local-submit {
         background: #facc15;
