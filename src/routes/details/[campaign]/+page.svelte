@@ -765,7 +765,7 @@
                 rel="noopener"
                 class="join-cta-banner"
                 aria-label="טופס הצטרפות להנחה בסולר"
-                onclick={(e) => { e.preventDefault(); openJoin(joinLinkDiesel); }}
+                onclick={noteJoined}
             >
                 {#if joined}
                     <DoneHand label={$t.purchases.doneShort} title={$t.purchases.tapHintDone} />
