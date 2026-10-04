@@ -138,6 +138,7 @@
     let shareToast = $state(false);
 
     // תוכן/מבנה (מ-Strapi) - title/description/image/links/pageConfig
+    let showResponses = $state(false);
     let campaign = $derived(data.campaign?.slug ?? "");
     let campaignTitle = $derived(data.campaign?.title ?? "");
     let campaignDesc = $derived(data.campaign?.description ?? "");
@@ -752,17 +753,19 @@
         <!-- אין דירוג בדף המבצע - רק סיכום ההצבעות, מקושר לדף הדירוגים והתגובות.
              במבצע חדש שאין בו עדיין דירוגים לא מציגים "0.0/5" אלא הזמנה לדרג ראשון. -->
         {#if campaignStats.rating > 0}
-            <a
-                href={`/details/${campaign}/responses`}
+            <button
+                type="button"
                 class="rating-summary-cta"
-                aria-label={`דירוג ${campaignStats.rating.toFixed(1)} מתוך 5 — למעבר לכל הדירוגים והתגובות`}
+                aria-expanded={showResponses}
+                aria-label={`דירוג ${campaignStats.rating.toFixed(1)} מתוך 5 — לפתיחת הדירוגים והתגובות`}
+                onclick={() => (showResponses = !showResponses)}
             >
                 <div class="rating-summary-badge">
                     <span class="rating-summary-stars" aria-hidden="true">⭐⭐⭐⭐⭐</span>
                     <span class="rating-summary-val">{campaignStats.rating.toFixed(1)}/5</span>
                 </div>
-                <span class="rating-summary-text">לדירוגים והתגובות&nbsp;←</span>
-            </a>
+                <span class="rating-summary-text">{showResponses ? 'סגירה ↑' : 'לדירוגים והתגובות ↓'}</span>
+            </button>
         {:else}
             <a
                 href={`/details/${campaign}/responses`}
@@ -773,7 +776,7 @@
             </a>
         {/if}
 
-        {#if allResponses.length > 0}
+        {#if showResponses && allResponses.length > 0}
             <div class="responses-list">
                 <h3 class="responses-title">תגובות מובילות</h3>
                 {#each allResponses as r (r.id)}
@@ -1992,6 +1995,9 @@
         border: 2px solid rgba(250, 204, 21, 0.45);
         border-radius: 18px;
         text-decoration: none;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
         transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
     }
