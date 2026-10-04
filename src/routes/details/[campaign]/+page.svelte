@@ -456,7 +456,7 @@
 />
 <JsonLd data={schemas} />
 
-<div class="details-page" class:bw-page={campaign === "fuel"} in:fade={{ duration: 300 }}>
+<div class="details-page" in:fade={{ duration: 300 }}>
     <!-- Hero + Stats unified banner -->
     <section class="hero-card">
         <div class="hero">
@@ -879,10 +879,6 @@
 </div>
 
 <style>
-    /* דף מבצע הדלק — שחור לבן */
-    .details-page.bw-page {
-        filter: grayscale(1);
-    }
 
     .details-page {
         max-width: 1100px;

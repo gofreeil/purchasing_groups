@@ -696,9 +696,9 @@
         z-index: 1;
     }
 
-    /* מבצע מוקפא - הכרטיס כולו בשחור-לבן */
+    /* מבצע מוקפא - ללא סינון צבע (הכרטיס נשאר צבעוני) */
     .purchase-card.frozen {
-        filter: grayscale(1);
+        filter: none;
     }
     .frozen-notice {
         position: fixed;
