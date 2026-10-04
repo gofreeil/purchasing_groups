@@ -1975,6 +1975,9 @@
     /* Survey */
     .survey-section-wrap {
         text-align: center;
+        margin-top: 3rem;
+        padding-top: 2.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.18);
     }
 
     /* סיכום ההצבעות בדף המבצע - קישור לדף הדירוגים והתגובות (במקום טופס דירוג) */
