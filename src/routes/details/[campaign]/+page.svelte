@@ -195,6 +195,43 @@
     }
     let joinLinkDiesel = $derived(data.campaign?.join_link_diesel ?? "");
 
+    // טופס הדלק: חובה קודם להצטרף לקבוצת הווצאפ של "יוצאים לחירות".
+    // אי אפשר לאמת חברות בפועל, לכן הלחיצה על קישור הקבוצה נשמרת בדפדפן ופותחת את ההמשך לטופס.
+    const WA_GROUP_LINK = "https://chat.whatsapp.com/K6nJLn21ssmGdolXVzH2RV";
+    const WA_GATE_KEY = "wa_group_joined";
+    let waGateOpen = $state(false);
+    let waClicked = $state(false);
+    let pendingJoinUrl = "";
+    function waAlreadyJoined() {
+        try {
+            return localStorage.getItem(WA_GATE_KEY) === "1";
+        } catch {
+            return false;
+        }
+    }
+    /** @param {string} url */
+    function openJoin(url) {
+        if (!url) return;
+        if (campaign === "fuel" && !waAlreadyJoined()) {
+            pendingJoinUrl = url;
+            waClicked = false;
+            waGateOpen = true;
+            return;
+        }
+        noteJoined();
+        window.open(url, "_blank", "noopener");
+    }
+    function onWaGroupClick() {
+        waClicked = true;
+        try {
+            localStorage.setItem(WA_GATE_KEY, "1");
+        } catch {}
+    }
+    function continueToForm() {
+        waGateOpen = false;
+        openJoin(pendingJoinUrl);
+    }
+
     // pageData ממופה משדות ה-JSON שבסכמת Strapi לשמות המקוריים שמשמשים את ה-template למטה.
     // כשמוסיפים שדה חדש לטמפלייט - להוסיף את המיפוי כאן.
     let pageData = $derived.by(() => {
@@ -402,8 +439,7 @@
             await new Promise((r) => setTimeout(r, 500));
             joinCtaClicked = false;
         }
-        noteJoined();
-        window.open(joinLink, "_blank", "noopener");
+        openJoin(joinLink);
     }
 
     /** @param {MouseEvent} e */
@@ -442,8 +478,7 @@
             await new Promise((r) => setTimeout(r, 500));
             joinCtaClicked = false;
         }
-        noteJoined();
-        window.open(joinLink, "_blank", "noopener");
+        openJoin(joinLink);
     }
 </script>
 
@@ -662,7 +697,7 @@
                 class:clicked={joinCtaClicked}
                 bind:this={joinCtaEl}
                 aria-label={$t.details.joinCta}
-                onclick={noteJoined}
+                onclick={(e) => { e.preventDefault(); openJoin(joinLink); }}
             >
                 {#if joined}
                     <DoneHand label={$t.purchases.doneShort} title={$t.purchases.tapHintDone} />
@@ -730,7 +765,7 @@
                 rel="noopener"
                 class="join-cta-banner"
                 aria-label="טופס הצטרפות להנחה בסולר"
-                onclick={noteJoined}
+                onclick={(e) => { e.preventDefault(); openJoin(joinLinkDiesel); }}
             >
                 {#if joined}
                     <DoneHand label={$t.purchases.doneShort} title={$t.purchases.tapHintDone} />
@@ -861,6 +896,23 @@
         {/if}
     </section>
 
+    {#if waGateOpen}
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+        <div class="wa-gate-backdrop" onclick={() => (waGateOpen = false)}>
+            <div class="wa-gate" role="dialog" aria-modal="true" aria-label="הצטרפות לקבוצת הווצאפ" onclick={(e) => e.stopPropagation()}>
+                <h3>רגע לפני הטופס 👋</h3>
+                <p>כדי להצטרף למבצע הדלק צריך להיות חלק מ"יוצאים לחירות" — קודם מצטרפים לקבוצת הווצאפ, ואז ממשיכים לטופס.</p>
+                <a class="wa-gate-btn wa-gate-wa" href={WA_GROUP_LINK} target="_blank" rel="noopener" onclick={onWaGroupClick}>
+                    💬 הצטרפות לקבוצת הווצאפ
+                </a>
+                <button type="button" class="wa-gate-btn wa-gate-next" disabled={!waClicked} onclick={continueToForm}>
+                    המשך להצטרפות ←
+                </button>
+                <button type="button" class="wa-gate-close" onclick={() => (waGateOpen = false)}>ביטול</button>
+            </div>
+        </div>
+    {/if}
+
     {#if shareToast}
         <div class="share-toast" role="status" aria-live="polite">
             ✅ הקישור הועתק - אפשר להדביק בכל מקום
@@ -882,6 +934,67 @@
 </div>
 
 <style>
+    .wa-gate-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.7);
+    }
+    .wa-gate {
+        width: 100%;
+        max-width: 420px;
+        padding: 1.6rem 1.4rem;
+        text-align: center;
+        background: #0f1630;
+        border: 2px solid rgba(250, 204, 21, 0.6);
+        border-radius: 18px;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .wa-gate h3 {
+        margin: 0;
+        color: #facc15;
+    }
+    .wa-gate p {
+        margin: 0;
+        line-height: 1.5;
+    }
+    .wa-gate-btn {
+        display: block;
+        padding: 0.85rem 1rem;
+        border: 0;
+        border-radius: 12px;
+        font: inherit;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .wa-gate-wa {
+        background: #25d366;
+        color: #06240f;
+    }
+    .wa-gate-next {
+        background: #facc15;
+        color: #1a1500;
+    }
+    .wa-gate-next:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+    .wa-gate-close {
+        background: none;
+        border: 0;
+        color: #aab;
+        font: inherit;
+        cursor: pointer;
+    }
+
 
     .details-page {
         max-width: 1100px;
