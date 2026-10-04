@@ -294,7 +294,7 @@
                 href={`/details/${campaign.slug}`}
                 class="purchase-link-overlay"
                 aria-label={campaign.title}
-                onclick={(e) => (campaign.frozen ? onFrozenClick(e, campaign.slug) : track('deal_click', campaign.slug))}
+                onclick={() => track('deal_click', campaign.slug)}
             ></a>
 
             {#if campaign.is_new}
