@@ -707,6 +707,14 @@
                 <div class="join-cta-content">
                     <h3>{@html pageData?.joinCtaSubtitle ?? campaignDesc}</h3>
                     <p>{$t.details.joinCtaAction}</p>
+                    {#if campaignStats.rating > 0}
+                        <div class="join-cta-rating" aria-label={`דירוג ${campaignStats.rating.toFixed(1)} מתוך 5`}>
+                            <span class="rating-summary-stars" aria-hidden="true">
+                                <span class="rating-stars-fill" style={`width: ${Math.min(100, Math.max(0, (campaignStats.rating / 5) * 100))}%`}>★★★★★</span>
+                            </span>
+                            <span class="join-cta-rating-val">{campaignStats.rating.toFixed(1)}/5</span>
+                        </div>
+                    {/if}
                 </div>
             </a>
             <span class="join-cta-hand">👉</span>
@@ -2144,6 +2152,19 @@
         left: 0;
         overflow: hidden;
         white-space: nowrap;
+        color: #facc15;
+    }
+    .join-cta-rating {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.4rem;
+    }
+    .join-cta-rating .rating-summary-stars { font-size: 1.15rem; }
+    .join-cta-rating-val {
+        font-size: 0.95rem;
+        font-weight: 800;
         color: #facc15;
     }
     .rating-summary-val {

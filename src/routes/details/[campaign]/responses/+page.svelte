@@ -158,7 +158,9 @@
         </p>
         {#if data.ratingCount > 0}
             <div class="rating-badge" aria-label={`ממוצע ${data.averageRating.toFixed(1)} מתוך 5 מתוך ${data.ratingCount} דירוגים`}>
-                <span class="stars-gold" aria-hidden="true">⭐⭐⭐⭐⭐</span>
+                <span class="stars-gold" aria-hidden="true">
+                    <span class="stars-fill" style={`width: ${Math.min(100, Math.max(0, (data.averageRating / 5) * 100))}%`}>★★★★★</span>
+                </span>
                 <span class="rating-val">{data.averageRating.toFixed(1)}/5 ({data.ratingCount})</span>
             </div>
         {/if}
@@ -362,8 +364,24 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     .rating-badge .stars-gold {
-        font-size: 1.1rem;
+        position: relative;
+        display: inline-block;
+        direction: ltr;
+        font-size: 1.4rem;
         letter-spacing: 1px;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.22);
+    }
+    .rating-badge .stars-gold::before {
+        content: '★★★★★';
+    }
+    .rating-badge .stars-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        color: #facc15;
     }
     .rating-badge .rating-val {
         font-size: 0.9rem;

@@ -357,7 +357,9 @@
                             class="survey-rating-summary"
                             aria-label={`${$t.details?.statsRating ?? 'דירוג'} ${card.rating.toFixed(1)} מתוך 5 — לצפייה בכל הדירוגים והתגובות`}
                         >
-                            <span class="stars-gold">⭐⭐⭐⭐⭐</span>
+                            <span class="stars-gold" aria-hidden="true">
+                                <span class="stars-fill" style={`width: ${Math.min(100, Math.max(0, (card.rating / 5) * 100))}%`}>★★★★★</span>
+                            </span>
                             <span class="rating-val">{card.rating.toFixed(1)}/5</span>
                         </a>
                     </div>
@@ -851,8 +853,24 @@
     }
 
     .stars-gold {
-        font-size: 0.9rem;
+        position: relative;
+        display: inline-block;
+        direction: ltr;
+        font-size: 1.1rem;
         letter-spacing: 1px;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.22);
+    }
+    .stars-gold::before {
+        content: '★★★★★';
+    }
+    .stars-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        color: #facc15;
     }
 
     .rating-val {
@@ -920,7 +938,7 @@
         }
 
         .stars-gold {
-            font-size: 0.7rem;
+            font-size: 0.9rem;
         }
 
         .rating-val {
