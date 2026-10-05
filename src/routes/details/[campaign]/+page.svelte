@@ -796,7 +796,9 @@
                 onclick={() => (showResponses = !showResponses)}
             >
                 <div class="rating-summary-badge">
-                    <span class="rating-summary-stars" aria-hidden="true">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-summary-stars" aria-hidden="true">
+                        <span class="rating-stars-fill" style={`width: ${Math.min(100, Math.max(0, (campaignStats.rating / 5) * 100))}%`}>★★★★★</span>
+                    </span>
                     <span class="rating-summary-val">{campaignStats.rating.toFixed(1)}/5</span>
                 </div>
                 <span class="rating-summary-text">{showResponses ? 'סגירה ↑' : 'לדירוגים והתגובות ↓'}</span>
@@ -2125,9 +2127,24 @@
         gap: 0.7rem;
     }
     .rating-summary-stars {
-        font-size: 1.5rem;
+        position: relative;
+        display: inline-block;
+        direction: ltr;
+        font-size: 1.9rem;
         letter-spacing: 2px;
         line-height: 1;
+        color: rgba(255, 255, 255, 0.22);
+    }
+    .rating-summary-stars::before {
+        content: '★★★★★';
+    }
+    .rating-stars-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        color: #facc15;
     }
     .rating-summary-val {
         font-size: 1.6rem;
@@ -2143,7 +2160,7 @@
         .rating-summary-cta {
             padding: 0.9rem 1.4rem;
         }
-        .rating-summary-stars { font-size: 1.25rem; }
+        .rating-summary-stars { font-size: 1.6rem; }
         .rating-summary-val { font-size: 1.35rem; }
         .rating-summary-text { font-size: 1rem; }
     }
