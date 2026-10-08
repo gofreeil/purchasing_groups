@@ -72,6 +72,8 @@
 	});
 	// אות ראשונה לעיגול ה-fallback כשאין תמונת פרופיל
 	let avatarInitial = $derived((displayName || "U").charAt(0).toUpperCase());
+	// תמונת הפרופיל לא נטענה (קישור שפג / חסום) → חוזרים לאות הראשונה
+	let avatarBroken = $state(false);
 
 	// ברכת SSO מקהילה: מופיעה כש-?welcome=community ויש משתמש מזוהה.
 	let showWelcome = $state(false);
@@ -271,8 +273,8 @@
 								aria-label={displayName}
 								onclick={() => (showUserMenu = false)}
 							>
-								{#if data.user.avatar_url}
-									<img class="user-avatar" src={data.user.avatar_url} alt="" width="44" height="44" decoding="async" referrerpolicy="no-referrer" />
+								{#if data.user.avatar_url && !avatarBroken}
+									<img class="user-avatar" src={data.user.avatar_url} alt="" width="44" height="44" decoding="async" referrerpolicy="no-referrer" onerror={() => (avatarBroken = true)} />
 								{:else}
 									<span class="user-avatar user-avatar-fallback" aria-hidden="true">{avatarInitial}</span>
 								{/if}
