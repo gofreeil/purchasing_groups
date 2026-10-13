@@ -8,12 +8,19 @@
 // הסוד משותף לכל האתרים של הרשת (משתנה הסביבה SUPER_ADMIN_TOTP_SECRET,
 // base32) - רשומה אחת באפליקציה מאמתת בכולם. אחרי קוד נכון נשמרת עוגייה
 // חתומה ל-12 שעות, קשורה למשתמש, כדי לא לבקש קוד על כל שמירה.
+//
+// קוד אחד לכל הרשת: באתר החי הגלגל מאמת את הקוד מול השרת המשותף
+// (api.gofreeil.com/api/site-edit/verify), שמנפיק עוגייה gf-site-edit לכל
+// *.gofreeil.com - ואותה עוגייה (אותו פורמט ואותה חתימה) מתקבלת גם כאן.
+// כך קוד שהוזן כאן או בכל אתר אחר של הרשת פותח את העריכה בכולם.
 // ============================================================
 
 import { env } from '$env/dynamic/private';
 import { isSuperAdmin } from '$lib/auth.js';
 
 export const TOTP_COOKIE = 'site_edit_2fa';
+// עוגיית העריכה של השרת המשותף (community-backend src/api/site-edit)
+const NETWORK_COOKIE = 'gf-site-edit';
 const COOKIE_TTL_MS = 12 * 60 * 60 * 1000;
 const STEP_SECONDS = 30;
 
@@ -144,8 +151,11 @@ export async function verifyTotp(event, code) {
 export async function isTotpVerified(event) {
     const user = event.locals.user;
     if (!user || !isSuperAdmin(user) || !totpConfigured()) return false;
-    const raw = event.cookies.get(TOTP_COOKIE) ?? '';
-    const [id, exp, sig] = raw.split('.');
-    if (!id || !exp || !sig || id !== String(user.id) || Number(exp) < Date.now()) return false;
-    return safeEqual(sig, await sign(`${id}.${exp}`));
+    // העוגייה של האתר, או זו של הרשת (קוד שהוזן באחד האתרים האחרים)
+    for (const name of [TOTP_COOKIE, NETWORK_COOKIE]) {
+        const [id, exp, sig] = (event.cookies.get(name) ?? '').split('.');
+        if (!id || !exp || !sig || id !== String(user.id) || Number(exp) < Date.now()) continue;
+        if (safeEqual(sig, await sign(`${id}.${exp}`))) return true;
+    }
+    return false;
 }

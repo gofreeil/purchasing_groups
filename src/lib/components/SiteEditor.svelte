@@ -334,9 +334,13 @@
         busy = true;
         error = '';
         try {
-            const res = await fetch('/api/site-edit/verify', {
+            // באתר החי - מול השרת המשותף של הרשת: הוא מנפיק עוגייה לכל *.gofreeil.com,
+            // כך שאותו קוד פותח את העריכה גם בשאר האתרים (וזו מתקבלת כאן, ראו superAdminTotp.js)
+            const network = /(^|\.)gofreeil\.com$/.test(location.hostname);
+            const res = await fetch(network ? 'https://api.gofreeil.com/api/site-edit/verify' : '/api/site-edit/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: network ? 'include' : 'same-origin',
                 body: JSON.stringify({ code }),
             });
             const body = await res.json().catch(() => ({}));
