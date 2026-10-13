@@ -2,7 +2,8 @@
 // siteContentStore.js — כיתובי האתר ומונה החברים, כפי שנערכו בפאנל.
 //
 // איפה זה נשמר: רשומה אחת ב-pg-campaigns עם slug שמור (site-texts),
-// בשדה ה-json benefits: { texts: { "<נתיב>": "<טקסט>" }, members }.
+// בשדה ה-json benefits: { texts: { "<נתיב>": "<טקסט>" }, members, replace }.
+// replace: טקסטים שנערכו בגלגל ⚙️ בלי מפתח בקוד - { "<מקור>": "<חדש>" } (ראו textReplace.js).
 // למה שם ולא collection חדש: ל-pg-campaigns כבר יש הרשאות כתיבה לצוות
 // ופרסום אוטומטי אחרי שמירה, כך שלא נדרש שינוי ופריסה של הבאקאנד.
 // הרשומה לא נוגעת בעסקאות: המיזוג ב-campaignsStore עובר רק על ה-slugs
@@ -22,14 +23,14 @@ export const DEFAULT_MEMBERS = 2004;
 const TTL_MS = 60_000;
 
 /**
- * @typedef {{ documentId: string | null, texts: Record<string, string>, members: number | null }} SiteContent
+ * @typedef {{ documentId: string | null, texts: Record<string, string>, members: number | null, replace: Record<string, string> }} SiteContent
  */
 
 /** @type {{ at: number, value: SiteContent } | null} */
 let cache = null;
 
 /** @type {SiteContent} */
-const EMPTY = { documentId: null, texts: {}, members: null };
+const EMPTY = { documentId: null, texts: {}, members: null, replace: {} };
 
 /**
  * הכיתובים והמונה שנערכו. בכשל - האחרונים שהצליחו, או ריק (= תוכן הקוד).
@@ -53,6 +54,7 @@ export async function getSiteContent({ fetch: f = fetch } = {}) {
             documentId: row?.documentId ?? null,
             texts: stored.texts && typeof stored.texts === 'object' ? stored.texts : {},
             members: Number.isFinite(members) && members > 0 ? Math.round(members) : null,
+            replace: stored.replace && typeof stored.replace === 'object' ? stored.replace : {},
         };
         cache = { at: Date.now(), value };
         return value;
@@ -64,11 +66,11 @@ export async function getSiteContent({ fetch: f = fetch } = {}) {
 
 /**
  * שמירת הכיתובים והמונה. texts מכיל רק את מה ששונה מהקוד; members null =
- * חזרה לברירת המחדל שבקוד.
- * @param {{ texts: Record<string, string>, members: number | null }} content
+ * חזרה לברירת המחדל שבקוד. replace שלא נשלח (מסך הכיתובים בפאנל) נשאר כפי שהוא.
+ * @param {{ texts: Record<string, string>, members: number | null, replace?: Record<string, string> }} content
  * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
  */
-export async function saveSiteContent({ texts, members }, { fetch: f = fetch, jwt = '' } = {}) {
+export async function saveSiteContent({ texts, members, replace }, { fetch: f = fetch, jwt = '' } = {}) {
     // קריאה טרייה ולא מהמטמון - כדי לא ליצור רשומה כפולה
     cache = null;
     const existing = await getSiteContent({ fetch: f });
@@ -82,7 +84,7 @@ export async function saveSiteContent({ texts, members }, { fetch: f = fetch, jw
         title: 'כיתובי האתר (נערך בפאנל)',
         status: 'inactive',
         edited_fields: [],
-        benefits: { texts, members },
+        benefits: { texts, members, replace: replace ?? existing.replace },
     };
 
     const url = existing.documentId

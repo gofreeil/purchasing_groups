@@ -12,6 +12,7 @@
 	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
 	import WelcomeScreen from "$lib/components/WelcomeScreen.svelte";
 	import SiteEditor from "$lib/components/SiteEditor.svelte";
+	import { setTextReplacements, refreshTextReplacements } from "$lib/textReplace.js";
 	import { OTHER_NETWORK_SITES } from "$lib/seo.js";
 
 	let { data, children } = $props();
@@ -48,6 +49,7 @@
 	// ולא לשלוח כלל חוסך לו בקשה על כל דף.
 	afterNavigate(() => {
 		if (!data?.isAdmin) trackPageview(window.location.pathname);
+		refreshTextReplacements();
 	});
 
 	let showLangMenu = $state(false);
@@ -55,6 +57,11 @@
 
 	// מסכי הניהול - בלי טורי הפרסומות, לרוחב מלא
 	let isAdminArea = $derived($page.url.pathname.startsWith("/admin"));
+	// טקסטים שנערכו בגלגל ⚙️ בלי מפתח בקוד (ראו textReplace.js) - לא בפאנל הניהול,
+	// שם רואים את הנתונים כפי שהם
+	$effect(() => {
+		setTextReplacements(isAdminArea ? {} : (data?.siteReplace ?? {}));
+	});
 	// פרסומות שממתינות לאישור - בועה על התמונה ובפריט "פאנל ניהול"
 	let adminPending = $derived(data?.isAdmin ? (data?.adminAlerts?.ads ?? 0) : 0);
 

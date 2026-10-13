@@ -17,6 +17,9 @@ const CAMPAIGN_TEXT_FIELDS = new Set([
     'plans_table_diesel_note',
 ]);
 
+const MAX_TEXT_LEN = 2000;
+const MAX_REPLACE = 500;
+
 /**
  * כיתוב בודד בטבלת מסלולים לפי נתיב (title / headers.2 / rows.0.cells.5.value).
  * רק כיתוב שכבר קיים מתעדכן - לא נוצר מבנה חדש בטבלה.
@@ -58,6 +61,21 @@ export async function POST(event) {
         const value = raw.replace(/\r\n/g, '\n');
         if (!value.trim() || value === defaults.get(path)) delete texts[path];
         else texts[path] = value;
+    }
+
+    // טקסטים בלי מפתח בקוד (text:<מקור>) - החלפה לפי הטקסט המקורי, ראו textReplace.js.
+    // ריק או זהה למקור - ההחלפה נמחקת והטקסט חוזר לקוד.
+    const replace = { ...current.replace };
+    for (const [key, raw] of Object.entries(patch)) {
+        if (!key.startsWith('text:') || typeof raw !== 'string') continue;
+        const original = key.slice(5);
+        const value = raw.replace(/\r\n/g, '\n').trim();
+        if (!original || original.length > MAX_TEXT_LEN || value.length > MAX_TEXT_LEN) continue;
+        if (!value || value === original) delete replace[original];
+        else replace[original] = value;
+    }
+    if (Object.keys(replace).length > MAX_REPLACE) {
+        return json({ error: 'יותר מדי טקסטים ערוכים' }, { status: 400 });
     }
 
     let members = current.members;
@@ -109,7 +127,7 @@ export async function POST(event) {
             }
             await saveCampaignOverride(slug, { ...full, ...changes }, opts);
         }
-        await saveSiteContent({ texts, members }, opts);
+        await saveSiteContent({ texts, members, replace }, opts);
     } catch (err) {
         const msg = err instanceof Error ? err.message : '';
         return json({ error: `השמירה נכשלה: ${msg.slice(0, 160)}` }, { status: 502 });

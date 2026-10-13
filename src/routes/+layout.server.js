@@ -77,5 +77,7 @@ export async function load({ locals, cookies, fetch }) {
         approvedAds,
         // כיתובים שנערכו בפאנל - נכנסים ל-$t דרך textOverrides (ראו siteTexts.js)
         siteTexts: (await getSiteContent({ fetch })).texts,
+        // טקסטים שנערכו בגלגל ⚙️ בלי מפתח בקוד - מוחלים בדפדפן (ראו textReplace.js)
+        siteReplace: (await getSiteContent({ fetch })).replace,
     };
 }
