@@ -13,9 +13,11 @@ const REQUEST_TIMEOUT_MS = 3000;
 /**
  * @param {string} path
  * @param {Record<string, string | number | boolean | null | undefined>} [params]
- * @param {{ fetch?: typeof fetch }} [opts]
+ * @param {{ fetch?: typeof fetch, timeoutMs?: number }} [opts] timeoutMs - לשליפות
+ *   כבדות בלבד (רשימות פרסומות עם base64, מגה-בייטים): התקרה כוללת גם את
+ *   הורדת הגוף, ו-3 שניות חתכו אותן בייצור - והרשימה נפלה בשקט לריקה.
  */
-export async function strapiGet(path, params = {}, { fetch: f = fetch } = {}) {
+export async function strapiGet(path, params = {}, { fetch: f = fetch, timeoutMs = REQUEST_TIMEOUT_MS } = {}) {
     const search = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
         if (value === undefined || value === null) continue;
@@ -25,7 +27,7 @@ export async function strapiGet(path, params = {}, { fetch: f = fetch } = {}) {
     const url = `${STRAPI_URL}/api/${path}${qs ? `?${qs}` : ''}`;
     const res = await f(url, {
         headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        signal: AbortSignal.timeout(timeoutMs),
     });
     if (!res.ok) throw new Error(`Strapi GET ${path} failed: ${res.status} ${res.statusText}`);
     return res.json();

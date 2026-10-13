@@ -25,6 +25,11 @@ export const DEFAULT_DURATION_DAYS = DEFAULT_PLAN_DAYS;
 
 // קאש קצר לרשימת המאושרות - נטען בכל ניווט דרך ה-layout, אין צורך להציף את Strapi.
 const TTL_MS = 120_000;
+
+// השליפות שמחזירות רשומות מלאות - כולל התמונות כ-base64, מגה-בייטים ברשימה.
+// תקרת 3 השניות הכללית של strapiGet כוללת את הורדת הגוף, וחתכה אותן
+// בייצור: טור הפרסומות, מסך הניהול ו"הפרסומות שלי" נפלו בשקט לריקים.
+const HEAVY_TIMEOUT_MS = 12_000;
 /** @type {{ at: number, list: any[] } | null} */
 let approvedCache = null;
 
@@ -236,7 +241,7 @@ async function retireStalePendingEdits(targetId, successorId, { fetch: f = fetch
         ['ad_status', 'title', 'landing', 'submitted_at'].forEach((fld, i) => {
             params[`fields[${i}]`] = fld;
         });
-        const data = await strapiGet(ENDPOINT, params, { fetch: f });
+        const data = await strapiGet(ENDPOINT, params, { fetch: f, timeoutMs: HEAVY_TIMEOUT_MS });
         const stale = (data?.data ?? [])
             .map(fromStrapi)
             .filter(Boolean)
@@ -277,7 +282,7 @@ export async function listApproved({ fetch: f = fetch } = {}) {
                 sort: 'submitted_at:desc',
                 'pagination[pageSize]': 25,
             },
-            { fetch: f },
+            { fetch: f, timeoutMs: HEAVY_TIMEOUT_MS },
         );
         const now = Date.now();
         // גרסה שהוחלפה בעדכון מאושר לא מוצגת לצד היורשת שלה
@@ -298,11 +303,13 @@ export async function listApproved({ fetch: f = fetch } = {}) {
         approvedCache = { at: Date.now(), list };
         return list;
     } catch (err) {
-        // כשל (למשל: ה-content type עדיין לא נוצר ב-Strapi) - קאש שלילי קצר
-        // כדי שלא נציף את Strapi בבקשה כושלת בכל ניווט.
+        // כשל רגעי (תקיעה / חיתוך בתקרת הזמן) לא מרוקן את הטור: נשארים עם
+        // הרשימה הטובה האחרונה, ומנסים שוב בעוד חצי דקה. קודם נשמרה כאן
+        // רשימה ריקה לשתי דקות, והפרסומות נעלמו מהאתר על כל תקלה.
         console.warn('adsStore: listApproved failed', err instanceof Error ? err.message : err);
-        approvedCache = { at: Date.now(), list: [] };
-        return [];
+        const list = approvedCache?.list ?? [];
+        approvedCache = { at: Date.now() - TTL_MS + 30_000, list };
+        return list;
     }
 }
 
@@ -414,7 +421,7 @@ export async function getApprovedAdImage(id, kind, { fetch: f = fetch } = {}) {
  */
 export async function getAd(id, { fetch: f = fetch } = {}) {
     try {
-        const data = await strapiGet(`${ENDPOINT}/${encodeURIComponent(id)}`, {}, { fetch: f });
+        const data = await strapiGet(`${ENDPOINT}/${encodeURIComponent(id)}`, {}, { fetch: f, timeoutMs: HEAVY_TIMEOUT_MS });
         return fromStrapi(data?.data);
     } catch {
         return null;
@@ -455,7 +462,7 @@ export async function listAllForAdmin({ fetch: f = fetch } = {}) {
     const data = await strapiGet(
         ENDPOINT,
         { sort: 'submitted_at:desc', 'pagination[pageSize]': 100 },
-        { fetch: f },
+        { fetch: f, timeoutMs: HEAVY_TIMEOUT_MS },
     );
     // גרסה שהוחלפה בעדכון מאושר לא מוצגת: היא לא "נדחתה" ולא ממתינה -
     // היא ההיסטוריה של פרסומת שכבר רצה על האתר בגרסה חדשה יותר.
@@ -1100,7 +1107,7 @@ export async function getMyAds(identity, { fetch: f = fetch } = {}) {
     if (email) params[`filters[$or][${i++}][submitted_by_email][$eq]`] = email;
 
     try {
-        const data = await strapiGet(ENDPOINT, params, { fetch: f });
+        const data = await strapiGet(ENDPOINT, params, { fetch: f, timeoutMs: HEAVY_TIMEOUT_MS });
         const now = Date.now();
         /** @type {Record<string, number>} */
         const rank = { approved: 0, pending: 1, rejected: 2 };

@@ -104,12 +104,15 @@ export async function notifyAdminsNewAd(info) {
             `תקופה מבוקשת: ${planLabelWithPrice(info.durationDays)}\n` +
             `תשלום: ${info.usedOwnerCode ? 'קוד בעלים' : 'ממתין לתשלום'}\n` +
             `המודעה ממתינה לאישור ב-groups.gofreeil.com/admin/ads`;
-        await Promise.all(receivers.map((receiver) =>
+        const results = await Promise.all(receivers.map((receiver) =>
             api('/api/messages', {
                 method: 'POST',
                 body: JSON.stringify({ data: { receiver, content, read: false } }),
             })
         ));
+        // fetch לא זורק על 401/403 - בלי הבדיקה הזו התראה שנדחתה נבלעה בלי עקבות
+        const failed = results.filter((res) => !res.ok).map((res) => res.status);
+        if (failed.length) console.warn('adsCode: new-ad notification rejected', failed);
     } catch (err) {
         console.warn('adsCode: new-ad notification failed', err instanceof Error ? err.message : err);
     }
