@@ -278,6 +278,9 @@
     /** @param {SubmitEvent} e */
     async function tryPayCode(e) {
         e.preventDefault();
+        await verifyPayCode();
+    }
+    async function verifyPayCode() {
         if (payCodeChecking || !payCode.trim()) return;
         payCodeChecking = true;
         payCodeError = false;
@@ -308,6 +311,15 @@
         // שחזור התקופה שנבחרה במחירון או בביקור קודם - עקבי עם הבילדר
         const storedPlanDays = localStorage.getItem(PLAN_DAYS_KEY);
         if (storedPlanDays) payDuration = normalizePlanDays(storedPlanDays);
+
+        // קוד בעלים שכבר הוזן בדף הפרסום - ממולא ומאומת כאן שוב מול השרת
+        try {
+            const carriedCode = sessionStorage.getItem("ad_owner_code");
+            if (carriedCode) {
+                payCode = carriedCode;
+                verifyPayCode();
+            }
+        } catch { /* ignore */ }
 
         /** @param {DragEvent} e */
         const blockOutsideDrop = (e) => {

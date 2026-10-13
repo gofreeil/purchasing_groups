@@ -135,7 +135,40 @@
         ...(FREE_PROMO ? [FREE_PROMO_DISCOUNT] : []),
     ];
     let discountInput = $state("");
-    let discountEval = $derived(evaluateDiscount(discountInput, discountCodes));
+    let localEval = $derived(evaluateDiscount(discountInput, discountCodes));
+
+    // קוד הבעלים לא נמצא בקוד הלקוח - קוד שלא זוהה מקומית נבדק מול השרת
+    const OWNER_CODE_KEY = "ad_owner_code";
+    /** @type {import('$lib/discountCodes.js').DiscountCode} */
+    const OWNER_DISCOUNT = { id: "owner-code", label: "קוד בעלים", code: "", kind: "free", percent: 100, active: true };
+    let ownerCodeOk = $state(false);
+    let ownerChecking = $state(false);
+    $effect(() => {
+        const code = discountInput.trim();
+        ownerCodeOk = false;
+        if (!browser || !code || localEval.reason !== "unknown") {
+            ownerChecking = false;
+            return;
+        }
+        ownerChecking = true;
+        let cancelled = false;
+        const t = setTimeout(async () => {
+            try {
+                const res = await fetch("/api/ads/verify-code", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code }),
+                });
+                const out = res.ok ? await res.json() : null;
+                if (!cancelled) ownerCodeOk = Boolean(out?.ok);
+            } catch { /* נשאר "לא מזוהה" */ }
+            if (!cancelled) ownerChecking = false;
+        }, 400);
+        return () => { cancelled = true; clearTimeout(t); };
+    });
+    let discountEval = $derived(
+        ownerCodeOk ? { applied: true, matched: OWNER_DISCOUNT, reason: "" } : localEval,
+    );
     let discountValue = $derived(
         discountEval.applied && discountEval.matched ? discountAmount(totalPayment, discountEval.matched) : 0,
     );
@@ -149,6 +182,8 @@
         try {
             localStorage.setItem("ad_paid", "1");
             localStorage.setItem("ad_paid_at", new Date().toISOString());
+            // הקוד עובר לשלב השליחה, שם השרת מאמת אותו שוב בהגשה עצמה
+            if (ownerCodeOk) sessionStorage.setItem(OWNER_CODE_KEY, discountInput.trim());
         } catch { /* ignore */ }
         goto("/advertise/builder");
     }
@@ -552,6 +587,8 @@
                     </p>
                 {:else if discountEval.reason === "inactive"}
                     <p class="d-msg off">הקוד אינו פעיל כרגע</p>
+                {:else if ownerChecking}
+                    <p class="d-msg off">בודק את הקוד...</p>
                 {:else}
                     <p class="d-msg unknown">הקוד שהוזן אינו מזוהה.</p>
                 {/if}
