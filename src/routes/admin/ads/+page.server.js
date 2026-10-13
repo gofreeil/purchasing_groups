@@ -19,6 +19,7 @@ import {
     sameAdvertiser,
 } from '$lib/server/adsStore.js';
 import { normalizePlanDays, planLabel } from '$lib/adPlans.js';
+import { failReason } from '$lib/strapi.js';
 
 // מסך אישור פרסומות (גרסה פשוטה של ads-review מקהילה בשכונה).
 // פתוח לסופר-אדמין וגם לאדמין שמונה - שניהם מאשרים ומנהלים פרסומות.
@@ -77,7 +78,7 @@ export const actions = {
             };
         } catch (err) {
             console.error('approve failed:', err);
-            return fail(502, { error: 'האישור נכשל - נסו שוב' });
+            return fail(502, { error: `האישור נכשל: ${failReason(err)}` });
         }
     },
     reject: async ({ request, locals, fetch }) => {
@@ -91,7 +92,7 @@ export const actions = {
             return { success: true, message: 'הפרסומת נדחתה' };
         } catch (err) {
             console.error('reject failed:', err);
-            return fail(502, { error: 'הדחייה נכשלה - נסו שוב' });
+            return fail(502, { error: `הדחייה נכשלה: ${failReason(err)}` });
         }
     },
     // הורדת פרסומת שכבר באתר - חוזרת לממתינות, בלי למחוק אותה
@@ -105,7 +106,7 @@ export const actions = {
             return { success: true, message: 'הפרסומת הורדה מהאתר וחזרה לממתינות' };
         } catch (err) {
             console.error('unapprove failed:', err);
-            return fail(502, { error: 'ההורדה נכשלה - נסו שוב' });
+            return fail(502, { error: `ההורדה נכשלה: ${failReason(err)}` });
         }
     },
     // קציבת תקופת פרסום - נספרת מיום האישור. שמורה לסופר-אדמין
@@ -125,7 +126,7 @@ export const actions = {
             return { success: true, message: `${r.title}: ${days} ימים${suffix}` };
         } catch (err) {
             console.error('setDuration failed:', err);
-            return fail(502, { error: 'קציבת התקופה נכשלה - נסו שוב' });
+            return fail(502, { error: `קציבת התקופה נכשלה: ${failReason(err)}` });
         }
     },
     // תאריך תפוגה שרירותי מחלון הקציבה - הפרסומת יורדת בסוף היום שנבחר. שמור לסופר-אדמין
@@ -148,7 +149,7 @@ export const actions = {
             return { success: true, message: `${r.title}: תפוגה נקבעה ל-${day}${suffix}` };
         } catch (err) {
             console.error('setExpiry failed:', err);
-            return fail(502, { error: 'קביעת התאריך נכשלה - נסו שוב' });
+            return fail(502, { error: `קביעת התאריך נכשלה: ${failReason(err)}` });
         }
     },
 
@@ -164,7 +165,7 @@ export const actions = {
             return { success: true, message: `${r.title} הושהתה - ${r.daysLeft} ימים שמורים לה` };
         } catch (err) {
             console.error('pause failed:', err);
-            return fail(502, { error: 'ההשהיה נכשלה - נסו שוב' });
+            return fail(502, { error: `ההשהיה נכשלה: ${failReason(err)}` });
         }
     },
     // המשך אחרי השהיה - הימים השמורים נספרים מהיום
@@ -179,7 +180,7 @@ export const actions = {
             return { success: true, message: `${r.title} חזרה לאוויר - ${r.daysLeft} ימים` };
         } catch (err) {
             console.error('resume failed:', err);
-            return fail(502, { error: 'ההפעלה מחדש נכשלה - נסו שוב' });
+            return fail(502, { error: `ההפעלה מחדש נכשלה: ${failReason(err)}` });
         }
     },
     // החלפת מקום בסדר התצוגה באתר
@@ -195,7 +196,7 @@ export const actions = {
             return { success: true, message: `${r.title} - מקום ${r.position} מתוך ${r.total}` };
         } catch (err) {
             console.error('move failed:', err);
-            return fail(502, { error: 'החלפת המקום נכשלה - נסו שוב' });
+            return fail(502, { error: `החלפת המקום נכשלה: ${failReason(err)}` });
         }
     },
     // הצבת פרסומת במקום מספרי בטור (1..12); מקום תפוס - השתיים מתחלפות
@@ -215,7 +216,7 @@ export const actions = {
             };
         } catch (err) {
             console.error('setSlot failed:', err);
-            return fail(502, { error: 'העברת המקום נכשלה - נסו שוב' });
+            return fail(502, { error: `העברת המקום נכשלה: ${failReason(err)}` });
         }
     },
     // שכפל פרסומת: אותה פרסומת במקום נוסף בטור (סופר-אדמין)
@@ -239,7 +240,7 @@ export const actions = {
             };
         } catch (err) {
             console.error('addExtraSlot failed:', err);
-            return fail(502, { error: 'השכפול נכשל - נסו שוב' });
+            return fail(502, { error: `השכפול נכשל: ${failReason(err)}` });
         }
     },
     removeExtraSlot: async ({ request, locals, fetch }) => {
@@ -257,7 +258,7 @@ export const actions = {
             return { success: true, message: `השכפול של "${r.title}" במקום ${r.slot} בוטל` };
         } catch (err) {
             console.error('removeExtraSlot failed:', err);
-            return fail(502, { error: 'ביטול השכפול נכשל - נסו שוב' });
+            return fail(502, { error: `ביטול השכפול נכשל: ${failReason(err)}` });
         }
     },
 };

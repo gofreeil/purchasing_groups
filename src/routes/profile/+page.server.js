@@ -12,6 +12,7 @@ import {
     unapproveAd,
 } from '$lib/server/adsStore.js';
 import { normalizePlanDays, planLabel } from '$lib/adPlans.js';
+import { failReason } from '$lib/strapi.js';
 
 /**
  * האזור האישי — העסקאות שהמשתמש חבר בהן, ממתי, עד מתי וכמה חסך.
@@ -85,7 +86,7 @@ export const actions = {
             return { message: `הפרסומת אושרה ופורסמה ל-${planLabel(durationDays)} ✅` };
         } catch (err) {
             console.error('profile approve failed:', err);
-            return fail(502, { error: 'האישור נכשל - נסו שוב' });
+            return fail(502, { error: `האישור נכשל: ${failReason(err)}` });
         }
     },
     reject: async ({ request, locals, fetch }) => {
@@ -96,7 +97,7 @@ export const actions = {
             return { message: 'הפרסומת נדחתה' };
         } catch (err) {
             console.error('profile reject failed:', err);
-            return fail(502, { error: 'הדחייה נכשלה - נסו שוב' });
+            return fail(502, { error: `הדחייה נכשלה: ${failReason(err)}` });
         }
     },
     // השהיה - יורדת מהאתר והימים שנותרו נשמרים לה
@@ -109,7 +110,7 @@ export const actions = {
             return { message: `${r.title} הושהתה - ${r.daysLeft} ימים שמורים לה` };
         } catch (err) {
             console.error('profile pause failed:', err);
-            return fail(502, { error: 'ההשהיה נכשלה - נסו שוב' });
+            return fail(502, { error: `ההשהיה נכשלה: ${failReason(err)}` });
         }
     },
     // המשך אחרי השהיה - הימים השמורים נספרים מהיום
@@ -122,7 +123,7 @@ export const actions = {
             return { message: `${r.title} חזרה לאוויר - ${r.daysLeft} ימים` };
         } catch (err) {
             console.error('profile resume failed:', err);
-            return fail(502, { error: 'ההפעלה מחדש נכשלה - נסו שוב' });
+            return fail(502, { error: `ההפעלה מחדש נכשלה: ${failReason(err)}` });
         }
     },
     // הורדה מהאתר בלי מחיקה - חוזרת לממתינות
@@ -134,7 +135,7 @@ export const actions = {
             return { message: 'הפרסומת הורדה מהאתר וחזרה לממתינות' };
         } catch (err) {
             console.error('profile unapprove failed:', err);
-            return fail(502, { error: 'ההורדה נכשלה - נסו שוב' });
+            return fail(502, { error: `ההורדה נכשלה: ${failReason(err)}` });
         }
     },
 };

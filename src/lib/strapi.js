@@ -11,6 +11,59 @@ const STRAPI_URL = (env.STRAPI_URL || 'https://api.gofreeil.com').replace(/\/$/,
 const REQUEST_TIMEOUT_MS = 3000;
 
 /**
+ * שגיאת Strapi עם הסיבה שהשרת החזיר (error.message בגוף התשובה) - כדי שמסכי
+ * הניהול יוכלו לומר למשתמש למה פעולה נכשלה, ולא רק "נסו שוב".
+ */
+export class StrapiError extends Error {
+    /**
+     * @param {string} method @param {string} path @param {Response} res
+     * @param {string} detail
+     */
+    constructor(method, path, res, detail) {
+        super(`Strapi ${method} ${path} failed: ${res.status} ${res.statusText}${detail ? ` - ${detail}` : ''}`);
+        this.status = res.status;
+        this.detail = detail;
+    }
+}
+
+/** @param {string} method @param {string} path @param {Response} res */
+async function strapiError(method, path, res) {
+    let detail = '';
+    try {
+        const body = await res.text();
+        try {
+            detail = String(JSON.parse(body)?.error?.message ?? '');
+        } catch {
+            detail = body.slice(0, 200);
+        }
+    } catch {
+        // גוף שלא נקרא (ניתוק/תקרת זמן) - נשארים עם הסטטוס
+    }
+    return new StrapiError(method, path, res, detail.trim());
+}
+
+/**
+ * הסיבה שקריאה ל-Strapi נכשלה, בעברית קצרה - להודעת השגיאה שהמשתמש רואה.
+ * @param {unknown} err
+ */
+export function failReason(err) {
+    if (err instanceof StrapiError) {
+        const d = err.detail ? ` (${err.detail})` : '';
+        if (err.status === 401) return 'החיבור פג - התנתקו והתחברו מחדש';
+        if (err.status === 403) return `השרת דחה - אין הרשאה${d}`;
+        if (err.status === 404) return 'הרשומה לא נמצאה בשרת';
+        if (err.status === 413) return 'הנתונים גדולים מדי לשרת';
+        return `שגיאת שרת ${err.status}${d}`;
+    }
+    if (err instanceof Error) {
+        if (err.name === 'TimeoutError' || err.name === 'AbortError') return 'השרת לא הגיב בזמן';
+        if (err.message === 'fetch failed') return 'אין חיבור לשרת';
+        return err.message;
+    }
+    return String(err);
+}
+
+/**
  * @param {string} path
  * @param {Record<string, string | number | boolean | null | undefined>} [params]
  * @param {{ fetch?: typeof fetch, timeoutMs?: number }} [opts] timeoutMs - לשליפות
@@ -29,7 +82,7 @@ export async function strapiGet(path, params = {}, { fetch: f = fetch, timeoutMs
         headers: { 'Content-Type': 'application/json' },
         signal: AbortSignal.timeout(timeoutMs),
     });
-    if (!res.ok) throw new Error(`Strapi GET ${path} failed: ${res.status} ${res.statusText}`);
+    if (!res.ok) throw await strapiError('GET', path, res);
     return res.json();
 }
 
@@ -46,7 +99,7 @@ export async function strapiPost(path, data, { fetch: f = fetch } = {}) {
         body: JSON.stringify({ data }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-    if (!res.ok) throw new Error(`Strapi POST ${path} failed: ${res.status} ${res.statusText}`);
+    if (!res.ok) throw await strapiError('POST', path, res);
     return res.json();
 }
 
@@ -67,7 +120,7 @@ export async function strapiPut(path, data, { fetch: f = fetch, jwt = '' } = {})
         body: JSON.stringify({ data }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-    if (!res.ok) throw new Error(`Strapi PUT ${path} failed: ${res.status} ${res.statusText}`);
+    if (!res.ok) throw await strapiError('PUT', path, res);
     return res.json();
 }
 
