@@ -644,25 +644,29 @@
     {/if}
 
     {#if pageData?.plansTable}
-        <section id="plans-table" class="section plans-table-section">
-            <h2>{pageData.plansTable.title}</h2>
+        <section id="plans-table" class="section plans-table-section" data-se-table={`campaign:${data.campaign?.slug}:plans_table`}>
+            <h2 data-se-cell="title">{pageData.plansTable.title}</h2>
             {#if pageData.plansTable.subtitle}
-                <p class="plans-table-subtitle">{pageData.plansTable.subtitle}</p>
+                <p class="plans-table-subtitle" data-se-cell="subtitle">{pageData.plansTable.subtitle}</p>
             {/if}
             <div class="plans-table-scroll" class:highlight={plansTableHighlight}>
                 <table class="plans-table">
                     <thead>
                         <tr>
-                            {#each pageData.plansTable.headers as header}
-                                <th>{@html header}</th>
+                            {#each pageData.plansTable.headers as header, h}
+                                <th data-se-cell={`headers.${h}`} data-se-html>{@html header}</th>
                             {/each}
                         </tr>
                     </thead>
                     <tbody>
-                        {#each pageData.plansTable.rows as row}
+                        {#each pageData.plansTable.rows as row, r}
                             <tr data-title={row.title} data-company={row.company}>
-                                {#each row.cells as cell}
-                                    <td data-label={cell.label}>
+                                {#each row.cells as cell, c}
+                                    <td
+                                        data-label={cell.label}
+                                        data-se-cell={cell.image ? null : `rows.${r}.cells.${c}.${cell.html ? 'html' : 'value'}`}
+                                        data-se-html={cell.html ? '' : null}
+                                    >
                                         {#if cell.image}
                                             <img src={cell.image.src} alt={cell.image.alt} class="plans-table-logo" width={cell.image.width} height={cell.image.height} loading="lazy" decoding="async" />
                                         {:else if cell.html}
@@ -722,25 +726,29 @@
     {/if}
 
     {#if pageData?.plansTableDiesel}
-        <section class="section plans-table-section">
-            <h2>{pageData.plansTableDiesel.title}</h2>
+        <section class="section plans-table-section" data-se-table={`campaign:${data.campaign?.slug}:plans_table_diesel`}>
+            <h2 data-se-cell="title">{pageData.plansTableDiesel.title}</h2>
             {#if pageData.plansTableDiesel.subtitle}
-                <p class="plans-table-subtitle">{pageData.plansTableDiesel.subtitle}</p>
+                <p class="plans-table-subtitle" data-se-cell="subtitle">{pageData.plansTableDiesel.subtitle}</p>
             {/if}
             <div class="plans-table-scroll">
                 <table class="plans-table">
                     <thead>
                         <tr>
-                            {#each pageData.plansTableDiesel.headers as header}
-                                <th>{@html header}</th>
+                            {#each pageData.plansTableDiesel.headers as header, h}
+                                <th data-se-cell={`headers.${h}`} data-se-html>{@html header}</th>
                             {/each}
                         </tr>
                     </thead>
                     <tbody>
-                        {#each pageData.plansTableDiesel.rows as row}
+                        {#each pageData.plansTableDiesel.rows as row, r}
                             <tr data-title={row.title} data-company={row.company}>
-                                {#each row.cells as cell}
-                                    <td data-label={cell.label}>
+                                {#each row.cells as cell, c}
+                                    <td
+                                        data-label={cell.label}
+                                        data-se-cell={cell.image ? null : `rows.${r}.cells.${c}.${cell.html ? 'html' : 'value'}`}
+                                        data-se-html={cell.html ? '' : null}
+                                    >
                                         {#if cell.image}
                                             <img src={cell.image.src} alt={cell.image.alt} class="plans-table-logo" width={cell.image.width} height={cell.image.height} loading="lazy" decoding="async" />
                                         {:else if cell.html}

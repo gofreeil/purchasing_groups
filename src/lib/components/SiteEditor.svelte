@@ -8,7 +8,8 @@
     // Google Authenticator, ואז כל כיתוב בדף נערך במקומו. המיפוי טקסט→מפתח
     // נעשה בזמן ריצה (כמו ב-PageTextEditor של חכמי העדה): כל text-node
     // שתוכנו שווה לערך של כיתוב ב-i18n נעטף ב-span contenteditable. בנוסף,
-    // אלמנט עם data-site-edit="members" (מונה החברים) נערך כמספר.
+    // אלמנט עם data-site-edit="members" (מונה החברים) נערך כמספר, ותאים עם
+    // data-se-cell בתוך data-se-table (טבלאות המסלולים) נערכים במקומם.
     // השמירה כותבת דריסות (siteContentStore) - בלי דיפלוי - ומרעננת.
 
     let { verified = false } = $props();
@@ -31,8 +32,16 @@
     let wrapped = new Map();
     /** @type {{ el: HTMLElement, original: string } | null} */
     let membersEl = null;
+    /** תאי טבלאות המסלולים - מפתח campaign:<slug>:<טבלה>:<נתיב בטבלה>
+     * @type {Map<HTMLElement, { key: string, html: boolean, original: string }>} */
+    let cells = new Map();
 
-    const EDITABLE_SELECTOR = `[${KEY_ATTR}],[data-site-edit][contenteditable]`;
+    const EDITABLE_SELECTOR = `[${KEY_ATTR}],[data-site-edit][contenteditable],[data-se-cell][contenteditable]`;
+
+    /** תוכן התא לשמירה: תא HTML נשמר כ-HTML (בלי סמני ההידרציה של Svelte) */
+    function cellValue(/** @type {HTMLElement} */ el, /** @type {boolean} */ html) {
+        return html ? el.innerHTML.replace(/<!--[\s\S]*?-->/g, '').trim() : el.innerText.trim();
+    }
 
     /** @param {MouseEvent} e */
     function blockLinks(e) {
@@ -91,6 +100,7 @@
         const keys = new Set();
         for (const [el, info] of wrapped) if (el.innerText.trim() !== info.original) keys.add(info.key);
         if (membersEl && membersEl.el.innerText.trim() !== membersEl.original) keys.add('members');
+        for (const [el, info] of cells) if (cellValue(el, info.html) !== info.original) keys.add(info.key);
         changedCount = keys.size;
     }
 
@@ -114,7 +124,7 @@
         while ((n = walker.nextNode())) {
             const node = /** @type {Text} */ (n);
             const parent = node.parentElement;
-            if (!parent || parent.closest('[data-se-ui],script,style,textarea,button,select,option,[data-site-edit]')) continue;
+            if (!parent || parent.closest('[data-se-ui],script,style,textarea,button,select,option,[data-site-edit],[data-se-cell]')) continue;
             const text = (node.textContent ?? '').trim();
             const q = text && byValue.get(text);
             // כיתוב שחוזר בדף (למשל "סטטוס:" בכל כרטיס עסקה) - כל ההופעות
@@ -148,6 +158,16 @@
             m.addEventListener('input', countChanges);
         }
 
+        cells = new Map();
+        for (const el of /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('[data-se-table] [data-se-cell]'))) {
+            const table = el.closest('[data-se-table]')?.getAttribute('data-se-table');
+            const html = el.hasAttribute('data-se-html');
+            el.setAttribute('contenteditable', 'true');
+            el.setAttribute('spellcheck', 'false');
+            el.addEventListener('input', countChanges);
+            cells.set(el, { key: `${table}:${el.getAttribute('data-se-cell')}`, html, original: cellValue(el, html) });
+        }
+
         document.addEventListener('click', blockLinks, true);
         changedCount = 0;
         error = '';
@@ -168,6 +188,15 @@
             if (membersEl.el.innerText.trim() !== membersEl.original) location.reload();
             membersEl = null;
         }
+        // התאים שייכים ל-Svelte ואי אפשר להחזיר אותם למקור - תא שנערך ובוטל מרענן
+        let cellChanged = false;
+        for (const [el, info] of cells) {
+            if (cellValue(el, info.html) !== info.original) cellChanged = true;
+            el.removeAttribute('contenteditable');
+            el.removeEventListener('input', countChanges);
+        }
+        cells = new Map();
+        if (cellChanged) location.reload();
         document.removeEventListener('click', blockLinks, true);
         editing = false;
         changedCount = 0;
@@ -220,6 +249,10 @@
         const texts = {};
         for (const [el, info] of wrapped) {
             const value = el.innerText.trim();
+            if (value !== info.original) texts[info.key] = value;
+        }
+        for (const [el, info] of cells) {
+            const value = cellValue(el, info.html);
             if (value !== info.original) texts[info.key] = value;
         }
         /** @type {Record<string, any>} */
@@ -414,7 +447,8 @@
         color: #86efac;
     }
     :global([data-se-key]),
-    :global([data-site-edit][contenteditable]) {
+    :global([data-site-edit][contenteditable]),
+    :global([data-se-cell][contenteditable]) {
         /* אזורים שמעבירים לחיצות הלאה (pointer-events:none, כמו בלוק הסטטוס
            בכרטיסי העסקאות) - הכיתוב עצמו כן תופס את הלחיצה */
         pointer-events: auto;
@@ -425,12 +459,14 @@
         min-width: 1ch;
     }
     :global([data-se-key]:hover),
-    :global([data-site-edit][contenteditable]:hover) {
+    :global([data-site-edit][contenteditable]:hover),
+    :global([data-se-cell][contenteditable]:hover) {
         outline-color: #f59e0b;
         background: rgba(245, 158, 11, 0.1);
     }
     :global([data-se-key]:focus),
-    :global([data-site-edit][contenteditable]:focus) {
+    :global([data-site-edit][contenteditable]:focus),
+    :global([data-se-cell][contenteditable]:focus) {
         outline: 2px solid #3b82f6;
         background: rgba(59, 130, 246, 0.1);
     }
