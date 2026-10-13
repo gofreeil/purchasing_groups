@@ -11,6 +11,8 @@ import {
     removeAdExtraSlot,
     computeAdSlots,
     computeAdExtraSlots,
+    computeSchedules,
+    removeAd,
     setAdDuration,
     setAdExpiry,
     normalizeDurationDays,
@@ -35,9 +37,13 @@ export async function load({ locals, fetch }) {
     ensureAdsAdmin(locals);
     /** @type {any[]} */
     let ads = [];
+    /** @type {any[]} */
+    let schedules = [];
     let backendUnavailable = false;
     try {
         ads = await listAllForAdmin({ fetch });
+        // טבלת התזמון (כמו בגמ"ח הארצי): כל המאושרות - פורסם/פג/נותר + ניהול מהשורה
+        schedules = computeSchedules(ads.filter((/** @type {any} */ a) => a.status === 'approved'));
         // מספר המקום של כל מאושרת בטור (1..12) - לתג ולבורר "מקום" בכרטיס
         const slotMap = computeAdSlots(ads.filter((/** @type {any} */ a) => a.status === 'approved'));
         // שכפל פרסומת - המקומות הנוספים האפקטיביים (1-based) של כל מאושרת
@@ -58,7 +64,7 @@ export async function load({ locals, fetch }) {
         backendUnavailable = true;
     }
     // חלון הקציבה (תקופה/תפוגה שרירותית) שמור לסופר-אדמין
-    return { ads, backendUnavailable, superAdmin: isSuperAdmin(locals.user) };
+    return { ads, schedules, backendUnavailable, superAdmin: isSuperAdmin(locals.user) };
 }
 
 export const actions = {
@@ -107,6 +113,21 @@ export const actions = {
         } catch (err) {
             console.error('unapprove failed:', err);
             return fail(502, { error: `ההורדה נכשלה: ${failReason(err)}` });
+        }
+    },
+    // מחיקה לצמיתות שמורה לסופר-אדמין; אדמין שמונה מוריד מהאתר ולא מוחק
+    remove: async ({ request, locals, fetch }) => {
+        ensureAdsAdmin(locals);
+        if (!isSuperAdmin(locals.user)) return fail(403, { error: 'מחיקה שמורה לסופר-אדמין' });
+        const form = await request.formData();
+        const id = String(form.get('id') ?? '');
+        if (!id) return fail(400, { error: 'חסר מזהה פרסומת' });
+        try {
+            await removeAd(id, { fetch, jwt: locals.jwt ?? '' });
+            return { success: true, message: 'נמחקה לצמיתות' };
+        } catch (err) {
+            console.error('remove failed:', err);
+            return fail(502, { error: `המחיקה נכשלה: ${failReason(err)}` });
         }
     },
     // קציבת תקופת פרסום - נספרת מיום האישור. שמורה לסופר-אדמין

@@ -124,6 +124,24 @@ export async function strapiPut(path, data, { fetch: f = fetch, jwt = '' } = {})
     return res.json();
 }
 
+// מחיקת רשומה (מחיקת פרסומת לצמיתות ממסך הניהול - סופר-אדמין בלבד).
+/**
+ * @param {string} path
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ */
+export async function strapiDelete(path, { fetch: f = fetch, jwt = '' } = {}) {
+    const url = `${STRAPI_URL}/api/${path}`;
+    /** @type {Record<string, string>} */
+    const headers = { 'Content-Type': 'application/json' };
+    if (jwt) headers['Authorization'] = `Bearer ${jwt}`;
+    const res = await f(url, {
+        method: 'DELETE',
+        headers,
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+    if (!res.ok) throw await strapiError('DELETE', path, res);
+}
+
 // תוכן הקמפיינים עבר לפרונט (campaigns.js) - Strapi משמש כאן רק לתגובות שביעות-רצון.
 /**
  * @typedef {Object} SatisfactionReply

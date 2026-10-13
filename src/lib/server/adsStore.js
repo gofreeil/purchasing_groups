@@ -14,7 +14,7 @@
 //   landing._requestedDurationDays (אחד ממסלולי adPlans) - התקופה שהמפרסם ביקש.
 //   landing._mainImageFit ({ x, y, z }) - מיקום+זום התמונה הראשית מהבילדר.
 
-import { strapiGet, strapiPost, strapiPut } from '$lib/strapi.js';
+import { strapiGet, strapiPost, strapiPut, strapiDelete } from '$lib/strapi.js';
 import { DEFAULT_PLAN_DAYS, normalizePlanDays } from '$lib/adPlans.js';
 import { parseAdImageFit } from '$lib/adImageFit.js';
 import { AD_SLOT_COUNT } from '$lib/adSlots.js';
@@ -596,6 +596,16 @@ export async function unapproveAd(id, { fetch: f = fetch, jwt = '' } = {}) {
     invalidateAdsCache();
 }
 
+/**
+ * מחיקה לצמיתות (סופר-אדמין בלבד - Strapi אוכף את זה גם בצד שלו).
+ * @param {string} id
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ */
+export async function removeAd(id, { fetch: f = fetch, jwt = '' } = {}) {
+    await strapiDelete(`${ENDPOINT}/${encodeURIComponent(id)}`, { fetch: f, jwt });
+    invalidateAdsCache();
+}
+
 const MIN_DURATION_DAYS = 1;
 const MAX_DURATION_DAYS = 730;
 
@@ -769,6 +779,65 @@ function computeSlots(list) {
  */
 export function computeAdSlots(list) {
     return new Map([...computeSlots(list)].map(([id, s]) => [id, s + 1]));
+}
+
+// ----- טבלת התזמון במסך הניהול (הועתק מהגמ"ח הארצי - computeSchedule) -----
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * שורת תזמון של פרסומת מאושרת: מתי פורסמה, מתי פגה וכמה נותר.
+ * state: ending = 7 ימים או פחות.
+ * @param {any} ad
+ */
+export function computeSchedule(ad) {
+    if (ad.status !== 'approved' || !ad.decidedAt) return null;
+    const days = ad.durationDays ?? DEFAULT_DURATION_DAYS;
+    const publishedAt = ad.decidedAt;
+    const expiresAt = ad.expiresAt || new Date(Date.parse(publishedAt) + days * DAY_MS).toISOString();
+    // מושהית: הזמן לא רץ. הימים שנותרו הם אלה שנשמרו ברגע ההשהיה.
+    const daysLeft = ad.paused
+        ? (ad.pausedDaysLeft ?? days)
+        : Math.ceil((Date.parse(expiresAt) - Date.now()) / DAY_MS);
+    const state = ad.paused ? 'paused'
+        : daysLeft < 0 ? 'expired'
+        : daysLeft <= 7 ? 'ending'
+        : 'active';
+    return {
+        id: ad.id,
+        title: ad.title,
+        advertiserName: ad.submittedBy?.name || '-',
+        advertiserEmail: ad.submittedBy?.email ?? '',
+        publishedAt,
+        expiresAt,
+        durationDays: days,
+        daysLeft,
+        state,
+        /** @type {number | undefined} */
+        slot: undefined,
+        /** @type {number[]} */
+        extraSlots: [],
+    };
+}
+
+/**
+ * טבלת התזמון של מסך הניהול - כל המאושרות, לפי סדר המקומות בטור.
+ * @param {any[]} approved
+ */
+export function computeSchedules(approved) {
+    const slots = computeAdSlots(approved);
+    const extras = computeAdExtraSlots(approved);
+    return approved
+        .map((ad) => {
+            const s = computeSchedule(ad);
+            if (s) {
+                s.slot = slots.get(ad.id);
+                s.extraSlots = extras.get(ad.id) ?? [];
+            }
+            return s;
+        })
+        .filter((s) => s !== null)
+        .sort((a, b) => (a.slot ?? 0) - (b.slot ?? 0));
 }
 
 /**
