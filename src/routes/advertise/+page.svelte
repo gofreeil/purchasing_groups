@@ -74,6 +74,7 @@
     /** @param {number} num */
     function selectRow(num) {
         highlightedRow = num;
+        confirmedPeriod = false; // מסלול אחר = תקופה אחרת, צריך לאשר מחדש
         if (selectedNum === num) {
             selectedNum = null; // לחיצה על המסלול הפעיל = ביטול
             try { localStorage.removeItem(PLAN_DAYS_KEY); } catch {}
@@ -100,13 +101,17 @@
     /**
      * @param {HTMLElement | null} el
      * @param {number} duration
+     * @param {boolean} [center] - למרכז המסך במקום לראשו
      */
-    function slowScrollTo(el, duration) {
+    function slowScrollTo(el, duration, center = false) {
         if (!el || !browser) return;
         const startY = window.scrollY;
         const header = document.querySelector("header");
         const headerOffset = header ? header.offsetHeight + 16 : 16;
-        const targetY = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+        const rect = el.getBoundingClientRect();
+        const targetY = center
+            ? rect.top + window.scrollY - Math.max(headerOffset, (window.innerHeight - rect.height) / 2)
+            : rect.top + window.scrollY - headerOffset;
         const distance = targetY - startY;
         if (Math.abs(distance) < 4) return;
         const startTime = performance.now();
@@ -237,6 +242,29 @@
 
     // ---- תקופת הפרסום: יום עריכה חינם + חודש מלא ----
     let confirmedPeriod = $state(false);
+
+    // ---- שלבים נעולים: כל שלב נפתח רק אחרי שהקודם הושלם, כדי שלא
+    // יגללו מטה לפני הזמן; בכל פתיחה מופיע כפתור "גלול מטה" מהבהב ----
+    let stage = $derived(!hasSelection ? 1 : !confirmedPeriod ? 2 : 3);
+    /** @type {HTMLLabelElement | null} */
+    let confirmEl = $state(null);
+    /** @type {HTMLDivElement | null} */
+    let paymentEl = $state(null);
+    let cueTarget = $derived(stage === 2 ? confirmEl : stage === 3 ? paymentEl : null);
+    let cueText = $derived(stage === 2 ? "גלול מטה - שלב 4: אישור התקופה" : "שלב 5 נפתח - גלול מטה לתשלום");
+    let cueTargetSeen = $state(false);
+    $effect(() => {
+        const el = cueTarget;
+        cueTargetSeen = false;
+        if (!el || typeof IntersectionObserver === "undefined") return;
+        const io = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) cueTargetSeen = true; },
+            // "נראה" = ראש היעד נכנס לשני השלישים העליונים של המסך (גם כשהיעד גבוה מהמסך)
+            { rootMargin: "0px 0px -35% 0px" },
+        );
+        io.observe(el);
+        return () => io.disconnect();
+    });
     let today = new Date();
     /**
      * @param {Date} d
@@ -406,7 +434,7 @@
                             <div class="ap-item-right">
                                 <button
                                     type="button"
-                                    onclick={() => (selectedNum = null)}
+                                    onclick={() => { selectedNum = null; confirmedPeriod = false; }}
                                     class="ap-item-remove"
                                     aria-label="הסר"
                                 >✕</button>
@@ -496,7 +524,7 @@
         </div>
     {:else}
         <div class="ap-empty-calc">
-            <p>🧮 בחר את תקופת הפרסום כדי לראות את <strong>סיכום המחיר!</strong></p>
+            <p>👆 בחר את תקופת הפרסום למעלה - <strong>השלבים הבאים ייפתחו אחרי הבחירה</strong></p>
         </div>
     {/if}
 
@@ -547,9 +575,12 @@
                 <span><span class="dot red"></span> תאריך תפוגת הפרסומת</span>
             </div>
 
-            <label class="ap-period-confirm">
+            <label class="ap-period-confirm" class:attention={!confirmedPeriod} bind:this={confirmEl}>
                 <input type="checkbox" bind:checked={confirmedPeriod} />
                 <div>
+                    {#if !confirmedPeriod}
+                        <p class="c-cta">👉 סמנו כאן כדי לפתוח את התשלום</p>
+                    {/if}
                     <p class="c-main">הבנתי את אורך התקופה ({periodLabel}) ואת תאריך התפוגה</p>
                     <p class="c-sub">
                         היום ({fmtDate(today)}) הוא יום עריכה חינם, והפרסום ירוץ עד
@@ -560,15 +591,16 @@
         </div>
     {/if}
 
-    <!-- ===== שלב 5: תשלום מאובטח ===== -->
-    <div class="ap-payment" class:locked={hasSelection && !confirmedPeriod}>
+    <!-- ===== שלב 5: תשלום מאובטח - נפתח רק אחרי האישור בשלב 4 ===== -->
+    {#if stage === 2}
+        <p class="ap-payment-locked">🔒 שלב 5 - תשלום: ייפתח אחרי סימון האישור למעלה</p>
+    {/if}
+    {#if stage === 3}
+    <div class="ap-payment" bind:this={paymentEl}>
         <h2 class="ap-period-title center">
             <span class="ap-step-num">5</span>
             🔒 תשלום מאובטח
         </h2>
-        {#if hasSelection && !confirmedPeriod}
-            <p class="ap-payment-lock-note">⬆️ סמן/י תחילה את התיבה למעלה (שלב 4) כדי לפתוח את התשלום</p>
-        {/if}
         <p class="ap-payment-sub">התשלום מתבצע בצורה מאובטחת - פרטי האשראי שלך לא מגיעים אלינו</p>
 
         <!-- קוד הנחה -->
@@ -661,6 +693,14 @@
             {/each}
         </div>
     </div>
+    {/if}
+
+    {#if cueTarget && !cueTargetSeen}
+        <button type="button" class="ap-scroll-cue" onclick={() => slowScrollTo(cueTarget, 900, true)}>
+            <span class="cue-arrow" aria-hidden="true">⬇️</span>
+            {cueText}
+        </button>
+    {/if}
 
     <!-- יצירת קשר -->
     <div class="ap-contact">
@@ -1531,16 +1571,81 @@
         padding: 1.5rem;
         transition: opacity 0.3s;
     }
-    .ap-payment.locked {
-        opacity: 0.5;
-        pointer-events: none;
-    }
-    .ap-payment-lock-note {
-        color: #fcd34d;
+    .ap-payment-locked {
+        margin: 1rem 0 0;
+        border-radius: 0.75rem;
+        border: 2px dashed rgba(255, 255, 255, 0.12);
+        padding: 0.75rem;
+        color: #6b7280;
         font-size: 0.85rem;
         font-weight: 700;
         text-align: center;
-        margin: 0 0 0.75rem;
+    }
+
+    /* ---- הבהוב הפעולה הבאה ---- */
+    .ap-period-confirm.attention {
+        border: 2px solid #f59e0b;
+        animation: confirmPulse 1.1s ease-in-out infinite;
+    }
+    .ap-period-confirm.attention input {
+        animation: checkboxPulse 1.1s ease-in-out infinite;
+    }
+    .ap-period-confirm .c-cta {
+        color: #fbbf24;
+        font-weight: 900;
+        font-size: 0.9rem;
+        margin: 0 0 0.3rem;
+    }
+    @keyframes confirmPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); background: rgba(245, 158, 11, 0.06); }
+        50% { box-shadow: 0 0 22px 4px rgba(245, 158, 11, 0.55); background: rgba(245, 158, 11, 0.16); }
+    }
+    @keyframes checkboxPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+    }
+
+    /* ---- כפתור "גלול מטה" צף - מופיע בכל פעם ששלב נפתח ---- */
+    .ap-scroll-cue {
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 900;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        max-width: calc(100vw - 8rem);
+        padding: 0.6rem 1.1rem;
+        border-radius: 999px;
+        border: 2px solid #fde047;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #111827;
+        font-weight: 900;
+        font-size: 0.9rem;
+        font-family: inherit;
+        cursor: pointer;
+        animation: cueBlink 1.1s ease-in-out infinite;
+    }
+    .ap-scroll-cue .cue-arrow {
+        display: inline-block;
+        animation: cueBounce 1.1s ease-in-out infinite;
+    }
+    @keyframes cueBlink {
+        0%, 100% { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(253, 224, 71, 0); }
+        50% { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), 0 0 24px 6px rgba(253, 224, 71, 0.6); }
+    }
+    @keyframes cueBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(4px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .ap-period-confirm.attention,
+        .ap-period-confirm.attention input,
+        .ap-scroll-cue,
+        .ap-scroll-cue .cue-arrow {
+            animation: none;
+        }
     }
     .ap-payment-sub {
         color: #9ca3af;
