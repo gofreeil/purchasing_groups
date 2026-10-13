@@ -3,7 +3,7 @@
 
 import { fetchSatisfactionResponses } from '$lib/strapi.js';
 import { getCampaignList } from '$lib/campaigns.js';
-import { listAllForAdmin } from '$lib/server/adsStore.js';
+import { countPendingAds } from '$lib/server/adsStore.js';
 
 const RATINGS_TTL_MS = 60_000;
 /** @type {{ at: number, value: any[] } | null} */
@@ -43,8 +43,6 @@ export const needsReply = (r) => !r?.admin_reply && !(r?.replies?.length > 0);
  * @param {{ fetch?: typeof fetch }} [opts]
  */
 export async function getExternalCounts({ fetch: f = fetch } = {}) {
-    const ads = await listAllForAdmin({ fetch: f })
-        .then((list) => list.filter((/** @type {any} */ a) => a.status === 'pending').length)
-        .catch(() => 0);
+    const ads = await countPendingAds({ fetch: f }).catch(() => 0);
     return { ads };
 }

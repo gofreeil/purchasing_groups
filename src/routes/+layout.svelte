@@ -55,6 +55,8 @@
 
 	// מסכי הניהול - בלי טורי הפרסומות, לרוחב מלא
 	let isAdminArea = $derived($page.url.pathname.startsWith("/admin"));
+	// פרסומות שממתינות לאישור - בועה על התמונה ובפריט "פאנל ניהול"
+	let adminPending = $derived(data?.isAdmin ? (data?.adminAlerts?.ads ?? 0) : 0);
 
 	// שם תצוגה ידידותי. לעולם לא להציג מזהה אוטומטי כמו "google_1164663...".
 	// סדר העדפה: שם אמיתי → החלק שלפני @ באימייל → username אנושי → "משתמש".
@@ -278,6 +280,9 @@
 								{:else}
 									<span class="user-avatar user-avatar-fallback" aria-hidden="true">{avatarInitial}</span>
 								{/if}
+								{#if adminPending > 0}
+									<span class="admin-alert" title="פרסומות ממתינות לאישור">{adminPending}</span>
+								{/if}
 							</a>
 							<button
 								class="user-menu-toggle"
@@ -309,7 +314,7 @@
 								{#if data?.isAdmin}
 									<a
 										class="user-dropdown-item"
-										href="/admin"
+										href={adminPending > 0 ? "/admin/ads" : "/admin"}
 										onclick={() => (showUserMenu = false)}
 									>
 										🛠️ {$lang === "he"
@@ -317,6 +322,9 @@
 											: $lang === "ru"
 												? "Панель управления"
 												: "Admin panel"}
+										{#if adminPending > 0}
+											<span class="admin-alert inline">{adminPending}</span>
+										{/if}
 									</a>
 								{/if}
 								<a
@@ -625,10 +633,35 @@
 		padding: 0.3rem 0.6rem;
 	}
 	.user-avatar-link {
+		position: relative;
 		display: flex;
 		align-items: center;
 		text-decoration: none;
 		border-radius: 50%;
+	}
+	/* בועת "ממתין לטיפול" לאדמין - כמו בסרגל הניווט של הפאנל */
+	.admin-alert {
+		position: absolute;
+		top: -0.3rem;
+		left: -0.3rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.2rem;
+		height: 1.2rem;
+		padding: 0 0.25rem;
+		border-radius: 999px;
+		background: #dc2626;
+		color: #fff;
+		font-size: 0.68rem;
+		font-weight: 900;
+		line-height: 1;
+		box-shadow: 0 0 0 2px var(--bg-header);
+	}
+	.admin-alert.inline {
+		position: static;
+		margin-inline-start: auto;
+		box-shadow: none;
 	}
 	.user-menu-toggle {
 		background: none;

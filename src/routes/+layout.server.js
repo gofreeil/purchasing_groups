@@ -1,4 +1,4 @@
-import { listApproved, computeAdSlots, computeAdExtraSlots, adImageUrl } from '$lib/server/adsStore.js';
+import { listApproved, computeAdSlots, computeAdExtraSlots, adImageUrl, countPendingAds } from '$lib/server/adsStore.js';
 import { isAdmin, isSuperAdmin } from '$lib/auth.js';
 import { getSiteContent } from '$lib/server/siteContentStore.js';
 import { isTotpVerified } from '$lib/server/superAdminTotp.js';
@@ -7,6 +7,10 @@ import { isTotpVerified } from '$lib/server/superAdminTotp.js';
 // ואת הפרסומות המאושרות של מפרסמים - לסיידבר הפרסומות.
 export async function load({ locals, cookies, fetch }) {
     const u = locals.user;
+    // פרסומות שממתינות לאישור - בועה על התמונה בהדר, כדי שאדמין יראה
+    // שמחכה לו משהו בכל עמוד באתר ולא רק כשהוא כבר בתוך הפאנל.
+    // נשלף במקביל לשאר ה-load; כשל = אין בועה.
+    const adsPendingP = isAdmin(u) ? countPendingAds({ fetch }).catch(() => 0) : Promise.resolve(0);
 
     // כשל בטעינת הפרסומות לא מפיל את האתר - פשוט לא מציגים אותן.
     /** @type {any[]} */
@@ -67,6 +71,7 @@ export async function load({ locals, cookies, fetch }) {
         // לדעת אם להציג את הקישור לפאנל.
         isAdmin: isAdmin(u),
         superAdmin: isSuperAdmin(u),
+        adminAlerts: { ads: await adsPendingP },
         // קוד Google Authenticator אומת - גלגל השיניים נכנס ישר למצב עריכה
         editVerified: await isTotpVerified({ locals, cookies }),
         approvedAds,

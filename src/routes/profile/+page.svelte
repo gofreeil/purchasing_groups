@@ -353,7 +353,11 @@
                 <h2 class="sec-title">🛠️ ניהול האתר</h2>
                 <div class="tiles">
                     {#each tiles as t (t.href)}
+                        {@const alert = t.alert === 'ads' ? (data.adminAlerts?.ads ?? 0) : 0}
                         <a class="tile" href={t.href}>
+                            {#if alert > 0}
+                                <span class="tile-alert">{alert} ממתינות</span>
+                            {/if}
                             <span class="tile-icon" aria-hidden="true">{t.icon}</span>
                             <strong>{t.title}</strong>
                             <span>{t.desc}</span>
@@ -910,6 +914,7 @@
         gap: 0.6rem;
     }
     .tile {
+        position: relative;
         border-radius: 0.9rem;
         border: 1px solid var(--border-color);
         background: rgba(255, 255, 255, 0.03);
@@ -935,5 +940,17 @@
         font-size: 0.74rem;
         color: var(--text-gray);
         line-height: 1.5;
+    }
+    /* בועת "ממתין לטיפול" - אותו אדום כמו בסרגל הפאנל */
+    .tile .tile-alert {
+        position: absolute;
+        top: 0.6rem;
+        left: 0.6rem;
+        border-radius: 999px;
+        background: #dc2626;
+        color: #fff;
+        padding: 0.1rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 900;
     }
 </style>

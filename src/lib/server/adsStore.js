@@ -28,8 +28,14 @@ const TTL_MS = 120_000;
 /** @type {{ at: number, list: any[] } | null} */
 let approvedCache = null;
 
+// מונה הממתינות לבועות ההתראה (פאנל, הדר, אזור אישי) - קאש קצר משלו.
+const PENDING_TTL_MS = 30_000;
+/** @type {{ at: number, value: number } | null} */
+let pendingCountCache = null;
+
 export function invalidateAdsCache() {
     approvedCache = null;
+    pendingCountCache = null;
 }
 
 /** @param {any} row - רשומת Strapi v5 (שטוחה, עם documentId) */
@@ -413,6 +419,32 @@ export async function getAd(id, { fetch: f = fetch } = {}) {
     } catch {
         return null;
     }
+}
+
+/**
+ * כמה פרסומות ממתינות לאישור - לבועות ההתראה. שאילתה רזה (רק ad_status
+ * ו-meta.total): הרשימה המלאה של listAllForAdmin שוקלת מגה-בייטים של
+ * base64, נחתכה בתקרת הזמן של strapiGet, והבועה נפלה בשקט ל-0 - כך
+ * פרסומת חדשה חיכתה בתור ואיש לא ידע עליה.
+ * גרסה ממתינה שהוחלפה לא נספרת: retireAd מעביר אותה ל-rejected.
+ * @param {{ fetch?: typeof fetch }} [opts]
+ */
+export async function countPendingAds({ fetch: f = fetch } = {}) {
+    if (pendingCountCache && Date.now() - pendingCountCache.at < PENDING_TTL_MS) {
+        return pendingCountCache.value;
+    }
+    const data = await strapiGet(
+        ENDPOINT,
+        {
+            'filters[ad_status][$eq]': 'pending',
+            'fields[0]': 'ad_status',
+            'pagination[pageSize]': 1,
+        },
+        { fetch: f },
+    );
+    const value = Number(data?.meta?.pagination?.total) || 0;
+    pendingCountCache = { at: Date.now(), value };
+    return value;
 }
 
 /**
