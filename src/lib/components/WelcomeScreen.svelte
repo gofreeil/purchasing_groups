@@ -18,10 +18,16 @@
 	 */
 	import { onMount } from 'svelte';
 	import { networkSites } from '$lib/networkSites';
+	import { describeReturn } from '$lib/authIntent';
 
 	let { userName = '' } = $props();
 
 	const WELCOME_MS = 7000;
+	// הגיעו לכאן מבקשה שדרשה הרשמה (ולא לדף הבית): מסך קצר יותר, ישר לבקשה
+	const PENDING_MS = 4500;
+	/** @type {string | null} */
+	let pending = $state(null);
+	let ms = $state(WELCOME_MS);
 	// לוגו האתר — המשתנה היחיד שמשתנה בין אתרי הרשת
 	const LOGO_SRC = '/assets/קבוצות-רכישה.webp';
 
@@ -62,6 +68,8 @@
 			/* localStorage חסום — ממשיכים ומציגים כ"מצטרפים" */
 		}
 		kind = k;
+		pending = describeReturn(window.location.pathname + window.location.search);
+		if (pending) ms = PENDING_MS;
 		visible = true;
 		try {
 			localStorage.setItem('gofreeil-welcomed', '1');
@@ -69,7 +77,7 @@
 			/* ignore */
 		}
 		requestAnimationFrame(() => (fill = true));
-		timer = setTimeout(dismiss, WELCOME_MS);
+		timer = setTimeout(dismiss, ms);
 		return () => {
 			if (timer) clearTimeout(timer);
 		};
@@ -103,6 +111,15 @@
 					</h2>
 					<p class="welcome-text">טוב לראות אותך שוב ברשת יוצאים לחירות.</p>
 				{/if}
+				<!-- נשלחו להירשם באמצע פעולה: "השלמת את ההרשמה — כעת תועבר לבקשתך הראשונה" (ראו $lib/authIntent) -->
+				{#if pending}
+					<div class="welcome-pending">
+						<p>
+							{kind === 'new' ? 'השלמת את ההרשמה! כעת תועבר לבקשתך הראשונה' : 'כעת תועבר לבקשתך'} — <span>{pending}</span>…
+						</p>
+						<button type="button" onclick={dismiss}>המשך לבקשה ←</button>
+					</div>
+				{/if}
 				<!-- לוגואים של כל האתרים ברשת (הרשימה הקנונית המלאה, כולל האתר
 				     הנוכחי) — מוצגים בשני המצבים (מצטרפים + שבים). flex-wrap עם
 				     מרכוז כדי שהשורה האחרונה (חלקית) תתמרכז ולא תישאר צמודה לצד -->
@@ -127,7 +144,7 @@
 
 		<!-- פס זמן — מתמלא עד סוף המסך (7 שניות) ואז המסך נסגר -->
 		<div class="welcome-progress">
-			<div class="welcome-progress-bar" style="width: {fill ? '100%' : '0%'}; transition: width {WELCOME_MS}ms linear;"></div>
+			<div class="welcome-progress-bar" style="width: {fill ? '100%' : '0%'}; transition: width {ms}ms linear;"></div>
 		</div>
 	</div>
 {/if}
@@ -144,6 +161,40 @@
 	}
 	.welcome-overlay.back {
 		background: linear-gradient(to bottom right, #022c22, #070b14, #172554);
+	}
+
+	.welcome-pending {
+		margin: 0 auto 1.5rem;
+		max-width: 36rem;
+		border-radius: 1rem;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.1);
+		padding: 0.75rem 1rem;
+	}
+	.welcome-pending p {
+		margin: 0;
+		color: #fff;
+		font-weight: 700;
+		font-size: 1.05rem;
+		line-height: 1.6;
+	}
+	.welcome-pending span {
+		color: #fcd34d;
+	}
+	.welcome-pending button {
+		margin-top: 0.5rem;
+		border: none;
+		border-radius: 9999px;
+		background: #fff;
+		color: #111827;
+		font-weight: 900;
+		font-size: 0.875rem;
+		padding: 0.375rem 1.25rem;
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.welcome-pending button:hover {
+		background: #f3f4f6;
 	}
 
 	.welcome-close {
