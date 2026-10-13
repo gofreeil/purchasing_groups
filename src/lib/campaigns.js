@@ -145,7 +145,7 @@ export const CAMPAIGNS = {
                         { label: 'רשת בדור', value: ' 4 (דור 5 בתוספת 7.9 ש"ח)' },
                         { label: 'דקות/סמסים', value: '5000' },
                         { label: 'חבילת גלישה ג\'יגה', value: 'ללא הגבלה' },
-                        { label: 'עלות ממוצעת לקו לחודש', value: 'מחיר קבוע 19.9' },
+                        { label: 'עלות לקו לחודש', value: 'מחיר קבוע 19.9' },
                         { label: 'עלות סים', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
                         { label: 'עלות משלוח', html: '<span class="no-cost-icon">🚫</span><br />ללא עלות' },
                         { label: 'רוכב על רשת', image: { src: '/images/cellcom.webp', alt: 'סלקום', width: 283, height: 178 } },
