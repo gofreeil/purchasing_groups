@@ -676,11 +676,17 @@
                                         {/if}
                                     </td>
                                 {/each}
+                                {#if pageData.plansTable.footnote && !row.no_footnote}
+                                    <td class="plan-row-footnote" data-se-cell="footnote">{pageData.plansTable.footnote}</td>
+                                {/if}
                             </tr>
                         {/each}
                     </tbody>
                 </table>
             </div>
+            {#if pageData.plansTable.footnote}
+                <p class="plans-table-footnote" data-se-cell="footnote">{pageData.plansTable.footnote}</p>
+            {/if}
             {#if pageData.plansTableNote}
                 <p class="plans-table-note" role="note">
                     <span class="plans-table-note-icon" aria-hidden="true">⚠️</span>
@@ -1430,6 +1436,18 @@
         margin: 0.85rem 0 0;
     }
 
+    /* הערת הכוכבית: במחשב מתחת לטבלה, בנייד בתחתית כל כרטיס (plan-row-footnote) */
+    .plans-table-footnote {
+        margin: 0.4rem 0 0;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.75);
+        text-align: right;
+    }
+
+    .plan-row-footnote {
+        display: none;
+    }
+
     :global(.plans-table th .header-sub) {
         display: inline-block;
         font-size: 0.78em;
@@ -1797,6 +1815,21 @@
             margin: 0;
             max-width: 56px;
             max-height: 32px;
+        }
+
+        .plans-table-footnote {
+            display: none;
+        }
+
+        .plans-table tbody td.plan-row-footnote {
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .plans-table tbody td.plan-row-footnote::before {
+            display: none;
         }
     }
 

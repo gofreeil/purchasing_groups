@@ -18,12 +18,14 @@
  * @property {string} title
  * @property {string} [company]
  * @property {PlanCell[]} cells
+ * @property {boolean} [no_footnote] בנייד - בלי הערת הכוכבית של הטבלה בכרטיס הזה
  *
  * @typedef {Object} PlansTable
  * @property {string} title
  * @property {string} [subtitle]
  * @property {string[]} headers
  * @property {PlanRow[]} rows
+ * @property {string} [footnote] הערת כוכבית - במחשב מתחת לטבלה, בנייד בכל כרטיס
  *
  * @typedef {Object} FindSection
  * @property {string} title
@@ -138,7 +140,7 @@ export const CAMPAIGNS = {
                     ],
                 },
                 {
-                    title: 'תוכנית ג\'', company: 'wecom',
+                    title: 'תוכנית ג\'', company: 'wecom', no_footnote: true,
                     cells: [
                         { label: 'שם חברה', value: 'wecom' },
                         { label: 'שם התוכנית', value: 'תוכנית ג\'' },
@@ -166,6 +168,7 @@ export const CAMPAIGNS = {
                     ],
                 },
             ],
+            footnote: '* התוכניות לשנה.',
         },
     },
     fuel: {
