@@ -1,6 +1,9 @@
 // פרסומות שותפי הקהילה - מקור: אתר "קהילה בשכונה".
 // השדה color הוא ערך CSS gradient מוכן לשימוש (background).
 // width/height - מידות התמונה בפיקסלים, כדי שהדפדפן ישריין מקום לפני הטעינה.
+// thumb - גרסת 300x300 לריבוע הקטן במגירת הנייד. הקובץ המלא (image) נשאר
+// לטור הצדדי ברוחב 280px; המגירה מציגה ב-92px ולכן 720px שם היו 3.8 פעמים
+// יותר בייטים ופי ~6 עבודת decode, לחינם.
 
 export const ads = [
 	{
@@ -10,6 +13,7 @@ export const ads = [
 		cta: "יש לך סיכסוך? לחץ לפתרון",
 		href: "https://chachmim.gofreeil.com/",
 		image: "/assets/bati-hapius.webp",
+		thumb: "/assets/bati-hapius-thumb.webp",
 		width: 720,
 		height: 720,
 		color: "linear-gradient(90deg, #ea580c, #dc2626)",
@@ -22,6 +26,7 @@ export const ads = [
 		hover: "מצא כל גמח בקלות!",
 		href: "https://gemach.gofreeil.com/",
 		image: "/assets/gemach-harzi.webp",
+		thumb: "/assets/gemach-harzi-thumb.webp",
 		width: 720,
 		height: 480,
 		color: "linear-gradient(90deg, #db2777, #c026d3, #7e22ce)",
@@ -34,6 +39,7 @@ export const ads = [
 		hover: "כל יתרונות השכונה תחת קורת גג אחת",
 		href: "https://community.gofreeil.com/",
 		image: "/assets/community-neighborhood.webp",
+		thumb: "/assets/community-neighborhood-thumb.webp",
 		width: 720,
 		height: 480,
 		color: "linear-gradient(90deg, #2563eb, #7e22ce)",
@@ -45,6 +51,7 @@ export const ads = [
 		cta: "הכר והשתתף במהפכת משילות העם על מוסדותיו",
 		href: "https://neighborhoods.gofreeil.com/",
 		image: "/assets/news/vaadei-shchunot.webp",
+		thumb: "/assets/news/vaadei-shchunot-thumb.webp",
 		width: 720,
 		height: 390,
 		color: "linear-gradient(90deg, #2563eb, #0891b2)",
@@ -56,6 +63,7 @@ export const ads = [
 		cta: "מבקרים את הרשויות, ממצים את זכות התושב",
 		href: "https://criticism.gofreeil.com/",
 		image: "/assets/mevaker-rashuyot.webp",
+		thumb: "/assets/mevaker-rashuyot-thumb.webp",
 		width: 720,
 		height: 722,
 		color: "linear-gradient(90deg, #1d4ed8, #4338ca)",
@@ -67,6 +75,7 @@ export const ads = [
 		cta: "העם מדרג את הרשויות ועובדי הציבור",
 		href: "https://rating.gofreeil.com/",
 		image: "/assets/public-rating.webp",
+		thumb: "/assets/public-rating-thumb.webp",
 		width: 720,
 		height: 1080,
 		color: "linear-gradient(90deg, #4f46e5, #2563eb)",
@@ -79,6 +88,7 @@ export const ads = [
 		hover: "הבע דעתך על הסוגיות האקטואליות",
 		href: "https://referendum.gofreeil.com/",
 		image: "/assets/referendum.webp",
+		thumb: "/assets/referendum-thumb.webp",
 		width: 720,
 		height: 480,
 		color: "linear-gradient(90deg, #9333ea, #4338ca)",
@@ -90,6 +100,7 @@ export const ads = [
 		cta: "התחבר עם קבוצת המשקיעים שלנו",
 		href: "https://www.melecshop.com/page/free",
 		image: "/assets/partners/investments.webp",
+		thumb: "/assets/partners/investments-thumb.webp",
 		width: 720,
 		height: 480,
 		color: "linear-gradient(90deg, #d97706, #ea580c)",
@@ -101,6 +112,7 @@ export const ads = [
 		cta: "מחפש בעל מקצוע איכותי באזורך?",
 		href: "https://index.gofreeil.com/",
 		image: "/assets/professionals.webp",
+		thumb: "/assets/professionals-thumb.webp",
 		width: 584,
 		height: 330,
 		color: "linear-gradient(90deg, #eab308, #f97316)",
@@ -112,6 +124,7 @@ export const ads = [
 		cta: "כנסו לחנות לחיים טובים יותר",
 		href: "https://shop.gofreeil.com/",
 		image: "/assets/freedom-store.webp",
+		thumb: "/assets/freedom-store-thumb.webp",
 		width: 720,
 		height: 480,
 		color: "linear-gradient(90deg, #059669, #0d9488)",

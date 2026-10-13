@@ -20,6 +20,12 @@
 	// נדחה, כדי לא לפגוע בסריקה של הקישורים.
 	let adImagesReady = $state(false);
 
+	// רשת ביטחון: הדגל נדלק גם אם המגירה נפתחה ממסלול שאינו הלשונית (דיפ-לינק,
+	// כפתור עתידי במקום אחר). בלי זה מסלול כזה היה פותח מגירה עם ריבועים ריקים.
+	$effect(() => {
+		if (open) adImagesReady = true;
+	});
+
 	function closeAll() {
 		open = false;
 		collapsed = false;
@@ -211,9 +217,9 @@
 	<div
 		class="drawer"
 		role="dialog"
-		aria-modal="true"
+		aria-modal={open}
 		aria-label="ההטבות מהקהילה הארצית"
-		aria-hidden={!open}
+		inert={!open || undefined}
 		ontouchstart={onDrawerTouchStart}
 		ontouchend={onDrawerTouchEnd}
 	>
@@ -238,18 +244,24 @@
 					onclick={closeAll}
 				>
 					<div class="benefit-img-wrap">
-						<!-- ראה adImagesReady. הריבוע 88px שמסביב קבוע, ולכן אין קפיצת
+						<!-- ראה adImagesReady. הריבוע שמסביב בגודל קבוע, ולכן אין קפיצת
 						     תצוגה כשהתמונה נכנסת; loading="lazy" מדלג בנוסף על הכרטיסים
-						     שנמצאים מתחת לגלילה ברשימה. -->
+						     שמתחת לגלילה, ו-fetchpriority="low" מוריד אותן מתחת לתוכן
+						     האמיתי של הדף אם המגירה נפתחת בזמן שעוד נטען משהו.
+
+						     thumb ולא image: הריבוע כאן הוא 92px, והקובץ המלא הוא 720px -
+						     פי 3.8 בייטים ופי ~6 עבודת decode על פיקסלים ש-object-fit:cover
+						     חותך ממילא. הקובץ המלא נשאר לטור הצדדי (AdsSidebar, 280px). -->
 						{#if adImagesReady}
 							<img
-								src={ad.image}
+								src={ad.thumb}
 								alt={ad.title}
 								class="benefit-img"
-								width={ad.width}
-								height={ad.height}
+								width="300"
+								height="300"
 								decoding="async"
 								loading="lazy"
+								fetchpriority="low"
 							/>
 						{/if}
 					</div>
