@@ -4,6 +4,7 @@ import { getCampaignList } from '$lib/campaigns.js';
 import { listMembershipsForUser } from '$lib/server/membershipsSource.js';
 import { summarize } from '$lib/memberships.js';
 import {
+    adImageUrl,
     approveAd,
     computeAdExtraSlots,
     computeAdSlots,
@@ -78,7 +79,8 @@ async function loadMySchedule(myRecords, fetch) {
     const mine = new Set(myApproved.map((a) => a.id));
     try {
         const live = await listApproved({ fetch }).catch(() => []);
-        const byId = new Map(live.map((/** @type {any} */ a) => [a.id, a]));
+        const liveById = new Map(live.map((/** @type {any} */ a) => [a.id, a]));
+        const byId = new Map(liveById);
         for (const a of myApproved) byId.set(a.id, a);
         const all = [...byId.values()];
         const slots = computeAdSlots(all);
@@ -91,7 +93,7 @@ async function loadMySchedule(myRecords, fetch) {
                 slot: slots.get(a.id),
                 extraSlots: extras.get(a.id) ?? [],
             })),
-            // הנתונים של חלון הקציבה
+            // הנתונים של חלון הקציבה ושל התצוגה המקדימה (ריחוף/הקשה על הכותרת)
             ads: all
                 .filter((a) => mine.has(a.id))
                 .map((a) => ({
@@ -105,6 +107,12 @@ async function loadMySchedule(myRecords, fetch) {
                     expiresAt: a.expiresAt,
                     durationDays: a.durationDays,
                     paused: a.paused,
+                    cta: a.cta,
+                    gradient: a.gradient,
+                    mainImageFit: a.mainImageFit,
+                    // התמונה ככתובת מהקאש של הטור - רק לפרסומת שבאוויר (הנתיב
+                    // מגיש מאושרות חיות בלבד, והרשומות כאן בלי ה-base64 הכבד)
+                    mainImage: liveById.has(a.id) ? adImageUrl(liveById.get(a.id), 'main') : '',
                 })),
         };
     } catch (err) {

@@ -14,6 +14,7 @@
     } from '$lib/memberships.js';
     import AdScheduleTable from '$lib/components/AdScheduleTable.svelte';
     import AdDurationModal from '$lib/components/AdDurationModal.svelte';
+    import AdPreviewLayer from '$lib/components/AdPreviewLayer.svelte';
 
     let { data, form } = $props();
 
@@ -52,6 +53,8 @@
     let scheduleAdById = $derived(new Map((schedule?.ads ?? []).map((/** @type {any} */ a) => [a.id, a])));
     /** חלון הקציבה של הטבלה. @type {any} */
     let durationAd = $state(null);
+    /** התצוגה המקדימה בריחוף/הקשה על הכותרת - כמו ב-/admin/ads. @type {any} */
+    let preview = $state(null);
     /** תוצאת פעולה מהטבלה. הפעולות הן של /admin/ads, ו-SvelteKit לא מעדכן
      *  את form של דף אחר - לכן ההודעה נשמרת כאן. @type {{ ok: boolean, text: string } | null} */
     let adsFlash = $state(null);
@@ -246,6 +249,9 @@
                         action="/admin/ads"
                         onresult={onAdsResult}
                         onduration={(id) => (durationAd = scheduleAdById.get(id) ?? null)}
+                        onhover={(e, id) => preview?.show(e, scheduleAdById.get(id))}
+                        onleave={() => preview?.hide()}
+                        onopen={(id) => preview?.open(scheduleAdById.get(id))}
                     >
                         {#snippet extra(s)}
                             {#if s.state === 'active' || s.state === 'ending'}
@@ -254,6 +260,7 @@
                             <a class="ad-edit sm" href="/advertise/builder?edit={s.id}" title="פתיחת הפרסומת בעורך">✏️ ערוך</a>
                         {/snippet}
                     </AdScheduleTable>
+                    <AdPreviewLayer bind:this={preview} />
                 {/if}
                 <div class="ads">
                     {#each otherAds as ad (ad.id)}
