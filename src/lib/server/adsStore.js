@@ -19,6 +19,7 @@ import { DEFAULT_PLAN_DAYS, normalizePlanDays } from '$lib/adPlans.js';
 import { parseAdImageFit } from '$lib/adImageFit.js';
 import { AD_SLOT_COUNT } from '$lib/adSlots.js';
 import { imageStamp, decodeDataImage } from './inlineImage.js';
+import { displayName } from '$lib/displayName.js';
 
 const ENDPOINT = 'pg-submitted-ads';
 export const DEFAULT_DURATION_DAYS = DEFAULT_PLAN_DAYS;
@@ -806,7 +807,8 @@ export function computeSchedule(ad) {
     return {
         id: ad.id,
         title: ad.title,
-        advertiserName: ad.submittedBy?.name || '-',
+        // שם אמיתי, או החלק שלפני @ באימייל - לא מזהה אוטומטי כמו google_1164...
+        advertiserName: displayName({ name: ad.submittedBy?.name, email: ad.submittedBy?.email }, '-'),
         advertiserEmail: ad.submittedBy?.email ?? '',
         publishedAt,
         expiresAt,
