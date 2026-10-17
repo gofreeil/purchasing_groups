@@ -5,7 +5,11 @@ import { listMembershipsForUser } from '$lib/server/membershipsSource.js';
 import { summarize } from '$lib/memberships.js';
 import {
     approveAd,
+    computeAdExtraSlots,
+    computeAdSlots,
+    computeSchedules,
     getMyAds,
+    listApprovedForSchedule,
     pauseAd,
     rejectAd,
     resumeAd,
@@ -50,11 +54,58 @@ export async function load({ locals, fetch }) {
         authorized: true,
         memberships,
         myAds,
+        schedule: isAdmin(user) ? await loadMySchedule(myAds, fetch) : null,
         summary: summarize(memberships),
         campaigns,
         isAdmin: isAdmin(user),
         superAdmin: isSuperAdmin(user),
     };
+}
+
+/**
+ * לאדמין: הפרסומות שלו שאושרו מוצגות ב"הפרסומות שלי" בשורות של טבלת
+ * התזמון (AdScheduleTable - כמו בגמ"ח), עם כל הניהול מהשורה. הפעולות
+ * עצמן הן של /admin/ads. בשביל בורר המקום והשכפול צריך לדעת מי תופסת
+ * כל מקום בטור - כלומר את כל המאושרות, בשליפה בלי התמונות.
+ * @param {any[]} myAds
+ * @param {typeof fetch} fetch
+ */
+async function loadMySchedule(myAds, fetch) {
+    const mine = new Set(myAds.filter((a) => a.status === 'approved').map((a) => a.id));
+    if (!mine.size) return null;
+    try {
+        const all = await listApprovedForSchedule({ fetch });
+        const slots = computeAdSlots(all);
+        const extras = computeAdExtraSlots(all);
+        return {
+            rows: computeSchedules(all).filter((s) => mine.has(s.id)),
+            approved: all.map((a) => ({
+                id: a.id,
+                title: a.title,
+                slot: slots.get(a.id),
+                extraSlots: extras.get(a.id) ?? [],
+            })),
+            // הנתונים של חלון הקציבה
+            ads: all
+                .filter((a) => mine.has(a.id))
+                .map((a) => ({
+                    id: a.id,
+                    title: a.title,
+                    submittedBy: a.submittedBy,
+                    requestedDurationDays: a.requestedDurationDays,
+                    payment: a.payment,
+                    submittedAt: a.submittedAt,
+                    decidedAt: a.decidedAt,
+                    expiresAt: a.expiresAt,
+                    durationDays: a.durationDays,
+                    paused: a.paused,
+                })),
+        };
+    } catch (err) {
+        // בלי הטבלה - השורות הרגילות של "הפרסומות שלי" מוצגות לכל הפרסומות
+        console.warn('profile schedule failed:', err instanceof Error ? err.message : err);
+        return null;
+    }
 }
 
 /**

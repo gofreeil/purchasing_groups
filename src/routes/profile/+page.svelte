@@ -12,6 +12,8 @@
         expiryState,
         activeMonths,
     } from '$lib/memberships.js';
+    import AdScheduleTable from '$lib/components/AdScheduleTable.svelte';
+    import AdDurationModal from '$lib/components/AdDurationModal.svelte';
 
     let { data, form } = $props();
 
@@ -41,6 +43,22 @@
         if (ad.paused) return { label: 'מושהית', tone: 'muted' };
         if (!ad.live) return { label: 'פג התוקף', tone: 'muted' };
         return { label: 'באוויר', tone: 'ok' };
+    }
+    // לאדמין: הפרסומות שאושרו מוצגות בשורות של טבלת התזמון (כמו בגמ"ח הארצי),
+    // עם כל הניהול מהשורה; ממתינות/נדחות נשארות בשורות הרגילות שלמטה.
+    let schedule = $derived(data.schedule ?? null);
+    let scheduledIds = $derived(new Set((schedule?.rows ?? []).map((/** @type {any} */ s) => s.id)));
+    let otherAds = $derived(myAds.filter((/** @type {any} */ a) => !scheduledIds.has(a.id)));
+    let scheduleAdById = $derived(new Map((schedule?.ads ?? []).map((/** @type {any} */ a) => [a.id, a])));
+    /** חלון הקציבה של הטבלה. @type {any} */
+    let durationAd = $state(null);
+    /** תוצאת פעולה מהטבלה. הפעולות הן של /admin/ads, ו-SvelteKit לא מעדכן
+     *  את form של דף אחר - לכן ההודעה נשמרת כאן. @type {{ ok: boolean, text: string } | null} */
+    let adsFlash = $state(null);
+    /** @param {any} result */
+    function onAdsResult(result) {
+        if (result.type === 'success') adsFlash = { ok: true, text: result.data?.message ?? 'בוצע ✅' };
+        else if (result.type === 'failure') adsFlash = { ok: false, text: result.data?.error ?? 'הפעולה נכשלה' };
     }
     let tiles = $derived(adminTiles(Boolean(data.isAdmin), Boolean(data.superAdmin)));
 
@@ -211,13 +229,34 @@
                         <a class="ads-admin-link" href="/admin/ads">🛠 לניהול הפרסומות</a>
                     {/if}
                 </h2>
-                {#if form?.message}
+                {#if adsFlash}
+                    <p class="ads-flash {adsFlash.ok ? 'ok' : 'danger'}">{adsFlash.text}</p>
+                {:else if form?.message}
                     <p class="ads-flash ok">{form.message}</p>
                 {:else if form?.error}
                     <p class="ads-flash danger">{form.error}</p>
                 {/if}
+                {#if schedule?.rows.length}
+                    <!-- אותן שורות כמו בטבלת התזמון של הגמ"ח (ושל /admin/ads):
+                         מקום + העבר, תקופה, וקצוב/השהה/הורד/מחק/שכפל - ועוד צפה/ערוך -->
+                    <AdScheduleTable
+                        schedules={schedule.rows}
+                        approved={schedule.approved}
+                        superAdmin={data.superAdmin}
+                        action="/admin/ads"
+                        onresult={onAdsResult}
+                        onduration={(id) => (durationAd = scheduleAdById.get(id) ?? null)}
+                    >
+                        {#snippet extra(s)}
+                            {#if s.state === 'active' || s.state === 'ending'}
+                                <a class="ad-btn ghost sm" href="/ads/{s.id}" target="_blank" title="דף הנחיתה באתר">👁 צפה</a>
+                            {/if}
+                            <a class="ad-edit sm" href="/advertise/builder?edit={s.id}" title="פתיחת הפרסומת בעורך">✏️ ערוך</a>
+                        {/snippet}
+                    </AdScheduleTable>
+                {/if}
                 <div class="ads">
-                    {#each myAds as ad (ad.id)}
+                    {#each otherAds as ad (ad.id)}
                         {@const st = adState(ad)}
                         <div class="ad-row">
                             <span class="pill {st.tone}">{st.label}</span>
@@ -321,6 +360,14 @@
                         </div>
                     {/each}
                 </div>
+                {#if durationAd}
+                    <AdDurationModal
+                        ad={durationAd}
+                        action="/admin/ads"
+                        onclose={() => (durationAd = null)}
+                        onresult={onAdsResult}
+                    />
+                {/if}
                 <p class="ads-note">
                     מה שרץ על האתר נשאר באוויר עד שהעדכון יאושר, ואז מתחלף בו —
                     באותו מקום בטור ועם אותו תאריך סיום.
@@ -769,6 +816,15 @@
     }
     .ad-edit:hover {
         background: #fde047;
+    }
+    /* צפה/ערוך בתוך שורת טבלת התזמון - באותו גודל של כפתורי הטבלה */
+    .ad-edit.sm,
+    .ad-btn.sm {
+        font-size: 11px;
+        font-weight: 900;
+        border-radius: 0.5rem;
+        padding: 0.25rem 0.625rem;
+        white-space: nowrap;
     }
     /* קיצורי הניהול - כפתורים קטנים זה לצד זה, נשברים לשורה בנייד */
     .ad-actions {

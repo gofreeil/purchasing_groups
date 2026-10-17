@@ -841,6 +841,37 @@ export function computeSchedules(approved) {
 }
 
 /**
+ * כל המאושרות בלי התמונות (גם מושהיות ופגות - הן שומרות את המקום שלהן) -
+ * לטבלת התזמון ב"הפרסומות שלי": היא צריכה לדעת מי תופסת כל מקום בטור
+ * בשביל בורר "העבר" ו"שכפל", אבל לא את מגה-הבייטים של ה-base64.
+ * @param {{ fetch?: typeof fetch }} [opts]
+ */
+export async function listApprovedForSchedule({ fetch: f = fetch } = {}) {
+    /** @type {Record<string, string | number>} */
+    const params = {
+        'filters[ad_status][$eq]': 'approved',
+        sort: 'submitted_at:desc',
+        'pagination[pageSize]': 100,
+    };
+    [
+        'ad_status',
+        'title',
+        'landing',
+        'submitted_at',
+        'submitted_by_id',
+        'submitted_by_email',
+        'submitted_by_name',
+        'decided_at',
+        'expires_at',
+        'duration_days',
+    ].forEach((fld, i) => {
+        params[`fields[${i}]`] = fld;
+    });
+    const data = await strapiGet(ENDPOINT, params, { fetch: f, timeoutMs: HEAVY_TIMEOUT_MS });
+    return withoutReplaced((data?.data ?? []).map(fromStrapi).filter(Boolean));
+}
+
+/**
  * מקומות השכפול השמורים ב-landing._extraSlots (0-based, בלי כפילויות).
  * @param {unknown} raw
  * @returns {number[]}
