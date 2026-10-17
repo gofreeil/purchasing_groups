@@ -841,37 +841,6 @@ export function computeSchedules(approved) {
 }
 
 /**
- * כל המאושרות בלי התמונות (גם מושהיות ופגות - הן שומרות את המקום שלהן) -
- * לטבלת התזמון ב"הפרסומות שלי": היא צריכה לדעת מי תופסת כל מקום בטור
- * בשביל בורר "העבר" ו"שכפל", אבל לא את מגה-הבייטים של ה-base64.
- * @param {{ fetch?: typeof fetch }} [opts]
- */
-export async function listApprovedForSchedule({ fetch: f = fetch } = {}) {
-    /** @type {Record<string, string | number>} */
-    const params = {
-        'filters[ad_status][$eq]': 'approved',
-        sort: 'submitted_at:desc',
-        'pagination[pageSize]': 100,
-    };
-    [
-        'ad_status',
-        'title',
-        'landing',
-        'submitted_at',
-        'submitted_by_id',
-        'submitted_by_email',
-        'submitted_by_name',
-        'decided_at',
-        'expires_at',
-        'duration_days',
-    ].forEach((fld, i) => {
-        params[`fields[${i}]`] = fld;
-    });
-    const data = await strapiGet(ENDPOINT, params, { fetch: f, timeoutMs: HEAVY_TIMEOUT_MS });
-    return withoutReplaced((data?.data ?? []).map(fromStrapi).filter(Boolean));
-}
-
-/**
  * מקומות השכפול השמורים ב-landing._extraSlots (0-based, בלי כפילויות).
  * @param {unknown} raw
  * @returns {number[]}
@@ -1182,9 +1151,21 @@ export function sameAdvertiser(ad, identity) {
  * @returns {Promise<MyAdSummary[]>}
  */
 export async function getMyAds(identity, { fetch: f = fetch } = {}) {
+    return (await getMyAdsWithRecords(identity, { fetch: f })).rows;
+}
+
+/**
+ * אותה שליפה כמו getMyAds, ובנוסף הרשומות עצמן (בלי עמודות ה-base64
+ * הכבדות) - בשבילן טבלת התזמון של האדמין ב"הפרסומות שלי" לא צריכה
+ * שליפה נוספת: מספר המקום, השכפולים וההשהיה יושבים ב-landing שלהן.
+ * @param {{ id?: string, email?: string }} identity
+ * @param {{ fetch?: typeof fetch }} [opts]
+ * @returns {Promise<{ rows: MyAdSummary[], records: any[] }>}
+ */
+export async function getMyAdsWithRecords(identity, { fetch: f = fetch } = {}) {
     const uid = String(identity?.id ?? '').trim();
     const email = String(identity?.email ?? '').trim();
-    if (!uid && !email) return [];
+    if (!uid && !email) return { rows: [], records: [] };
 
     /** @type {Record<string, string>} */
     const params = { sort: 'submitted_at:desc', 'pagination[pageSize]': '50' };
@@ -1198,6 +1179,8 @@ export async function getMyAds(identity, { fetch: f = fetch } = {}) {
         'submitted_at',
         'submitted_by_id',
         'submitted_by_email',
+        'submitted_by_name',
+        'decided_at',
         'landing',
     ].forEach((fld, i) => {
         params[`fields[${i}]`] = fld;
@@ -1212,10 +1195,11 @@ export async function getMyAds(identity, { fetch: f = fetch } = {}) {
         /** @type {Record<string, number>} */
         const rank = { approved: 0, pending: 1, rejected: 2 };
         // גרסה שהוחלפה בעדכון מאושר יורדת מהרשימה - הפרסומת מופיעה פעם אחת
-        return withoutReplaced((data?.data ?? []).map(fromStrapi).filter(Boolean))
+        const records = withoutReplaced((data?.data ?? []).map(fromStrapi).filter(Boolean))
             // הסינון בשרת הוא לפי מזהה *או* אימייל; מוודאים כאן שוב שהשורה
             // באמת של המפרסם, כדי שגם שינוי בסכמה לא ידליף פרסומת זרה.
-            .filter((/** @type {any} */ a) => sameAdvertiser(a, identity))
+            .filter((/** @type {any} */ a) => sameAdvertiser(a, identity));
+        const rows = records
             .map((/** @type {any} */ a) => ({
                 id: a.id,
                 title: a.title,
@@ -1243,9 +1227,10 @@ export async function getMyAds(identity, { fetch: f = fetch } = {}) {
                     (rank[x.status] ?? 9) - (rank[y.status] ?? 9) ||
                     (x.slot ?? 99) - (y.slot ?? 99),
             );
+        return { rows, records };
     } catch (err) {
         console.warn('adsStore: getMyAds failed', err instanceof Error ? err.message : err);
-        return [];
+        return { rows: [], records: [] };
     }
 }
 

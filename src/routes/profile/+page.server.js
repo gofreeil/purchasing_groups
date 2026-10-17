@@ -8,8 +8,8 @@ import {
     computeAdExtraSlots,
     computeAdSlots,
     computeSchedules,
-    getMyAds,
-    listApprovedForSchedule,
+    getMyAdsWithRecords,
+    listApproved,
     pauseAd,
     rejectAd,
     resumeAd,
@@ -31,10 +31,10 @@ export async function load({ locals, fetch }) {
     const memberships = await listMembershipsForUser(user).catch(() => []);
     // הפרסומות של המשתמש - לרשימת "הפרסומות שלי", שם לכל אחת יש כפתור
     // עריכה. תקלה מול Strapi לא מפילה את האזור האישי: הרשימה פשוט ריקה.
-    const myAds = await getMyAds(
+    const { rows: myAds, records: myRecords } = await getMyAdsWithRecords(
         { id: String(user.id ?? ''), email: user.email ?? '' },
         { fetch },
-    ).catch(() => []);
+    ).catch(() => ({ rows: [], records: [] }));
     const joined = new Set(memberships.map((m) => m.campaignSlug));
 
     // רק מה שהמסך באמת קורא — שם, אייקון ותמונה — ולא אובייקט הקמפיין
@@ -54,7 +54,7 @@ export async function load({ locals, fetch }) {
         authorized: true,
         memberships,
         myAds,
-        schedule: isAdmin(user) ? await loadMySchedule(myAds, fetch) : null,
+        schedule: isAdmin(user) ? await loadMySchedule(myRecords, fetch) : null,
         summary: summarize(memberships),
         campaigns,
         isAdmin: isAdmin(user),
@@ -66,15 +66,21 @@ export async function load({ locals, fetch }) {
  * לאדמין: הפרסומות שלו שאושרו מוצגות ב"הפרסומות שלי" בשורות של טבלת
  * התזמון (AdScheduleTable - כמו בגמ"ח), עם כל הניהול מהשורה. הפעולות
  * עצמן הן של /admin/ads. בשביל בורר המקום והשכפול צריך לדעת מי תופסת
- * כל מקום בטור - כלומר את כל המאושרות, בשליפה בלי התמונות.
- * @param {any[]} myAds
+ * כל מקום בטור: הרשומות שלו (כבר נשלפו ל"הפרסומות שלי") + הפרסומות
+ * שבאוויר מהקאש של הטור. שליפה של כל המאושרות כאן כבדה מדי - עמודת
+ * ה-landing לבדה שוקלת מגה-בייטים, והיא נחתכה בתקרת הזמן בייצור.
+ * @param {any[]} myRecords
  * @param {typeof fetch} fetch
  */
-async function loadMySchedule(myAds, fetch) {
-    const mine = new Set(myAds.filter((a) => a.status === 'approved').map((a) => a.id));
-    if (!mine.size) return null;
+async function loadMySchedule(myRecords, fetch) {
+    const myApproved = myRecords.filter((a) => a.status === 'approved');
+    if (!myApproved.length) return null;
+    const mine = new Set(myApproved.map((a) => a.id));
     try {
-        const all = await listApprovedForSchedule({ fetch });
+        const live = await listApproved({ fetch }).catch(() => []);
+        const byId = new Map(live.map((/** @type {any} */ a) => [a.id, a]));
+        for (const a of myApproved) byId.set(a.id, a);
+        const all = [...byId.values()];
         const slots = computeAdSlots(all);
         const extras = computeAdExtraSlots(all);
         return {
