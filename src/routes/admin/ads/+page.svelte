@@ -7,10 +7,10 @@
     import AdScheduleTable from "$lib/components/AdScheduleTable.svelte";
     import AdDurationModal from "$lib/components/AdDurationModal.svelte";
 
-    // מסך אישור פרסומות לאדמין - ממתינות / מאושרות / נדחות.
+    // מסך אישור פרסומות לאדמין - ממתינות / מאושרות / נדחות / אשפה.
     let { data, form } = $props();
 
-    /** @type {'pending' | 'approved' | 'rejected'} */
+    /** @type {'pending' | 'approved' | 'rejected' | 'trash'} */
     let tab = $state("pending");
 
     // 12 המקומות הממוספרים בטור הפרסומות - בורר "מקום" בכרטיסי המאושרות
@@ -30,7 +30,9 @@
             }),
     );
     let rejected = $derived(data.ads.filter((/** @type {any} */ a) => a.status === "rejected"));
-    let shown = $derived(tab === "pending" ? pending : tab === "approved" ? approved : rejected);
+    let shown = $derived(tab === "pending" ? pending : tab === "approved" ? approved : tab === "rejected" ? rejected : []);
+    // האשפה: נמחקו (שחזור) ופג תוקפן (חידוש) - מהשרת, החדשות בראש
+    let trash = $derived(data.trash ?? []);
 
     /** @param {string} iso */
     function fmtDate(iso) {
@@ -194,9 +196,67 @@
         <button type="button" class="tab-btn" class:active={tab === "rejected"} onclick={() => (tab = "rejected")}>
             ❌ נדחו ({rejected.length})
         </button>
+        <button type="button" class="tab-btn" class:active={tab === "trash"} onclick={() => (tab = "trash")}
+                title="פרסומות שנמחקו או שפג תוקפן - לשחזור או לחידוש">
+            🗑 אשפה ({trash.length})
+        </button>
     </div>
 
-    {#if shown.length === 0}
+    {#if tab === "trash"}
+        <!-- אשפה: נמחקה = שחזור למצב הקודם (מקום ותוקף נשמרו); פגה = חידוש לתקופה חדשה -->
+        {#if trash.length === 0}
+            <p class="empty">האשפה ריקה.</p>
+        {/if}
+        <div class="trash-list">
+            {#each trash as t (t.id)}
+                <div class="trash-row">
+                    <span class="trash-body">
+                        <button
+                            type="button"
+                            class="ad-title-btn trash-title"
+                            onmouseenter={(e) => preview?.show(e, adById.get(t.id) ?? t)}
+                            onmouseleave={() => preview?.hide()}
+                            onclick={() => preview?.open(adById.get(t.id) ?? t)}
+                            title="תצוגה מקדימה של הפרסומת"
+                        >{t.title}</button>
+                        <span class="trash-meta">
+                            <span class="status-pill {t.kind === 'deleted' ? 'rejected' : 'pending'}">{t.kind === "deleted" ? "נמחקה" : "פג התוקף"}</span>
+                            {fmtDate(t.at)} · {t.advertiserName}
+                        </span>
+                    </span>
+                    <span class="trash-actions">
+                        {#if t.kind === "deleted"}
+                            {#if data.superAdmin}
+                                <form method="POST" action="?/restore" use:enhance>
+                                    <input type="hidden" name="id" value={t.id} />
+                                    <button type="submit" class="a-btn approve" title="חזרה למצב שלפני המחיקה">♻ שחזר</button>
+                                </form>
+                                <form method="POST" action="?/purge" use:enhance>
+                                    <input type="hidden" name="id" value={t.id} />
+                                    <button type="submit" class="a-btn reject"
+                                            onclick={(e) => { if (!confirm(`למחוק לצמיתות את "${t.title}"? אין דרך חזרה.`)) e.preventDefault(); }}>
+                                        ✕ מחק לצמיתות
+                                    </button>
+                                </form>
+                            {/if}
+                        {:else}
+                            <form method="POST" action="?/approve" use:enhance>
+                                <input type="hidden" name="id" value={t.id} />
+                                <input type="hidden" name="durationDays" value={t.requestedDurationDays ?? ""} />
+                                <button type="submit" class="a-btn approve" title="פרסום מחדש לתקופה חדשה מהיום, באותו מקום בטור">♻ חדש</button>
+                            </form>
+                            {#if data.superAdmin}
+                                <form method="POST" action="?/remove" use:enhance>
+                                    <input type="hidden" name="id" value={t.id} />
+                                    <button type="submit" class="a-btn ghost" title="העברה לאשפה - אפשר לשחזר">🗑 מחק</button>
+                                </form>
+                            {/if}
+                        {/if}
+                    </span>
+                </div>
+            {/each}
+        </div>
+    {:else if shown.length === 0}
         <p class="empty">אין פרסומות בקטגוריה הזו.</p>
     {/if}
 
@@ -673,6 +733,45 @@
         text-underline-offset: 4px;
     }
     .ad-title-btn:hover { color: #fcd34d; }
+
+    /* האשפה - שורה קומפקטית לכל פרסומת */
+    .trash-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 1.5rem;
+    }
+    .trash-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.75rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .trash-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: 0;
+    }
+    .trash-title { font-size: 0.95rem; text-align: right; }
+    .trash-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+    .trash-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
     .status-pill {
         font-size: 0.7rem;
         font-weight: 900;

@@ -324,7 +324,7 @@
                                 <form method="POST" action="{action}?/remove" use:enhance={submit}>
                                     <input type="hidden" name="id" value={s.id} />
                                     <button type="submit" class="sch-btn red"
-                                            onclick={(e) => { if (!confirm(`למחוק לצמיתות את "${s.title}"?`)) e.preventDefault(); }}>
+                                            onclick={(e) => { if (!confirm(`להעביר את "${s.title}" לאשפה? אפשר לשחזר אותה משם.`)) e.preventDefault(); }}>
                                         🗑 מחק
                                     </button>
                                 </form>

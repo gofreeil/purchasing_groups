@@ -111,6 +111,10 @@ function fromStrapi(row) {
         // הוחלפה בגרסה מעודכנת - היסטוריה, ולא פרסומת שנדחתה. מסוננת
         // ממסך הניהול ומ"הפרסומות שלי" כדי שלא תיראה כדחייה אמיתית.
         superseded: row.landing?._superseded === true,
+        // באשפה: נמחקה במסך הניהול ואפשר לשחזר אותה. המחיקה רכה - הרשומה
+        // נשארת ב-Strapi כ-rejected (יורדת מהאתר ומספירת הממתינות), והמצב
+        // שהיה לה לפני כן נשמר ב-_deletedStatus לשחזור. ראה trashAd.
+        deletedAt: typeof row.landing?._deletedAt === 'string' ? row.landing._deletedAt : '',
     };
 }
 
@@ -128,16 +132,20 @@ function byDisplayOrder(a, b) {
  * מאושרת (עדכון שלה שכבר אושר) - גם אם סימון ההחלפה לא נכתב, למשל כשה-PUT
  * של ההורדה נכשל אחרי שהאישור כבר עבר. בלי זה אותה פרסומת הופיעה פעמיים:
  * הגרסה החדשה "באוויר" והישנה "פג התוקף", באותו מקום בטור.
+ * גם מה שבאשפה מסונן, חוץ ממסך הניהול שמציג אותה (keepDeleted).
  * @param {any[]} list
+ * @param {{ keepDeleted?: boolean }} [opts]
  * @returns {any[]}
  */
-function withoutReplaced(list) {
+function withoutReplaced(list, { keepDeleted = false } = {}) {
     const replaced = new Set(
         list
             .filter((/** @type {any} */ a) => a.status === 'approved' && a.replacesAdId && !a.superseded)
             .map((/** @type {any} */ a) => a.replacesAdId),
     );
-    return list.filter((/** @type {any} */ a) => !a.superseded && !replaced.has(a.id));
+    return list.filter(
+        (/** @type {any} */ a) => !a.superseded && !replaced.has(a.id) && (keepDeleted || !a.deletedAt),
+    );
 }
 
 /**
@@ -456,10 +464,11 @@ export async function countPendingAds({ fetch: f = fetch } = {}) {
 }
 
 /**
- * כל הפרסומות למסך האדמין (ממתינות + מאושרות + נדחות).
- * @param {{ fetch?: typeof fetch }} [opts]
+ * כל הפרסומות למסך האדמין (ממתינות + מאושרות + נדחות). withDeleted = גם
+ * מה שבאשפה - למסך הניהול בלבד; חישובי המקומות בטור עובדים בלעדיה.
+ * @param {{ fetch?: typeof fetch, withDeleted?: boolean }} [opts]
  */
-export async function listAllForAdmin({ fetch: f = fetch } = {}) {
+export async function listAllForAdmin({ fetch: f = fetch, withDeleted = false } = {}) {
     const data = await strapiGet(
         ENDPOINT,
         { sort: 'submitted_at:desc', 'pagination[pageSize]': 100 },
@@ -467,7 +476,9 @@ export async function listAllForAdmin({ fetch: f = fetch } = {}) {
     );
     // גרסה שהוחלפה בעדכון מאושר לא מוצגת: היא לא "נדחתה" ולא ממתינה -
     // היא ההיסטוריה של פרסומת שכבר רצה על האתר בגרסה חדשה יותר.
-    return withoutReplaced((data?.data ?? []).map(fromStrapi).filter(Boolean));
+    return withoutReplaced((data?.data ?? []).map(fromStrapi).filter(Boolean), {
+        keepDeleted: withDeleted,
+    });
 }
 
 /**
@@ -595,6 +606,86 @@ export async function unapproveAd(id, { fetch: f = fetch, jwt = '' } = {}) {
         { fetch: f, jwt },
     );
     invalidateAdsCache();
+}
+
+// ----- אשפה: מחיקה רכה, שחזור, ופגות תוקף לחידוש -----
+
+/**
+ * "מחק" במסך הניהול - לאשפה ולא לצמיתות: הפרסומת יורדת מהאתר (ad_status
+ * rejected) ונעלמת מהרשימות, אבל כל התוכן שלה נשמר ואפשר לשחזר אותה.
+ * המצב הקודם (מאושרת/ממתינה/נדחתה) נשמר ב-landing, יחד עם המקום בטור
+ * והתוקף - השחזור מחזיר אותה בדיוק למה שהייתה.
+ * @param {string} id
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ * @returns {Promise<{title:string}|null>}
+ */
+export async function trashAd(id, { fetch: f = fetch, jwt = '' } = {}) {
+    const ad = await getAd(id, { fetch: f });
+    if (!ad) return null;
+    if (ad.deletedAt) return { title: ad.title };
+    await strapiPut(
+        `${ENDPOINT}/${encodeURIComponent(id)}`,
+        {
+            ad_status: 'rejected',
+            landing: { ...(ad.landing ?? {}), _deletedAt: new Date().toISOString(), _deletedStatus: ad.status },
+        },
+        { fetch: f, jwt },
+    );
+    invalidateAdsCache();
+    return { title: ad.title };
+}
+
+/**
+ * שחזור מהאשפה למצב שהיה לפני המחיקה. פרסומת מאושרת חוזרת לאוויר אם
+ * התוקף שלה עוד לא עבר; אם עבר - היא מופיעה באשפה כפגה, לחידוש.
+ * @param {string} id
+ * @param {{ fetch?: typeof fetch, jwt?: string }} [opts]
+ * @returns {Promise<{title:string,status:string}|null>}
+ */
+export async function restoreAd(id, { fetch: f = fetch, jwt = '' } = {}) {
+    const ad = await getAd(id, { fetch: f });
+    if (!ad?.deletedAt) return null;
+    const landing = { ...(ad.landing ?? {}) };
+    const status = ['approved', 'pending', 'rejected'].includes(landing._deletedStatus)
+        ? landing._deletedStatus
+        : 'pending';
+    delete landing._deletedAt;
+    delete landing._deletedStatus;
+    await strapiPut(
+        `${ENDPOINT}/${encodeURIComponent(id)}`,
+        { ad_status: status, landing },
+        { fetch: f, jwt },
+    );
+    invalidateAdsCache();
+    return { title: ad.title, status };
+}
+
+/**
+ * האשפה של מסך הניהול: מה שנמחק (לשחזור) ומאושרות שפג תוקפן (לחידוש),
+ * החדשות בראש. list = listAllForAdmin עם withDeleted. למחוקות מצורפים
+ * נתוני הכרטיס לתצוגה המקדימה; פגות התוקף כבר ברשימה הראשית של הדף.
+ * @param {any[]} list
+ */
+export function computeTrash(list) {
+    const now = Date.now();
+    return list
+        .filter(
+            (/** @type {any} */ a) =>
+                a.deletedAt ||
+                (a.status === 'approved' && !a.paused && a.expiresAt && Date.parse(a.expiresAt) <= now),
+        )
+        .map((/** @type {any} */ a) => ({
+            id: a.id,
+            title: a.title,
+            advertiserName: displayName({ name: a.submittedBy?.name, email: a.submittedBy?.email }, '-'),
+            kind: a.deletedAt ? 'deleted' : 'expired',
+            at: a.deletedAt || a.expiresAt,
+            requestedDurationDays: a.requestedDurationDays,
+            ...(a.deletedAt
+                ? { mainImage: a.mainImage, mainImageFit: a.mainImageFit, cta: a.cta, gradient: a.gradient }
+                : {}),
+        }))
+        .sort((x, y) => (Date.parse(y.at) || 0) - (Date.parse(x.at) || 0));
 }
 
 /**
