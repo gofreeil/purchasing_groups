@@ -222,9 +222,9 @@
         </section>
 
         <!-- ═══ הפרסומות שלי ═══ -->
-        <!-- מוצג רק למי שיש לו פרסומות. "ערוך" פותח את הפרסומת בעורך
-             עם התוכן שרץ עליה עכשיו, והשליחה מחליפה בדיוק אותה. -->
-        {#if myAds.length}
+        <!-- מוצג רק למי שיש לו פרסומות (לסופר-אדמין - גם כל הטור). "ערוך" פותח
+             את הפרסומת בעורך עם התוכן שרץ עליה עכשיו, והשליחה מחליפה בדיוק אותה. -->
+        {#if myAds.length || schedule?.rows.length}
             <section>
                 <h2 class="sec-title">
                     📢 הפרסומות שלי
@@ -247,6 +247,7 @@
                         approved={schedule.approved}
                         superAdmin={data.superAdmin}
                         action="/admin/ads"
+                        sortBySlot
                         onresult={onAdsResult}
                         onduration={(id) => (durationAd = scheduleAdById.get(id) ?? null)}
                         onhover={(e, id) => preview?.show(e, scheduleAdById.get(id))}
@@ -257,7 +258,9 @@
                             {#if s.state === 'active' || s.state === 'ending'}
                                 <a class="ad-btn ghost sm" href="/ads/{s.id}" target="_blank" title="דף הנחיתה באתר">👁 צפה</a>
                             {/if}
-                            <a class="ad-edit sm" href="/advertise/builder?edit={s.id}" title="פתיחת הפרסומת בעורך">✏️ ערוך</a>
+                            {#if scheduleAdById.get(s.id)?.mine}
+                                <a class="ad-edit sm" href="/advertise/builder?edit={s.id}" title="פתיחת הפרסומת בעורך">✏️ ערוך</a>
+                            {/if}
                         {/snippet}
                     </AdScheduleTable>
                     <AdPreviewLayer bind:this={preview} />

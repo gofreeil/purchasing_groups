@@ -13,6 +13,7 @@
      *   approved: any[],
      *   superAdmin?: boolean,
      *   action?: string,
+     *   sortBySlot?: boolean,
      *   onresult?: (result: any) => void,
      *   onduration?: (id: string) => void,
      *   onhover?: (e: MouseEvent, id: string) => void,
@@ -26,6 +27,7 @@
         approved,
         superAdmin = false,
         action = "",
+        sortBySlot = false,
         onresult,
         onduration,
         onhover,
@@ -45,11 +47,13 @@
         };
     }
 
-    // טבלת התזמון מסודרת לפי תאריך הפרסום - החדשות בראש
+    // טבלת התזמון מסודרת לפי תאריך הפרסום - החדשות בראש; sortBySlot = לפי
+    // המקום בטור (1, 2, 3...), כמו שהטור עצמו מסודר
     let schedulesByDate = $derived(
-        [...schedules].sort(
-            (/** @type {any} */ a, /** @type {any} */ b) =>
-                (Date.parse(b.publishedAt) || 0) - (Date.parse(a.publishedAt) || 0),
+        [...schedules].sort((/** @type {any} */ a, /** @type {any} */ b) =>
+            sortBySlot
+                ? (a.slot ?? 999) - (b.slot ?? 999)
+                : (Date.parse(b.publishedAt) || 0) - (Date.parse(a.publishedAt) || 0),
         ),
     );
 

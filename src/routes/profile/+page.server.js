@@ -55,7 +55,7 @@ export async function load({ locals, fetch }) {
         authorized: true,
         memberships,
         myAds,
-        schedule: isAdmin(user) ? await loadMySchedule(myRecords, fetch) : null,
+        schedule: isAdmin(user) ? await loadMySchedule(myRecords, fetch, isSuperAdmin(user)) : null,
         summary: summarize(memberships),
         campaigns,
         isAdmin: isAdmin(user),
@@ -70,12 +70,17 @@ export async function load({ locals, fetch }) {
  * כל מקום בטור: הרשומות שלו (כבר נשלפו ל"הפרסומות שלי") + הפרסומות
  * שבאוויר מהקאש של הטור. שליפה של כל המאושרות כאן כבדה מדי - עמודת
  * ה-landing לבדה שוקלת מגה-בייטים, והיא נחתכה בתקרת הזמן בייצור.
+ *
+ * everyone (סופר-אדמין): כל הפרסומות שבאוויר, גם של מפרסמים אחרים, לפי
+ * סדר המקומות - כדי שהטבלה תראה את כל הטור. מושהית/פגה של מפרסם אחר לא
+ * נמצאת בקאש של הטור, ולכן היא נשארת במסך הניהול בלבד.
  * @param {any[]} myRecords
  * @param {typeof fetch} fetch
+ * @param {boolean} [everyone]
  */
-async function loadMySchedule(myRecords, fetch) {
+async function loadMySchedule(myRecords, fetch, everyone = false) {
     const myApproved = myRecords.filter((a) => a.status === 'approved');
-    if (!myApproved.length) return null;
+    if (!myApproved.length && !everyone) return null;
     const mine = new Set(myApproved.map((a) => a.id));
     try {
         const live = await listApproved({ fetch }).catch(() => []);
@@ -83,10 +88,12 @@ async function loadMySchedule(myRecords, fetch) {
         const byId = new Map(liveById);
         for (const a of myApproved) byId.set(a.id, a);
         const all = [...byId.values()];
+        if (!all.length) return null;
         const slots = computeAdSlots(all);
         const extras = computeAdExtraSlots(all);
+        const shown = (/** @type {string} */ id) => everyone || mine.has(id);
         return {
-            rows: computeSchedules(all).filter((s) => mine.has(s.id)),
+            rows: computeSchedules(all).filter((s) => shown(s.id)),
             approved: all.map((a) => ({
                 id: a.id,
                 title: a.title,
@@ -95,9 +102,11 @@ async function loadMySchedule(myRecords, fetch) {
             })),
             // הנתונים של חלון הקציבה ושל התצוגה המקדימה (ריחוף/הקשה על הכותרת)
             ads: all
-                .filter((a) => mine.has(a.id))
+                .filter((a) => shown(a.id))
                 .map((a) => ({
                     id: a.id,
+                    // "ערוך" פתוח רק לבעלים - הבילדר דוחה פרסומת של מפרסם אחר
+                    mine: mine.has(a.id),
                     title: a.title,
                     submittedBy: a.submittedBy,
                     requestedDurationDays: a.requestedDurationDays,
