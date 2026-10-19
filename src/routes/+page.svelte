@@ -221,6 +221,13 @@
                 width="3052"
                 height="1379"
             />
+            <img
+                class="together-logo"
+                src="/images/maalim-et-hatedder.png"
+                alt="מעלים את התדר - לבריאות ושגשוג בעולם המודרני"
+                width="700"
+                height="389"
+            />
         </div>
     </div>
 

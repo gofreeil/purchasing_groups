@@ -1315,10 +1315,14 @@ a {
 
     .together-side {
         flex: none;
-        gap: 0.3rem;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.3rem 1rem;
     }
 
     .together-tagline {
+        width: 100%;
         font-size: 0.75rem;
     }
 
