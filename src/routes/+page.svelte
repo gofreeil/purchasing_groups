@@ -221,6 +221,7 @@
                 width="3052"
                 height="1379"
             />
+            <hr class="together-sep" />
             <img
                 class="together-logo"
                 src="/images/maalim-et-hatedder.png"

@@ -650,6 +650,14 @@ a {
     height: auto;
 }
 
+/* קו קטן בין שני הלוגואים */
+.together-sep {
+    width: 60px;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid rgba(250, 204, 21, 0.45);
+}
+
 .whatsapp-counter-final {
     display: flex;
     justify-content: center;
@@ -1328,6 +1336,11 @@ a {
 
     .together-logo {
         width: 120px;
+    }
+
+    /* במובייל הלוגואים זה לצד זה - קו אופקי לא במקום */
+    .together-sep {
+        display: none;
     }
 
     /* Main Page Title - Accessibility */
