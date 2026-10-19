@@ -121,7 +121,14 @@
                 </p>
             </div>
             {#if data.isAdmin}
-                <a class="admin-cta" href="/admin">🛠️ פאנל ניהול</a>
+                {@const pending = data.adminAlerts?.ads ?? 0}
+                <!-- הבועה שעל התמונה בהדר = פרסומות שממתינות לאישור; כאן רואים מה היא -->
+                <a class="admin-cta" href={pending > 0 ? '/admin/ads' : '/admin'}>
+                    🛠️ פאנל ניהול
+                    {#if pending > 0}
+                        <span class="cta-alert">{pending} {pending === 1 ? 'פרסומת ממתינה' : 'פרסומות ממתינות'} לאישור</span>
+                    {/if}
+                </a>
             {/if}
         </header>
 
@@ -525,6 +532,15 @@
     }
     .admin-cta:hover {
         background: rgba(120, 53, 15, 0.5);
+    }
+    .cta-alert {
+        margin-inline-start: 0.4rem;
+        border-radius: 999px;
+        background: #dc2626;
+        color: #fff;
+        padding: 0.1rem 0.5rem;
+        font-size: 0.72rem;
+        font-weight: 900;
     }
 
     /* ── כרטיס החיסכון ── */
