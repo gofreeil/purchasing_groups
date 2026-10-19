@@ -156,14 +156,23 @@ function withoutReplaced(list, { keepDeleted = false } = {}) {
  * דורסת אותה: מה שרץ על האתר נשאר באוויר עד שהעדכון יאושר, ורק אז
  * מתחלף בו - באותו מקום בטור ועם אותו תאריך סיום. מזהה שאינו שייך
  * למפרסם (טעות או ניחוש) פשוט לא מכובד, והשליחה נכנסת כפרסומת חדשה.
+ * payload.anyOwner = סופר-אדמין שעורך פרסומת של מפרסם אחר: הגרסה החדשה
+ * נרשמת על שם המפרסם המקורי, כך שהבעלות לא עוברת אליו באישור.
  *
  * @param {any} payload
  * @param {{ fetch?: typeof fetch }} [opts]
  */
 export async function submitAd(payload, { fetch: f = fetch } = {}) {
     const target = payload.editOfAdId
-        ? await getOwnAdForEdit(payload.editOfAdId, payload.submittedBy ?? {}, { fetch: f })
+        ? await getOwnAdForEdit(payload.editOfAdId, payload.submittedBy ?? {}, {
+              fetch: f,
+              anyOwner: payload.anyOwner === true,
+          })
         : null;
+    const owner =
+        target && !sameAdvertiser(target, payload.submittedBy ?? {})
+            ? target.submittedBy
+            : payload.submittedBy;
 
     const res = await strapiPost(
         ENDPOINT,
@@ -188,9 +197,9 @@ export async function submitAd(payload, { fetch: f = fetch } = {}) {
                 // כדי שמסך הניהול יוכל לומר "עדכון ל..." בלי שליפה נוספת.
                 ...(target ? { _replacesAdId: target.id, _replacesTitle: target.title } : {}),
             },
-            submitted_by_id: payload.submittedBy?.id ?? '',
-            submitted_by_email: payload.submittedBy?.email ?? '',
-            submitted_by_name: payload.submittedBy?.name ?? '',
+            submitted_by_id: owner?.id ?? '',
+            submitted_by_email: owner?.email ?? '',
+            submitted_by_name: owner?.name ?? '',
             submitted_at: new Date().toISOString(),
         },
         { fetch: f },
@@ -1333,13 +1342,14 @@ export async function getMyAdsWithRecords(identity, { fetch: f = fetch } = {}) {
 /**
  * הפרסומת המלאה לעריכה בבילדר - לבעליה בלבד. הבדיקה נעשית בשרת לפי
  * זהות המפרסם, כך שאי אפשר למשוך תוכן של פרסומת זרה בניחוש מזהה.
+ * anyOwner = סופר-אדמין: רשאי לערוך גם פרסומת של מפרסם אחר.
  * @param {string} id
  * @param {{ id?: string, email?: string }} identity
- * @param {{ fetch?: typeof fetch }} [opts]
+ * @param {{ fetch?: typeof fetch, anyOwner?: boolean }} [opts]
  */
-export async function getOwnAdForEdit(id, identity, { fetch: f = fetch } = {}) {
+export async function getOwnAdForEdit(id, identity, { fetch: f = fetch, anyOwner = false } = {}) {
     if (!id || (!identity?.id && !identity?.email)) return null;
     const ad = await getAd(id, { fetch: f });
     if (!ad || ad.superseded) return null;
-    return sameAdvertiser(ad, identity) ? ad : null;
+    return anyOwner || sameAdvertiser(ad, identity) ? ad : null;
 }

@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import { submitAd } from '$lib/server/adsStore.js';
 import { isOwnerCode, notifyOwnerCodeUse, notifyAdminsNewAd } from '$lib/server/adsCode.js';
 import { normalizePlanDays } from '$lib/adPlans.js';
+import { isSuperAdmin } from '$lib/auth.js';
 
 // קליטת פרסומת חדשה מה-builder - נשמרת ב-Strapi במצב "ממתינה לאישור".
 // האישור עצמו ידני. חובה להיות מחובר: מודעה בלי submitted_by היא מודעה בלי
@@ -44,7 +45,9 @@ export async function POST({ request, fetch, locals }) {
                 subtitle: payload.subtitle,
                 // עריכה של פרסומת קיימת: המזהה נבדק ב-submitAd מול זהות
                 // המפרסם, ומזהה שאינו שלו נכנס כפרסומת חדשה במקום להחליף.
+                // סופר-אדמין רשאי לערוך גם פרסומת של מפרסם אחר.
                 editOfAdId: typeof payload.editOfAdId === 'string' ? payload.editOfAdId : '',
+                anyOwner: isSuperAdmin(user),
                 payment: usedOwnerCode ? 'code' : 'pending',
                 requestedDurationDays,
                 hoverText: payload.hoverText ?? '',

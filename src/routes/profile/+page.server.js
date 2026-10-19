@@ -105,8 +105,9 @@ async function loadMySchedule(myRecords, fetch, everyone = false) {
                 .filter((a) => shown(a.id))
                 .map((a) => ({
                     id: a.id,
-                    // "ערוך" פתוח רק לבעלים - הבילדר דוחה פרסומת של מפרסם אחר
-                    mine: mine.has(a.id),
+                    // "ערוך" פתוח לבעלים, ולסופר-אדמין גם על פרסומת של מפרסם
+                    // אחר (העדכון נרשם על שם המפרסם המקורי)
+                    editable: everyone || mine.has(a.id),
                     title: a.title,
                     submittedBy: a.submittedBy,
                     requestedDurationDays: a.requestedDurationDays,

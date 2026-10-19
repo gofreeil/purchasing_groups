@@ -56,16 +56,17 @@ export async function load({ locals, fetch }) {
         const slotMap = computeAdSlots(ads.filter((/** @type {any} */ a) => a.status === 'approved'));
         // שכפל פרסומת - המקומות הנוספים האפקטיביים (1-based) של כל מאושרת
         const extraMap = computeAdExtraSlots(ads.filter((/** @type {any} */ a) => a.status === 'approved'));
-        // mine = הפרסומת שייכת למנהל המחובר, ולכן הוא רשאי לפתוח אותה
-        // בעורך. עריכה של פרסומת של מפרסם אחר נחסמת בשרת ממילא, ואין
-        // טעם להציג כפתור שיחזיר 404.
+        // editable = המנהל המחובר רשאי לפתוח את הפרסומת בעורך: שלו, או כל
+        // פרסומת לסופר-אדמין. לאדמין רגיל עריכה של פרסומת של מפרסם אחר
+        // נחסמת בשרת ממילא, ואין טעם להציג כפתור שיחזיר 404.
         const identity = { id: String(locals.user?.id ?? ''), email: locals.user?.email ?? '' };
+        const superAdmin = isSuperAdmin(locals.user);
         ads = ads.map((/** @type {any} */ a) => ({
             ...a,
             ...(slotMap.has(a.id) ? { slot: slotMap.get(a.id) } : {}),
             // גובר על extraSlots הגולמי (0-based) של הרשומה
             extraSlots: extraMap.get(a.id) ?? [],
-            mine: sameAdvertiser(a, identity),
+            editable: superAdmin || sameAdvertiser(a, identity),
         }));
     } catch (err) {
         console.error('admin/ads load failed:', err);

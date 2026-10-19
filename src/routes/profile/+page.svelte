@@ -258,7 +258,7 @@
                             {#if s.state === 'active' || s.state === 'ending'}
                                 <a class="ad-btn ghost sm" href="/ads/{s.id}" target="_blank" title="דף הנחיתה באתר">👁 צפה</a>
                             {/if}
-                            {#if scheduleAdById.get(s.id)?.mine}
+                            {#if scheduleAdById.get(s.id)?.editable}
                                 <a class="ad-edit sm" href="/advertise/builder?edit={s.id}" title="פתיחת הפרסומת בעורך">✏️ ערוך</a>
                             {/if}
                         {/snippet}
