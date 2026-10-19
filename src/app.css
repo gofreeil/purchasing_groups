@@ -620,6 +620,36 @@ a {
     border: none;
 }
 
+.video-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.together-side {
+    flex: 0 0 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.together-tagline {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #facc15;
+    text-align: center;
+}
+
+.together-logo {
+    width: 100%;
+    height: auto;
+}
+
 .whatsapp-counter-final {
     display: flex;
     justify-content: center;
@@ -1276,6 +1306,24 @@ a {
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         width: 85%;
         max-width: 950px;
+    }
+
+    .video-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .together-side {
+        flex: none;
+        gap: 0.3rem;
+    }
+
+    .together-tagline {
+        font-size: 0.75rem;
+    }
+
+    .together-logo {
+        width: 120px;
     }
 
     /* Main Page Title - Accessibility */

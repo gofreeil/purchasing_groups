@@ -200,15 +200,28 @@
         {$t.homepage.title || "קבוצת רכישות חוסכונית"}
     </h1>
 
-    <div class="video-container-large">
-        <iframe
-            src="https://www.youtube-nocookie.com/embed/pl7kV6-aTEw?rel=0"
-            title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
-            frameborder="0"
-            loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-        ></iframe>
+    <div class="video-row">
+        <div class="video-container-large">
+            <iframe
+                src="https://www.youtube-nocookie.com/embed/pl7kV6-aTEw?rel=0"
+                title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
+                frameborder="0"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+            ></iframe>
+        </div>
+
+        <div class="together-side">
+            <p class="together-tagline">קהילות יוצאים לחירות | ביחד | מעלים את התדר</p>
+            <img
+                class="together-logo"
+                src="/images/TOGETHER%20LOGO%20PNG-05.png"
+                alt="TOGETHER"
+                width="3052"
+                height="1379"
+            />
+        </div>
     </div>
 
     <!-- Annual Savings Counter -->
