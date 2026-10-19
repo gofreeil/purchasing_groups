@@ -629,7 +629,7 @@ a {
 }
 
 .together-side {
-    flex: 0 0 200px;
+    flex: 0 0 180px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -646,16 +646,32 @@ a {
 }
 
 .together-logo {
-    width: 100%;
+    width: 145px;
+    max-width: 100%;
     height: auto;
 }
 
-/* קו קטן בין שני הלוגואים */
+/* קו הפרדה זהוב עם יהלום במרכז, בין שני הלוגואים */
 .together-sep {
-    width: 60px;
-    margin: 0;
+    position: relative;
+    width: 130px;
+    height: 2px;
+    margin: 0.7rem 0 0.3rem;
     border: 0;
-    border-top: 1px solid rgba(250, 204, 21, 0.45);
+    overflow: visible;
+    background: linear-gradient(90deg, transparent, #d4af37 25%, #f5e28a 50%, #d4af37 75%, transparent);
+}
+
+.together-sep::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    background: linear-gradient(135deg, #f5e28a, #d4af37);
+    box-shadow: 0 0 6px rgba(245, 226, 138, 0.7);
+    transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .whatsapp-counter-final {
@@ -1335,7 +1351,7 @@ a {
     }
 
     .together-logo {
-        width: 120px;
+        width: 105px;
     }
 
     /* במובייל הלוגואים זה לצד זה - קו אופקי לא במקום */
