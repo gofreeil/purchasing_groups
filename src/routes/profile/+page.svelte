@@ -256,10 +256,10 @@
                     >
                         {#snippet extra(s)}
                             {#if s.state === 'active' || s.state === 'ending'}
-                                <a class="ad-btn ghost sm" href="/ads/{s.id}" target="_blank" title="דף הנחיתה באתר">👁 צפה</a>
+                                <a class="row-icon" href="/ads/{s.id}" target="_blank" title="צפה בדף הנחיתה" aria-label="צפה בדף הנחיתה">👁</a>
                             {/if}
                             {#if scheduleAdById.get(s.id)?.editable}
-                                <a class="ad-edit sm" href="/advertise/builder?edit={s.id}" title="פתיחת הפרסומת בעורך">✏️ ערוך</a>
+                                <a class="row-icon edit" href="/advertise/builder?edit={s.id}" title="ערוך את הפרסומת" aria-label="ערוך את הפרסומת">✏️</a>
                             {/if}
                         {/snippet}
                     </AdScheduleTable>
@@ -827,14 +827,30 @@
     .ad-edit:hover {
         background: #fde047;
     }
-    /* צפה/ערוך בתוך שורת טבלת התזמון - באותו גודל של כפתורי הטבלה */
-    .ad-edit.sm,
-    .ad-btn.sm {
-        font-size: 11px;
-        font-weight: 900;
+    /* צפה/ערוך בתוך שורת טבלת התזמון - אייקונים בגובה כפתורי הטבלה,
+       כדי שלא יפתחו שורה נוספת בתא */
+    .row-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.5rem;
         border-radius: 0.5rem;
-        padding: 0.25rem 0.625rem;
-        white-space: nowrap;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 12px;
+        text-decoration: none;
+        transition: background 0.15s;
+    }
+    .row-icon:hover {
+        background: rgba(255, 255, 255, 0.18);
+    }
+    .row-icon.edit {
+        border-color: rgba(250, 204, 21, 0.5);
+        background: rgba(250, 204, 21, 0.15);
+    }
+    .row-icon.edit:hover {
+        background: rgba(250, 204, 21, 0.28);
     }
     /* קיצורי הניהול - כפתורים קטנים זה לצד זה, נשברים לשורה בנייד */
     .ad-actions {

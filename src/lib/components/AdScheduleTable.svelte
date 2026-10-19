@@ -355,7 +355,7 @@
                                             <input type="hidden" name="id" value={s.id} />
                                             <select name="slot" aria-label="שכפל פרסומת" class="sch-dup-select"
                                                     onchange={(e) => e.currentTarget.form?.requestSubmit()}>
-                                                <option value="" selected disabled>⧉ שכפל פרסומת</option>
+                                                <option value="" selected disabled>⧉ שכפל</option>
                                                 {#if dup.same.length > 1}
                                                     <option value="same" style="background:#fff;color:#111;font-weight:700">
                                                         ★ קבועה בכל הסבב ({dup.same.join(", ")})
@@ -483,7 +483,10 @@
     }
     .sch-dup-chip:hover { opacity: 0.8; }
     .sch-dup-chip .x { color: #b91c1c; }
+    /* רוחב קבוע: בלעדיו ה-select נמתח לפי האפשרות הארוכה ברשימה ודוחק
+       את שאר הכפתורים לשורה נוספת */
     .sch-dup-select {
+        width: 5.25rem;
         border-radius: 0.5rem; border: 1px solid rgba(14, 165, 233, 0.4); background: rgba(14, 165, 233, 0.15);
         padding: 0.25rem 0.375rem; font-size: 11px; font-weight: 900; font-family: inherit; color: #bae6fd;
     }
