@@ -203,11 +203,11 @@
     <div class="video-row">
         <div class="video-container-large">
             <iframe
-                src="https://www.youtube-nocookie.com/embed/pl7kV6-aTEw?rel=0"
+                src="https://eitanium.org/videoEmbed/542/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94"
                 title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
                 frameborder="0"
                 loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                 allowfullscreen
             ></iframe>
         </div>
