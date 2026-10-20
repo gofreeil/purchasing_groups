@@ -203,7 +203,7 @@
     <div class="video-row">
         <div class="video-container-large">
             <iframe
-                src="https://eitanium.org/videoEmbed/542/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94"
+                src="https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1"
                 title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
                 frameborder="0"
                 loading="lazy"
