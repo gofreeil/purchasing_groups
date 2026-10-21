@@ -5,6 +5,7 @@
 	import {
 		parseAdStyle, legacyAdStyle, adStyleVars, logoAnchorClass, logoFreeStyle, logoCornerSide,
 	} from "$lib/adStyle.js";
+	import { logoClearance } from "$lib/logoClearance.js";
 
 	// פרסומות מאושרות של מפרסמים. הטור הימני הוא המקום היחיד שלהן -
 	// הטור השמאלי שמור לאתרי רשת "יוצאים לחירות" בלבד.
@@ -129,7 +130,8 @@
 				{@const st = styleOf(ad)}
 				{@const cornerSide = logoCornerSide(st, Boolean(ad.logo))}
 				<a class="paid-ad" href="/ads/{ad.id}" aria-label="{ad.title} – {ad.subtitle}" style={cardVars(ad)}>
-					<div class="paid-ad-media">
+					<!-- הכותרת ותת-הכותרת עוקפות את הלוגו בכל מיקום שלו (logoClearance) -->
+					<div class="paid-ad-media" use:logoClearance={ad}>
 						<img
 							src={ad.mainImage}
 							alt={ad.title}
@@ -144,11 +146,11 @@
 							class:has-corner-logo-left={cornerSide === "left"}
 							style="transform: translateY({st.titleOffsetY}px);"
 						>
-							<h3 class="promo-title" style="color: {st.titleColor};">{ad.title}</h3>
+							<h3 class="promo-title" style="color: {st.titleColor};"><span class="logo-avoid" aria-hidden="true"></span>{ad.title}</h3>
 						</div>
 						{#if ad.subtitle}
 							<div class="promo-sub-wrap">
-								<p class="promo-sub">{ad.subtitle}</p>
+								<p class="promo-sub"><span class="logo-avoid" data-anchor="bottom" aria-hidden="true"></span>{ad.subtitle}</p>
 							</div>
 						{/if}
 						{#if ad.logo}
@@ -157,6 +159,7 @@
 								alt=""
 								loading="lazy"
 								decoding="async"
+								data-ad-logo
 								class="promo-logo {logoAnchorClass(st)}"
 								class:promo-logo-circle={st.logoShape === "circle"}
 								style={logoFreeStyle(st)}
@@ -320,17 +323,28 @@
 		line-height: var(--sub-lh, 1.3);
 		text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 	}
-	/* משולש בלתי-נראה שגורם לשורה הראשונה להתקצר לפי שיפוע האלכסון */
+	/* משולש בלתי-נראה שגורם לשורה הראשונה להתקצר לפי שיפוע האלכסון.
+	   כשהלוגו בצד שמאל, logoClearance מחליף אותו ב-float משולב ומכבה
+	   אותו דרך --logo-avoid-tri. */
 	.promo-sub::before {
 		content: "";
+		display: var(--logo-avoid-tri, block);
 		float: left;
 		width: 28%;
 		height: 1.35em;
 		shape-outside: polygon(0 0, 100% 0, 0 100%);
 	}
+	/* ה-float שגורם לטקסט לעקוף את הלוגו - מוצג ומוצב רק ע"י logoClearance */
+	.logo-avoid {
+		display: none;
+	}
 	.paid-ad-media .promo-logo {
 		position: absolute;
 		z-index: 6;
+		/* 36px כולל הריפוד - כמו בבילדר (שם preflight של Tailwind קובע
+		   border-box). בלי זה הלוגו יצא 42px, ועוגן ה-CTA (18px = חצי
+		   לוגו) לא היה ממורכז על קצה הרצועה. */
+		box-sizing: border-box;
 		width: 36px;
 		height: 36px;
 		border-radius: 6px;
