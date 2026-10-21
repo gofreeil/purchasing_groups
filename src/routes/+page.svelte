@@ -296,7 +296,7 @@
                     aria-label="הפעלת סרטון ההדרכה עם קול"
                     onclick={enableVideoSound}
                 >
-                    <span class="video-sound-badge">🔇 לחצו לשמיעה</span>
+                    <span class="video-sound-badge">לחצו לשמיעה</span>
                 </button>
             {/if}
         </div>
