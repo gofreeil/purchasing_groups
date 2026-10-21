@@ -29,7 +29,7 @@
     // אז נותנים לו לנגן מושתק (mute=1) - פעם אחת עד הסוף. שכבה שקופה מעליו
     // תופסת את הלחיצה הראשונה ומנגנת מההתחלה עם קול (בלחיצה ישירה על הנגן
     // הוא היה נעצר). shortsPreload=1 - מצב טעינה-מראש של eitanium, שלא סופר
-    // צפייה עד ההודעה 'activateShorts' (שגם מפעילה את הנגן).
+    // צפייה עד שהסרטון נטען שוב בלי הפרמטר (בלחיצה).
     const VIDEO_URL =
         "https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1";
     let videoSrc = $state(VIDEO_URL + "?mute=1&shortsPreload=1");
@@ -62,7 +62,6 @@
     });
     /** @type {HTMLIFrameElement | undefined} */
     let videoFrame = $state();
-    let videoLoaded = false;
     /** @type {ReturnType<typeof setInterval> | undefined} */
     let videoMuteTimer;
     /** @param {string} cmd */
@@ -70,26 +69,23 @@
         videoFrame?.contentWindow?.postMessage(cmd, "https://eitanium.org");
     }
     function onVideoLoad() {
-        if (videoSoundOn) return;
-        videoLoaded = true;
-        // הנגן זוכר עוצמת קול מביקור קודם ועלול לבטל את ההשתקה - מוודאים
-        const until = Date.now() + 5000;
+        // הנגן זוכר עוצמת קול/השתקה מביקור קודם (persistvolume) - מוודאים
+        // שאחרי הטעינה המצב הוא מה שרצינו: מושתק עד הלחיצה, ועם קול אחריה
+        const cmd = videoSoundOn ? "unmute" : "mute";
+        clearInterval(videoMuteTimer);
+        const until = Date.now() + 4000;
         videoMuteTimer = setInterval(() => {
             if (Date.now() > until) return clearInterval(videoMuteTimer);
-            videoCmd("mute");
+            videoCmd(cmd);
         }, 250);
     }
     function enableVideoSound() {
         videoSoundOn = true;
         clearInterval(videoMuteTimer);
-        if (!videoLoaded) {
-            // עוד לא נטען - טוענים בלי השתקה, והנגן יתחיל לבד עם קול
-            videoSrc = VIDEO_URL;
-            return;
-        }
-        videoCmd("stop");
-        videoCmd("unmute");
-        videoCmd("activateShorts");
+        // mute=1 גם מאפס את עוצמת הקול ל-0, ופקודת 'unmute' רק מבטלת את
+        // ההשתקה - הסרטון נשאר בלי קול עד הרמת העוצמה ידנית בנגן. לכן טוענים
+        // מחדש בלי mute=1, והנגן מתחיל מההתחלה עם קול.
+        videoSrc = VIDEO_URL;
     }
 
     // מבצע מוקפא (campaign.frozen): לחיצה על הכרטיס מציגה הודעה קצרה
