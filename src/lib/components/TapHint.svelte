@@ -24,11 +24,11 @@
     // המכשיר מבקש הפחתת תנועה - מנגנים גרסה סטטית (opacity בלבד, בלי transform)
     let reducedMotion = $state(false);
 
-    // משך הניגון: היד והכיתוב נמוגים יחד אחרי 3 שניות (ועוד מרווח קטן לסיום ההנפשה)
-    const PLAY_MS = 3200;
-    // הרגע שבו האצבע/הסמן חוזרים למטה ונוגעים בכרטיס (35% מהנפשת tap-pointer של 3 שניות) -
+    // משך הניגון: היד והכיתוב נמוגים יחד אחרי 2.4 שניות (ועוד מרווח קטן לסיום ההנפשה)
+    const PLAY_MS = 2600;
+    // הרגע שבו האצבע/הסמן חוזרים למטה ונוגעים בכרטיס (60% מהנפשת tap-pointer של 2.4 שניות) -
     // אז הכרטיס עצמו מקבל "לחיצה" (מחלקת tap-pressed על ההורה, ראה app.css)
-    const PRESS_AT_MS = 1000;
+    const PRESS_AT_MS = 1400;
     const PRESS_MS = 450;
 
     onMount(() => {
@@ -194,8 +194,8 @@
         --tap-y: 69%;
     }
     .tap-hint.desktop {
-        --tap-x: 55%;
-        --tap-y: 52%;
+        --tap-x: 59%;
+        --tap-y: 57%;
     }
 
     /* כל החלקים שקופים עד שמופעלת מחלקת play, ומונפשים אך ורק ב-transform
@@ -224,7 +224,7 @@
         box-shadow: 0 0 16px rgba(74, 222, 128, 0.45);
     }
     .tap-hint.play .tap-ring {
-        animation: tap-ring 800ms linear 0.8s forwards;
+        animation: tap-ring 900ms linear 1.25s forwards;
     }
     @keyframes tap-ring {
         0% {
@@ -243,9 +243,14 @@
     .tap-hand {
         width: 104px;
         height: auto;
-        /* קצה האצבע נמצא ב-~10%/1.5% של התמונה - מיישרים אותו לנקודת ההקשה */
-        margin: -3px 0 0 -11px;
+        /* קצה האצבע נמצא ב-~10%/1.5% של התמונה - מיישרים אותו 14px מימין לנקודת
+           ההקשה, כדי שהאצבע לא תסתיר את תחילת הכיתוב שמשמאלה */
+        margin: -3px 0 0 3px;
         filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5));
+    }
+    /* הטבעת עוקבת אחרי קצה האצבע המוזז */
+    .tap-hint:not(.desktop) .tap-ring {
+        margin-left: -10px;
     }
 
     /* ── סמן העכבר בלפטופ ────────────────────────────────── */
@@ -258,39 +263,39 @@
 
     .tap-hint.play .tap-hand,
     .tap-hint.play .tap-cursor {
-        animation: tap-pointer 3s linear forwards;
+        animation: tap-pointer 2.4s linear forwards;
     }
 
-    /* כניסה מלמטה-ימין, הקשה אחת (0.85s), החזקה ויציאה חזרה.
-       תזוזה טהורה בלי scale - כך אין רסטור מחדש של הצל בכל פריים,
-       וכל קטע מקבל עקומת האטה משלו כדי שהמעברים לא ייראו קטועים. */
+    /* כניסה איטית מלמטה-ימין (0.7s), הקשה אחת רכה (נגיעה ב-1.44s), החזקה קצרה
+       ויציאה רגועה חזרה. תזוזה טהורה בלי scale - כך אין רסטור מחדש של הצל בכל
+       פריים, וכל קטע מקבל עקומת האטה משלו כדי שהמעברים לא ייראו קטועים. */
     @keyframes tap-pointer {
         0% {
             opacity: 0;
             transform: translate3d(30px, 78px, 0);
-            animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+            animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        14% {
+        29% {
             opacity: 1;
             transform: translate3d(0, 0, 0);
             animation-timing-function: linear;
-        }
-        23% {
-            transform: translate3d(0, 0, 0);
-            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        28% {
-            transform: translate3d(-2px, -7px, 0);
-            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         }
         35% {
             transform: translate3d(0, 0, 0);
+            animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+        }
+        48% {
+            transform: translate3d(-1px, -5px, 0);
+            animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+        }
+        60% {
+            transform: translate3d(0, 0, 0);
             animation-timing-function: linear;
         }
-        88% {
+        79% {
             opacity: 1;
             transform: translate3d(0, 0, 0);
-            animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.55);
+            animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
         }
         100% { opacity: 0; transform: translate3d(24px, 62px, 0); }
     }
@@ -310,20 +315,20 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(74, 222, 128, 0.22);
     }
     .tap-hint.play .tap-label {
-        animation: tap-label 3s linear forwards;
+        animation: tap-label 2.4s linear forwards;
     }
-    /* עולה יחד עם היד, מחזיק עד ~2 שניות ואז נמוג יחד איתה עד 3 */
+    /* עולה יחד עם היד, מחזיק עד ~1.8 שניות ואז נמוג יחד איתה עד 2.4 */
     @keyframes tap-label {
         0% {
             opacity: 0;
             transform: translate(-100%, -100%) translateY(10px);
-            animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+            animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        11% {
+        15% {
             opacity: 1;
             transform: translate(-100%, -100%) translateY(0);
         }
-        67% {
+        75% {
             opacity: 1;
             transform: translate(-100%, -100%) translateY(0);
         }
@@ -341,10 +346,10 @@
         0% {
             opacity: 0;
             transform: translateY(10px);
-            animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+            animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        11% { opacity: 1; transform: translateY(0); }
-        67% { opacity: 1; transform: translateY(0); }
+        15% { opacity: 1; transform: translateY(0); }
+        75% { opacity: 1; transform: translateY(0); }
         100% { opacity: 0; transform: translateY(6px); }
     }
 
@@ -357,7 +362,7 @@
     }
     .tap-hint.reduced.play .tap-hand,
     .tap-hint.reduced.play .tap-cursor {
-        animation: tap-fade 3s linear forwards;
+        animation: tap-fade 2.4s linear forwards;
     }
     .tap-hint.reduced .tap-label {
         transform: translate(-100%, -100%);
@@ -367,12 +372,12 @@
     }
     .tap-hint.reduced.play .tap-label,
     .tap-hint.reduced.play.desktop .tap-label {
-        animation: tap-fade 3s linear forwards;
+        animation: tap-fade 2.4s linear forwards;
     }
     @keyframes tap-fade {
         0% { opacity: 0; }
-        12% { opacity: 1; }
-        80% { opacity: 1; }
+        15% { opacity: 1; }
+        79% { opacity: 1; }
         100% { opacity: 0; }
     }
 
