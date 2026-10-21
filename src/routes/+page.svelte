@@ -24,7 +24,50 @@
     // היד המצביעה על הכרטיס שלהן הופכת ליד שמסמנת "בוצע". נקרא רק בצד הלקוח.
     /** @type {Set<string>} */
     let joined = $state(new Set());
+
+    // סרטון ההדרכה: הנגן של eitanium מנגן אוטומטית (forceautoplay בצד השרת).
+    // טוענים אותו מראש מתחת לתמונת השער, ועד הלחיצה משתיקים ועוצרים אותו
+    // בהודעות postMessage. shortsPreload=1 - מצב טעינה-מראש של eitanium,
+    // שלא סופר צפייה עד ההודעה 'activateShorts' (שגם מפעילה את הנגן).
+    const VIDEO_URL =
+        "https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1";
+    let videoSrc = $state(VIDEO_URL + "?shortsPreload=1");
     let videoStarted = $state(false);
+    let videoMounted = $state(false);
+    onMount(() => {
+        videoMounted = true;
+        return () => clearInterval(videoHoldTimer);
+    });
+    /** @type {HTMLIFrameElement | undefined} */
+    let videoFrame = $state();
+    let videoLoaded = false;
+    /** @type {ReturnType<typeof setInterval> | undefined} */
+    let videoHoldTimer;
+    /** @param {string} cmd */
+    function videoCmd(cmd) {
+        videoFrame?.contentWindow?.postMessage(cmd, "https://eitanium.org");
+    }
+    function onVideoLoad() {
+        if (videoStarted) return;
+        videoLoaded = true;
+        const until = Date.now() + 20000;
+        videoHoldTimer = setInterval(() => {
+            if (Date.now() > until) return clearInterval(videoHoldTimer);
+            videoCmd("mute");
+            videoCmd("pause");
+        }, 250);
+    }
+    function startVideo() {
+        videoStarted = true;
+        clearInterval(videoHoldTimer);
+        if (!videoLoaded) {
+            // עוד לא נטען - טוענים רגיל, והנגן יתחיל לבד (המשתמש כבר לחץ)
+            videoSrc = VIDEO_URL;
+            return;
+        }
+        videoCmd("unmute");
+        videoCmd("activateShorts");
+    }
 
     // מבצע מוקפא (campaign.frozen): לחיצה על הכרטיס מציגה הודעה קצרה
     // במקום לעבור לדף העסקה
@@ -204,22 +247,25 @@
 
     <div class="video-row">
         <div class="video-container-large">
-            <!-- הנגן של eitanium מנגן אוטומטית (forceautoplay בצד השרת), לכן
-                 מציגים תמונת שער ונטען את ה-iframe רק אחרי לחיצה -->
-            {#if videoStarted}
+            <!-- רק בצד הלקוח, כדי ש-onload לא יקרה לפני ה-hydration -->
+            {#if videoMounted}
                 <iframe
-                    src="https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1"
+                    bind:this={videoFrame}
+                    src={videoSrc}
                     title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
                     frameborder="0"
+                    loading="lazy"
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                     allowfullscreen
+                    onload={onVideoLoad}
                 ></iframe>
-            {:else}
+            {/if}
+            {#if !videoStarted}
                 <button
                     type="button"
                     class="video-poster"
                     aria-label="הפעלת סרטון ההדרכה"
-                    onclick={() => (videoStarted = true)}
+                    onclick={startVideo}
                 >
                     <img
                         src="https://eitanium.org/videos/video_261020161019_vd68e/video_261020161019_vd68e.jpg"
