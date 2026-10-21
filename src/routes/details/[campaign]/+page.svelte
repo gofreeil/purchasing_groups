@@ -33,7 +33,7 @@
 
     let { data } = $props();
 
-    const whatsappLink = "https://chat.whatsapp.com/FE9orNZKb8RGCEXLRiLMtC";
+    const whatsappLink = "https://chat.whatsapp.com/K6nJLn21ssmGdolXVzH2RV";
 
     // נתוני חיסכון/דירוג/ביקורות - קבועים בקוד (לא תלויים בעריכה ב-admin).
     // חברי פעילים מגיעים מ-Google Sheet (data.activeMembers).
