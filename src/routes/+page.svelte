@@ -25,68 +25,60 @@
     /** @type {Set<string>} */
     let joined = $state(new Set());
 
-    // סרטון ההדרכה: הנגן של eitanium מנגן אוטומטית (forceautoplay בצד השרת),
-    // אז נותנים לו לנגן מושתק (mute=1) - פעם אחת עד הסוף. שכבה שקופה מעליו
-    // תופסת את הלחיצה הראשונה ומנגנת מההתחלה עם קול (בלחיצה ישירה על הנגן
-    // הוא היה נעצר). shortsPreload=1 - מצב טעינה-מראש של eitanium, שלא סופר
-    // צפייה עד שהסרטון נטען שוב בלי הפרמטר (בלחיצה).
-    const VIDEO_URL =
-        "https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1";
-    let videoSrc = $state(VIDEO_URL + "?mute=1&shortsPreload=1");
-    let videoSoundOn = $state(false);
-    let videoMounted = $state(false);
-    // נגן צף בדסקטופ: אחרי שהגולש הפעיל את הסרטון וגלל אל מתחתיו, הנגן
-    // נצמד לפינת המסך. רק CSS - העברת ה-iframe ב-DOM הייתה טוענת אותו מחדש.
+    // סרטון ההדרכה (eitanium). נגן צף בדסקטופ: אחרי שהגולש לחץ על הנגן
+    // והסרטון מתנגן, גלילה אל מתחתיו מצמידה אותו לפינת המסך. רק CSS - העברת
+    // ה-iframe ב-DOM הייתה טוענת אותו מחדש.
+    const VIDEO_ORIGIN = "https://eitanium.org";
     /** @type {HTMLDivElement | undefined} */
     let videoBox = $state();
-    let videoOutOfView = $state(false);
-    let videoFloatClosed = $state(false);
-    let videoFloating = $derived(videoSoundOn && videoOutOfView && !videoFloatClosed);
+    /** @type {HTMLIFrameElement | undefined} */
+    let videoFrame = $state();
+    let videoClicked = false;
+    let videoPlaying = false;
+    let videoOutOfView = false;
+    let videoFloatClosed = false;
+    let videoFloating = $state(false);
+    function updateVideoFloat() {
+        if (!videoOutOfView || videoFloatClosed) videoFloating = false;
+        else if (videoClicked && videoPlaying) videoFloating = true;
+        // עצירה בתוך הנגן הצף לא מורידה אותו - רק סגירה או חזרה לסרטון
+    }
     function closeVideoFloat() {
         videoFloatClosed = true;
-        videoCmd("pause");
+        videoFrame?.contentWindow?.postMessage("pause", VIDEO_ORIGIN);
+        updateVideoFloat();
     }
     onMount(() => {
-        videoMounted = true;
         const desktop = matchMedia("(min-width: 769px)");
         const io = new IntersectionObserver(([e]) => {
             videoOutOfView = desktop.matches && !e.isIntersecting && e.boundingClientRect.top < 0;
             // חזרה לסרטון מאפסת את הסגירה - בגלילה הבאה הוא יצוף שוב
             if (e.isIntersecting) videoFloatClosed = false;
+            updateVideoFloat();
         });
         if (videoBox) io.observe(videoBox);
+        // לחיצה בתוך iframe זר לא מגיעה לדף - רק blur של החלון כשהפוקוס עובר אליו
+        const onBlur = () => {
+            if (document.activeElement === videoFrame) videoClicked = true;
+        };
+        // הנגן של eitanium מדווח לדף העליון על play/pause/ended
+        /** @param {MessageEvent} e */
+        const onMessage = (e) => {
+            if (e.origin !== VIDEO_ORIGIN || e.source !== videoFrame?.contentWindow) return;
+            const type = e.data?.type;
+            if (type === "play") videoPlaying = true;
+            else if (type === "pause" || type === "ended") videoPlaying = false;
+            else return;
+            updateVideoFloat();
+        };
+        window.addEventListener("blur", onBlur);
+        window.addEventListener("message", onMessage);
         return () => {
-            clearInterval(videoMuteTimer);
             io.disconnect();
+            window.removeEventListener("blur", onBlur);
+            window.removeEventListener("message", onMessage);
         };
     });
-    /** @type {HTMLIFrameElement | undefined} */
-    let videoFrame = $state();
-    /** @type {ReturnType<typeof setInterval> | undefined} */
-    let videoMuteTimer;
-    /** @param {string} cmd */
-    function videoCmd(cmd) {
-        videoFrame?.contentWindow?.postMessage(cmd, "https://eitanium.org");
-    }
-    function onVideoLoad() {
-        // הנגן זוכר עוצמת קול/השתקה מביקור קודם (persistvolume) - מוודאים
-        // שאחרי הטעינה המצב הוא מה שרצינו: מושתק עד הלחיצה, ועם קול אחריה
-        const cmd = videoSoundOn ? "unmute" : "mute";
-        clearInterval(videoMuteTimer);
-        const until = Date.now() + 4000;
-        videoMuteTimer = setInterval(() => {
-            if (Date.now() > until) return clearInterval(videoMuteTimer);
-            videoCmd(cmd);
-        }, 250);
-    }
-    function enableVideoSound() {
-        videoSoundOn = true;
-        clearInterval(videoMuteTimer);
-        // mute=1 גם מאפס את עוצמת הקול ל-0, ופקודת 'unmute' רק מבטלת את
-        // ההשתקה - הסרטון נשאר בלי קול עד הרמת העוצמה ידנית בנגן. לכן טוענים
-        // מחדש בלי mute=1, והנגן מתחיל מההתחלה עם קול.
-        videoSrc = VIDEO_URL;
-    }
 
     // מבצע מוקפא (campaign.frozen): לחיצה על הכרטיס מציגה הודעה קצרה
     // במקום לעבור לדף העסקה
@@ -267,19 +259,15 @@
     <div class="video-row">
         <div class="video-container-large" bind:this={videoBox}>
             <div class="video-frame" class:video-floating={videoFloating}>
-                <!-- רק בצד הלקוח, כדי ש-onload לא יקרה לפני ה-hydration -->
-                {#if videoMounted}
-                    <iframe
-                        bind:this={videoFrame}
-                        src={videoSrc}
-                        title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
-                        frameborder="0"
-                        loading="lazy"
-                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                        allowfullscreen
-                        onload={onVideoLoad}
-                    ></iframe>
-                {/if}
+                <iframe
+                    bind:this={videoFrame}
+                    src="https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1"
+                    title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
+                    frameborder="0"
+                    loading="lazy"
+                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                    allowfullscreen
+                ></iframe>
                 {#if videoFloating}
                     <button
                         type="button"
@@ -289,16 +277,6 @@
                     >
                 {/if}
             </div>
-            {#if videoMounted && !videoSoundOn}
-                <button
-                    type="button"
-                    class="video-sound-overlay"
-                    aria-label="הפעלת סרטון ההדרכה עם קול"
-                    onclick={enableVideoSound}
-                >
-                    <span class="video-sound-badge">לחצו לשמיעה</span>
-                </button>
-            {/if}
         </div>
 
         <div class="together-side">

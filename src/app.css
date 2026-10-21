@@ -665,33 +665,6 @@ a {
     background: rgba(0, 0, 0, 0.9);
 }
 
-.video-sound-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    padding: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-}
-
-.video-sound-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 5px 12px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.65);
-    color: #fff;
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: background 0.2s;
-}
-
-.video-sound-overlay:hover .video-sound-badge {
-    background: rgba(0, 0, 0, 0.85);
-}
-
 .video-row {
     display: flex;
     align-items: center;
