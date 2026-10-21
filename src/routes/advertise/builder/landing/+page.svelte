@@ -4,6 +4,7 @@
     import { goto } from "$app/navigation";
     import { adPlans, planFor, normalizePlanDays, DEFAULT_PLAN_DAYS } from "$lib/adPlans.js";
     import { AD_DRAFT_KEY, getAdEditTarget } from "$lib/adDraft.js";
+    import { localAdStyle, autoLogoAnchor } from "$lib/adStyle.js";
     import {
         AD_BODY_LIMIT, AD_EFFECTIVE_LIMIT, SIDE_IMAGE_MAX_BYTES,
         bodyBytes, fmtWeight, approxDataUrlBytes, compressImageToFit,
@@ -57,6 +58,12 @@
     let logo = $state("");
     let logoShape = $state(/** @type {'square' | 'circle'} */ ("square"));
     let gradient = $state("linear-gradient(135deg, #f59e0b, #ea580c)");
+    // העיצוב שנבחר בבילדר - נשלח עם המודעה (landing._adStyle), כדי שהכרטיס
+    // בטור הפרסומות ייראה כמו בדמו החי
+    let logoPosition = $state(/** @type {'right' | 'left' | 'cta'} */ ("right"));
+    let diagHeight = $state(12);
+    let titleColor = $state("#ffffff");
+    let titleOffsetY = $state(0);
 
     // ===== גרירת קבצים =====
     let isDraggingLandingImage = $state(false);
@@ -105,6 +112,7 @@
                 uniqueness, phone, whatsapp, website, email, address, hours,
                 // עותק עמוק — כיווץ תמונות מוצר לא ישנה את המצב שעל המסך
                 products: products.map((p) => ({ ...p })),
+                _adStyle: localAdStyle({ logoShape, logoPosition, diagHeight, titleColor, titleOffsetY }),
             },
             // עריכה של פרסומת קיימת. השרת מאמת שהיא באמת של המפרסם -
             // מזהה זר פשוט לא מכובד ונכנס כפרסומת חדשה.
@@ -367,6 +375,10 @@
                     logo = d.logo ?? "";
                     logoShape = d.logoShape ?? "square";
                     gradient = d.gradient ?? gradient;
+                    logoPosition = d.logoPosition ?? autoLogoAnchor(title);
+                    diagHeight = typeof d.diagHeight === "number" ? d.diagHeight : 12;
+                    titleColor = d.titleColor ?? "#ffffff";
+                    titleOffsetY = typeof d.titleOffsetY === "number" ? d.titleOffsetY : 0;
                 }
             } catch {}
             // טיוטה ישנה שחורגת מהתקציב מכווצת מיד — לא מחכים לכישלון בסוף

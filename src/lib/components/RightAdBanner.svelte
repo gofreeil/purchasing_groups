@@ -17,16 +17,12 @@
 	);
 
 	// הכרטיס בנוי מאותן שכבות של הדמו החי בבילדר: כותרת, רצועה אלכסונית,
-	// תת-כותרת ולוגו. פרסומת שהופצה מקהילה בשכונה נושאת את העיצוב שנקבע
-	// שם (_adStyle) ומוצגת בדיוק כמו שם, כולל גודל הכותרת; פרסומת מהבילדר
-	// של האתר הזה מקבלת את ברירות המחדל שלו.
+	// תת-כותרת ולוגו. העיצוב שהמפרסם קבע נוסע עם הפרסומת (_adStyle) - גם
+	// מקהילה בשכונה וגם מהבילדר כאן - כולל גודל הכותרת, שנקבע לפי המקור
+	// שלו. פרסומת ותיקה בלי עיצוב שמור מקבלת את ברירות המחדל של הבילדר.
 	/** @param {any} ad */
 	function styleOf(ad) {
 		return parseAdStyle(ad.adStyle) ?? legacyAdStyle(ad.title);
-	}
-	/** @param {any} ad */
-	function cardVars(ad) {
-		return `${adStyleVars(styleOf(ad))}--title-size:${ad.adStyle ? 1.15 : 0.95}rem;`;
 	}
 	const FALLBACK_GRADIENT = "linear-gradient(135deg,#f59e0b,#ea580c)";
 
@@ -129,7 +125,7 @@
 				{@const ad = cell.ad}
 				{@const st = styleOf(ad)}
 				{@const cornerSide = logoCornerSide(st, Boolean(ad.logo))}
-				<a class="paid-ad" href="/ads/{ad.id}" aria-label="{ad.title} – {ad.subtitle}" style={cardVars(ad)}>
+				<a class="paid-ad" href="/ads/{ad.id}" aria-label="{ad.title} – {ad.subtitle}" style={adStyleVars(st)}>
 					<!-- הכותרת ותת-הכותרת עוקפות את הלוגו בכל מיקום שלו (logoClearance) -->
 					<div class="paid-ad-media" use:logoClearance={ad}>
 						<img

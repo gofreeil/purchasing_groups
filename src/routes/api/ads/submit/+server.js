@@ -3,6 +3,7 @@ import { submitAd } from '$lib/server/adsStore.js';
 import { isOwnerCode, notifyOwnerCodeUse, notifyAdminsNewAd } from '$lib/server/adsCode.js';
 import { normalizePlanDays } from '$lib/adPlans.js';
 import { isSuperAdmin } from '$lib/auth.js';
+import { parseAdStyle } from '$lib/adStyle.js';
 
 // קליטת פרסומת חדשה מה-builder - נשמרת ב-Strapi במצב "ממתינה לאישור".
 // האישור עצמו ידני. חובה להיות מחובר: מודעה בלי submitted_by היא מודעה בלי
@@ -33,6 +34,9 @@ export async function POST({ request, fetch, locals }) {
     // הקוד מאומת כאן, בשרת — לא סומכים על דגל payment מהדפדפן
     const usedOwnerCode = isOwnerCode(payload.ownerCode);
     const requestedDurationDays = normalizePlanDays(payload.requestedDurationDays);
+    // העיצוב מהבילדר (צורת ומיקום הלוגו, גובה הרצועה, צבע הכותרת) - מנורמל
+    // כאן כי חלק ממנו נכנס ל-style inline בטור הפרסומות
+    const adStyle = parseAdStyle(payload.landing._adStyle);
     try {
         const ad = await submitAd(
             {
@@ -74,6 +78,7 @@ export async function POST({ request, fetch, locals }) {
                     address: payload.landing.address ?? '',
                     hours: payload.landing.hours ?? '',
                     products: Array.isArray(payload.landing.products) ? payload.landing.products : [],
+                    ...(adStyle ? { _adStyle: adStyle } : {}),
                 },
             },
             { fetch },

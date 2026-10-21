@@ -6,8 +6,10 @@
 // גובה הרצועה האלכסונית, צבע והזזת הכותרת - בתוך landing._adStyle.
 // בלי המודול הזה הכרטיס כאן היה תמונה חשופה, שונה ממה שרואים בקהילה.
 //
-// פרסומת שנבנתה בבילדר של האתר הזה לא שומרת את השדה, ומקבלת את ברירות
-// המחדל שהבילדר כאן מציג בדמו החי (legacyAdStyle).
+// פרסומת שנבנתה בבילדר של האתר הזה שומרת באותו שדה את מה שנבחר בו
+// (localAdStyle) - כולל גודל הכותרת והסלוגן של הדמו החי, שקטנים משל
+// קהילה בשכונה. פרסומת ותיקה מהבילדר כאן, מלפני שהשדה נשמר, מקבלת את
+// ברירות המחדל שהוא מציג (legacyAdStyle).
 // ============================================================
 
 /**
@@ -25,6 +27,7 @@
  *   subFontSize: number,
  *   subLineHeight: number,
  *   subAlign: SubAlign,
+ *   titleSize: number,
  * }} AdStyle
  */
 
@@ -32,6 +35,11 @@
 const DEFAULT_BAND_HEIGHT = 12;
 /** הפרש בין שתי פינות הרצועה - מה שנותן לה את השיפוע */
 const BAND_SLOPE = 10;
+/** גודל הכותרת (rem): בקהילה בשכונה, ובדמו החי של הבילדר כאן */
+const COMMUNITY_TITLE_SIZE = 1.15;
+const LOCAL_TITLE_SIZE = 0.95;
+/** גודל הסלוגן (rem) בדמו החי של הבילדר כאן */
+const LOCAL_SUB_SIZE = 0.7;
 
 /** @type {AdStyle} */
 const DEFAULT_AD_STYLE = {
@@ -45,6 +53,8 @@ const DEFAULT_AD_STYLE = {
     subFontSize: 0.88,
     subLineHeight: 1.3,
     subAlign: 'right',
+    // פרסומת מקהילה בשכונה לא נושאת את השדה - הגודל שם קבוע
+    titleSize: COMMUNITY_TITLE_SIZE,
 };
 
 /** @param {number} v @param {number} lo @param {number} hi */
@@ -85,22 +95,52 @@ export function parseAdStyle(raw) {
         subFontSize: clamp(num(o.subFontSize) ?? DEFAULT_AD_STYLE.subFontSize, 0.6, 1.5),
         subLineHeight: clamp(num(o.subLineHeight) ?? DEFAULT_AD_STYLE.subLineHeight, 0.9, 2.2),
         subAlign: o.subAlign === 'center' || o.subAlign === 'left' || o.subAlign === 'justify' ? o.subAlign : 'right',
+        titleSize: clamp(num(o.titleSize) ?? DEFAULT_AD_STYLE.titleSize, 0.6, 2),
     };
 }
 
 /**
- * פרסומת בלי עיצוב שמור - מה שהבילדר של האתר הזה מציג בדמו החי:
- * כותרת ארוכה (מעל 20 תווים) מורידה את הלוגו לפינה שמעל רצועת ה-CTA,
- * ותת-הכותרת בגודל 0.7rem.
+ * ברירת המחדל החכמה של הבילדר כאן למיקום הלוגו: כותרת ארוכה (מעל 20
+ * תווים) מורידה אותו לפינה שמעל רצועת ה-CTA
+ * @param {string} title
+ * @returns {LogoAnchor}
+ */
+export function autoLogoAnchor(title) {
+    return (title ?? '').trim().length > 20 ? 'cta' : 'right';
+}
+
+/**
+ * מה שהבילדר של האתר הזה מציג בדמו החי - נשמר עם הפרסומת ב-landing._adStyle
+ * @param {{ logoShape: LogoShape, logoPosition: LogoAnchor, diagHeight: number, titleColor: string, titleOffsetY: number }} b
+ * @returns {AdStyle}
+ */
+export function localAdStyle(b) {
+    return {
+        ...DEFAULT_AD_STYLE,
+        logoShape: b.logoShape,
+        logoAnchor: b.logoPosition,
+        bandHeight: b.diagHeight,
+        titleColor: b.titleColor,
+        titleOffsetY: b.titleOffsetY,
+        subFontSize: LOCAL_SUB_SIZE,
+        titleSize: LOCAL_TITLE_SIZE,
+    };
+}
+
+/**
+ * פרסומת בלי עיצוב שמור - ברירות המחדל של הדמו החי בבילדר כאן:
+ * לוגו מרובע במיקום האוטומטי, רצועה של 12% וכותרת לבנה
  * @param {string} title
  * @returns {AdStyle}
  */
 export function legacyAdStyle(title) {
-    return {
-        ...DEFAULT_AD_STYLE,
-        logoAnchor: (title ?? '').trim().length > 20 ? 'cta' : 'right',
-        subFontSize: 0.7,
-    };
+    return localAdStyle({
+        logoShape: 'square',
+        logoPosition: autoLogoAnchor(title),
+        diagHeight: DEFAULT_BAND_HEIGHT,
+        titleColor: DEFAULT_AD_STYLE.titleColor,
+        titleOffsetY: 0,
+    });
 }
 
 /** @param {AdStyle} style */
@@ -109,15 +149,16 @@ function isLogoFree(style) {
 }
 
 /**
- * משתני ה-CSS של הכרטיס (רצועה + טיפוגרפיית תת-הכותרת), לשתילה ב-style
- * של כרטיס בודד.
+ * משתני ה-CSS של הכרטיס (רצועה + טיפוגרפיית הכותרת ותת-הכותרת), לשתילה
+ * ב-style של כרטיס בודד.
  * @param {AdStyle} style
  */
 export function adStyleVars(style) {
     const left = clamp(100 - style.bandHeight, 0, 100);
     const right = Math.max(0, left - BAND_SLOPE);
     return `--diag-top-left:${left}%;--diag-top-right:${right}%;`
-        + `--sub-size:${style.subFontSize}rem;--sub-lh:${style.subLineHeight};--sub-align:${style.subAlign};`;
+        + `--sub-size:${style.subFontSize}rem;--sub-lh:${style.subLineHeight};--sub-align:${style.subAlign};`
+        + `--title-size:${style.titleSize}rem;`;
 }
 
 /**

@@ -5,6 +5,7 @@
     import { adImgFit, AD_ZOOM_MIN, AD_ZOOM_MAX } from "$lib/adImageFit.js";
     import { logoClearance } from "$lib/logoClearance.js";
     import { normalizePlanDays } from "$lib/adPlans.js";
+    import { localAdStyle, legacyAdStyle, autoLogoAnchor } from "$lib/adStyle.js";
     import { AD_DRAFT_KEY, getAdEditTarget, setAdEditTarget, clearAdEditTarget } from "$lib/adDraft.js";
     import {
         AD_EFFECTIVE_LIMIT, MAIN_IMAGE_MAX_BYTES,
@@ -358,6 +359,7 @@
                 advantages: [...landingAdvantages],
                 uniqueness, phone, whatsapp, website, email, address, hours,
                 products: products.map((p) => ({ ...p })),
+                _adStyle: localAdStyle({ logoShape, logoPosition, diagHeight, titleColor, titleOffsetY }),
             },
             ownerCode: "",
             requestedDurationDays: 365,
@@ -594,6 +596,19 @@
             cta = ad.cta || "הקלק לפרטים והזמנות";
             gradient = ad.gradient || gradient;
 
+            // העיצוב שרץ על האתר: השמור עם הפרסומת, ובפרסומת ותיקה בלי
+            // עיצוב שמור - ברירות המחדל שהיא מוצגת בהן בטור (legacyAdStyle)
+            const st = ad.adStyle ?? legacyAdStyle(title);
+            logoShape = st.logoShape;
+            // הלוגו השמור כבר חתוך לעיגול - "עריכת החיתוך" זמינה מיד
+            hasCircleCrop = st.logoShape === "circle";
+            logoPosition = st.logoAnchor;
+            // מיקום ששונה מברירת המחדל החכמה נבחר ידנית - שהיא לא תדרוס אותו
+            logoPositionExplicit = st.logoAnchor !== autoLogoAnchor(title);
+            diagHeight = st.bandHeight;
+            titleColor = st.titleColor;
+            titleOffsetY = st.titleOffsetY;
+
             const L = ad.landing ?? {};
             landingHeadline = L.headline ?? "";
             landingPitch = L.pitch ?? "";
@@ -732,7 +747,7 @@
     // ברירת מחדל חכמה למיקום הלוגו: כותרת ארוכה → ליד הכפתור
     $effect(() => {
         if (!logo || logoPositionExplicit) return;
-        const next = title.trim().length > 20 ? "cta" : "right";
+        const next = autoLogoAnchor(title);
         if (logoPosition !== next) logoPosition = next;
     });
 

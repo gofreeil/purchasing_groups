@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import { getOwnAdForEdit } from '$lib/server/adsStore.js';
 import { isSuperAdmin } from '$lib/auth.js';
+import { parseAdStyle } from '$lib/adStyle.js';
 
 /**
  * GET /api/ads/mine?id=<documentId>
@@ -39,6 +40,8 @@ export async function GET({ url, locals, fetch }) {
         logo: ad.logo,
         mainImage: ad.mainImage,
         mainImageFit: ad.mainImageFit ?? null,
+        // העיצוב של הכרטיס (landing._adStyle); null בפרסומת ותיקה בלי עיצוב שמור
+        adStyle: parseAdStyle(L._adStyle),
         landing: {
             headline: L.headline ?? '',
             pitch: L.pitch ?? '',
