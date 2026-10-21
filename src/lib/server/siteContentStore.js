@@ -17,7 +17,7 @@ const REQUEST_TIMEOUT_MS = 3000;
 const SLUG = 'site-texts';
 
 // מונה החברים בדף הבית כשלא נערך בפאנל. לעדכון: מסך "כיתובי האתר" בפאנל.
-export const DEFAULT_MEMBERS = 2004;
+export const DEFAULT_MEMBERS = 3470;
 
 // נקרא בכל טעינת דף (מה-layout) - TTL קצר, ואיפוס מיידי אחרי שמירה.
 const TTL_MS = 60_000;
