@@ -25,46 +25,69 @@
     /** @type {Set<string>} */
     let joined = $state(new Set());
 
-    // סרטון ההדרכה: הנגן של eitanium מנגן אוטומטית (forceautoplay בצד השרת).
-    // טוענים אותו מראש מתחת לתמונת השער, ועד הלחיצה משתיקים ועוצרים אותו
-    // בהודעות postMessage. shortsPreload=1 - מצב טעינה-מראש של eitanium,
-    // שלא סופר צפייה עד ההודעה 'activateShorts' (שגם מפעילה את הנגן).
+    // סרטון ההדרכה: הנגן של eitanium מנגן אוטומטית (forceautoplay בצד השרת),
+    // אז נותנים לו לנגן מושתק (mute=1) - פעם אחת עד הסוף. שכבה שקופה מעליו
+    // תופסת את הלחיצה הראשונה ומנגנת מההתחלה עם קול (בלחיצה ישירה על הנגן
+    // הוא היה נעצר). shortsPreload=1 - מצב טעינה-מראש של eitanium, שלא סופר
+    // צפייה עד ההודעה 'activateShorts' (שגם מפעילה את הנגן).
     const VIDEO_URL =
         "https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1";
-    let videoSrc = $state(VIDEO_URL + "?shortsPreload=1");
-    let videoStarted = $state(false);
+    let videoSrc = $state(VIDEO_URL + "?mute=1&shortsPreload=1");
+    let videoSoundOn = $state(false);
     let videoMounted = $state(false);
+    // נגן צף בדסקטופ: אחרי שהגולש הפעיל את הסרטון וגלל אל מתחתיו, הנגן
+    // נצמד לפינת המסך. רק CSS - העברת ה-iframe ב-DOM הייתה טוענת אותו מחדש.
+    /** @type {HTMLDivElement | undefined} */
+    let videoBox = $state();
+    let videoOutOfView = $state(false);
+    let videoFloatClosed = $state(false);
+    let videoFloating = $derived(videoSoundOn && videoOutOfView && !videoFloatClosed);
+    function closeVideoFloat() {
+        videoFloatClosed = true;
+        videoCmd("pause");
+    }
     onMount(() => {
         videoMounted = true;
-        return () => clearInterval(videoHoldTimer);
+        const desktop = matchMedia("(min-width: 769px)");
+        const io = new IntersectionObserver(([e]) => {
+            videoOutOfView = desktop.matches && !e.isIntersecting && e.boundingClientRect.top < 0;
+            // חזרה לסרטון מאפסת את הסגירה - בגלילה הבאה הוא יצוף שוב
+            if (e.isIntersecting) videoFloatClosed = false;
+        });
+        if (videoBox) io.observe(videoBox);
+        return () => {
+            clearInterval(videoMuteTimer);
+            io.disconnect();
+        };
     });
     /** @type {HTMLIFrameElement | undefined} */
     let videoFrame = $state();
     let videoLoaded = false;
     /** @type {ReturnType<typeof setInterval> | undefined} */
-    let videoHoldTimer;
+    let videoMuteTimer;
     /** @param {string} cmd */
     function videoCmd(cmd) {
         videoFrame?.contentWindow?.postMessage(cmd, "https://eitanium.org");
     }
     function onVideoLoad() {
-        if (videoStarted) return;
+        if (videoSoundOn) return;
         videoLoaded = true;
-        const until = Date.now() + 20000;
-        videoHoldTimer = setInterval(() => {
-            if (Date.now() > until) return clearInterval(videoHoldTimer);
+        // הנגן זוכר עוצמת קול מביקור קודם ועלול לבטל את ההשתקה - מוודאים
+        const until = Date.now() + 5000;
+        videoMuteTimer = setInterval(() => {
+            if (Date.now() > until) return clearInterval(videoMuteTimer);
             videoCmd("mute");
-            videoCmd("pause");
         }, 250);
     }
-    function startVideo() {
-        videoStarted = true;
-        clearInterval(videoHoldTimer);
+    function enableVideoSound() {
+        videoSoundOn = true;
+        clearInterval(videoMuteTimer);
         if (!videoLoaded) {
-            // עוד לא נטען - טוענים רגיל, והנגן יתחיל לבד (המשתמש כבר לחץ)
+            // עוד לא נטען - טוענים בלי השתקה, והנגן יתחיל לבד עם קול
             videoSrc = VIDEO_URL;
             return;
         }
+        videoCmd("stop");
         videoCmd("unmute");
         videoCmd("activateShorts");
     }
@@ -246,33 +269,38 @@
     </h1>
 
     <div class="video-row">
-        <div class="video-container-large">
-            <!-- רק בצד הלקוח, כדי ש-onload לא יקרה לפני ה-hydration -->
-            {#if videoMounted}
-                <iframe
-                    bind:this={videoFrame}
-                    src={videoSrc}
-                    title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
-                    frameborder="0"
-                    loading="lazy"
-                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                    allowfullscreen
-                    onload={onVideoLoad}
-                ></iframe>
-            {/if}
-            {#if !videoStarted}
+        <div class="video-container-large" bind:this={videoBox}>
+            <div class="video-frame" class:video-floating={videoFloating}>
+                <!-- רק בצד הלקוח, כדי ש-onload לא יקרה לפני ה-hydration -->
+                {#if videoMounted}
+                    <iframe
+                        bind:this={videoFrame}
+                        src={videoSrc}
+                        title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
+                        frameborder="0"
+                        loading="lazy"
+                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                        allowfullscreen
+                        onload={onVideoLoad}
+                    ></iframe>
+                {/if}
+                {#if videoFloating}
+                    <button
+                        type="button"
+                        class="video-float-close"
+                        aria-label="סגירת הנגן הצף"
+                        onclick={closeVideoFloat}>✕</button
+                    >
+                {/if}
+            </div>
+            {#if videoMounted && !videoSoundOn}
                 <button
                     type="button"
-                    class="video-poster"
-                    aria-label="הפעלת סרטון ההדרכה"
-                    onclick={startVideo}
+                    class="video-sound-overlay"
+                    aria-label="הפעלת סרטון ההדרכה עם קול"
+                    onclick={enableVideoSound}
                 >
-                    <img
-                        src="https://eitanium.org/videos/video_261020161019_vd68e/video_261020161019_vd68e.jpg"
-                        alt="סרטון הדרכה על קבוצות רכישות חוסכוניות"
-                        loading="lazy"
-                    />
-                    <span class="video-play-btn" aria-hidden="true"></span>
+                    <span class="video-sound-badge">🔇 לחצו לשמיעה</span>
                 </button>
             {/if}
         </div>
