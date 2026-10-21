@@ -64,14 +64,14 @@ export async function POST(event) {
     }
 
     // טקסטים בלי מפתח בקוד (text:<מקור>) - החלפה לפי הטקסט המקורי, ראו textReplace.js.
-    // ריק או זהה למקור - ההחלפה נמחקת והטקסט חוזר לקוד.
+    // null או זהה למקור - ההחלפה נמחקת והטקסט חוזר לקוד; ריק - הטקסט נמחק מהדף.
     const replace = { ...current.replace };
     for (const [key, raw] of Object.entries(patch)) {
-        if (!key.startsWith('text:') || typeof raw !== 'string') continue;
+        if (!key.startsWith('text:') || (typeof raw !== 'string' && raw !== null)) continue;
         const original = key.slice(5);
-        const value = raw.replace(/\r\n/g, '\n').trim();
-        if (!original || original.length > MAX_TEXT_LEN || value.length > MAX_TEXT_LEN) continue;
-        if (!value || value === original) delete replace[original];
+        const value = raw === null ? null : raw.replace(/\r\n/g, '\n').trim();
+        if (!original || original.length > MAX_TEXT_LEN || (value?.length ?? 0) > MAX_TEXT_LEN) continue;
+        if (value === null || value === original) delete replace[original];
         else replace[original] = value;
     }
     if (Object.keys(replace).length > MAX_REPLACE) {

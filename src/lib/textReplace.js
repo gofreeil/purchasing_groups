@@ -3,7 +3,7 @@
 //
 // כיתוב של i18n או של עסקה נשמר כדריסה של הנתונים עצמם (SiteEditor).
 // כל טקסט אחר בדף (טקסט קבוע בקומפוננטה, מספר בטבלה, placeholder של
-// תיבה) נשמר כהחלפה לפי הטקסט המקורי: { "<מקור>": "<חדש>" }, ומוחל כאן
+// תיבה) נשמר כהחלפה לפי הטקסט המקורי: { "<מקור>": "<חדש>" } ("" = נמחק), ומוחל כאן
 // בדפדפן על כל text-node שתוכנו (אחרי trim) זהה למקור - כמו העורך המשותף
 // של שאר אתרי הרשת (community-backend/public/site-editor.js).
 // כיתוב עם אותיות - לכל האתר; מספר בלבד - לדף שבו נערך (מפתח "@<נתיב>|<מספר>").
@@ -43,9 +43,10 @@ function split(raw) {
 function applyNode(node) {
     const raw = node.nodeValue ?? '';
     const t = raw.trim();
-    if (!t) return;
     const prev = originals.get(node);
     const mine = prev !== undefined && applied.get(node) === raw;
+    // ריק - אלא אם זה טקסט שאנחנו מחקנו (החלפה ריקה), שאולי צריך להחזיר
+    if (!t && !mine) return;
     if (!mine) {
         originals.delete(node);
         applied.delete(node);

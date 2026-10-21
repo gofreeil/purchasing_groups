@@ -158,12 +158,15 @@
         const parent = node.parentElement;
         const raw = node.nodeValue ?? '';
         const shown = raw.trim();
+        // טקסט שנמחק בעריכה קודמת (החלפה ריקה) - נשאר ניתן לעריכה, ריק ועם המקור מעומעם,
+        // כדי שאפשר יהיה להחזיר אותו
+        const deleted = shown ? '' : originalTextOf(node);
         // טקסט עם אות או ספרה (לא סימנים/אימוג'י בלבד), שעוד לא נעטף, מחוץ לאזורים שלא עורכים
-        if (!parent || !shown || !HAS_TEXT.test(shown) || parent.closest(NO_WRAP)) return;
+        if (!parent || !(shown ? HAS_TEXT.test(shown) : deleted) || parent.closest(NO_WRAP)) return;
 
         // כיתוב שחוזר בדף (למשל "סטטוס:" בכל כרטיס עסקה) - כל ההופעות
         // נערכות. אחרי שנגמרו המפתחות בתור, ההופעות הבאות שייכות לאחרון.
-        const q = byValue.get(shown);
+        const q = shown ? byValue.get(shown) : undefined;
         let key, orig;
         if (q?.length) {
             key = /** @type {string} */ (q.length > 1 ? q.shift() : q[0]);
@@ -181,6 +184,7 @@
         span.setAttribute('contenteditable', 'true');
         span.setAttribute('spellcheck', 'false');
         span.textContent = shown;
+        if (deleted) span.setAttribute('data-se-deleted', deleted);
         /** @type {Text[]} */
         const extras = [];
         /** @type {Node[]} */
@@ -365,17 +369,18 @@
 
     async function saveAll() {
         if (busy) return;
-        /** @type {Record<string, string>} */
+        /** @type {Record<string, string | null>} */
         const texts = {};
         for (const [el, info] of wrapped) {
             const value = spanValue(el);
             if (value === info.original) continue;
-            // החלפה שחזרה לנוסח שבקוד נשלחת כריקון - ההחלפה נמחקת (גם במפתח-דף של מספר)
-            texts[info.key] = info.key.startsWith('text:') && value === info.orig ? '' : value;
+            // החלפה שחזרה לנוסח שבקוד נשלחת כ-null - ההחלפה נמחקת (גם במפתח-דף של מספר);
+            // ריק = הטקסט נמחק מהדף
+            texts[info.key] = info.key.startsWith('text:') && value === info.orig ? null : value;
         }
         for (const [box, b] of boxes) {
             const value = boxValue(box);
-            if (value !== b.shown) texts[b.key] = value === b.orig ? '' : value;
+            if (value !== b.shown) texts[b.key] = value === b.orig ? null : value;
         }
         for (const [el, info] of cells) {
             const value = cellValue(el, info.html);
@@ -586,6 +591,11 @@
         /* גם בתוך כפתורים עם user-select:none */
         -webkit-user-select: text;
         user-select: text;
+    }
+    :global([data-se-deleted]:empty)::before {
+        content: attr(data-se-deleted);
+        opacity: 0.45;
+        text-decoration: line-through;
     }
     :global([data-se-ph]) {
         outline: 1px dashed rgba(245, 158, 11, 0.6) !important;
