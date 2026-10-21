@@ -24,6 +24,7 @@
     // היד המצביעה על הכרטיס שלהן הופכת ליד שמסמנת "בוצע". נקרא רק בצד הלקוח.
     /** @type {Set<string>} */
     let joined = $state(new Set());
+    let videoStarted = $state(false);
 
     // מבצע מוקפא (campaign.frozen): לחיצה על הכרטיס מציגה הודעה קצרה
     // במקום לעבור לדף העסקה
@@ -203,14 +204,31 @@
 
     <div class="video-row">
         <div class="video-container-large">
-            <iframe
-                src="https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1"
-                title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
-                frameborder="0"
-                loading="lazy"
-                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                allowfullscreen
-            ></iframe>
+            <!-- הנגן של eitanium מנגן אוטומטית (forceautoplay בצד השרת), לכן
+                 מציגים תמונת שער ונטען את ה-iframe רק אחרי לחיצה -->
+            {#if videoStarted}
+                <iframe
+                    src="https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1"
+                    title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
+                    frameborder="0"
+                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                    allowfullscreen
+                ></iframe>
+            {:else}
+                <button
+                    type="button"
+                    class="video-poster"
+                    aria-label="הפעלת סרטון ההדרכה"
+                    onclick={() => (videoStarted = true)}
+                >
+                    <img
+                        src="https://eitanium.org/videos/video_261020161019_vd68e/video_261020161019_vd68e.jpg"
+                        alt="סרטון הדרכה על קבוצות רכישות חוסכוניות"
+                        loading="lazy"
+                    />
+                    <span class="video-play-btn" aria-hidden="true"></span>
+                </button>
+            {/if}
         </div>
 
         <div class="together-side">
