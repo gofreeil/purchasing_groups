@@ -16,6 +16,7 @@
         collectionSchema,
         campaignServiceSchema,
         faqSchema,
+        videoSchema,
     } from "$lib/seo.js";
 
     let { data } = $props();
@@ -29,6 +30,26 @@
     // והסרטון מתנגן, גלילה אל מתחתיו מצמידה אותו לפינת המסך. רק CSS - העברת
     // ה-iframe ב-DOM הייתה טוענת אותו מחדש.
     const VIDEO_ORIGIN = "https://eitanium.org";
+    // פרטי הסרטון ל-VideoObject ולתמלול. מקור: דף הסרטון באיתניום (547) והכתוביות
+    // שלו (he.vtt). החלפת סרטון מחייבת לעדכן כאן את כל השדות.
+    const VIDEO = {
+        embedUrl: `${VIDEO_ORIGIN}/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1`,
+        contentUrl: `${VIDEO_ORIGIN}/videos/video_261020161019_vd68e/index.mp4`,
+        thumbnailUrl: `${VIDEO_ORIGIN}/videos/video_261020161019_vd68e/video_261020161019_vd68e.jpg`,
+        uploadDate: "2026-10-20T01:10:19+03:00",
+        duration: "PT2M7S",
+        name: "קבוצות רכישה - איך חוסכים יחד בסלולר, באינטרנט, בגז ובחשמל",
+        description:
+            "סרטון הדרכה של 2 דקות: התנועה החברתית יוצאים לחירות מסבירה איך קבוצות רכישה מוזילות את השירותים שמשלמים עליהם כל חודש - סלולר, אינטרנט, גז, חשמל וסולארי - ואיך מצטרפים.",
+        transcript: [
+            "ברוכים הבאים למהפכה החברתית של העם, התנועה החברתית שעוזרת לכם ללא מאמץ לחסוך כסף בכל חודש ולפרק את המונופולים של העולם הישן.",
+            "אז ברוכים הבאים לתנועה החברתית יוצאים לחירות. אנחנו כאן כדי לקיים כוח מאוחד של העם שאי אפשר להרוס אותו. לא פוליטיקה שתלויה בבעלי ההון, לא הרשות המחוקקת שבנויה על הבנקים ולא הרשות להגבלים עסקיים שכל מי שמאייש אותה הוא איזושהי חברה של משפחת עופר או עוד אחד מהטייקונים.",
+            "מה אנחנו עושים? אנחנו מתארגנים בקבוצות רכישה לרכוש בהוזלה קודם כל את כל השירותים שאנחנו משלמים עליהם יום-יום, שזה אומר סלולר, אינטרנט, גז, חשמל, סולארי ועוד ועוד.",
+            "המטרה שלנו זה להתקדם לרמה שאנחנו רוכשים את כל החקלאות ישירות מהחקלאים אלינו לשכונה. אנחנו נוריד את מחירי המזון ישירות אל ועדי השכונות באופן שמונופולים לא יכולים להתלכד שוב ולהפריד את האזרח. אנחנו מחברים את האזרח, מפרקים את המונופולים.",
+            "לכן כל מה שאתם צריכים לעשות זה פשוט להצטרף לקבוצות, להוריד לכם את המחיר. קל, פשוט. ספרו לחברים, שתפו איתם את האתר - כל התוכניות שלנו מופיעות במרוכז אחת אחרי השנייה. יורידו לעצמם את כל הרכישות החודשיות, ואז מתקדמים אל שוק המזון בישראל.",
+            "יוצאים לחירות - המהפכה בידיים שלנו. כוחנו באחדותנו.",
+        ],
+    };
     /** @type {HTMLDivElement | undefined} */
     let videoBox = $state();
     /** @type {HTMLIFrameElement | undefined} */
@@ -238,7 +259,8 @@
                 image: c.image_url
             })
         ),
-        faqSchema(faqs)
+        faqSchema(faqs),
+        videoSchema({ ...VIDEO, transcript: VIDEO.transcript.join(" ") })
     ]);
 </script>
 
@@ -261,8 +283,9 @@
             <div class="video-frame" class:video-floating={videoFloating}>
                 <iframe
                     bind:this={videoFrame}
-                    src="https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1"
+                    src={VIDEO.embedUrl}
                     title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
+                    aria-describedby="video-desc"
                     frameborder="0"
                     loading="lazy"
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
@@ -298,6 +321,16 @@
             />
         </div>
     </div>
+
+    <!-- נגישות: תיאור הסרטון לקוראי מסך (aria-describedby של ה-iframe) + תמלול מלא
+         מקופל - לעיוורים ולכבדי שמיעה, וגם טקסט שגוגל קורא -->
+    <p id="video-desc" class="sr-only">{VIDEO.description} התמלול המלא נמצא מתחת לסרטון.</p>
+    <details class="video-transcript">
+        <summary><span aria-hidden="true">📝</span> תמלול הסרטון</summary>
+        {#each VIDEO.transcript as para}
+            <p>{para}</p>
+        {/each}
+    </details>
 
     <!-- Annual Savings Counter -->
     <div class="savings-counter-final" role="region" aria-label="חיסכון שנתי">
@@ -508,6 +541,44 @@
 </div>
 
 <style>
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    /* תמלול הסרטון - שורה קטנה צמודה לסרטון, נפתח לפי בקשה */
+    .video-transcript {
+        width: 66%;
+        max-width: 860px;
+        margin-top: -0.6rem;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        text-align: right;
+    }
+    .video-transcript summary {
+        width: fit-content;
+        margin: 0 auto;
+        cursor: pointer;
+        color: #facc15;
+        font-weight: 700;
+    }
+    .video-transcript p {
+        margin: 0.4rem 0 0;
+    }
+    @media (max-width: 768px) {
+        .video-transcript {
+            width: 85%;
+            margin-top: -0.4rem;
+        }
+    }
+
     :global(.hl-whatsapp) {
         display: inline-block;
         font-size: 1.35em;
