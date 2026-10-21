@@ -550,6 +550,16 @@
         display: inline-block;
         transform-origin: center;
     }
+    /* במסך רחב - כותרת בשורה אחת; עודף נשפך לרווח הריק שלפני עמודת הסטטוס
+       (min-width:0 כדי שהעמודה לא תתרחב ותדחוף את הגריד) */
+    @media (min-width: 1366px) {
+        .purchase-info {
+            min-width: 0;
+        }
+        .cellular-title {
+            white-space: nowrap;
+        }
+    }
     .cellular-title.pop {
         animation: cellular-pop 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
     }
