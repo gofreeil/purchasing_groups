@@ -376,7 +376,11 @@
             if (value === info.original) continue;
             // החלפה שחזרה לנוסח שבקוד נשלחת כ-null - ההחלפה נמחקת (גם במפתח-דף של מספר);
             // ריק = הטקסט נמחק מהדף
-            texts[info.key] = info.key.startsWith('text:') && value === info.orig ? null : value;
+            if (info.key.startsWith('text:')) texts[info.key] = value === info.orig ? null : value;
+            // כיתוב של i18n/עסקה שנמחק כולו - נמחק כהחלפה ריקה לפי הטקסט שבדף (דריסה
+            // ריקה של הנתונים הייתה מחזירה אותו לקוד), וכך גם אפשר להחזיר אותו מהגלגל
+            else if (!value) texts[`text:${replaceKeyFor(info.original)}`] = '';
+            else texts[info.key] = value;
         }
         for (const [box, b] of boxes) {
             const value = boxValue(box);
