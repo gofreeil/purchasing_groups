@@ -344,6 +344,7 @@ export const CAMPAIGNS = {
         can_join: true,
         is_new: true,
         new_badge_text: 'חדש!',
+        join_link: 'https://docs.google.com/forms/d/e/1FAIpQLSeLSAYxjk-VDPryxvtJcQRkUqzNdvHc_jxKPCk1tdx2mFajPw/viewform?usp=header',
         join_cta_subtitle: 'בדיקת מיחזור משכנתא בתנאי קבוצה',
         benefits: {
             title: 'היתרונות שלך',
