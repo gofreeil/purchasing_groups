@@ -7,6 +7,9 @@
     import JsonLd from "$lib/components/JsonLd.svelte";
     import TapHint from "$lib/components/TapHint.svelte";
     import DoneHand from "$lib/components/DoneHand.svelte";
+    import GuideVideo from "$lib/components/GuideVideo.svelte";
+    import VideoTranscript from "$lib/components/VideoTranscript.svelte";
+    import { VIDEO } from "$lib/video.js";
     import { readJoined } from "$lib/joined.js";
     import { track } from "$lib/track.js";
     import {
@@ -25,81 +28,6 @@
     // היד המצביעה על הכרטיס שלהן הופכת ליד שמסמנת "בוצע". נקרא רק בצד הלקוח.
     /** @type {Set<string>} */
     let joined = $state(new Set());
-
-    // סרטון ההדרכה (eitanium). נגן צף בדסקטופ: אחרי שהגולש לחץ על הנגן
-    // והסרטון מתנגן, גלילה אל מתחתיו מצמידה אותו לפינת המסך. רק CSS - העברת
-    // ה-iframe ב-DOM הייתה טוענת אותו מחדש.
-    const VIDEO_ORIGIN = "https://eitanium.org";
-    // פרטי הסרטון ל-VideoObject ולתמלול. מקור: דף הסרטון באיתניום (547) והכתוביות
-    // שלו (he.vtt). החלפת סרטון מחייבת לעדכן כאן את כל השדות.
-    const VIDEO = {
-        embedUrl: `${VIDEO_ORIGIN}/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1`,
-        contentUrl: `${VIDEO_ORIGIN}/videos/video_261020161019_vd68e/index.mp4`,
-        thumbnailUrl: `${VIDEO_ORIGIN}/videos/video_261020161019_vd68e/video_261020161019_vd68e.jpg`,
-        uploadDate: "2026-10-20T01:10:19+03:00",
-        duration: "PT2M7S",
-        name: "קבוצות רכישה - איך חוסכים יחד בסלולר, באינטרנט, בגז ובחשמל",
-        description:
-            "סרטון הדרכה של 2 דקות: התנועה החברתית יוצאים לחירות מסבירה איך קבוצות רכישה מוזילות את השירותים שמשלמים עליהם כל חודש - סלולר, אינטרנט, גז, חשמל וסולארי - ואיך מצטרפים.",
-        transcript: [
-            "ברוכים הבאים למהפכה החברתית של העם, התנועה החברתית שעוזרת לכם ללא מאמץ לחסוך כסף בכל חודש ולפרק את המונופולים של העולם הישן.",
-            "אז ברוכים הבאים לתנועה החברתית יוצאים לחירות. אנחנו כאן כדי לקיים כוח מאוחד של העם שאי אפשר להרוס אותו. לא פוליטיקה שתלויה בבעלי ההון, לא הרשות המחוקקת שבנויה על הבנקים ולא הרשות להגבלים עסקיים שכל מי שמאייש אותה הוא איזושהי חברה של משפחת עופר או עוד אחד מהטייקונים.",
-            "מה אנחנו עושים? אנחנו מתארגנים בקבוצות רכישה לרכוש בהוזלה קודם כל את כל השירותים שאנחנו משלמים עליהם יום-יום, שזה אומר סלולר, אינטרנט, גז, חשמל, סולארי ועוד ועוד.",
-            "המטרה שלנו זה להתקדם לרמה שאנחנו רוכשים את כל החקלאות ישירות מהחקלאים אלינו לשכונה. אנחנו נוריד את מחירי המזון ישירות אל ועדי השכונות באופן שמונופולים לא יכולים להתלכד שוב ולהפריד את האזרח. אנחנו מחברים את האזרח, מפרקים את המונופולים.",
-            "לכן כל מה שאתם צריכים לעשות זה פשוט להצטרף לקבוצות, להוריד לכם את המחיר. קל, פשוט. ספרו לחברים, שתפו איתם את האתר - כל התוכניות שלנו מופיעות במרוכז אחת אחרי השנייה. יורידו לעצמם את כל הרכישות החודשיות, ואז מתקדמים אל שוק המזון בישראל.",
-            "יוצאים לחירות - המהפכה בידיים שלנו. כוחנו באחדותנו.",
-        ],
-    };
-    /** @type {HTMLDivElement | undefined} */
-    let videoBox = $state();
-    /** @type {HTMLIFrameElement | undefined} */
-    let videoFrame = $state();
-    let videoClicked = false;
-    let videoPlaying = false;
-    let videoOutOfView = false;
-    let videoFloatClosed = false;
-    let videoFloating = $state(false);
-    function updateVideoFloat() {
-        if (!videoOutOfView || videoFloatClosed) videoFloating = false;
-        else if (videoClicked && videoPlaying) videoFloating = true;
-        // עצירה בתוך הנגן הצף לא מורידה אותו - רק סגירה או חזרה לסרטון
-    }
-    function closeVideoFloat() {
-        videoFloatClosed = true;
-        videoFrame?.contentWindow?.postMessage("pause", VIDEO_ORIGIN);
-        updateVideoFloat();
-    }
-    onMount(() => {
-        const desktop = matchMedia("(min-width: 769px)");
-        const io = new IntersectionObserver(([e]) => {
-            videoOutOfView = desktop.matches && !e.isIntersecting && e.boundingClientRect.top < 0;
-            // חזרה לסרטון מאפסת את הסגירה - בגלילה הבאה הוא יצוף שוב
-            if (e.isIntersecting) videoFloatClosed = false;
-            updateVideoFloat();
-        });
-        if (videoBox) io.observe(videoBox);
-        // לחיצה בתוך iframe זר לא מגיעה לדף - רק blur של החלון כשהפוקוס עובר אליו
-        const onBlur = () => {
-            if (document.activeElement === videoFrame) videoClicked = true;
-        };
-        // הנגן של eitanium מדווח לדף העליון על play/pause/ended
-        /** @param {MessageEvent} e */
-        const onMessage = (e) => {
-            if (e.origin !== VIDEO_ORIGIN || e.source !== videoFrame?.contentWindow) return;
-            const type = e.data?.type;
-            if (type === "play") videoPlaying = true;
-            else if (type === "pause" || type === "ended") videoPlaying = false;
-            else return;
-            updateVideoFloat();
-        };
-        window.addEventListener("blur", onBlur);
-        window.addEventListener("message", onMessage);
-        return () => {
-            io.disconnect();
-            window.removeEventListener("blur", onBlur);
-            window.removeEventListener("message", onMessage);
-        };
-    });
 
     // מבצע מוקפא (campaign.frozen): לחיצה על הכרטיס מציגה הודעה קצרה
     // במקום לעבור לדף העסקה
@@ -279,28 +207,7 @@
     </h1>
 
     <div class="video-row">
-        <div class="video-container-large" bind:this={videoBox}>
-            <div class="video-frame" class:video-floating={videoFloating}>
-                <iframe
-                    bind:this={videoFrame}
-                    src={VIDEO.embedUrl}
-                    title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
-                    aria-describedby="video-desc"
-                    frameborder="0"
-                    loading="lazy"
-                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                    allowfullscreen
-                ></iframe>
-                {#if videoFloating}
-                    <button
-                        type="button"
-                        class="video-float-close"
-                        aria-label="סגירת הנגן הצף"
-                        onclick={closeVideoFloat}>✕</button
-                    >
-                {/if}
-            </div>
-        </div>
+        <GuideVideo />
 
         <div class="together-side">
             <p class="together-tagline">קהילות יוצאים לחירות | ביחד | מעלים את התדר</p>
@@ -322,15 +229,7 @@
         </div>
     </div>
 
-    <!-- נגישות: תיאור הסרטון לקוראי מסך (aria-describedby של ה-iframe) + תמלול מלא
-         מקופל - לעיוורים ולכבדי שמיעה, וגם טקסט שגוגל קורא -->
-    <p id="video-desc" class="sr-only">{VIDEO.description} התמלול המלא נמצא מתחת לסרטון.</p>
-    <details class="video-transcript">
-        <summary><span aria-hidden="true">📝</span> תמלול הסרטון</summary>
-        {#each VIDEO.transcript as para}
-            <p>{para}</p>
-        {/each}
-    </details>
+    <VideoTranscript />
 
     <!-- Annual Savings Counter -->
     <div class="savings-counter-final" role="region" aria-label="חיסכון שנתי">
@@ -541,44 +440,6 @@
 </div>
 
 <style>
-    .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-    }
-
-    /* תמלול הסרטון - שורה קטנה צמודה לסרטון, נפתח לפי בקשה */
-    .video-transcript {
-        width: 66%;
-        max-width: 860px;
-        margin-top: -0.6rem;
-        font-size: 0.85rem;
-        line-height: 1.6;
-        text-align: right;
-    }
-    .video-transcript summary {
-        width: fit-content;
-        margin: 0 auto;
-        cursor: pointer;
-        color: #facc15;
-        font-weight: 700;
-    }
-    .video-transcript p {
-        margin: 0.4rem 0 0;
-    }
-    @media (max-width: 768px) {
-        .video-transcript {
-            width: 85%;
-            margin-top: -0.4rem;
-        }
-    }
-
     :global(.hl-whatsapp) {
         display: inline-block;
         font-size: 1.35em;

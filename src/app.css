@@ -621,6 +621,12 @@ a {
     border: none;
 }
 
+/* בדף אודותינו: הסרטון ממלא את רוחב הכרטיס */
+.video-container-large.video-fill {
+    width: 100%;
+    max-width: none;
+}
+
 .video-frame {
     position: absolute;
     inset: 0;
