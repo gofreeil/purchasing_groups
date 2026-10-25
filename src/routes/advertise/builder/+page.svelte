@@ -5,7 +5,13 @@
     import { adImgFit, AD_ZOOM_MIN, AD_ZOOM_MAX } from "$lib/adImageFit.js";
     import { logoClearance } from "$lib/logoClearance.js";
     import { normalizePlanDays } from "$lib/adPlans.js";
-    import { localAdStyle, legacyAdStyle, autoLogoAnchor } from "$lib/adStyle.js";
+    import {
+        bandCorners, logoCornerSide, legacyAdStyle,
+        DEFAULT_SUB_FONT_SIZE, SUB_FONT_SIZE_MIN, SUB_FONT_SIZE_MAX,
+        DEFAULT_SUB_LINE_HEIGHT, SUB_LINE_HEIGHT_MIN, SUB_LINE_HEIGHT_MAX,
+    } from "$lib/adStyle.js";
+    import { gradientStyle } from "$lib/adGradient.js";
+    import { builderT, fmt } from "$lib/translations/builder.js";
     import { AD_DRAFT_KEY, getAdEditTarget, setAdEditTarget, clearAdEditTarget } from "$lib/adDraft.js";
     import {
         AD_EFFECTIVE_LIMIT, MAIN_IMAGE_MAX_BYTES,
@@ -14,7 +20,9 @@
     } from "$lib/adPayloadBudget.js";
 
     // בונה הפרסומות - הועתק מאתר "קהילה בשכונה" והותאם לקבוצות רכישה:
-    // עברית בלבד, CSS רגיל (בלי Tailwind), גרדיאנטים כמחרוזות CSS.
+    // CSS רגיל (בלי Tailwind), גרדיאנטים כמחרוזות CSS. עיצוב הכרטיס, הדמו
+    // החי והשפות (עברית/אנגלית/רוסית) זהים לבילדר שם, כדי שפרסומת שהופצה
+    // משם תיערך כאן בלי לאבד אף פרמטר.
 
     let { data } = $props();
 
@@ -66,7 +74,126 @@
     let logoShape = $state(/** @type {'square' | 'circle'} */ ("square"));
     let hasCircleCrop = $state(false);
     let logoPosition = $state(/** @type {'right' | 'left' | 'cta'} */ ("right"));
+    // נהיה true ברגע שהמפרסם בוחר מיקום בעצמו. עד אז המיקום מתחלף
+    // אוטומטית: כותרת ארוכה → מעל ה-CTA, אחרת → פינה ימנית.
     let logoPositionExplicit = $state(false);
+
+    // ===== מיקום חופשי של הלוגו =====
+    // מרכז הלוגו באחוזי משבצת התמונה. null בשני הצירים = הלוגו עדיין יושב
+    // על העוגן (logoPosition). ברגע שהמפרסם גורר אותו - או מזיז בחיצי
+    // המקלדת - כאן נשמרת הנקודה המדויקת שבה שחרר. כמו בקהילה בשכונה.
+    let logoFreeX = $state(/** @type {number | null} */ (null));
+    let logoFreeY = $state(/** @type {number | null} */ (null));
+    let logoFree = $derived(logoFreeX !== null && logoFreeY !== null);
+    let logoDragging = $state(false);
+
+    // מחלקת העוגן כל עוד הלוגו במקום ברירת המחדל
+    let logoAnchorClass = $derived(
+        logoPosition === "left" ? "ad-logo-left" : logoPosition === "cta" ? "ad-logo-cta" : "ad-logo-right"
+    );
+    // מיקום inline - רק אחרי שהמפרסם הזיז את הלוגו בעצמו
+    let logoFreeStyle = $derived(
+        logoFree
+            ? `left:${logoFreeX}%; top:${logoFreeY}%; right:auto; bottom:auto; transform:translate(-50%,-50%);`
+            : ""
+    );
+
+    // מידות הגרירה, נמדדות בלחיצה מול התצוגה שבה הלוגו נמצא (הדמו החי /
+    // כרטיס התצוגה המקדימה), כך שאותו קוד עובד בשתיהן
+    let dragWrapW = 0, dragWrapH = 0;
+    let dragHalfW = 0, dragHalfH = 0;
+    let dragStartX = 0, dragStartY = 0;
+    let dragBaseCX = 0, dragBaseCY = 0;
+
+    /**
+     * מודד את הלוגו ואת משבצת התצוגה; מחזיר את מרכז הלוגו בפיקסלים בתוך המשבצת
+     * @param {HTMLElement} el
+     * @returns {{ cx: number, cy: number } | null}
+     */
+    function measureLogo(el) {
+        const wrap = el.parentElement;
+        if (!wrap) return null;
+        const wr = wrap.getBoundingClientRect();
+        const lr = el.getBoundingClientRect();
+        if (!wr.width || !wr.height || !lr.width || !lr.height) return null;
+        dragWrapW = wr.width; dragWrapH = wr.height;
+        dragHalfW = lr.width / 2; dragHalfH = lr.height / 2;
+        return { cx: lr.left - wr.left + dragHalfW, cy: lr.top - wr.top + dragHalfH };
+    }
+
+    /**
+     * שומר מרכז לוגו (פיקסלים בתוך המשבצת), מוגבל כך שלא ייצא מהמודעה
+     * @param {number} cx
+     * @param {number} cy
+     */
+    function commitLogoCenter(cx, cy) {
+        const x = Math.min(Math.max(cx, dragHalfW), dragWrapW - dragHalfW);
+        const y = Math.min(Math.max(cy, dragHalfH), dragWrapH - dragHalfH);
+        logoFreeX = Math.round((x / dragWrapW) * 1000) / 10;
+        logoFreeY = Math.round((y / dragWrapH) * 1000) / 10;
+        logoPositionExplicit = true; // עוצר את ההחלפה האוטומטית ימין/CTA
+    }
+
+    /** @param {PointerEvent} e */
+    function logoPointerDown(e) {
+        const el = /** @type {HTMLElement} */ (e.currentTarget);
+        const center = measureLogo(el);
+        if (!center) return;
+        e.preventDefault();
+        e.stopPropagation();
+        dragBaseCX = center.cx; dragBaseCY = center.cy;
+        dragStartX = e.clientX; dragStartY = e.clientY;
+        logoDragging = true;
+        try { el.setPointerCapture(e.pointerId); } catch {}
+    }
+    /** @param {PointerEvent} e */
+    function logoPointerMove(e) {
+        if (!logoDragging) return;
+        commitLogoCenter(dragBaseCX + (e.clientX - dragStartX), dragBaseCY + (e.clientY - dragStartY));
+    }
+    /** @param {PointerEvent} e */
+    function logoPointerUp(e) {
+        if (!logoDragging) return;
+        logoDragging = false;
+        try { /** @type {HTMLElement} */ (e.currentTarget).releasePointerCapture(e.pointerId); } catch {}
+    }
+    /**
+     * מקבילת מקלדת לגרירה: חץ מזיז ב-1% מהמשבצת, Shift+חץ ב-5%
+     * @param {KeyboardEvent} e
+     */
+    function logoKeyDown(e) {
+        /** @type {Record<string, [number, number]>} */
+        const keys = {
+            ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1],
+        };
+        const dir = keys[e.key];
+        if (!dir) return;
+        const el = /** @type {HTMLElement} */ (e.currentTarget);
+        const center = measureLogo(el);
+        if (!center) return;
+        e.preventDefault();
+        const stepPct = e.shiftKey ? 5 : 1;
+        commitLogoCenter(
+            center.cx + dir[0] * (dragWrapW * stepPct / 100),
+            center.cy + dir[1] * (dragWrapH * stepPct / 100),
+        );
+    }
+    /** חזרה למיקום האוטומטי של ברירת המחדל */
+    function resetLogoPosition() {
+        logoFreeX = null;
+        logoFreeY = null;
+        logoPositionExplicit = false;
+    }
+    /**
+     * העוגנים הקבועים נשארים קיצורי לחיצה אחת - הם מבטלים מיקום חופשי
+     * @param {'right' | 'left' | 'cta'} pos
+     */
+    function setLogoAnchor(pos) {
+        logoFreeX = null;
+        logoFreeY = null;
+        logoPosition = pos;
+        logoPositionExplicit = true;
+    }
 
     // ===== חיתוך עגול ללוגו =====
     const CROP_STAGE = 320;
@@ -166,6 +293,10 @@
     let titleColor = $state("#ffffff");
     let titleOffsetY = $state(0);
     let subtitle = $state("");
+    // טיפוגרפיית הסלוגן (שלב 5) - גודל, רווח בין שורות ויישור
+    let subFontSize = $state(DEFAULT_SUB_FONT_SIZE);
+    let subLineHeight = $state(DEFAULT_SUB_LINE_HEIGHT);
+    let subAlign = $state(/** @type {import('$lib/adStyle.js').SubAlign} */ ("right"));
     let hoverText = $state("");
     let cta = $state("הקלק לפרטים והזמנות");
     // גרדיאנט כמחרוזת CSS - תואם לשדה color של adsData.js באתר הזה
@@ -256,14 +387,43 @@
         return () => window.removeEventListener("resize", onResize);
     });
 
-    // גובה הפס האלכסוני - משתני CSS גלובליים שכל התצוגות משתמשות בהם
+    // גובה הפס האלכסוני וטיפוגרפיית הסלוגן - משתני CSS על ה-root, כדי שכל
+    // התצוגות בבילדר (דמו חי, נייד, מחשב) יתעדכנו יחד. bandCorners הוא אותו
+    // חישוב שהטור הימני מקבל מ-adStyleVars, כך שמה שמכוונים כאן הוא מה שיתפרסם.
     $effect(() => {
         if (!browser) return;
-        const topLeft = Math.max(0, Math.min(100, 100 - diagHeight));
-        const topRight = Math.max(0, topLeft - 10);
-        document.documentElement.style.setProperty("--diag-top-left", `${topLeft}%`);
-        document.documentElement.style.setProperty("--diag-top-right", `${topRight}%`);
+        const { left, right } = bandCorners(diagHeight);
+        const root = document.documentElement.style;
+        root.setProperty("--diag-top-left", `${left}%`);
+        root.setProperty("--diag-top-right", `${right}%`);
+        root.setProperty("--sub-size", `${subFontSize}rem`);
+        root.setProperty("--sub-lh", String(subLineHeight));
+        root.setProperty("--sub-align", subAlign);
     });
+
+    // ===== העיצוב שנוסע עם המודעה =====
+    // כל מה שהמפרסם מחליט על הכרטיס נארז כאן ונשלח עם המודעה כ-landing._adStyle -
+    // אותו מבנה בדיוק כמו בקהילה בשכונה (adStyle.js), כך שגם פרסומת שהופצה
+    // משם נשמרת חזרה בלי לאבד אף פרמטר.
+    let adStyle = $derived({
+        logoShape,
+        logoAnchor: logoPosition,
+        logoX: logoFreeX,
+        logoY: logoFreeY,
+        bandHeight: diagHeight,
+        titleOffsetY,
+        titleColor,
+        subFontSize,
+        subLineHeight,
+        subAlign,
+    });
+
+    // שמירת מקום ללוגו בפינה שליד הכותרת - אותו כלל משותף של הטור הימני,
+    // כך שהכותרת נשברת אותו דבר בתצוגה ובאתר
+    let titleCornerSide = $derived(logoCornerSide(adStyle, Boolean(logo)));
+
+    // הכיתובים בשפת האתר
+    let T = $derived($builderT);
 
     /**
      * @param {HTMLElement | null} el
@@ -359,7 +519,7 @@
                 advantages: [...landingAdvantages],
                 uniqueness, phone, whatsapp, website, email, address, hours,
                 products: products.map((p) => ({ ...p })),
-                _adStyle: localAdStyle({ logoShape, logoPosition, diagHeight, titleColor, titleOffsetY }),
+                _adStyle: { ...adStyle },
             },
             ownerCode: "",
             requestedDurationDays: 365,
@@ -387,7 +547,7 @@
     async function processImageFile(file, target) {
         if (!file) return;
         if (!file.type.startsWith("image/")) {
-            alert("נא להעלות קובץ תמונה");
+            alert(T.uploadImageFile);
             return;
         }
         uploadIssue = { zone: "", msg: "" };
@@ -404,8 +564,7 @@
         if (!fit.ok) {
             uploadIssue = {
                 zone: target,
-                msg: `אין מקום לתמונה הזו — המודעה כולה מוגבלת במשקל, וגם אחרי דחיסה היא חורגת. `
-                    + `הסירו או החליפו תמונה אחרת (הכבדה ביותר: ${heaviestImageLabel(candidate) || "—"}) ונסו שוב.`,
+                msg: fmt(T.noRoom, { img: heaviestImageLabel(candidate, imageLabels) || "—" }),
             };
             return; // המצב הקיים לא נגעו בו — אפשר להמשיך לעבוד
         }
@@ -516,42 +675,56 @@
 
     // ===== פלטת צבעים - גרדיאנטים כמחרוזות CSS =====
     const palettes = [
-        { id: "amber",    label: "ענבר",       cls: "linear-gradient(135deg, #f59e0b, #ea580c)" },
-        { id: "orange",   label: "כתום",       cls: "linear-gradient(135deg, #f97316, #ef4444)" },
-        { id: "yellow",   label: "צהוב",       cls: "linear-gradient(135deg, #facc15, #f59e0b)" },
-        { id: "red",      label: "אדום",       cls: "linear-gradient(135deg, #dc2626, #db2777)" },
-        { id: "rose",     label: "ורוד עז",    cls: "linear-gradient(135deg, #f43f5e, #c026d3)" },
-        { id: "crimson",  label: "בורדו",      cls: "linear-gradient(135deg, #be123c, #7f1d1d)" },
-        { id: "fuchsia",  label: "פוקסיה",     cls: "linear-gradient(135deg, #d946ef, #9333ea)" },
-        { id: "purple",   label: "סגול",       cls: "linear-gradient(135deg, #9333ea, #db2777)" },
-        { id: "violet",   label: "סגול כהה",   cls: "linear-gradient(135deg, #7c3aed, #4338ca)" },
-        { id: "indigo",   label: "אינדיגו",    cls: "linear-gradient(135deg, #4f46e5, #2563eb)" },
-        { id: "blue",     label: "כחול",       cls: "linear-gradient(135deg, #2563eb, #0891b2)" },
-        { id: "sky",      label: "תכלת",       cls: "linear-gradient(135deg, #38bdf8, #3b82f6)" },
-        { id: "teal",     label: "טורקיז",     cls: "linear-gradient(135deg, #14b8a6, #0891b2)" },
-        { id: "emerald",  label: "אזמרגד",     cls: "linear-gradient(135deg, #10b981, #0f766e)" },
-        { id: "green",    label: "ירוק",       cls: "linear-gradient(135deg, #16a34a, #059669)" },
-        { id: "lime",     label: "ליים",       cls: "linear-gradient(135deg, #a3e635, #22c55e)" },
-        { id: "slate",    label: "אפור",       cls: "linear-gradient(135deg, #64748b, #374151)" },
-        { id: "dark",     label: "כהה",        cls: "linear-gradient(135deg, #1f2937, #0f172a)" },
-        { id: "peach",    label: "אפרסק",      cls: "linear-gradient(135deg, #fdba74, #f472b6)" },
-        { id: "mint",     label: "מנטה",       cls: "linear-gradient(135deg, #6ee7b7, #2dd4bf)" },
-        { id: "gold",     label: "זהב",        cls: "linear-gradient(135deg, #eab308, #b45309)" },
-        { id: "midnight", label: "חצות",       cls: "linear-gradient(135deg, #334155, #1e3a8a)" },
+        { id: "amber",    labelKey: "pAmber",    cls: "linear-gradient(135deg, #f59e0b, #ea580c)" },
+        { id: "orange",   labelKey: "pOrange",   cls: "linear-gradient(135deg, #f97316, #ef4444)" },
+        { id: "yellow",   labelKey: "pYellow",   cls: "linear-gradient(135deg, #facc15, #f59e0b)" },
+        { id: "red",      labelKey: "pRed",      cls: "linear-gradient(135deg, #dc2626, #db2777)" },
+        { id: "rose",     labelKey: "pRose",     cls: "linear-gradient(135deg, #f43f5e, #c026d3)" },
+        { id: "crimson",  labelKey: "pCrimson",  cls: "linear-gradient(135deg, #be123c, #7f1d1d)" },
+        { id: "fuchsia",  labelKey: "pFuchsia",  cls: "linear-gradient(135deg, #d946ef, #9333ea)" },
+        { id: "purple",   labelKey: "pPurple",   cls: "linear-gradient(135deg, #9333ea, #db2777)" },
+        { id: "violet",   labelKey: "pViolet",   cls: "linear-gradient(135deg, #7c3aed, #4338ca)" },
+        { id: "indigo",   labelKey: "pIndigo",   cls: "linear-gradient(135deg, #4f46e5, #2563eb)" },
+        { id: "blue",     labelKey: "pBlue",     cls: "linear-gradient(135deg, #2563eb, #0891b2)" },
+        { id: "sky",      labelKey: "pSky",      cls: "linear-gradient(135deg, #38bdf8, #3b82f6)" },
+        { id: "teal",     labelKey: "pTeal",     cls: "linear-gradient(135deg, #14b8a6, #0891b2)" },
+        { id: "emerald",  labelKey: "pEmerald",  cls: "linear-gradient(135deg, #10b981, #0f766e)" },
+        { id: "green",    labelKey: "pGreen",    cls: "linear-gradient(135deg, #16a34a, #059669)" },
+        { id: "lime",     labelKey: "pLime",     cls: "linear-gradient(135deg, #a3e635, #22c55e)" },
+        { id: "slate",    labelKey: "pSlate",    cls: "linear-gradient(135deg, #64748b, #374151)" },
+        { id: "dark",     labelKey: "pDark",     cls: "linear-gradient(135deg, #1f2937, #0f172a)" },
+        { id: "peach",    labelKey: "pPeach",    cls: "linear-gradient(135deg, #fdba74, #f472b6)" },
+        { id: "mint",     labelKey: "pMint",     cls: "linear-gradient(135deg, #6ee7b7, #2dd4bf)" },
+        { id: "gold",     labelKey: "pGold",     cls: "linear-gradient(135deg, #eab308, #b45309)" },
+        { id: "midnight", labelKey: "pMidnight", cls: "linear-gradient(135deg, #334155, #1e3a8a)" },
     ];
 
     const titleColors = [
-        { c: "#ffffff", label: "לבן" },
-        { c: "#fbbf24", label: "זהב" },
-        { c: "#fde047", label: "צהוב" },
-        { c: "#fb923c", label: "כתום" },
-        { c: "#f87171", label: "אדום" },
-        { c: "#f9a8d4", label: "ורוד" },
-        { c: "#c4b5fd", label: "סגול" },
-        { c: "#67e8f9", label: "תכלת" },
-        { c: "#86efac", label: "ירוק" },
-        { c: "#0f172a", label: "שחור" },
+        { c: "#ffffff", labelKey: "cWhite" },
+        { c: "#fbbf24", labelKey: "cGold" },
+        { c: "#fde047", labelKey: "cYellow" },
+        { c: "#fb923c", labelKey: "cOrange" },
+        { c: "#f87171", labelKey: "cRed" },
+        { c: "#f9a8d4", labelKey: "cPink" },
+        { c: "#c4b5fd", labelKey: "cPurple" },
+        { c: "#67e8f9", labelKey: "cCyan" },
+        { c: "#86efac", labelKey: "cGreen" },
+        { c: "#0f172a", labelKey: "cBlack" },
     ];
+
+    // יישור הסלוגן (שלב 5) - אותן ארבע אפשרויות של קהילה בשכונה
+    /** @type {{ id: import('$lib/adStyle.js').SubAlign, labelKey: string, icon: string }[]} */
+    const subAligns = [
+        { id: "right",   labelKey: "s5AlignRight",   icon: "➡" },
+        { id: "center",  labelKey: "s5AlignCenter",  icon: "↔" },
+        { id: "left",    labelKey: "s5AlignLeft",    icon: "⬅" },
+        { id: "justify", labelKey: "s5AlignJustify", icon: "☰" },
+    ];
+
+    /** כיתוב לפי מפתח שמגיע מנתונים (פלטה, צבעים, יישור) @param {string} key */
+    function tr(key) {
+        return /** @type {Record<string, string>} */ (/** @type {unknown} */ (T))[key] ?? key;
+    }
 
     // ===== תצוגה מקדימה =====
     let previewMode = $state(/** @type {'mobile' | 'desktop'} */ ("mobile"));
@@ -596,18 +769,26 @@
             cta = ad.cta || "הקלק לפרטים והזמנות";
             gradient = ad.gradient || gradient;
 
-            // העיצוב שרץ על האתר: השמור עם הפרסומת, ובפרסומת ותיקה בלי
-            // עיצוב שמור - ברירות המחדל שהיא מוצגת בהן בטור (legacyAdStyle)
+            // העיצוב שרץ על האתר - כל השדות של landing._adStyle, גם של פרסומת
+            // שהופצה מקהילה בשכונה (לוגו חופשי, טיפוגרפיית הסלוגן), כדי שעריכה
+            // ושמירה לא יאבדו אף אחד מהם. פרסומת ותיקה בלי עיצוב שמור מקבלת
+            // את מה שהיא מוצגת בו בטור (legacyAdStyle).
             const st = ad.adStyle ?? legacyAdStyle(title);
             logoShape = st.logoShape;
             // הלוגו השמור כבר חתוך לעיגול - "עריכת החיתוך" זמינה מיד
             hasCircleCrop = st.logoShape === "circle";
             logoPosition = st.logoAnchor;
-            // מיקום ששונה מברירת המחדל החכמה נבחר ידנית - שהיא לא תדרוס אותו
-            logoPositionExplicit = st.logoAnchor !== autoLogoAnchor(title);
+            // עיצוב שמור נבחר ידנית - ברירת המחדל החכמה לא תדרוס אותו.
+            // בפרסומת ותיקה היא ממשיכה לפעול, בדיוק כמו בטור.
+            logoPositionExplicit = Boolean(ad.adStyle);
+            logoFreeX = st.logoX;
+            logoFreeY = st.logoY;
             diagHeight = st.bandHeight;
             titleColor = st.titleColor;
             titleOffsetY = st.titleOffsetY;
+            subFontSize = st.subFontSize;
+            subLineHeight = st.subLineHeight;
+            subAlign = st.subAlign;
 
             const L = ad.landing ?? {};
             landingHeadline = L.headline ?? "";
@@ -682,6 +863,8 @@
                     hasCircleCrop = Boolean(d.hasCircleCrop);
                     logoPosition = d.logoPosition ?? "right";
                     logoPositionExplicit = Boolean(d.logoPositionExplicit);
+                    logoFreeX = typeof d.logoFreeX === "number" ? d.logoFreeX : null;
+                    logoFreeY = typeof d.logoFreeY === "number" ? d.logoFreeY : null;
                     mainImage = d.mainImage ?? "";
                     mainImageObjectX = typeof d.mainImageObjectX === "number" ? d.mainImageObjectX : 50;
                     mainImageObjectY = typeof d.mainImageObjectY === "number" ? d.mainImageObjectY : 50;
@@ -690,6 +873,9 @@
                     titleColor = d.titleColor ?? "#ffffff";
                     titleOffsetY = typeof d.titleOffsetY === "number" ? d.titleOffsetY : 0;
                     subtitle = d.subtitle ?? "";
+                    subFontSize = typeof d.subFontSize === "number" ? d.subFontSize : DEFAULT_SUB_FONT_SIZE;
+                    subLineHeight = typeof d.subLineHeight === "number" ? d.subLineHeight : DEFAULT_SUB_LINE_HEIGHT;
+                    subAlign = d.subAlign === "center" || d.subAlign === "left" || d.subAlign === "justify" ? d.subAlign : "right";
                     hoverText = d.hoverText ?? "";
                     cta = d.cta || "הקלק לפרטים והזמנות";
                     gradient = d.gradient ?? gradient;
@@ -744,10 +930,12 @@
         };
     });
 
-    // ברירת מחדל חכמה למיקום הלוגו: כותרת ארוכה → ליד הכפתור
+    // ברירת מחדל חכמה למיקום הלוגו: כותרת ארוכה (מעל 20 תווים) לא משאירה
+    // מקום ללוגו בפינה שליד הכותרת, ולכן הוא יורד ליד ה-CTA. נעצרת ברגע
+    // שהמפרסם בוחר מיקום בעצמו.
     $effect(() => {
         if (!logo || logoPositionExplicit) return;
-        const next = autoLogoAnchor(title);
+        const next = title.trim().length > 20 ? "cta" : "right";
         if (logoPosition !== next) logoPosition = next;
     });
 
@@ -758,9 +946,9 @@
     $effect(() => {
         if (!browser) return;
         const snapshot = {
-            logo, logoOriginal, hasCircleCrop, logoShape, logoPosition, logoPositionExplicit,
+            logo, logoOriginal, hasCircleCrop, logoShape, logoPosition, logoPositionExplicit, logoFreeX, logoFreeY,
             mainImage, mainImageObjectX, mainImageObjectY, mainImageZoom, title, titleColor, titleOffsetY,
-            subtitle, hoverText, cta, gradient, diagHeight,
+            subtitle, subFontSize, subLineHeight, subAlign, hoverText, cta, gradient, diagHeight,
             landingHeadline, landingPitch, landingExtended, landingImage, landingAdvantages,
             uniqueness, phone, whatsapp, website, email, address, hours, products,
         };
@@ -773,7 +961,7 @@
     });
 
     function resetDraft() {
-        if (!confirm("לאפס את הטיוטה ולהתחיל מחדש?")) return;
+        if (!confirm(T.resetConfirm)) return;
         try { localStorage.removeItem(LS_KEY); } catch {}
         location.reload();
     }
@@ -783,14 +971,21 @@
     // נבדק כאן, וגם משקל המודעה — במקום שדף הנחיתה יחזיר את המשתמש אחורה.
     let adWeightBytes = $derived.by(() => bodyBytes(buildPayloadSnapshot()));
     let overweight = $derived(adWeightBytes > AD_EFFECTIVE_LIMIT);
-    let heaviestLabel = $derived.by(() => heaviestImageLabel(buildPayloadSnapshot()));
+    // שמות התמונות בהודעות המשקל, בשפת האתר
+    let imageLabels = $derived({
+        main: T.imgMain,
+        logo: T.imgLogo,
+        landing: T.imgLanding,
+        product: (/** @type {number} */ n) => fmt(T.imgProduct, { n }),
+    });
+    let heaviestLabel = $derived.by(() => heaviestImageLabel(buildPayloadSnapshot(), imageLabels));
     let cardMissing = $derived.by(() => {
         /** @type {string[]} */
         const out = [];
-        if (!mainImage) out.push("התמונה הראשית (שלב 1)");
-        if (!title.trim()) out.push("הכותרת (שלב 3)");
-        if (!subtitle.trim()) out.push("הסלוגן (שלב 5)");
-        if (!hoverText.trim()) out.push("הטקסט בריחוף (שלב 6)");
+        if (!mainImage) out.push(T.missMain);
+        if (!title.trim()) out.push(T.missTitle);
+        if (!subtitle.trim()) out.push(T.missSubtitle);
+        if (!hoverText.trim()) out.push(T.missHover);
         return out;
     });
     let canLeaveToLanding = $derived(cardMissing.length === 0 && !overweight);
@@ -838,33 +1033,33 @@
     function buildDraftSummary() {
         /** @type {string[]} */
         const parts = [];
-        if (title) parts.push(`כותרת: "${title}"`);
-        if (subtitle) parts.push(`סלוגן: "${subtitle}"`);
-        if (mainImage) parts.push("יש תמונה ראשית");
-        if (logo) parts.push("יש לוגו");
-        if (hoverText) parts.push(`טקסט ריחוף: "${hoverText.slice(0, 60)}${hoverText.length > 60 ? "…" : ""}"`);
+        if (title) parts.push(fmt(T.dTitle, { v: title }));
+        if (subtitle) parts.push(fmt(T.dSubtitle, { v: subtitle }));
+        if (mainImage) parts.push(T.dMainImage);
+        if (logo) parts.push(T.dLogo);
+        if (hoverText) parts.push(fmt(T.dHover, { v: `${hoverText.slice(0, 60)}${hoverText.length > 60 ? "…" : ""}` }));
         return parts.join(" · ");
     }
     function submitHelp() {
         const problem = helpProblem.trim();
         const contact = helpContact.trim();
         if (problem.length < 5) {
-            helpError = "נא לתאר את הבעיה (לפחות כמה מילים)";
+            helpError = T.errDescribe;
             return;
         }
         const isLoggedIn = Boolean(data?.layoutUser?.email || data?.layoutUser?.name);
         if (!isLoggedIn && !contact) {
-            helpError = "נא להשאיר דרך ליצירת קשר";
+            helpError = T.errContact;
             return;
         }
         helpError = "";
-        const identity = contact || data?.layoutUser?.email || data?.layoutUser?.name || "אנונימי";
+        const identity = contact || data?.layoutUser?.email || data?.layoutUser?.name || T.anonymous;
         const draftSummary = buildDraftSummary();
         const waText =
-            `שלום! אני צריך/ה עזרה בעיצוב הפרסומת באתר קבוצות הרכישה 🆘\n\n` +
+            `${T.waHelpMsg}\n\n` +
             `🧑 ${identity}\n\n` +
-            `הבעיה:\n"${problem}"` +
-            (draftSummary ? `\n\nמצב הטיוטה: ${draftSummary}` : "");
+            `${T.theProblem}\n"${problem}"` +
+            (draftSummary ? `\n\n${T.draftState} ${draftSummary}` : "");
         const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(waText)}`;
         window.open(waUrl, "_blank", "noopener,noreferrer");
         helpOpen = false;
@@ -872,7 +1067,7 @@
 </script>
 
 <svelte:head>
-    <title>בניית הפרסומת שלי | רכישות קבוצתיות יוצאים לחירות</title>
+    <title>{T.pageTitle}</title>
 </svelte:head>
 
 {#if !accessChecked}
@@ -883,16 +1078,14 @@
         <!-- הודעה צפה: תמונה נדחסה אוטומטית -->
         {#if compressNotice.visible}
             <div class="compress-toast" role="status" aria-live="polite">
-                <button type="button" class="compress-toast-close" onclick={dismissCompressNotice} aria-label="סגור הודעה">✕</button>
+                <button type="button" class="compress-toast-close" onclick={dismissCompressNotice} aria-label={T.closeNotice}>✕</button>
                 <div class="compress-toast-body">
                     <span class="compress-toast-icon">🪄</span>
                     <div>
-                        <p class="ct-title">התמונה כווצה אוטומטית</p>
+                        <p class="ct-title">{T.ctTitle}</p>
                         <p class="ct-text">
-                            כדי שהמודעה כולה תעמוד במשקל שהשרת מקבל, התמונה
-                            ({fmtWeight(compressNotice.originalBytes)}) כווצה
-                            ל-<strong>{fmtWeight(compressNotice.finalBytes)}</strong>.
-                            <br />אם האיכות לא מספיקה - נסו תמונה קלה או פשוטה יותר.
+                            {fmt(T.ctBody, { from: fmtWeight(compressNotice.originalBytes) })}<strong>{fmtWeight(compressNotice.finalBytes)}</strong>.
+                            <br />{T.ctTip}
                         </p>
                     </div>
                 </div>
@@ -902,10 +1095,10 @@
         <!-- כותרת -->
         <div class="b-hero">
             <div class="b-hero-icon">🎨</div>
-            <h1 class="b-hero-title">בונה הפרסומות</h1>
+            <h1 class="b-hero-title">{T.heroTitle}</h1>
             <p class="b-hero-sub">
-                מעצבים את הפרסומת שלכם צעד-צעד - בדיוק כפי שתיראה באתר.
-                <br />כל שינוי נשמר אוטומטית.
+                {T.hero1}
+                <br />{T.hero2}
             </p>
 
             <!-- עריכת פרסומת קיימת -->
@@ -917,19 +1110,13 @@
                     <div>
                         <p class="b-cd-title">
                             {editLoad === "loading"
-                                ? "טוענים את הפרסומת לעריכה..."
+                                ? T.editLoading
                                 : editLoad === "error"
-                                  ? "לא הצלחנו לטעון את הפרסומת"
-                                  : "עריכת פרסומת קיימת"}
+                                  ? T.editFailedTitle
+                                  : T.editTitle}
                         </p>
                         <p class="b-cd-text">
-                            {#if editLoad === "error"}
-                                רעננו את הדף כדי לנסות שוב. שליחה עכשיו תיכנס
-                                כפרסומת חדשה ולא תחליף את הקיימת.
-                            {:else}
-                                מה שרץ על האתר נשאר באוויר עד שהעדכון יאושר, ואז
-                                מתחלף בו — באותו מקום בטור ועם אותו תאריך סיום.
-                            {/if}
+                            {editLoad === "error" ? T.editFailedBody : T.editBody}
                         </p>
                     </div>
                 </div>
@@ -940,11 +1127,11 @@
                 <div class="b-countdown">
                     <span class="b-cd-icon">⏰</span>
                     <div>
-                        <p class="b-cd-title">יום העריכה החינמי פעיל</p>
+                        <p class="b-cd-title">{T.cdTitle}</p>
                         <p class="b-cd-text">
-                            נותרו <strong>{fmtCountdown(freeMsRemaining)}</strong>
-                            שעות לסיום העריכה בחינם. <strong>כדאי לסיים היום!</strong>
-                            הפרסום ירוץ עד {fmtDateShort(new Date(paidAt.getTime() + planDays * 24 * 60 * 60 * 1000))}.
+                            {T.cdLeft} <strong>{fmtCountdown(freeMsRemaining)}</strong>
+                            {T.cdMid} <strong>{T.cdFinish}</strong>
+                            {fmt(T.cdEnd, { date: fmtDateShort(new Date(paidAt.getTime() + planDays * 24 * 60 * 60 * 1000)) })}
                         </p>
                     </div>
                 </div>
@@ -952,8 +1139,8 @@
                 <div class="b-expired">
                     <span class="b-cd-icon">⌛</span>
                     <div>
-                        <p class="b-cd-title red">יום העריכה החינמי הסתיים</p>
-                        <p class="b-cd-text">אפשר עדיין לערוך ולשלוח - צרו קשר אם צריך עזרה.</p>
+                        <p class="b-cd-title red">{T.expTitle}</p>
+                        <p class="b-cd-text">{T.expBody}</p>
                     </div>
                 </div>
             {/if}
@@ -962,15 +1149,13 @@
             <div class="b-autosave">
                 <span class="b-cd-icon">💾</span>
                 <div>
-                    <p class="b-as-title">הטיוטה נשמרת אוטומטית</p>
-                    <p class="b-cd-text">
-                        אפשר לצאת מהדף ולחזור - כל מה שהזנתם מחכה לכם כאן.
-                    </p>
+                    <p class="b-as-title">{T.autosaveTitle}</p>
+                    <p class="b-cd-text">{T.autosaveBody}</p>
                 </div>
             </div>
 
             <div class="b-reset-row">
-                <button type="button" onclick={resetDraft} class="b-reset">🗑 איפוס הטיוטה והתחלה מחדש</button>
+                <button type="button" onclick={resetDraft} class="b-reset">{T.reset}</button>
             </div>
         </div>
 
@@ -982,22 +1167,22 @@
                 <section bind:this={stepRefs.image} class="step-card">
                     <div class="step-head" class:step-title-light={litFlags.image.title}>
                         <span class="step-num" class:step-num-light={litFlags.image.num}>1</span>
-                        <h2>העלו את התמונה הראשית</h2>
+                        <h2>{T.s1Title}</h2>
                         {#if activeStep === "image"}
                             <span class="tutorial-finger" aria-hidden="true">👇</span>
                         {/if}
                     </div>
-                    <p class="step-help">זו התמונה הגדולה שממלאת את הפרסומת. בחרו תמונה איכותית שמייצגת את העסק.</p>
+                    <p class="step-help">{T.s1Help}</p>
 
                     <div class="step1-grid">
                         <div class="tips-box">
-                            <p class="tips-title">💡 טיפים לתמונה מנצחת</p>
+                            <p class="tips-title">{T.tipsTitle}</p>
                             <ul>
-                                <li>📸 תמונה חדה ומוארת היטב</li>
-                                <li>🎯 מוקד אחד ברור - מוצר, מנה או חזית העסק</li>
-                                <li>🌈 צבעים חיים בולטים יותר בפיד</li>
-                                <li>📐 המודעה נחתכת לגובה בדסקטופ ולרוחב בנייד - עדיף תמונה מרובעת והעיקר במרכז</li>
-                                <li>🚫 בלי טקסט על התמונה - הטקסט מתווסף בהמשך</li>
+                                <li>{T.tip1}</li>
+                                <li>{T.tip2}</li>
+                                <li>{T.tip3}</li>
+                                <li>{T.tip4}</li>
+                                <li>{T.tip5}</li>
                             </ul>
                         </div>
 
@@ -1010,20 +1195,20 @@
                             ondrop={(e) => handleDrop(e, "main", (v) => (isDraggingMain = v))}
                         >
                             {#if mainImage}
-                                <img src={mainImage} alt="התמונה הראשית" style:object-fit="cover" style:object-position="{mainImageObjectX}% {mainImageObjectY}%" use:adImgFit={mainImageFit} />
-                                <button type="button" class="remove-x" onclick={(e) => { e.preventDefault(); clearImage("main"); }} aria-label="הסר תמונה">✕</button>
-                                <button type="button" class="crop-arrow up" onclick={(e) => { e.preventDefault(); nudgeMainImage("up"); }} aria-label="הזז למעלה">▲</button>
-                                <button type="button" class="crop-arrow down" onclick={(e) => { e.preventDefault(); nudgeMainImage("down"); }} aria-label="הזז למטה">▼</button>
-                                <button type="button" class="crop-arrow left" onclick={(e) => { e.preventDefault(); nudgeMainImage("left"); }} aria-label="הזז שמאלה">◀</button>
-                                <button type="button" class="crop-arrow right" onclick={(e) => { e.preventDefault(); nudgeMainImage("right"); }} aria-label="הזז ימינה">▶</button>
-                                <button type="button" class="crop-reset" onclick={(e) => { e.preventDefault(); mainImageObjectX = 50; mainImageObjectY = 50; mainImageZoom = 1; }} aria-label="איפוס מיקום וזום">⊙</button>
-                                <button type="button" class="crop-zoom zoom-in" onclick={(e) => { e.preventDefault(); zoomMainImage("in"); }} aria-label="זום פנימה">＋</button>
-                                <button type="button" class="crop-zoom zoom-out" onclick={(e) => { e.preventDefault(); zoomMainImage("out"); }} aria-label="זום החוצה">－</button>
+                                <img src={mainImage} alt={T.mainImageAlt} style:object-fit="cover" style:object-position="{mainImageObjectX}% {mainImageObjectY}%" use:adImgFit={mainImageFit} />
+                                <button type="button" class="remove-x" onclick={(e) => { e.preventDefault(); clearImage("main"); }} aria-label={T.removeImage}>✕</button>
+                                <button type="button" class="crop-arrow up" onclick={(e) => { e.preventDefault(); nudgeMainImage("up"); }} aria-label={T.nudgeUp}>▲</button>
+                                <button type="button" class="crop-arrow down" onclick={(e) => { e.preventDefault(); nudgeMainImage("down"); }} aria-label={T.nudgeDown}>▼</button>
+                                <button type="button" class="crop-arrow left" onclick={(e) => { e.preventDefault(); nudgeMainImage("left"); }} aria-label={T.nudgeLeft}>◀</button>
+                                <button type="button" class="crop-arrow right" onclick={(e) => { e.preventDefault(); nudgeMainImage("right"); }} aria-label={T.nudgeRight}>▶</button>
+                                <button type="button" class="crop-reset" onclick={(e) => { e.preventDefault(); mainImageObjectX = 50; mainImageObjectY = 50; mainImageZoom = 1; }} aria-label={T.resetPos}>⊙</button>
+                                <button type="button" class="crop-zoom zoom-in" onclick={(e) => { e.preventDefault(); zoomMainImage("in"); }} aria-label={T.zoomIn}>＋</button>
+                                <button type="button" class="crop-zoom zoom-out" onclick={(e) => { e.preventDefault(); zoomMainImage("out"); }} aria-label={T.zoomOut}>－</button>
                             {:else}
                                 <div class="upload-empty">
                                     <div class="upload-emoji">📸</div>
-                                    <p class="upload-main">{isDraggingMain ? "שחררו כאן! ✨" : "לחצו או גררו תמונה לכאן"}</p>
-                                    <p class="upload-note">תמונות גדולות יכווצו אוטומטית</p>
+                                    <p class="upload-main">{isDraggingMain ? T.dropHere : T.clickOrDrag}</p>
+                                    <p class="upload-note">{T.uploadNote}</p>
                                 </div>
                             {/if}
                             <input type="file" accept="image/*" onchange={(e) => handleImage(e, "main")} class="hidden-input" />
@@ -1033,9 +1218,9 @@
                         <p class="upload-issue" role="alert">⛔ {uploadIssue.msg}</p>
                     {/if}
                     {#if mainImage}
-                        <p class="crop-hint">אפשר למרכז עם החיצים ולהתקרב/להתרחק עם ＋/－ - התוצאה מוצגת בדמו החי</p>
+                        <p class="crop-hint">{T.cropHint}</p>
                         <div class="step-nav-row">
-                            <button type="button" class="step-nav-btn" onclick={() => advance("logo")}>סיימתי למרכז - לשלב הבא ←</button>
+                            <button type="button" class="step-nav-btn" onclick={() => advance("logo")}>{T.doneCentering}</button>
                         </div>
                     {/if}
                 </section>
@@ -1044,12 +1229,12 @@
                 <section bind:this={stepRefs.logo} class="step-card">
                     <div class="step-head" class:step-title-light={litFlags.logo.title}>
                         <span class="step-num" class:step-num-light={litFlags.logo.num}>2</span>
-                        <h2>לוגו העסק (לא חובה)</h2>
+                        <h2>{T.s2Title}</h2>
                         {#if activeStep === "logo"}
                             <span class="tutorial-finger" aria-hidden="true">👇</span>
                         {/if}
                     </div>
-                    <p class="step-help">הלוגו מופיע בפינת הפרסומת - <strong class="amber-strong">מומלץ</strong> אך אפשר לדלג.</p>
+                    <p class="step-help">{T.s2HelpPre} <strong class="amber-strong">{T.s2HelpStrong}</strong> {T.s2HelpPost}</p>
 
                     <div class="logo-row">
                         <div class="logo-upload-col">
@@ -1062,38 +1247,52 @@
                                 ondrop={(e) => handleDrop(e, "logo", (v) => (isDraggingLogo = v))}
                             >
                                 {#if logo}
-                                    <img src={logo} alt="לוגו" />
-                                    <button type="button" class="remove-x" onclick={(e) => { e.preventDefault(); clearImage("logo"); }} aria-label="הסר לוגו">✕</button>
+                                    <img src={logo} alt={T.logoAlt} />
+                                    <button type="button" class="remove-x" onclick={(e) => { e.preventDefault(); clearImage("logo"); }} aria-label={T.removeLogo}>✕</button>
                                 {:else}
                                     <div class="upload-sm-empty">
                                         <div class="upload-sm-emoji">{isDraggingLogo ? "✨" : "🏷️"}</div>
-                                        <p>{isDraggingLogo ? "שחררו!" : "העלו לוגו"}</p>
+                                        <p>{isDraggingLogo ? T.release : T.uploadLogo}</p>
                                     </div>
                                 {/if}
                                 <input type="file" accept="image/*" onchange={(e) => handleImage(e, "logo")} class="hidden-input" />
                             </label>
                             {#if logo && logoShape === "circle" && hasCircleCrop}
-                                <button type="button" onclick={openCropper} class="edit-crop-link">עריכת החיתוך</button>
+                                <button type="button" onclick={openCropper} class="edit-crop-link">{T.editCrop}</button>
                             {/if}
                         </div>
 
                         {#if logo}
                             <div class="logo-controls">
                                 <div>
-                                    <p class="control-label">צורת החיתוך</p>
+                                    <p class="control-label">{T.cropShape}</p>
                                     <div class="seg-group">
-                                        <button type="button" onclick={chooseSquare} class="seg-btn" class:active={logoShape === "square"}>⬜ מרובע</button>
-                                        <button type="button" onclick={chooseCircle} class="seg-btn" class:active={logoShape === "circle"}>⚪ עגול</button>
+                                        <button type="button" onclick={chooseSquare} class="seg-btn" class:active={logoShape === "square"}>{T.square}</button>
+                                        <button type="button" onclick={chooseCircle} class="seg-btn" class:active={logoShape === "circle"}>{T.circle}</button>
                                     </div>
                                 </div>
                                 <div>
-                                    <p class="control-label">מיקום הלוגו</p>
+                                    <p class="control-label">{T.logoPos}</p>
                                     <div class="seg-group">
-                                        <button type="button" onclick={() => { logoPosition = "right"; logoPositionExplicit = true; }} class="seg-btn" class:active={logoPosition === "right"}>ימין</button>
-                                        <button type="button" onclick={() => { logoPosition = "left"; logoPositionExplicit = true; }} class="seg-btn" class:active={logoPosition === "left"}>שמאל</button>
-                                        <button type="button" onclick={() => { logoPosition = "cta"; logoPositionExplicit = true; }} class="seg-btn" class:active={logoPosition === "cta"}>למטה</button>
+                                        <button type="button" onclick={() => setLogoAnchor("right")} class="seg-btn" class:active={!logoFree && logoPosition === "right"}>{T.posRight}</button>
+                                        <button type="button" onclick={() => setLogoAnchor("left")} class="seg-btn" class:active={!logoFree && logoPosition === "left"}>{T.posLeft}</button>
+                                        <button type="button" onclick={() => setLogoAnchor("cta")} class="seg-btn" class:active={!logoFree && logoPosition === "cta"}>{T.posBottom}</button>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- מיקום חופשי: גוררים את הלוגו על הדמו החי לכל נקודה -->
+                            <div class="logo-drag-row">
+                                <p class="logo-drag-hint">
+                                    <span aria-hidden="true">🖐️</span>
+                                    <span>{T.logoDragHint}</span>
+                                </p>
+                                {#if logoFree}
+                                    <span class="logo-free-info">
+                                        <span class="logo-free-coords">{logoFreeX}% · {logoFreeY}%</span>
+                                        <button type="button" onclick={resetLogoPosition} class="logo-free-reset">{T.logoPosReset}</button>
+                                    </span>
+                                {/if}
                             </div>
                         {/if}
                     </div>
@@ -1103,21 +1302,21 @@
                     {/if}
 
                     <div class="step-nav-row">
-                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("logo"))}>→ שלב אחורה</button>
+                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("logo"))}>{T.prevStep}</button>
                         <button type="button" class="step-nav-btn" onclick={() => advance("title")}>
-                            {logo ? "לשלב הבא ←" : "דילוג על הלוגו ←"}
+                            {logo ? T.nextStep : T.skipLogo}
                         </button>
                     </div>
 
                     <!-- ===== מודל חיתוך עגול ===== -->
                     {#if cropOpen}
-                        <div class="crop-modal-bg" role="dialog" aria-modal="true" aria-label="חיתוך הלוגו לעיגול">
+                        <div class="crop-modal-bg" role="dialog" aria-modal="true" aria-label={T.cropModalAria}>
                             <div class="crop-modal">
                                 <div class="crop-modal-head">
-                                    <h3>חיתוך עגול ללוגו</h3>
-                                    <button type="button" class="crop-modal-x" onclick={cancelCrop} aria-label="סגור">✕</button>
+                                    <h3>{T.cropTitle}</h3>
+                                    <button type="button" class="crop-modal-x" onclick={cancelCrop} aria-label={T.close}>✕</button>
                                 </div>
-                                <p class="crop-help">גררו את התמונה למיקום הרצוי, והשתמשו בגלגלת או במחוון לזום.</p>
+                                <p class="crop-help">{T.cropHelp}</p>
                                 <div
                                     class="crop-stage"
                                     onpointerdown={cropPointerDown}
@@ -1128,7 +1327,7 @@
                                 >
                                     <img
                                         src={logoOriginal}
-                                        alt="לוגו"
+                                        alt={T.logoAlt}
                                         class="crop-img"
                                         draggable="false"
                                         style:transform="translate({cropOffsetX}px, {cropOffsetY}px) scale({cropZoom})"
@@ -1136,13 +1335,13 @@
                                     <div class="crop-circle-mask"></div>
                                 </div>
                                 <div class="crop-controls">
-                                    <span class="crop-zoom-label">זום</span>
-                                    <input type="range" min="0.3" max="4" step="0.01" bind:value={cropZoom} class="crop-zoom-slider" aria-label="רמת הזום" />
+                                    <span class="crop-zoom-label">{T.zoom}</span>
+                                    <input type="range" min="0.3" max="4" step="0.01" bind:value={cropZoom} class="crop-zoom-slider" aria-label={T.zoomLevel} />
                                     <span class="crop-zoom-val">{Math.round(cropZoom * 100)}%</span>
                                 </div>
                                 <div class="crop-actions">
-                                    <button type="button" class="crop-btn-cancel" onclick={cancelCrop}>ביטול</button>
-                                    <button type="button" class="crop-btn-confirm" onclick={confirmCrop}>אישור החיתוך ✓</button>
+                                    <button type="button" class="crop-btn-cancel" onclick={cancelCrop}>{T.cancel}</button>
+                                    <button type="button" class="crop-btn-confirm" onclick={confirmCrop}>{T.confirmCrop}</button>
                                 </div>
                             </div>
                         </div>
@@ -1153,13 +1352,13 @@
                 <section bind:this={stepRefs.title} class="step-card">
                     <div class="step-head" class:step-title-light={litFlags.title.title}>
                         <span class="step-num" class:step-num-light={litFlags.title.num}>3</span>
-                        <h2>כותרת הפרסומת</h2>
+                        <h2>{T.s3Title}</h2>
                         {#if activeStep === "title"}
                             <span class="tutorial-finger" aria-hidden="true">👇</span>
                         {/if}
 
-                        <div class="title-color-rail" aria-label="בחירת צבע הכותרת">
-                            <span class="title-color-label">צבע:</span>
+                        <div class="title-color-rail" aria-label={T.titleColorAria}>
+                            <span class="title-color-label">{T.colorLabel}</span>
                             {#each titleColors as p}
                                 <button
                                     type="button"
@@ -1167,18 +1366,18 @@
                                     class="title-color-dot"
                                     class:selected={titleColor === p.c}
                                     style:background={p.c}
-                                    title={p.label}
-                                    aria-label={p.label}
+                                    title={tr(p.labelKey)}
+                                    aria-label={tr(p.labelKey)}
                                     aria-pressed={titleColor === p.c}
                                 ></button>
                             {/each}
-                            <label class="title-color-custom" title="צבע מותאם אישית">
-                                <input type="color" bind:value={titleColor} aria-label="בחירת צבע מותאם" />
+                            <label class="title-color-custom" title={T.customColor}>
+                                <input type="color" bind:value={titleColor} aria-label={T.customColorPick} />
                                 <span>🎨</span>
                             </label>
                         </div>
                     </div>
-                    <p class="step-help">שם העסק או המסר המרכזי - קצר וקליט (עד 40 תווים).</p>
+                    <p class="step-help">{T.s3Help}</p>
 
                     <input
                         type="text"
@@ -1186,24 +1385,24 @@
                         maxlength="40"
                         onfocus={() => activeStep === "title" || (activeStep = "title")}
                         onblur={() => title.trim() && commitField("title")}
-                        placeholder="למשל: פיצה של אמא"
+                        placeholder={T.s3Ph}
                         class="text-input"
                     />
                     <div class="char-count">{title.length}/40</div>
 
                     <div class="slider-block">
                         <div class="slider-head">
-                            <p>מיקום הכותרת <span class="amber-strong">{titleOffsetY > 0 ? `+${titleOffsetY}` : titleOffsetY}px</span></p>
-                            <button type="button" onclick={() => (titleOffsetY = 0)} class="slider-reset">איפוס</button>
+                            <p>{T.titlePos} <span class="amber-strong">{titleOffsetY > 0 ? `+${titleOffsetY}` : titleOffsetY}px</span></p>
+                            <button type="button" onclick={() => (titleOffsetY = 0)} class="slider-reset">{T.resetWord}</button>
                         </div>
-                        <input type="range" min="-20" max="60" step="1" bind:value={titleOffsetY} class="range-input" aria-label="מיקום אנכי של הכותרת" />
-                        <div class="slider-labels"><span>למעלה</span><span>למטה</span></div>
+                        <input type="range" min="-20" max="60" step="1" bind:value={titleOffsetY} class="range-input" aria-label={T.titlePosAria} />
+                        <div class="slider-labels"><span>{T.up}</span><span>{T.down}</span></div>
                     </div>
 
                     <div class="step-nav-row">
-                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("title"))}>→ שלב אחורה</button>
+                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("title"))}>{T.prevStep}</button>
                         {#if title}
-                            <button type="button" class="step-nav-btn" onclick={() => commitField("title")}>לשלב הבא ←</button>
+                            <button type="button" class="step-nav-btn" onclick={() => commitField("title")}>{T.nextStep}</button>
                         {/if}
                     </div>
                 </section>
@@ -1212,24 +1411,24 @@
                 <section bind:this={stepRefs.gradient} class="step-card">
                     <div class="step-head" class:step-title-light={litFlags.gradient.title}>
                         <span class="step-num" class:step-num-light={litFlags.gradient.num}>4</span>
-                        <h2>צבע הפס והכפתור</h2>
+                        <h2>{T.s4Title}</h2>
                         {#if activeStep === "gradient"}
                             <span class="tutorial-finger" aria-hidden="true">👇</span>
                         {/if}
                     </div>
-                    <p class="step-help">הצבע של הפס האלכסוני על התמונה ושל כפתור הקריאה לפעולה.</p>
+                    <p class="step-help">{T.s4Help}</p>
 
-                    <p class="control-label">צבע הפס</p>
-                    <div class="color-rail" aria-label="בחירת צבע הפס">
+                    <p class="control-label">{T.bandColor}</p>
+                    <div class="color-rail" aria-label={T.bandColorAria}>
                         {#each palettes as p}
                             <button
                                 type="button"
                                 onclick={() => (gradient = p.cls)}
                                 class="color-dot"
                                 class:selected={gradient === p.cls}
-                                style:background={p.cls}
-                                title={p.label}
-                                aria-label={p.label}
+                                style={gradientStyle(p.cls, "to bottom right")}
+                                title={tr(p.labelKey)}
+                                aria-label={tr(p.labelKey)}
                                 aria-pressed={gradient === p.cls}
                             ></button>
                         {/each}
@@ -1237,15 +1436,15 @@
 
                     <div class="slider-block">
                         <div class="slider-head">
-                            <p>גובה הפס <span class="amber-strong">{diagHeight}%</span> מהתמונה</p>
+                            <p>{T.bandHeightPre} <span class="amber-strong">{diagHeight}%</span> {T.bandHeightPost}</p>
                         </div>
-                        <input type="range" min="5" max="50" step="1" bind:value={diagHeight} class="range-input" aria-label="גובה הפס האלכסוני" />
-                        <div class="slider-labels"><span>נמוך</span><span>גבוה</span></div>
+                        <input type="range" min="5" max="50" step="1" bind:value={diagHeight} class="range-input" aria-label={T.bandHeightAria} />
+                        <div class="slider-labels"><span>{T.bandLow}</span><span>{T.bandHigh}</span></div>
                     </div>
 
                     <div class="step-nav-row">
-                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("gradient"))}>→ שלב אחורה</button>
-                        <button type="button" class="step-nav-btn" onclick={() => advance("subtitle")}>ממשיכים לשלב הבא ←</button>
+                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("gradient"))}>{T.prevStep}</button>
+                        <button type="button" class="step-nav-btn" onclick={() => advance("subtitle")}>{T.continueNext}</button>
                     </div>
                 </section>
 
@@ -1253,12 +1452,12 @@
                 <section bind:this={stepRefs.subtitle} class="step-card">
                     <div class="step-head" class:step-title-light={litFlags.subtitle.title}>
                         <span class="step-num" class:step-num-light={litFlags.subtitle.num}>5</span>
-                        <h2>משפט קצר / סלוגן</h2>
+                        <h2>{T.s5Title}</h2>
                         {#if activeStep === "subtitle"}
                             <span class="tutorial-finger" aria-hidden="true">👇</span>
                         {/if}
                     </div>
-                    <p class="step-help">מופיע על הפס הצבעוני בתחתית הפרסומת (עד 70 תווים).</p>
+                    <p class="step-help">{T.s5Help}</p>
 
                     <input
                         type="text"
@@ -1266,15 +1465,64 @@
                         maxlength="70"
                         onfocus={() => activeStep === "subtitle" || (activeStep = "subtitle")}
                         onblur={() => subtitle.trim() && commitField("subtitle")}
-                        placeholder="למשל: משלוחים חינם עד הבית בכל הארץ"
+                        placeholder={T.s5Ph}
                         class="text-input"
                     />
                     <div class="char-count">{subtitle.length}/70</div>
 
+                    <!-- טיפוגרפיה של הסלוגן: גודל, רווח בין שורות ויישור - כמו בקהילה
+                         בשכונה. הערכים נוסעים עם המודעה (_adStyle), ולכן מה שנראה כאן
+                         הוא מה שיתפרסם. -->
+                    <div class="sub-type-panel">
+                        <p class="sub-type-title">{T.s5TypeTitle}</p>
+
+                        <div class="sub-type-row">
+                            <span class="sub-type-label">{T.s5Size}</span>
+                            <input type="range" class="sub-type-range"
+                                   min={SUB_FONT_SIZE_MIN} max={SUB_FONT_SIZE_MAX} step="0.02"
+                                   bind:value={subFontSize}
+                                   aria-label={T.s5Size}
+                                   oninput={() => activeStep === "subtitle" || (activeStep = "subtitle")} />
+                            <span class="sub-type-value">{subFontSize.toFixed(2)}</span>
+                        </div>
+
+                        <div class="sub-type-row">
+                            <span class="sub-type-label">{T.s5LineHeight}</span>
+                            <input type="range" class="sub-type-range"
+                                   min={SUB_LINE_HEIGHT_MIN} max={SUB_LINE_HEIGHT_MAX} step="0.05"
+                                   bind:value={subLineHeight}
+                                   aria-label={T.s5LineHeight}
+                                   oninput={() => activeStep === "subtitle" || (activeStep = "subtitle")} />
+                            <span class="sub-type-value">{subLineHeight.toFixed(2)}</span>
+                        </div>
+
+                        <div class="sub-type-row">
+                            <span class="sub-type-label">{T.s5Align}</span>
+                            <div class="sub-type-aligns">
+                                {#each subAligns as opt}
+                                    <button type="button"
+                                            onclick={() => (subAlign = opt.id)}
+                                            title={tr(opt.labelKey)}
+                                            aria-pressed={subAlign === opt.id}
+                                            class="sub-type-align-btn"
+                                            class:is-active={subAlign === opt.id}>
+                                        <span aria-hidden="true">{opt.icon}</span>
+                                        <span class="sub-type-align-text">{tr(opt.labelKey)}</span>
+                                    </button>
+                                {/each}
+                            </div>
+                        </div>
+
+                        <button type="button" class="sub-type-reset"
+                                onclick={() => { subFontSize = DEFAULT_SUB_FONT_SIZE; subLineHeight = DEFAULT_SUB_LINE_HEIGHT; subAlign = "right"; }}>
+                            {T.s5TypeReset}
+                        </button>
+                    </div>
+
                     <div class="step-nav-row">
-                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("subtitle"))}>→ שלב אחורה</button>
+                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("subtitle"))}>{T.prevStep}</button>
                         {#if subtitle}
-                            <button type="button" class="step-nav-btn" onclick={() => commitField("subtitle")}>לשלב הבא ←</button>
+                            <button type="button" class="step-nav-btn" onclick={() => commitField("subtitle")}>{T.nextStep}</button>
                         {/if}
                     </div>
                 </section>
@@ -1283,14 +1531,14 @@
                 <section bind:this={stepRefs.hover} class="step-card">
                     <div class="step-head" class:step-title-light={litFlags.hover.title}>
                         <span class="step-num" class:step-num-light={litFlags.hover.num}>6</span>
-                        <h2>טקסט בריחוף העכבר</h2>
+                        <h2>{T.s6Title}</h2>
                         {#if activeStep === "hover"}
                             <span class="tutorial-finger" aria-hidden="true">👇</span>
                         {/if}
                     </div>
                     <p class="step-help">
-                        כשגולש מרחף עם העכבר מעל הפרסומת - התמונה מתחלפת בטקסט הזה.
-                        <br /><strong class="amber-strong">זה המקום למכור:</strong> מה מקבלים, למה דווקא אתם (עד 90 תווים).
+                        {T.s6Help1}
+                        <br /><strong class="amber-strong">{T.s6HelpStrong}</strong> {T.s6Help2}
                     </p>
 
                     <!-- התיבה גדלה לפי התוכן (autoGrow): גובה קבוע חתך את השורות
@@ -1302,15 +1550,15 @@
                         rows="3"
                         onfocus={() => activeStep === "hover" || (activeStep = "hover")}
                         onblur={() => hoverText.trim() && commitField("hover")}
-                        placeholder="למשל: 20% הנחה לחברי הקבוצה על כל התפריט!"
+                        placeholder={T.s6Ph}
                         class="text-input"
                     ></textarea>
                     <div class="char-count">{hoverText.length}/90</div>
 
                     <div class="step-nav-row">
-                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("hover"))}>→ שלב אחורה</button>
+                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("hover"))}>{T.prevStep}</button>
                         {#if hoverText}
-                            <button type="button" class="step-nav-btn" onclick={() => commitField("hover")}>לשלב הבא ←</button>
+                            <button type="button" class="step-nav-btn" onclick={() => commitField("hover")}>{T.nextStep}</button>
                         {/if}
                     </div>
                 </section>
@@ -1319,17 +1567,17 @@
                 <section bind:this={stepRefs.preview} class="step-card">
                     <div class="step-head" class:step-title-light={litFlags.preview.title}>
                         <span class="step-num" class:step-num-light={litFlags.preview.num}>7</span>
-                        <h2>תצוגה מקדימה</h2>
+                        <h2>{T.s7Title}</h2>
                         {#if activeStep === "preview"}
                             <span class="tutorial-finger" aria-hidden="true">👇</span>
                         {/if}
                     </div>
-                    <p class="step-help">כך תיראה הפרסומת שלכם באתר. עברו עם העכבר על הכרטיס כדי לראות את צד הריחוף.</p>
+                    <p class="step-help">{T.s7Help}</p>
 
                     <div class="preview-toggle-row">
                         <div class="seg-group">
-                            <button type="button" onclick={() => (previewMode = "mobile")} class="seg-btn" class:active={previewMode === "mobile"}>📱 נייד</button>
-                            <button type="button" onclick={() => (previewMode = "desktop")} class="seg-btn" class:active={previewMode === "desktop"}>💻 מחשב</button>
+                            <button type="button" onclick={() => (previewMode = "mobile")} class="seg-btn" class:active={previewMode === "mobile"}>{T.mobile}</button>
+                            <button type="button" onclick={() => (previewMode = "desktop")} class="seg-btn" class:active={previewMode === "desktop"}>{T.desktop}</button>
                         </div>
                     </div>
 
@@ -1341,29 +1589,29 @@
                                     <div class="mobile-popup">
                                         <div class="popup-title-row">
                                             {#if logo}
-                                                <img src={logo} alt="לוגו" class="popup-logo-above" class:circle={logoShape === "circle"} />
+                                                <img src={logo} alt={T.logoAlt} class="popup-logo-above" class:circle={logoShape === "circle"} />
                                             {/if}
-                                            <h3 class="popup-title-above" style:color={titleColor}>{title || "כותרת הפרסומת"}</h3>
+                                            <h3 class="popup-title-above" style:color={titleColor}>{title || T.phTitle}</h3>
                                         </div>
                                         <div class="popup-img pro-img-wrap">
                                             {#if mainImage}
                                                 <img src={mainImage} alt={title} style:object-position="{mainImageObjectX}% {mainImageObjectY}%" use:adImgFit={mainImageFit} />
                                             {:else}
-                                                <div class="img-placeholder">התמונה הראשית</div>
+                                                <div class="img-placeholder">{T.mainImageAlt}</div>
                                             {/if}
-                                            <div class="pro-diag" style:background={gradient}></div>
+                                            <div class="pro-diag" style={gradientStyle(gradient, "to bottom right")}></div>
                                             <div class="pro-title-wrap mobile">
-                                                <p class="pro-sub">{subtitle || "משפט קצר / סלוגן"}</p>
+                                                <p class="pro-sub">{subtitle || T.phSlogan}</p>
                                             </div>
                                             <div class="close-countdown">5</div>
                                         </div>
                                         <div class="popup-body">
-                                            <button type="button" class="popup-cta" style:background={gradient}>← {cta}</button>
+                                            <button type="button" class="popup-cta" style={gradientStyle(gradient, "to right")}>← {cta}</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <p class="preview-caption">כך תיראה הפרסומת בנייד - חלונית שנפתחת לגולש</p>
+                            <p class="preview-caption">{T.mobileCaption}</p>
                         </div>
                     {:else}
                         <div class="preview-frame">
@@ -1376,57 +1624,72 @@
                                 onfocus={() => (hoverPreview = true)}
                                 onblur={() => (hoverPreview = false)}
                             >
-                                <div class="pro-img-wrap clean-card-img" use:logoClearance={[title, subtitle, logo, logoPosition, diagHeight, titleOffsetY]}>
+                                <div class="pro-img-wrap clean-card-img" use:logoClearance={[title, subtitle, logo, logoFreeX, logoFreeY, logoPosition, diagHeight, titleOffsetY, subFontSize, subLineHeight, subAlign]}>
                                     {#if mainImage}
                                         <img src={mainImage} alt={title} class="ad-img" style:opacity={showHover ? 0 : 1} style:object-position="{mainImageObjectX}% {mainImageObjectY}%" use:adImgFit={mainImageFit} />
                                     {:else}
-                                        <div class="img-placeholder">התמונה שלך</div>
+                                        <div class="img-placeholder">{T.imgPlaceholder}</div>
                                     {/if}
-                                    <div class="pro-diag" style:background={gradient} style:opacity={showHover ? 0 : 1}></div>
-                                    <div class="pro-title-top" style:opacity={showHover ? 0 : 1} style:transform="translateY({titleOffsetY}px)">
-                                        <h3 class="pro-title" style:color={titleColor}><span class="logo-avoid" aria-hidden="true"></span>{title || "כותרת הפרסומת"}</h3>
+                                    <div class="pro-diag" style={gradientStyle(gradient, "to bottom right")} style:opacity={showHover ? 0 : 1}></div>
+                                    <div
+                                        class="pro-title-top"
+                                        class:has-corner-logo-right={titleCornerSide === "right"}
+                                        class:has-corner-logo-left={titleCornerSide === "left"}
+                                        style:opacity={showHover ? 0 : 1}
+                                        style:transform="translateY({titleOffsetY}px)"
+                                    >
+                                        <h3 class="pro-title" style:color={titleColor}><span class="logo-avoid" aria-hidden="true"></span>{title || T.phTitle}</h3>
                                     </div>
                                     <div class="pro-title-wrap" style:opacity={showHover ? 0 : 1}>
-                                        <p class="pro-sub"><span class="logo-avoid" data-anchor="bottom" aria-hidden="true"></span>{subtitle || "משפט קצר / סלוגן"}</p>
+                                        <p class="pro-sub"><span class="logo-avoid" data-anchor="bottom" aria-hidden="true"></span>{subtitle || T.phSlogan}</p>
                                     </div>
                                     <div class="hover-overlay" style:opacity={showHover ? 1 : 0}>
-                                        <h3 class="hover-title">{title || "הכותרת"}</h3>
-                                        <p class="hover-text">{hoverText || "הטקסט שמופיע בריחוף העכבר"}</p>
+                                        <h3 class="hover-title">{title || T.phTitleShort}</h3>
+                                        <p class="hover-text">{hoverText || T.phHover}</p>
                                     </div>
                                     {#if logo}
+                                        <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
+                                        <!-- הלוגו עצמו הוא ידית הגרירה. role=button + tabindex נותנים לו
+                                             מקבילת מקלדת מלאה (חיצים מזיזים אותו) -->
                                         <img
                                             src={logo}
-                                            alt="לוגו"
-                                            data-ad-logo class="ad-logo"
-                                            class:circle={logoShape === "circle"}
-                                            class:pos-left={logoPosition === "left"}
-                                            class:pos-cta={logoPosition === "cta"}
+                                            alt={T.logoAlt}
+                                            data-ad-logo
+                                            class="ad-logo ad-logo-draggable {logoFree ? 'ad-logo-free' : logoAnchorClass}"
+                                            class:ad-logo-circle={logoShape === "circle"}
+                                            class:ad-logo-dragging={logoDragging}
+                                            style={logoFreeStyle}
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="0"
+                                            aria-label={T.logoDragAria}
+                                            onpointerdown={logoPointerDown}
+                                            onpointermove={logoPointerMove}
+                                            onpointerup={logoPointerUp}
+                                            onpointercancel={logoPointerUp}
+                                            onkeydown={logoKeyDown}
                                         />
                                     {/if}
                                 </div>
-                                <div class="promo-cta" style:background={gradient}>
+                                <div class="promo-cta" style={gradientStyle(gradient, "to right")}>
                                     <p>{cta}</p>
                                 </div>
                             </div>
-                            <p class="preview-caption">כך תיראה הפרסומת במחשב - בעמודת הפרסומות שלצד התוכן</p>
+                            <p class="preview-caption">{T.desktopCaption}</p>
                         </div>
                     {/if}
 
                     <div class="step-nav-row">
-                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("preview"))}>→ שלב אחורה</button>
+                        <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("preview"))}>{T.prevStep}</button>
                         <div class="help-wrap">
-                            <button type="button" onclick={openHelp} class="help-btn" aria-label="בקשת עזרה בעיצוב">
+                            <button type="button" onclick={openHelp} class="help-btn" aria-label={T.helpBtnAria}>
                                 <span aria-hidden="true">😩</span>
-                                <span>אני מסתבך! צריך עזרה</span>
+                                <span>{T.helpBtn}</span>
                                 <span aria-hidden="true">🆘</span>
                             </button>
                         </div>
                         <button type="button" class="step-nav-btn" onclick={goToLandingEditor} disabled={movingToLanding || !canLeaveToLanding}>
-                            {#if movingToLanding}
-                                ⏳ עוברים לדף הנחיתה...
-                            {:else}
-                                נראה מעולה 👍 לשלב הבא ←
-                            {/if}
+                            {movingToLanding ? T.movingLanding : T.looksGreat}
                         </button>
                     </div>
 
@@ -1434,28 +1697,27 @@
                     {#if !canLeaveToLanding}
                         <div class="step-block-note" role="alert">
                             {#if cardMissing.length > 0}
-                                <p>⛔ אי אפשר להמשיך עדיין — חסר: <strong>{cardMissing.join(", ")}</strong>.</p>
+                                <p>{T.missingPre} <strong>{cardMissing.join(", ")}</strong>.</p>
                             {/if}
                             {#if overweight}
                                 <p>
-                                    ⚖️ המודעה כבדה מדי ({fmtWeight(adWeightBytes)} מתוך {fmtWeight(AD_EFFECTIVE_LIMIT)} מותרים) —
-                                    הקטינו או הסירו תמונה{#if heaviestLabel}&nbsp;(הכבדה ביותר: <strong>{heaviestLabel}</strong>){/if}.
+                                    {fmt(T.tooHeavy, { w: fmtWeight(adWeightBytes), max: fmtWeight(AD_EFFECTIVE_LIMIT) })}{#if heaviestLabel}&nbsp;{T.heaviestPre} <strong>{heaviestLabel}</strong>){/if}.
                                 </p>
                             {/if}
                         </div>
                     {:else if adWeightBytes > AD_EFFECTIVE_LIMIT * 0.7}
-                        <p class="weight-pill">⚖️ משקל המודעה: {fmtWeight(adWeightBytes)} מתוך {fmtWeight(AD_EFFECTIVE_LIMIT)} מותרים</p>
+                        <p class="weight-pill">{fmt(T.weightPill, { w: fmtWeight(adWeightBytes), max: fmtWeight(AD_EFFECTIVE_LIMIT) })}</p>
                     {/if}
                 </section>
 
             </div><!-- /.builder-steps -->
 
             <!-- ========== דמו חי - קופץ להתיישר עם השלב הפעיל ========== -->
-            <aside class="builder-demo" aria-label="דמו חי של הפרסומת" style:top="{demoTop}px">
+            <aside class="builder-demo" aria-label={T.demoAria} style:top="{demoTop}px">
                 <div class="live-demo-card">
-                    <p class="live-demo-label">👁 דמו חי</p>
+                    <p class="live-demo-label">{T.demoLabel}</p>
                     <div class="live-demo-frame" dir="rtl">
-                        <div class="pro-img-wrap live-demo-img-wrap" use:logoClearance={[title, subtitle, logo, logoPosition, diagHeight, titleOffsetY]}>
+                        <div class="pro-img-wrap live-demo-img-wrap" use:logoClearance={[title, subtitle, logo, logoFreeX, logoFreeY, logoPosition, diagHeight, titleOffsetY, subFontSize, subLineHeight, subAlign]}>
                             {#if mainImage}
                                 <img
                                     src={mainImage}
@@ -1468,34 +1730,50 @@
                             {:else}
                                 <div class="placeholder-dashed placeholder-img" style:opacity={activeStep === "hover" ? 0 : 1}>
                                     <div class="placeholder-icon">📸</div>
-                                    <p>התמונה הראשית</p>
-                                    <p class="placeholder-hint">שלב 1</p>
+                                    <p>{T.mainImageAlt}</p>
+                                    <p class="placeholder-hint">{fmt(T.stepN, { n: 1 })}</p>
                                 </div>
                             {/if}
-                            <div class="pro-diag" style:background={gradient} style:opacity={activeStep === "hover" ? 0 : 1}></div>
-                            <div class="pro-title-top" style:transform="translateY({titleOffsetY}px)" style:opacity={activeStep === "hover" ? 0 : 1}>
+                            <div class="pro-diag" style={gradientStyle(gradient, "to bottom right")} style:opacity={activeStep === "hover" ? 0 : 1}></div>
+                            <div
+                                class="pro-title-top"
+                                class:has-corner-logo-right={titleCornerSide === "right"}
+                                class:has-corner-logo-left={titleCornerSide === "left"}
+                                style:transform="translateY({titleOffsetY}px)"
+                                style:opacity={activeStep === "hover" ? 0 : 1}
+                            >
                                 {#if title}
                                     <h3 class="pro-title" style:color={titleColor}><span class="logo-avoid" aria-hidden="true"></span>{title}</h3>
                                 {:else}
-                                    <div class="placeholder-dashed placeholder-line">הכותרת - שלב 3</div>
+                                    <div class="placeholder-dashed placeholder-line">{T.phTitleStep}</div>
                                 {/if}
                             </div>
                             <div class="pro-title-wrap" style:opacity={activeStep === "hover" ? 0 : 1}>
                                 {#if subtitle}
                                     <p class="pro-sub"><span class="logo-avoid" data-anchor="bottom" aria-hidden="true"></span>{subtitle}</p>
                                 {:else}
-                                    <div class="placeholder-dashed placeholder-line small">הסלוגן - שלב 5</div>
+                                    <div class="placeholder-dashed placeholder-line small">{T.phSloganStep}</div>
                                 {/if}
                             </div>
                             {#if logo}
+                                <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
                                 <img
                                     src={logo}
-                                    alt="לוגו"
-                                    data-ad-logo class="ad-logo"
-                                    class:circle={logoShape === "circle"}
-                                    class:pos-left={logoPosition === "left"}
-                                    class:pos-cta={logoPosition === "cta"}
-                                    style:opacity={activeStep === "hover" ? 0 : 1}
+                                    alt={T.logoAlt}
+                                    data-ad-logo
+                                    class="ad-logo ad-logo-draggable {logoFree ? 'ad-logo-free' : logoAnchorClass}"
+                                    class:ad-logo-circle={logoShape === "circle"}
+                                    class:ad-logo-dragging={logoDragging}
+                                    style="{logoFreeStyle} opacity:{activeStep === 'hover' ? 0 : 1};"
+                                    draggable="false"
+                                    role="button"
+                                    tabindex="0"
+                                    aria-label={T.logoDragAria}
+                                    onpointerdown={logoPointerDown}
+                                    onpointermove={logoPointerMove}
+                                    onpointerup={logoPointerUp}
+                                    onpointercancel={logoPointerUp}
+                                    onkeydown={logoKeyDown}
                                 />
                             {:else}
                                 <div
@@ -1503,14 +1781,14 @@
                                     class:pos-left={logoPosition === "left"}
                                     class:pos-cta={logoPosition === "cta"}
                                     style:opacity={activeStep === "hover" ? 0 : 1}
-                                >לוגו<br />שלב 2</div>
+                                >{T.logoAlt}<br />{fmt(T.stepN, { n: 2 })}</div>
                             {/if}
                             <div class="hover-overlay" style:opacity={activeStep === "hover" ? 1 : 0}>
-                                <h3 class="hover-title">{title || "הכותרת"}</h3>
-                                <p class="hover-text">{hoverText || "הטקסט שמופיע בריחוף"}</p>
+                                <h3 class="hover-title">{title || T.phTitleShort}</h3>
+                                <p class="hover-text">{hoverText || T.phHoverShort}</p>
                             </div>
                         </div>
-                        <div class="promo-cta" style:background={gradient}>
+                        <div class="promo-cta" style={gradientStyle(gradient, "to right")}>
                             <p>{cta}</p>
                         </div>
                     </div>
@@ -1525,7 +1803,7 @@
 <!-- תג אדמין -->
 {#if accessGranted && isSuperAdmin}
     <div class="admin-badge" dir="rtl">
-        <p>🛡️ מצב אדמין - גישה חופשית לבונה</p>
+        <p>{T.adminBadge}</p>
     </div>
 {/if}
 
@@ -1543,20 +1821,20 @@
         <div class="help-modal" dir="rtl">
             <div class="help-modal-head">
                 <span class="help-modal-icon" aria-hidden="true">🆘</span>
-                <h2 id="help-modal-title">עזרה בעיצוב הפרסומת</h2>
-                <button type="button" class="help-close" onclick={closeHelp} aria-label="סגור">×</button>
+                <h2 id="help-modal-title">{T.helpModalTitle}</h2>
+                <button type="button" class="help-close" onclick={closeHelp} aria-label={T.close}>×</button>
             </div>
 
-            <p class="help-intro">ספרו לנו מה מסתבך - נחזור אליכם ונעזור לסיים את העיצוב יחד.</p>
+            <p class="help-intro">{T.helpIntro}</p>
 
             <label class="help-field">
-                <span class="help-label">מה הבעיה? <span class="help-required">*</span></span>
+                <span class="help-label">{T.helpProblem} <span class="help-required">*</span></span>
                 <textarea
                     id="help-problem-input"
                     bind:value={helpProblem}
                     maxlength="2000"
                     rows="5"
-                    placeholder="למשל: התמונה לא מסתדרת לי במרכז, או שאני לא בטוח איזה צבע לבחור..."
+                    placeholder={T.helpProblemPh}
                     class="help-textarea"
                 ></textarea>
                 <span class="help-counter">{helpProblem.length}/2000</span>
@@ -1564,13 +1842,13 @@
 
             {#if !data?.layoutUser?.email && !data?.layoutUser?.name}
                 <label class="help-field">
-                    <span class="help-label">איך ניצור איתך קשר? <span class="help-required">*</span></span>
-                    <input type="text" bind:value={helpContact} maxlength="200" placeholder="טלפון או אימייל" class="help-input" />
+                    <span class="help-label">{T.helpIdentify} <span class="help-required">*</span></span>
+                    <input type="text" bind:value={helpContact} maxlength="200" placeholder={T.helpIdentifyPh} class="help-input" />
                 </label>
             {:else}
                 <p class="help-identity">
                     <span aria-hidden="true">🧑</span>
-                    מזוהה כ-<strong>{data?.layoutUser?.name || data?.layoutUser?.email}</strong>
+                    {T.identifiedAs}<strong>{data?.layoutUser?.name || data?.layoutUser?.email}</strong>
                 </p>
             {/if}
 
@@ -1579,10 +1857,10 @@
             {/if}
 
             <div class="help-actions">
-                <button type="button" class="help-btn-secondary" onclick={closeHelp}>ביטול</button>
+                <button type="button" class="help-btn-secondary" onclick={closeHelp}>{T.cancel}</button>
                 <button type="button" class="help-btn-primary" onclick={submitHelp}>
                     <span aria-hidden="true">💬</span>
-                    שליחה ופתיחת וואטסאפ
+                    {T.sendOpenWa}
                 </button>
             </div>
         </div>
@@ -1749,14 +2027,15 @@
     /* ============== שתי עמודות + דמו קופץ ============== */
     .builder-cols {
         position: relative;
-        padding-left: 156px; /* מקום לדמו (140px) + רווח */
+        padding-left: 186px; /* מקום לדמו (170px) + רווח - כמו בקהילה בשכונה */
     }
     .builder-steps { width: 100%; }
     .builder-demo {
         position: absolute;
         top: 0;
         left: 0;
-        width: 140px;
+        /* משבצת של 144px + ריפוד הכרטיס - כך הדמו ברוחב האמיתי של הטור */
+        width: 170px;
         transition: top 700ms cubic-bezier(0.4, 0, 0.2, 1);
     }
     @media (max-width: 768px) {
@@ -1764,7 +2043,9 @@
         .builder-demo {
             position: static;
             width: 100%;
-            max-width: 240px;
+            /* גם בנייד התצוגה נשארת ברוחב האמיתי - משבצת רחבה יותר הייתה
+               מראה שבירת שורות אחרת לגמרי ממה שיתפרסם */
+            max-width: 170px;
             margin: 0 auto 1rem;
         }
     }
@@ -1775,8 +2056,8 @@
         position: absolute;
         top: 0.5rem;
         bottom: 0.5rem;
-        left: -156px;
-        width: 140px;
+        left: -186px;
+        width: 170px;
         border: 2px dashed rgba(251, 191, 36, 0.22);
         border-radius: 0.85rem;
         background: rgba(251, 191, 36, 0.025);
@@ -1799,8 +2080,13 @@
         text-align: center;
         margin: 0 0 0.5rem;
     }
+    /* 144px בדיוק - רוחב המשבצת בטור הפרסומות (כמו בקהילה בשכונה). כשהתצוגה
+       צרה או רחבה יותר הטקסט נשבר לשורות אחרות, והמפרסם רואה מודעה שאינה
+       זו שתתפרסם. */
     .live-demo-frame {
-        width: 100%;
+        width: 144px;
+        max-width: 100%;
+        margin-inline: auto;
         border-radius: 0.55rem;
         overflow: hidden;
         background: #0f172a;
@@ -2182,6 +2468,142 @@
         flex-wrap: wrap;
         gap: 1rem;
         align-self: center;
+    }
+    /* מיקום חופשי: רמז הגרירה + הקואורדינטות וכפתור החזרה לברירת המחדל */
+    .logo-drag-row {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.25rem;
+    }
+    .logo-drag-hint {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin: 0;
+        font-size: 0.69rem;
+        font-weight: 700;
+        color: rgba(252, 211, 77, 0.9);
+    }
+    .logo-free-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.69rem;
+        font-weight: 700;
+        color: #9ca3af;
+    }
+    .logo-free-coords {
+        border-radius: 0.375rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.125rem 0.5rem;
+        font-variant-numeric: tabular-nums;
+    }
+    .logo-free-reset {
+        border-radius: 0.375rem;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: none;
+        padding: 0.125rem 0.5rem;
+        color: #fcd34d;
+        font: inherit;
+        cursor: pointer;
+        transition: color 0.15s, border-color 0.15s;
+    }
+    .logo-free-reset:hover {
+        color: #fde68a;
+        border-color: rgba(251, 191, 36, 0.6);
+    }
+
+    /* ============== טיפוגרפיית הסלוגן (שלב 5) - כמו בקהילה בשכונה ============== */
+    .sub-type-panel {
+        margin-top: 0.85rem;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 0.9rem;
+        background: rgba(255, 255, 255, 0.04);
+        padding: 0.75rem 0.9rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        text-align: start;
+    }
+    .sub-type-title {
+        margin: 0;
+        color: rgb(253, 230, 138);
+        font-weight: 900;
+        font-size: 0.85rem;
+    }
+    .sub-type-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+    .sub-type-label {
+        color: rgb(209, 213, 219);
+        font-weight: 700;
+        font-size: 0.78rem;
+        min-width: 6.5rem;
+    }
+    .sub-type-range {
+        flex: 1 1 8rem;
+        min-width: 7rem;
+        accent-color: rgb(245, 158, 11);
+    }
+    .sub-type-value {
+        color: white;
+        font-weight: 700;
+        font-size: 0.75rem;
+        min-width: 2.6rem;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+    .sub-type-aligns {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        flex: 1 1 auto;
+    }
+    .sub-type-align-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.05);
+        color: rgb(209, 213, 219);
+        font-family: inherit;
+        font-size: 0.72rem;
+        font-weight: 700;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .sub-type-align-btn:hover { color: white; background: rgba(255, 255, 255, 0.1); }
+    .sub-type-align-btn.is-active {
+        background: rgb(245, 158, 11);
+        border-color: rgb(245, 158, 11);
+        color: black;
+    }
+    /* במסך צר נשארים האייקונים בלבד, כדי שארבע האפשרויות ייכנסו בשורה */
+    @media (max-width: 480px) {
+        .sub-type-align-text { display: none; }
+    }
+    .sub-type-reset {
+        align-self: flex-start;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: rgb(252, 211, 77);
+        font-family: inherit;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        padding: 0;
     }
     .control-label {
         font-size: 0.75rem;
@@ -2650,7 +3072,7 @@
     }
 
     .clean-card {
-        width: 140px;
+        width: 144px; /* רוחב המשבצת האמיתי בטור הפרסומות */
         border-radius: 0.6rem;
         overflow: hidden;
         background: #0f172a;
@@ -2714,13 +3136,26 @@
         transition: opacity 1500ms ease;
         pointer-events: none;
     }
+    /* לוגו בפינה העליונה יושב בגובה הכותרת, ולכן הכותרת שומרת לו מקום -
+       אחרת הוא מכסה את המילה האחרונה במשבצת של 144px. אותם כללים בדיוק
+       בטור הפרסומות, כך שהכותרת נשברת אותו דבר בתצוגה ובאתר. */
+    .pro-title-top.has-corner-logo-right { padding-right: 46px; }
+    .pro-title-top.has-corner-logo-left { padding-left: 46px; }
+    /* הכותרת - הערכים של קהילה בשכונה ושל הטור הימני (1.15rem) */
     .pro-title {
         color: white;
         font-weight: 900;
-        font-size: 0.95rem;
+        font-size: 1.15rem;
         line-height: 1.15;
-        margin: 0;
+        margin: 0 0 0.2rem;
         text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(0, 0, 0, 0.9);
+        letter-spacing: -0.02em;
+    }
+    .pro-title-top .pro-title {
+        margin: 0;
+        text-align: center;
+        letter-spacing: 0.005em;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(0, 0, 0, 0.95);
     }
     .pro-title-wrap {
         position: absolute;
@@ -2729,19 +3164,22 @@
         bottom: 0;
         padding: 0.55rem 0.7rem 1.1rem;
         z-index: 4;
-        text-align: right;
+        text-align: var(--sub-align, right);
         transition: opacity 1500ms ease;
     }
     .pro-title-wrap.mobile { padding: 0.65rem 0.85rem 1.25rem; }
+    /* גודל/רווח/יישור מגיעים מהמשתנים של שלב 5 (אותם ש-adStyleVars מייצר
+       לטור הפרסומות), עם ה-fallback הישן - בדיוק הכלל של הטור */
     .pro-sub {
         color: rgba(255, 255, 255, 0.95);
         font-weight: 600;
-        font-size: 0.7rem;
-        line-height: 1.3;
+        font-size: var(--sub-size, 0.88rem);
+        line-height: var(--sub-lh, 1.3);
         margin: 0;
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
     }
-    .pro-title-wrap.mobile .pro-sub { font-size: 0.9rem; }
+    /* בנייד המשבצת רחבה יותר, ולכן הטיפוגרפיה מוגדלת ביחס קבוע לבחירת המפרסם */
+    .pro-title-wrap.mobile .pro-sub { font-size: calc(var(--sub-size, 0.88rem) * 1.14); }
     /* השורה הראשונה של הסלוגן מתקצרת בעקבות האלכסון.
        logoClearance מכבה אותו (--logo-avoid-tri) כשהלוגו באותו צד */
     .pro-sub::before {
@@ -2752,6 +3190,10 @@
         height: 1.35em;
         shape-outside: polygon(0 0, 100% 0, 0 100%);
     }
+    .pro-title-wrap.mobile .pro-sub::before {
+        width: 32%;
+        height: 1.4em;
+    }
     /* ה-float שגורם לטקסט לעקוף את הלוגו - מוצג ומוצב רק ע"י logoClearance */
     .logo-avoid {
         display: none;
@@ -2759,7 +3201,6 @@
     .ad-logo {
         position: absolute;
         top: 6px;
-        right: 6px;
         /* 36px כולל הריפוד - כמו בטור הפרסומות; עוגן ה-CTA מניח חצי לוגו = 18px */
         box-sizing: border-box;
         width: 36px;
@@ -2770,15 +3211,41 @@
         object-fit: contain;
         z-index: 5;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-        transition: opacity 1500ms ease;
     }
-    .ad-logo.circle { border-radius: 50%; }
-    .ad-logo.pos-left { left: 6px; right: auto; }
-    .ad-logo.pos-cta {
+    .ad-logo-right { right: 6px; left: auto; }
+    .ad-logo-left { left: 6px; right: auto; }
+    .ad-logo-circle { border-radius: 50%; }
+    /* הלוגו רוכב על הפינה הימנית של הרצועה האלכסונית: מרכזו על
+       --diag-top-right (18px = חצי מגובה הלוגו) */
+    .ad-logo-cta {
         top: auto;
         bottom: calc(100% - var(--diag-top-right, 78%) - 18px);
         right: 6px;
         left: auto;
+    }
+    /* מיקום חופשי - הנקודה המדויקת מגיעה מ-left/top inline שהגרירה כותבת */
+    .ad-logo-free { top: auto; bottom: auto; right: auto; left: auto; }
+    /* ידית גרירה: סמן יד + טבעת מקווקוות בריחוף/פוקוס. touch-action:none
+       הוא מה שמאפשר לגרור באצבע במקום לגלול את הדף. */
+    .ad-logo-draggable {
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+    .ad-logo-draggable:hover {
+        outline: 2px dashed rgba(251, 191, 36, 0.9);
+        outline-offset: 2px;
+    }
+    .ad-logo-draggable:focus-visible {
+        outline: 2px solid #fbbf24;
+        outline-offset: 2px;
+    }
+    .ad-logo-dragging {
+        cursor: grabbing;
+        outline: 2px solid #fbbf24;
+        outline-offset: 2px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
     }
     .hover-overlay {
         position: absolute;
@@ -2793,33 +3260,35 @@
         text-align: center;
         transition: opacity 1500ms ease;
         pointer-events: none;
-        z-index: 6;
+        z-index: 4;
     }
     .hover-title {
         color: white;
         font-weight: 700;
-        font-size: 0.85rem;
+        font-size: 0.95rem;
         margin: 0 0 0.4rem;
     }
     .hover-text {
-        color: #e5e7eb;
-        font-size: 0.65rem;
+        color: rgb(229, 231, 235);
+        font-size: 0.7rem;
         line-height: 1.4;
-        margin: 0;
+        margin: 0 0 0.4rem;
         font-weight: 700;
         /* pre-line - ירידות שורה שהמפרסם הקליד בשלב 6 נשמרות בתצוגה
            המקדימה (בלי זה HTML מכווץ כל \n לרווח והמשפט נשפך לשורה אחת) */
         white-space: pre-line;
     }
+    /* אותם מספרים של רצועת ה-CTA בטור הימני (p-2.5 / text-xs / leading-tight),
+       כדי שטקסט ארוך יישבר שם בדיוק כמו כאן */
     .promo-cta {
-        padding: 0.65rem;
+        padding: 0.625rem;
         text-align: center;
     }
     .promo-cta p {
         color: white;
         font-weight: 700;
-        font-size: 0.72rem;
-        line-height: 1.3;
+        font-size: 0.75rem;
+        line-height: 1.25;
         margin: 0;
     }
     .img-placeholder {

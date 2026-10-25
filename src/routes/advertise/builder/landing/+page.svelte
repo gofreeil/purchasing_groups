@@ -4,7 +4,7 @@
     import { goto } from "$app/navigation";
     import { adPlans, planFor, normalizePlanDays, DEFAULT_PLAN_DAYS } from "$lib/adPlans.js";
     import { AD_DRAFT_KEY, getAdEditTarget } from "$lib/adDraft.js";
-    import { localAdStyle, autoLogoAnchor } from "$lib/adStyle.js";
+    import { DEFAULT_AD_STYLE, parseAdStyle } from "$lib/adStyle.js";
     import {
         AD_BODY_LIMIT, AD_EFFECTIVE_LIMIT, SIDE_IMAGE_MAX_BYTES,
         bodyBytes, fmtWeight, approxDataUrlBytes, compressImageToFit,
@@ -58,12 +58,9 @@
     let logo = $state("");
     let logoShape = $state(/** @type {'square' | 'circle'} */ ("square"));
     let gradient = $state("linear-gradient(135deg, #f59e0b, #ea580c)");
-    // העיצוב שנבחר בבילדר - נשלח עם המודעה (landing._adStyle), כדי שהכרטיס
-    // בטור הפרסומות ייראה כמו בדמו החי
-    let logoPosition = $state(/** @type {'right' | 'left' | 'cta'} */ ("right"));
-    let diagHeight = $state(12);
-    let titleColor = $state("#ffffff");
-    let titleOffsetY = $state(0);
+    // העיצוב שנבחר בבילדר (כל השדות של landing._adStyle - כמו בקהילה בשכונה)
+    // נשלח עם המודעה, כדי שהכרטיס בטור הפרסומות ייראה כמו בדמו החי
+    let adStyleFromDraft = $state({ ...DEFAULT_AD_STYLE });
 
     // ===== גרירת קבצים =====
     let isDraggingLandingImage = $state(false);
@@ -112,7 +109,7 @@
                 uniqueness, phone, whatsapp, website, email, address, hours,
                 // עותק עמוק — כיווץ תמונות מוצר לא ישנה את המצב שעל המסך
                 products: products.map((p) => ({ ...p })),
-                _adStyle: localAdStyle({ logoShape, logoPosition, diagHeight, titleColor, titleOffsetY }),
+                _adStyle: { ...adStyleFromDraft },
             },
             // עריכה של פרסומת קיימת. השרת מאמת שהיא באמת של המפרסם -
             // מזהה זר פשוט לא מכובד ונכנס כפרסומת חדשה.
@@ -375,10 +372,21 @@
                     logo = d.logo ?? "";
                     logoShape = d.logoShape ?? "square";
                     gradient = d.gradient ?? gradient;
-                    logoPosition = d.logoPosition ?? autoLogoAnchor(title);
-                    diagHeight = typeof d.diagHeight === "number" ? d.diagHeight : 12;
-                    titleColor = d.titleColor ?? "#ffffff";
-                    titleOffsetY = typeof d.titleOffsetY === "number" ? d.titleOffsetY : 0;
+                    // הטיוטה שומרת את השדות בשמות של הבילדר; כאן הם נארזים
+                    // לאובייקט העיצוב שנשלח עם המודעה (ומנורמל שוב בשרת)
+                    adStyleFromDraft = parseAdStyle({
+                        logoShape: d.logoShape,
+                        logoAnchor: d.logoPosition,
+                        logoX: d.logoFreeX,
+                        logoY: d.logoFreeY,
+                        bandHeight: d.diagHeight,
+                        titleOffsetY: d.titleOffsetY,
+                        titleColor: d.titleColor,
+                        // טיפוגרפיית הסלוגן משלב 5
+                        subFontSize: d.subFontSize,
+                        subLineHeight: d.subLineHeight,
+                        subAlign: d.subAlign,
+                    }) ?? { ...DEFAULT_AD_STYLE };
                 }
             } catch {}
             // טיוטה ישנה שחורגת מהתקציב מכווצת מיד — לא מחכים לכישלון בסוף

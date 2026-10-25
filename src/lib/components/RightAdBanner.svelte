@@ -6,6 +6,8 @@
 		parseAdStyle, legacyAdStyle, adStyleVars, logoAnchorClass, logoFreeStyle, logoCornerSide,
 	} from "$lib/adStyle.js";
 	import { logoClearance } from "$lib/logoClearance.js";
+	import { gradientStyle } from "$lib/adGradient.js";
+	import { t } from "$lib/i18n.js";
 
 	// פרסומות מאושרות של מפרסמים. הטור הימני הוא המקום היחיד שלהן -
 	// הטור השמאלי שמור לאתרי רשת "יוצאים לחירות" בלבד.
@@ -16,15 +18,15 @@
 		(approvedAds ?? []).filter((/** @type {any} */ a) => a.mainImage),
 	);
 
-	// הכרטיס בנוי מאותן שכבות של הדמו החי בבילדר: כותרת, רצועה אלכסונית,
-	// תת-כותרת ולוגו. העיצוב שהמפרסם קבע נוסע עם הפרסומת (_adStyle) - גם
-	// מקהילה בשכונה וגם מהבילדר כאן - כולל גודל הכותרת, שנקבע לפי המקור
-	// שלו. פרסומת ותיקה בלי עיצוב שמור מקבלת את ברירות המחדל של הבילדר.
+	// הכרטיס הוא עותק של כרטיס הפרסומת בקהילה בשכונה - אותן שכבות, מידות
+	// וצבעים - כדי שפרסומת שהופצה משם תיראה כאן בדיוק כמו שם. העיצוב
+	// שהמפרסם קבע בבילדר (שם או כאן) נוסע עם הפרסומת (_adStyle) ומנורמל
+	// באותו מודול משותף; פרסומת ותיקה בלי עיצוב שמור מקבלת את הכלל הישן
+	// (כותרת ארוכה ← לוגו מעל רצועת ה-CTA), כמו בקהילה בשכונה.
 	/** @param {any} ad */
 	function styleOf(ad) {
 		return parseAdStyle(ad.adStyle) ?? legacyAdStyle(ad.title);
 	}
-	const FALLBACK_GRADIENT = "linear-gradient(135deg,#f59e0b,#ea580c)";
 
 	let currentGroup = $state(0);
 
@@ -109,8 +111,8 @@
 	);
 </script>
 
-<aside class="right-ad-banner" aria-label="פרסומות">
-	<h4 class="right-ad-title">תוכן שיווקי</h4>
+<aside class="right-ad-banner" aria-label={$t.sidebar.adsAria}>
+	<h4 class="right-ad-title">{$t.sidebar.sponsored}</h4>
 
 	<!-- לוח 16 המקומות בסדר מספרי, בקבוצות של 4 (1-4, 5-8, 9-12, 13-16).
 	     כל הכרטיסים מתחלפים בסבב כרגיל - פרסומות ומשבצות פנויות יחד:
@@ -128,14 +130,17 @@
 				<a class="paid-ad" href="/ads/{ad.id}" aria-label="{ad.title} – {ad.subtitle}" style={adStyleVars(st)}>
 					<!-- הכותרת ותת-הכותרת עוקפות את הלוגו בכל מיקום שלו (logoClearance) -->
 					<div class="paid-ad-media" use:logoClearance={ad}>
-						<img
-							src={ad.mainImage}
-							alt={ad.title}
-							loading="lazy"
-							decoding="async"
-							use:adImgFit={parseAdImageFit(ad.mainImageFit)}
-						/>
-						<div class="promo-diag" style="background: {ad.gradient || FALLBACK_GRADIENT}"></div>
+						<div class="paid-ad-img">
+							<!-- המיקום/זום שנבחרו בבילדר מוחלים גם כאן — הדמו הוא מה שרואים -->
+							<img
+								src={ad.mainImage}
+								alt={ad.title}
+								loading="lazy"
+								decoding="async"
+								use:adImgFit={parseAdImageFit(ad.mainImageFit)}
+							/>
+						</div>
+						<div class="promo-diag" style={gradientStyle(ad.gradient, "to bottom right")}></div>
 						<div
 							class="promo-title-top"
 							class:has-corner-logo-right={cornerSide === "right"}
@@ -156,20 +161,28 @@
 								loading="lazy"
 								decoding="async"
 								data-ad-logo
-								class="promo-logo {logoAnchorClass(st)}"
+								class="promo-logo {logoAnchorClass(st, 'promo')}"
 								class:promo-logo-circle={st.logoShape === "circle"}
 								style={logoFreeStyle(st)}
 							/>
 						{/if}
 						<div class="paid-ad-hover">
-							<strong>{ad.title}</strong>
-							<span>{ad.subtitle}</span>
+							<div class="paid-ad-hover-body">
+								<h3>{ad.title}</h3>
+								<p>{ad.subtitle}</p>
+							</div>
 						</div>
 					</div>
-					<!-- כרטיס מוצר מהחנות - בלי רצועת המחיר ("₪.. · לצפייה בחנות") -->
-					{#if !ad.shop}
-					<div class="paid-ad-cta" style="background: {ad.gradient || FALLBACK_GRADIENT}">
-						{ad.cta || ad.title}
+					<!-- כרטיס מוצר מהחנות - בלי רצועת המחיר ("₪.. · לצפייה בחנות").
+					     גם פרסומת שטקסט הכפתור שלה נמחק מוצגת בלי רצועה -->
+					{#if !ad.shop && ad.cta}
+					<div class="paid-ad-cta" style={gradientStyle(ad.gradient, "to right")}>
+						<p>{ad.cta || ad.title}</p>
+						{#if ad.hover}
+							<!-- pre-line + max-content: משפט בשורה אחת נשאר בשורה אחת, אבל ירידות
+							     שורה שהמפרסם הקליד נשמרות, וטקסט ארוך נגמר ב-max-width במקום לגלוש -->
+							<span class="paid-ad-tip">{ad.hover}</span>
+						{/if}
 					</div>
 					{/if}
 				</a>
@@ -179,24 +192,24 @@
 					href="/advertise"
 					class="right-ad-card"
 					style="border-color: {slot.border}; background: {slot.bg};"
-					aria-label="מקום פרסום פנוי - לפרטים על פרסום באתר"
+					aria-label={$t.sidebar.freeSlotAria}
 				>
 					<!-- מספר המקום הפנוי - בדיוק המספרים שלא נתפסו ע"י פרסומות -->
 					<div class="right-ad-num">{cell.num}</div>
 					<div class="right-ad-emoji">📢</div>
 					<div class="right-ad-vtext">
 						<span class="right-ad-vmain" style="color: {slot.text}">
-							מקום פרסום זה
+							{$t.sidebar.thisAdSpace}
 						</span>
 						<span class="right-ad-vsub" style="color: {slot.text}">
-							- יכול להיות שלך
+							{$t.sidebar.couldBeYours}
 						</span>
 					</div>
 					<span
 						class="right-ad-btn"
 						style="background: {slot.btn}"
 					>
-						לפרטים
+						{$t.sidebar.adDetails}
 					</span>
 				</a>
 			{/if}
@@ -207,40 +220,62 @@
 </aside>
 
 <style>
-	/* פרסומת משלמת: אותו יחס שהבילדר מציג בתצוגה החיה (144/450), כדי
-	   שהחיתוך והזום שהמפרסם כיוון שם לא יישברו כאן. */
+	/* כרטיס פרסומת משלמת - עותק של הכרטיס בקהילה בשכונה. שם הוא בנוי
+	   ממחלקות Tailwind v4 (block overflow-hidden rounded-lg shadow-lg
+	   transition-transform hover:scale-105, שכבות ב-transition-opacity
+	   duration-[1500ms]); כאן אותם ערכים בדיוק ב-CSS רגיל, כדי שפרסומת
+	   שהופצה משם תיראה כאן זהה - גודל, צבע, צל ותנועה. */
 	.paid-ad {
+		position: relative;
 		display: block;
 		overflow: hidden;
 		border-radius: 0.5rem;
-		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.35);
-		transition: transform 0.2s ease;
+		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+		transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+		text-decoration: none;
 	}
 	.paid-ad:hover {
 		transform: scale(1.05);
 	}
+	/* aspect-ratio 144/450 = בדיוק היחס שהבילדר מציג בתצוגה החיה. המפרסם
+	   מכוון שם מיקום וזום על מסגרת צרה וגבוהה, ולכן חייבים לשמור את אותו
+	   יחס - אחרת החיתוך שהוא בחר נשבר. */
 	.paid-ad-media {
 		position: relative;
 		width: 100%;
 		aspect-ratio: 144 / 450;
 		overflow: hidden;
 	}
-	.paid-ad-media img {
+	.paid-ad-img {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+	}
+	.paid-ad-img img {
+		display: block;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		transition: opacity 1.5s;
 	}
-	.paid-ad:hover .paid-ad-media img,
+	.paid-ad-img img,
+	.promo-diag,
+	.promo-title-top,
+	.promo-sub-wrap,
+	.paid-ad-media .promo-logo,
+	.paid-ad-hover {
+		transition: opacity 1500ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.paid-ad:hover .paid-ad-img img,
 	.paid-ad:hover .promo-diag,
 	.paid-ad:hover .promo-title-top,
-	.paid-ad:hover .promo-sub-wrap {
+	.paid-ad:hover .promo-sub-wrap,
+	.paid-ad:hover .promo-logo {
 		opacity: 0;
 	}
 
-	/* שכבות הכרטיס - אותם ערכים של RightAdBanner בקהילה בשכונה, כדי
-	   שפרסומת שהופצה משם תיראה כאן בדיוק כמו שם. שמות המחלקות מתחילים
-	   ב-promo ולא ב-ad: EasyList מסתירה בכל אתר אלמנט עם `.ad-title`. */
+	/* שמות המחלקות מתחילים ב-promo ולא ב-ad בכוונה: EasyList מכילה כלל
+	   קוסמטי גנרי `##.ad-title` שמסתיר כל אלמנט עם המחלקה הזאת בכל אתר.
+	   הערכים זהים ל-.pro-title-top/.pro-title/.ad-logo שבבילדר. */
 	.promo-title-top {
 		position: absolute;
 		inset-inline: 0;
@@ -255,7 +290,6 @@
 			rgba(0, 0, 0, 0) 100%
 		);
 		pointer-events: none;
-		transition: opacity 1.5s;
 	}
 	/* לוגו בפינה העליונה יושב בגובה הכותרת - הריפוד שומר לו מקום.
 	   padding פיזי: הדף RTL, והקצה הלוגי הפוך לצד שבו הלוגו נמצא. */
@@ -264,15 +298,6 @@
 	}
 	.promo-title-top.has-corner-logo-left {
 		padding-left: 46px;
-	}
-	.promo-title {
-		margin: 0;
-		color: white;
-		font-weight: 900;
-		font-size: var(--title-size, 0.95rem);
-		line-height: 1.15;
-		letter-spacing: 0.005em;
-		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(0, 0, 0, 0.95);
 	}
 	/* הרצועה האלכסונית בתחתית התמונה; הגובה מגיע מ-adStyleVars */
 	.promo-diag {
@@ -286,7 +311,6 @@
 		);
 		opacity: 0.96;
 		pointer-events: none;
-		transition: opacity 1.5s;
 	}
 	/* פס הברק הלבן שחוצה את האלכסון */
 	.promo-diag::after {
@@ -301,6 +325,8 @@
 		);
 		pointer-events: none;
 	}
+	/* גודל/רווח/יישור מגיעים מ-adStyleVars — מה שהמפרסם כיוון בשלב 5.
+	   ה-fallback הוא הערך שהיה קבוע, כדי שמודעות ותיקות לא ישתנו. */
 	.promo-sub-wrap {
 		position: absolute;
 		inset-inline: 0;
@@ -309,7 +335,6 @@
 		padding: 0.55rem 0.7rem 1.1rem;
 		text-align: var(--sub-align, right);
 		pointer-events: none;
-		transition: opacity 1.5s;
 	}
 	.promo-sub {
 		margin: 0;
@@ -330,6 +355,15 @@
 		height: 1.35em;
 		shape-outside: polygon(0 0, 100% 0, 0 100%);
 	}
+	.promo-title {
+		margin: 0;
+		color: white;
+		font-weight: 900;
+		font-size: 1.15rem;
+		line-height: 1.15;
+		letter-spacing: 0.005em;
+		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(0, 0, 0, 0.95);
+	}
 	/* ה-float שגורם לטקסט לעקוף את הלוגו - מוצג ומוצב רק ע"י logoClearance */
 	.logo-avoid {
 		display: none;
@@ -337,10 +371,12 @@
 	.paid-ad-media .promo-logo {
 		position: absolute;
 		z-index: 6;
-		/* 36px כולל הריפוד - כמו בבילדר (שם preflight של Tailwind קובע
-		   border-box). בלי זה הלוגו יצא 42px, ועוגן ה-CTA (18px = חצי
+		/* 36px כולל הריפוד - כמו בקהילה בשכונה (שם preflight של Tailwind
+		   קובע border-box). בלי זה הלוגו יצא 42px, ועוגן ה-CTA (18px = חצי
 		   לוגו) לא היה ממורכז על קצה הרצועה. */
 		box-sizing: border-box;
+		display: block;
+		max-width: none;
 		width: 36px;
 		height: 36px;
 		border-radius: 6px;
@@ -360,7 +396,8 @@
 		left: 6px;
 		right: auto;
 	}
-	/* עוגן "מעל ה-CTA": הלוגו רוכב על הפינה הימנית של הרצועה האלכסונית */
+	/* עוגן "מעל ה-CTA": הלוגו רוכב על הפינה הימנית של הרצועה האלכסונית,
+	   מרכזו על --diag-top-right (18px = חצי מגובה הלוגו) */
 	.promo-logo-cta {
 		top: auto;
 		bottom: calc(100% - var(--diag-top-right, 78%) - 18px);
@@ -377,40 +414,79 @@
 	.promo-logo-circle {
 		border-radius: 50%;
 	}
+	/* צד הריחוף: absolute inset-0 flex bg-black/60 backdrop-blur-sm (v4 = 8px) */
 	.paid-ad-hover {
 		position: absolute;
 		inset: 0;
 		display: flex;
-		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.25rem;
-		padding: 0 0.75rem;
-		text-align: center;
 		background: rgba(0, 0, 0, 0.6);
-		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(8px);
+		backdrop-filter: blur(8px);
 		opacity: 0;
-		transition: opacity 1.5s;
 	}
 	.paid-ad:hover .paid-ad-hover {
 		opacity: 1;
 	}
-	.paid-ad-hover strong {
+	.paid-ad-hover-body {
+		position: relative;
+		z-index: 10;
+		padding-inline: 0.75rem;
+		text-align: center;
+	}
+	.paid-ad-hover h3 {
+		margin: 0 0 0.25rem;
 		color: #fff;
 		font-size: 0.875rem;
+		line-height: 1.25rem;
 		font-weight: 700;
 	}
-	.paid-ad-hover span {
-		color: #e5e7eb;
+	.paid-ad-hover p {
+		margin: 0;
+		color: oklch(92.8% 0.006 264.531);
 		font-size: 0.75rem;
+		line-height: 1rem;
 	}
+	/* רצועת ה-CTA: p-2.5 / text-xs / font-bold / leading-tight */
 	.paid-ad-cta {
-		padding: 0.625rem 0.5rem;
+		position: relative;
+		padding: 0.625rem;
 		text-align: center;
+	}
+	.paid-ad-cta p {
+		margin: 0;
 		color: #fff;
 		font-size: 0.75rem;
 		font-weight: 700;
-		line-height: 1.2;
+		line-height: 1.25;
+	}
+	/* הטקסט בריחוף מעל ה-CTA (hover_text) - בועה כהה מעל הרצועה */
+	.paid-ad-tip {
+		position: absolute;
+		bottom: 100%;
+		left: 50%;
+		transform: translateX(-50%);
+		margin-bottom: 0.5rem;
+		display: none;
+		width: max-content;
+		max-width: 15rem;
+		padding: 0.375rem 0.75rem;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 0.5rem;
+		background: oklch(21% 0.034 264.665);
+		color: #fff;
+		font-size: 0.75rem;
+		line-height: 1rem;
+		font-weight: 700;
+		text-align: center;
+		white-space: pre-line;
+		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+		pointer-events: none;
+		z-index: 50;
+	}
+	.paid-ad-cta:hover .paid-ad-tip {
+		display: block;
 	}
 
 	.right-ad-banner {

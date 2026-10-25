@@ -1,21 +1,20 @@
 // ============================================================
-// adStyle.js - העיצוב של כרטיס פרסומת בטור הימני
+// adStyle.js — העיצוב שהמפרסם קבע בבילדר, נשמר יחד עם המודעה
 // ------------------------------------------------------------
-// עותק של adStyle.ts מ"קהילה בשכונה". פרסומת שהופצה משם ("פרסם בכל
-// האתרים") נושאת את העיצוב שהמפרסם קבע בבילדר שם - מיקום/צורת הלוגו,
-// גובה הרצועה האלכסונית, צבע והזזת הכותרת - בתוך landing._adStyle.
-// בלי המודול הזה הכרטיס כאן היה תמונה חשופה, שונה ממה שרואים בקהילה.
+// עותק זהה של adStyle.ts מ"קהילה בשכונה" (מקור האמת). פרסומת שהופצה
+// משם ("פרסם בכל האתרים") נושאת את העיצוב שנקבע בבילדר שם בתוך
+// landing._adStyle, והבילדר כאן שומר באותו שדה בדיוק את אותו מבנה -
+// כך שפרסומת נראית אותו דבר בכל אתרי הרשת, ועריכה של פרסומת שהופצה
+// לא מאבדת אף פרמטר. אותם ערכים מוחלים בתצוגה החיה בבילדר ובטור הימני.
 //
-// פרסומת שנבנתה בבילדר של האתר הזה שומרת באותו שדה את מה שנבחר בו
-// (localAdStyle) - כולל גודל הכותרת והסלוגן של הדמו החי, שקטנים משל
-// קהילה בשכונה. פרסומת ותיקה מהבילדר כאן, מלפני שהשדה נשמר, מקבלת את
-// ברירות המחדל שהוא מציג (legacyAdStyle).
+// מודעה ותיקה שנשלחה לפני השדה הזה מקבלת null מ-parseAdStyle, ואז
+// legacyAdStyle() משחזר את ההתנהגות שהייתה לה - כמו בקהילה בשכונה.
 // ============================================================
 
 /**
  * @typedef {'square' | 'circle'} LogoShape
  * @typedef {'right' | 'left' | 'cta'} LogoAnchor
- * @typedef {'right' | 'center' | 'left' | 'justify'} SubAlign
+ * @typedef {'right' | 'center' | 'left' | 'justify'} SubAlign - יישור תת-הכותרת: ימין / מרכז / שמאל / מילוי רוחב
  * @typedef {{
  *   logoShape: LogoShape,
  *   logoAnchor: LogoAnchor,
@@ -27,22 +26,37 @@
  *   subFontSize: number,
  *   subLineHeight: number,
  *   subAlign: SubAlign,
- *   titleSize: number,
  * }} AdStyle
+ * logoShape - ריבוע (פינות מעוגלות) או עיגול מלא
+ * logoAnchor - עוגן ברירת המחדל של הלוגו, כשאין לו מיקום חופשי
+ * logoX/logoY - מרכז הלוגו באחוזי המשבצת. null בשני הצירים = יושב על העוגן
+ * bandHeight - גובה הרצועה האלכסונית באחוזים מגובה התמונה
+ * titleOffsetY - הזזה אנכית של הכותרת בפיקסלים
+ * titleColor - צבע הכותרת (#rgb / #rrggbb בלבד — הערך נכנס ל-style inline)
+ * subFontSize - גודל תת-הכותרת ב-rem
+ * subLineHeight - רווח בין שורות תת-הכותרת (יחס, לא יחידה)
+ * subAlign - יישור תת-הכותרת
  */
 
 /** ברירת המחדל של הבילדר: רצועה בגובה 12% מהתמונה */
-const DEFAULT_BAND_HEIGHT = 12;
-/** הפרש בין שתי פינות הרצועה - מה שנותן לה את השיפוע */
-const BAND_SLOPE = 10;
-/** גודל הכותרת (rem): בקהילה בשכונה, ובדמו החי של הבילדר כאן */
-const COMMUNITY_TITLE_SIZE = 1.15;
-const LOCAL_TITLE_SIZE = 0.95;
-/** גודל הסלוגן (rem) בדמו החי של הבילדר כאן */
-const LOCAL_SUB_SIZE = 0.7;
+export const DEFAULT_BAND_HEIGHT = 12;
+/** הפרש בין שתי פינות הרצועה — מה שנותן לה את השיפוע */
+export const BAND_SLOPE = 10;
+export const BAND_MIN = 5;
+export const BAND_MAX = 50;
+export const TITLE_OFFSET_MIN = -20;
+export const TITLE_OFFSET_MAX = 60;
+
+/** תת-הכותרת: הערכים שהיו קבועים ב-CSS לפני שהמפרסם קיבל שליטה עליהם */
+export const DEFAULT_SUB_FONT_SIZE = 0.88;
+export const SUB_FONT_SIZE_MIN = 0.6;
+export const SUB_FONT_SIZE_MAX = 1.5;
+export const DEFAULT_SUB_LINE_HEIGHT = 1.3;
+export const SUB_LINE_HEIGHT_MIN = 0.9;
+export const SUB_LINE_HEIGHT_MAX = 2.2;
 
 /** @type {AdStyle} */
-const DEFAULT_AD_STYLE = {
+export const DEFAULT_AD_STYLE = {
     logoShape: 'square',
     logoAnchor: 'right',
     logoX: null,
@@ -50,11 +64,9 @@ const DEFAULT_AD_STYLE = {
     bandHeight: DEFAULT_BAND_HEIGHT,
     titleOffsetY: 0,
     titleColor: '#ffffff',
-    subFontSize: 0.88,
-    subLineHeight: 1.3,
+    subFontSize: DEFAULT_SUB_FONT_SIZE,
+    subLineHeight: DEFAULT_SUB_LINE_HEIGHT,
     subAlign: 'right',
-    // פרסומת מקהילה בשכונה לא נושאת את השדה - הגודל שם קבוע
-    titleSize: COMMUNITY_TITLE_SIZE,
 };
 
 /** @param {number} v @param {number} lo @param {number} hi */
@@ -63,7 +75,7 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const num = (v) => (typeof v === 'number' && isFinite(v) ? v : null);
 
 /**
- * צבע נכנס ל-style inline ולכן מותר רק hex - לא ביטוי CSS שרירותי
+ * צבע נכנס ל-style inline ולכן מותר רק hex — לא ביטוי CSS שרירותי
  * @param {unknown} v
  */
 function parseColor(v) {
@@ -73,7 +85,8 @@ function parseColor(v) {
 }
 
 /**
- * מנרמל סגנון מקלט לא-בטוח (Strapi). null כשאין סגנון שמור בכלל.
+ * מנרמל סגנון מקלט לא-בטוח (Strapi / localStorage / דפדפן).
+ * מחזיר null כשאין סגנון שמור בכלל - מודעה שנשלחה לפני השדה הזה.
  * @param {unknown} raw
  * @returns {AdStyle | null}
  */
@@ -87,91 +100,81 @@ export function parseAdStyle(raw) {
     return {
         logoShape: o.logoShape === 'circle' ? 'circle' : 'square',
         logoAnchor: o.logoAnchor === 'left' ? 'left' : o.logoAnchor === 'cta' ? 'cta' : 'right',
-        logoX: free ? clamp(x, 0, 100) : null,
-        logoY: free ? clamp(y, 0, 100) : null,
-        bandHeight: clamp(num(o.bandHeight) ?? DEFAULT_BAND_HEIGHT, 5, 50),
-        titleOffsetY: clamp(num(o.titleOffsetY) ?? 0, -20, 60),
+        logoX: free ? clamp(/** @type {number} */ (x), 0, 100) : null,
+        logoY: free ? clamp(/** @type {number} */ (y), 0, 100) : null,
+        bandHeight: clamp(num(o.bandHeight) ?? DEFAULT_BAND_HEIGHT, BAND_MIN, BAND_MAX),
+        titleOffsetY: clamp(num(o.titleOffsetY) ?? 0, TITLE_OFFSET_MIN, TITLE_OFFSET_MAX),
         titleColor: parseColor(o.titleColor),
-        subFontSize: clamp(num(o.subFontSize) ?? DEFAULT_AD_STYLE.subFontSize, 0.6, 1.5),
-        subLineHeight: clamp(num(o.subLineHeight) ?? DEFAULT_AD_STYLE.subLineHeight, 0.9, 2.2),
-        subAlign: o.subAlign === 'center' || o.subAlign === 'left' || o.subAlign === 'justify' ? o.subAlign : 'right',
-        titleSize: clamp(num(o.titleSize) ?? DEFAULT_AD_STYLE.titleSize, 0.6, 2),
+        subFontSize: clamp(num(o.subFontSize) ?? DEFAULT_SUB_FONT_SIZE, SUB_FONT_SIZE_MIN, SUB_FONT_SIZE_MAX),
+        subLineHeight: clamp(num(o.subLineHeight) ?? DEFAULT_SUB_LINE_HEIGHT, SUB_LINE_HEIGHT_MIN, SUB_LINE_HEIGHT_MAX),
+        subAlign: parseSubAlign(o.subAlign),
     };
 }
 
 /**
- * ברירת המחדל החכמה של הבילדר כאן למיקום הלוגו: כותרת ארוכה (מעל 20
- * תווים) מורידה אותו לפינה שמעל רצועת ה-CTA
- * @param {string} title
- * @returns {LogoAnchor}
+ * @param {unknown} v
+ * @returns {SubAlign}
  */
-export function autoLogoAnchor(title) {
-    return (title ?? '').trim().length > 20 ? 'cta' : 'right';
+function parseSubAlign(v) {
+    return v === 'center' || v === 'left' || v === 'justify' ? v : 'right';
 }
 
 /**
- * מה שהבילדר של האתר הזה מציג בדמו החי - נשמר עם הפרסומת ב-landing._adStyle
- * @param {{ logoShape: LogoShape, logoPosition: LogoAnchor, diagHeight: number, titleColor: string, titleOffsetY: number }} b
- * @returns {AdStyle}
- */
-export function localAdStyle(b) {
-    return {
-        ...DEFAULT_AD_STYLE,
-        logoShape: b.logoShape,
-        logoAnchor: b.logoPosition,
-        bandHeight: b.diagHeight,
-        titleColor: b.titleColor,
-        titleOffsetY: b.titleOffsetY,
-        subFontSize: LOCAL_SUB_SIZE,
-        titleSize: LOCAL_TITLE_SIZE,
-    };
-}
-
-/**
- * פרסומת בלי עיצוב שמור - ברירות המחדל של הדמו החי בבילדר כאן:
- * לוגו מרובע במיקום האוטומטי, רצועה של 12% וכותרת לבנה
+ * הכלל שלפיו נקבע מיקום הלוגו במודעות שנשלחו לפני שהסגנון נשמר:
+ * כותרת ארוכה לא משאירה מקום ללוגו בפינה שלידה, ולכן הוא ירד לפינה
+ * שמעל רצועת ה-CTA. משמר את מראה המודעות שכבר רצות על האתר.
  * @param {string} title
  * @returns {AdStyle}
  */
 export function legacyAdStyle(title) {
-    return localAdStyle({
-        logoShape: 'square',
-        logoPosition: autoLogoAnchor(title),
-        diagHeight: DEFAULT_BAND_HEIGHT,
-        titleColor: DEFAULT_AD_STYLE.titleColor,
-        titleOffsetY: 0,
-    });
+    return {
+        ...DEFAULT_AD_STYLE,
+        logoAnchor: (title ?? '').trim().length > 20 ? 'cta' : 'right',
+    };
 }
 
-/** @param {AdStyle} style */
-function isLogoFree(style) {
+/**
+ * האם הלוגו יושב על מיקום חופשי שהמפרסם גרר בעצמו
+ * @param {AdStyle} style
+ */
+export function isLogoFree(style) {
     return style.logoX !== null && style.logoY !== null;
 }
 
 /**
- * משתני ה-CSS של הכרטיס (רצועה + טיפוגרפיית הכותרת ותת-הכותרת), לשתילה
- * ב-style של כרטיס בודד.
+ * גובה הרצועה → שתי פינות ה-clip-path (אחוז מלמעלה; קטן יותר = רצועה גבוהה)
+ * @param {number} bandHeight
+ * @returns {{ left: number, right: number }}
+ */
+export function bandCorners(bandHeight) {
+    const left = clamp(100 - bandHeight, 0, 100);
+    return { left, right: Math.max(0, left - BAND_SLOPE) };
+}
+
+/**
+ * משתני ה-CSS של הכרטיס (רצועה + טיפוגרפיית תת-הכותרת), לשתילה ב-style
+ * של כרטיס בודד. אותם משתנים נצרכים ע"י ה-CSS בבילדר ובטור הימני, כדי
+ * שהמפרסם יקבל בדיוק את מה שכיוון על המסך.
  * @param {AdStyle} style
  */
 export function adStyleVars(style) {
-    const left = clamp(100 - style.bandHeight, 0, 100);
-    const right = Math.max(0, left - BAND_SLOPE);
+    const { left, right } = bandCorners(style.bandHeight);
     return `--diag-top-left:${left}%;--diag-top-right:${right}%;`
-        + `--sub-size:${style.subFontSize}rem;--sub-lh:${style.subLineHeight};--sub-align:${style.subAlign};`
-        + `--title-size:${style.titleSize}rem;`;
+        + `--sub-size:${style.subFontSize}rem;--sub-lh:${style.subLineHeight};--sub-align:${style.subAlign};`;
 }
 
 /**
- * מחלקת המיקום של הלוגו (promo-logo-free כשהמיקום מגיע מ-style inline)
+ * מחלקת המיקום של הלוגו (ריק כשהמיקום חופשי ומגיע מ-style inline)
  * @param {AdStyle} style
+ * @param {'ad' | 'promo'} prefix
  */
-export function logoAnchorClass(style) {
-    if (isLogoFree(style)) return 'promo-logo-free';
-    return `promo-logo-${style.logoAnchor}`;
+export function logoAnchorClass(style, prefix) {
+    if (isLogoFree(style)) return `${prefix}-logo-free`;
+    return `${prefix}-logo-${style.logoAnchor}`;
 }
 
 /**
- * מיקום חופשי -> style inline. ריק כשהלוגו על העוגן
+ * מיקום חופשי → style inline. ריק כשהלוגו על העוגן
  * @param {AdStyle} style
  */
 export function logoFreeStyle(style) {
@@ -180,8 +183,9 @@ export function logoFreeStyle(style) {
 }
 
 /**
- * האם הלוגו יושב בפינה העליונה שליד הכותרת - אז הכותרת מקבלת ריפוד
- * באותו צד, אחרת הלוגו מכסה לה את המילה האחרונה (המשבצת רחבה 144px).
+ * האם הלוגו יושב בפינה העליונה שליד הכותרת. במקרה כזה הכותרת מקבלת
+ * ריפוד באותו צד, אחרת הלוגו מכסה לה את המילה האחרונה - המשבצת
+ * רחבה 144px בלבד. הכלל זהה בבילדר ובאתר כדי שהתצוגה תהיה זהה.
  * @param {AdStyle} style
  * @param {boolean} hasLogo
  * @returns {'right' | 'left' | null}

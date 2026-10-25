@@ -22,7 +22,13 @@ export const translations = readable({
             sponsored: "תוכן שיווקי",
             yourAdHere: "מקום פרסום זה יכול להיות שלך",
             advertise: "רוצים לפרסם כאן?",
-            contact: "צור קשר"
+            contact: "צור קשר",
+            // טור הפרסומות (RightAdBanner) - אותם כיתובים כמו בקהילה בשכונה
+            adsAria: "פרסומות",
+            freeSlotAria: "מקום פרסום פנוי - לפרטים על פרסום באתר",
+            thisAdSpace: "מקום פרסום זה",
+            couldBeYours: "- יכול להיות שלך",
+            adDetails: "לפרטים"
         },
         homepage: {
             title: "מהפכת הוזלת יוקר המחיה צומחת מהעם",
@@ -242,7 +248,12 @@ export const translations = readable({
             sponsored: "Sponsored Content",
             yourAdHere: "This advertising space could be yours",
             advertise: "Want to advertise here?",
-            contact: "Contact us"
+            contact: "Contact us",
+            adsAria: "Advertisements",
+            freeSlotAria: "Free ad space - details about advertising on the site",
+            thisAdSpace: "This ad space",
+            couldBeYours: "- could be yours",
+            adDetails: "Details"
         },
         homepage: {
             title: "The cost of living reduction revolution grows from the people",
@@ -425,7 +436,12 @@ export const translations = readable({
             sponsored: "Рекламный контент",
             yourAdHere: "Это рекламное место может быть вашим",
             advertise: "Хотите разместить рекламу здесь?",
-            contact: "Связаться с нами"
+            contact: "Связаться с нами",
+            adsAria: "Реклама",
+            freeSlotAria: "Свободное рекламное место - подробнее о рекламе на сайте",
+            thisAdSpace: "Это рекламное место",
+            couldBeYours: "- может быть вашим",
+            adDetails: "Подробнее"
         },
         homepage: {
             title: "Революция по снижению цен на проживание растет из народа",
