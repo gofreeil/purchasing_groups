@@ -7,6 +7,9 @@
     import JsonLd from "$lib/components/JsonLd.svelte";
     import TapHint from "$lib/components/TapHint.svelte";
     import DoneHand from "$lib/components/DoneHand.svelte";
+    import GuideVideo from "$lib/components/GuideVideo.svelte";
+    import VideoTranscript from "$lib/components/VideoTranscript.svelte";
+    import { VIDEO } from "$lib/video.js";
     import { readJoined } from "$lib/joined.js";
     import { track } from "$lib/track.js";
     import {
@@ -16,6 +19,7 @@
         collectionSchema,
         campaignServiceSchema,
         faqSchema,
+        videoSchema,
     } from "$lib/seo.js";
 
     let { data } = $props();
@@ -24,69 +28,6 @@
     // היד המצביעה על הכרטיס שלהן הופכת ליד שמסמנת "בוצע". נקרא רק בצד הלקוח.
     /** @type {Set<string>} */
     let joined = $state(new Set());
-
-    // סרטון ההדרכה: הנגן של eitanium מנגן אוטומטית (forceautoplay בצד השרת),
-    // אז נותנים לו לנגן מושתק (mute=1) - פעם אחת עד הסוף. שכבה שקופה מעליו
-    // תופסת את הלחיצה הראשונה ומנגנת מההתחלה עם קול (בלחיצה ישירה על הנגן
-    // הוא היה נעצר). shortsPreload=1 - מצב טעינה-מראש של eitanium, שלא סופר
-    // צפייה עד שהסרטון נטען שוב בלי הפרמטר (בלחיצה).
-    const VIDEO_URL =
-        "https://eitanium.org/videoEmbed/547/%D7%A7%D7%91%D7%95%D7%A6%D7%95%D7%AA-%D7%A8%D7%9B%D7%99%D7%A9%D7%94-1";
-    let videoSrc = $state(VIDEO_URL + "?mute=1&shortsPreload=1");
-    let videoSoundOn = $state(false);
-    let videoMounted = $state(false);
-    // נגן צף בדסקטופ: אחרי שהגולש הפעיל את הסרטון וגלל אל מתחתיו, הנגן
-    // נצמד לפינת המסך. רק CSS - העברת ה-iframe ב-DOM הייתה טוענת אותו מחדש.
-    /** @type {HTMLDivElement | undefined} */
-    let videoBox = $state();
-    let videoOutOfView = $state(false);
-    let videoFloatClosed = $state(false);
-    let videoFloating = $derived(videoSoundOn && videoOutOfView && !videoFloatClosed);
-    function closeVideoFloat() {
-        videoFloatClosed = true;
-        videoCmd("pause");
-    }
-    onMount(() => {
-        videoMounted = true;
-        const desktop = matchMedia("(min-width: 769px)");
-        const io = new IntersectionObserver(([e]) => {
-            videoOutOfView = desktop.matches && !e.isIntersecting && e.boundingClientRect.top < 0;
-            // חזרה לסרטון מאפסת את הסגירה - בגלילה הבאה הוא יצוף שוב
-            if (e.isIntersecting) videoFloatClosed = false;
-        });
-        if (videoBox) io.observe(videoBox);
-        return () => {
-            clearInterval(videoMuteTimer);
-            io.disconnect();
-        };
-    });
-    /** @type {HTMLIFrameElement | undefined} */
-    let videoFrame = $state();
-    /** @type {ReturnType<typeof setInterval> | undefined} */
-    let videoMuteTimer;
-    /** @param {string} cmd */
-    function videoCmd(cmd) {
-        videoFrame?.contentWindow?.postMessage(cmd, "https://eitanium.org");
-    }
-    function onVideoLoad() {
-        // הנגן זוכר עוצמת קול/השתקה מביקור קודם (persistvolume) - מוודאים
-        // שאחרי הטעינה המצב הוא מה שרצינו: מושתק עד הלחיצה, ועם קול אחריה
-        const cmd = videoSoundOn ? "unmute" : "mute";
-        clearInterval(videoMuteTimer);
-        const until = Date.now() + 4000;
-        videoMuteTimer = setInterval(() => {
-            if (Date.now() > until) return clearInterval(videoMuteTimer);
-            videoCmd(cmd);
-        }, 250);
-    }
-    function enableVideoSound() {
-        videoSoundOn = true;
-        clearInterval(videoMuteTimer);
-        // mute=1 גם מאפס את עוצמת הקול ל-0, ופקודת 'unmute' רק מבטלת את
-        // ההשתקה - הסרטון נשאר בלי קול עד הרמת העוצמה ידנית בנגן. לכן טוענים
-        // מחדש בלי mute=1, והנגן מתחיל מההתחלה עם קול.
-        videoSrc = VIDEO_URL;
-    }
 
     // מבצע מוקפא (campaign.frozen): לחיצה על הכרטיס מציגה הודעה קצרה
     // במקום לעבור לדף העסקה
@@ -246,7 +187,8 @@
                 image: c.image_url
             })
         ),
-        faqSchema(faqs)
+        faqSchema(faqs),
+        videoSchema({ ...VIDEO, transcript: VIDEO.transcript.join(" ") })
     ]);
 </script>
 
@@ -265,41 +207,7 @@
     </h1>
 
     <div class="video-row">
-        <div class="video-container-large" bind:this={videoBox}>
-            <div class="video-frame" class:video-floating={videoFloating}>
-                <!-- רק בצד הלקוח, כדי ש-onload לא יקרה לפני ה-hydration -->
-                {#if videoMounted}
-                    <iframe
-                        bind:this={videoFrame}
-                        src={videoSrc}
-                        title="סרטון הדרכה על קבוצות רכישות חוסכוניות"
-                        frameborder="0"
-                        loading="lazy"
-                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                        allowfullscreen
-                        onload={onVideoLoad}
-                    ></iframe>
-                {/if}
-                {#if videoFloating}
-                    <button
-                        type="button"
-                        class="video-float-close"
-                        aria-label="סגירת הנגן הצף"
-                        onclick={closeVideoFloat}>✕</button
-                    >
-                {/if}
-            </div>
-            {#if videoMounted && !videoSoundOn}
-                <button
-                    type="button"
-                    class="video-sound-overlay"
-                    aria-label="הפעלת סרטון ההדרכה עם קול"
-                    onclick={enableVideoSound}
-                >
-                    <span class="video-sound-badge">לחצו לשמיעה</span>
-                </button>
-            {/if}
-        </div>
+        <GuideVideo />
 
         <div class="together-side">
             <p class="together-tagline">קהילות יוצאים לחירות | ביחד | מעלים את התדר</p>
@@ -320,6 +228,8 @@
             />
         </div>
     </div>
+
+    <VideoTranscript />
 
     <!-- Annual Savings Counter -->
     <div class="savings-counter-final" role="region" aria-label="חיסכון שנתי">

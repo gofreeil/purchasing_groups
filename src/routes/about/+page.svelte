@@ -6,8 +6,11 @@
     // ============================================================
     import Seo from "$lib/components/Seo.svelte";
     import JsonLd from "$lib/components/JsonLd.svelte";
-    import { SITE_NAME, SITE_URL, PARENT_SITE, faqSchema, breadcrumbSchema } from "$lib/seo.js";
+    import GuideVideo from "$lib/components/GuideVideo.svelte";
+    import VideoTranscript from "$lib/components/VideoTranscript.svelte";
+    import { SITE_NAME, SITE_URL, PARENT_SITE, faqSchema, breadcrumbSchema, videoSchema } from "$lib/seo.js";
     import { ABOUT_FAQ, ABOUT_INTRO } from "$lib/aboutFaq.js";
+    import { VIDEO } from "$lib/video.js";
 
     const schemas = [
         {
@@ -25,6 +28,7 @@
             { name: "אודותינו", path: "/about" },
         ]),
         faqSchema(ABOUT_FAQ),
+        videoSchema({ ...VIDEO, transcript: VIDEO.transcript.join(" ") }),
     ];
 </script>
 
@@ -46,6 +50,11 @@
             <a href={PARENT_SITE.url} target="_blank" rel="noopener noreferrer">{PARENT_SITE.name}</a>
             — {PARENT_SITE.description}.
         </p>
+
+        <div class="about-video">
+            <GuideVideo fill />
+            <VideoTranscript fill />
+        </div>
 
         <section id="faq" class="faq-section" aria-labelledby="faq-title">
             <h2 id="faq-title">שאלות ותשובות</h2>
@@ -80,8 +89,13 @@
         padding: 3rem;
         border-radius: 20px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
+        /* בלי backdrop-filter: הוא הופך את הכרטיס לבלוק-מכיל של position:fixed
+           והנגן הצף של הסרטון היה נצמד לכרטיס במקום לפינת המסך */
         border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .about-video {
+        margin-top: 1.5rem;
     }
 
     .main-title {

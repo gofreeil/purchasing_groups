@@ -254,6 +254,28 @@ export function campaignServiceSchema(opts) {
 }
 
 /**
+ * VideoObject — סרטון מוטמע (eitanium), כדי שגוגל יציג אותו בתוצאות עם תמונה ממוזערת.
+ * name, thumbnailUrl ו-uploadDate הם שדות חובה של גוגל.
+ * @param {{ name: string, description: string, thumbnailUrl: string, uploadDate: string, duration?: string, embedUrl: string, contentUrl?: string, transcript?: string }} opts
+ */
+export function videoSchema(opts) {
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'VideoObject',
+		name: opts.name,
+		description: stripHtml(opts.description),
+		thumbnailUrl: [opts.thumbnailUrl],
+		uploadDate: opts.uploadDate,
+		...(opts.duration ? { duration: opts.duration } : {}),
+		embedUrl: opts.embedUrl,
+		...(opts.contentUrl ? { contentUrl: opts.contentUrl } : {}),
+		...(opts.transcript ? { transcript: stripHtml(opts.transcript) } : {}),
+		inLanguage: 'he-IL',
+		publisher: { '@id': `${SITE_URL}/#organization` }
+	};
+}
+
+/**
  * ניקוי תגי HTML מטקסט שנכנס ל-JSON-LD (התוכן באתר מכיל <br> ו-<span>).
  * @param {string} s
  */
