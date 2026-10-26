@@ -1,4 +1,5 @@
 <script>
+    import PasswordInput from '$lib/components/PasswordInput.svelte';
     import { page } from '$app/stores';
     let { data, form } = $props();
 
@@ -165,8 +166,7 @@
                 סיסמה
                 <a class="forgot-link" href={forgotHref}>שכחתי סיסמה</a>
             </span>
-            <input
-                type="password"
+            <PasswordInput
                 name="password"
                 autocomplete="current-password"
                 required
