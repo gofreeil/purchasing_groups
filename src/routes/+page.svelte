@@ -558,7 +558,11 @@
     .banner-container-with-hands {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 1.5rem;
+        /* רוחב מוגדר, כדי שהבאנר (width קבוע) יתכווץ במסך צר/מוגדל
+           ולא ידחוף את הדף מעבר לרוחב המסך */
+        width: 100%;
     }
 
     .side-hand {
@@ -834,6 +838,18 @@
 
         .purchase-status-2col .survey-badge-container {
             grid-column: 1 / -1;
+        }
+    }
+
+    /* מסך צר מאוד / מוגדל: מאפשרים לשורות הסטטוס להישבר במקום לדחוף את הדף הצידה */
+    @media (max-width: 300px) {
+        .purchase-status-2col {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .purchase-status-2col .status-col .status-line {
+            flex-wrap: wrap;
+            white-space: normal;
         }
     }
 

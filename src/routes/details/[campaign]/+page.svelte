@@ -2877,9 +2877,14 @@
         }
 
         .steps {
-            grid-template-columns: repeat(3, 1fr);
+            /* minmax(0,…) - אחרת מילה ארוכה מרחיבה את העמודה ודוחפת את הדף הצידה */
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 0.4rem;
             padding: 0 0.4rem;
+        }
+
+        .step {
+            overflow-wrap: anywhere;
         }
 
         .step {
@@ -2988,6 +2993,11 @@
     @media (max-width: 380px) {
         .details-page {
             padding: 0 0.4rem;
+        }
+        /* 1rem ריפוד של main-layout + 0.4rem של .details-page. ה-bleed של
+           סעיף השלבים (-1.5rem) היה חורג מרוחב המסך ב-0.1rem לכל צד */
+        .section.steps-section {
+            margin-inline: -1.4rem;
         }
         .section {
             padding: 1.2rem 0.65rem;

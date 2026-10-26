@@ -48,6 +48,10 @@ html {
 
 body {
     max-width: 100%;
+    /* רשת ביטחון: overflow-x:hidden על ה-html לבדו לא עוצר בדפדפני נייד את
+       האפשרות למשוך את הדף הצידה כשיש אלמנט רחב מהמסך (למשל במסך מוגדל).
+       clip לא יוצר גלילה פנימית ולכן לא שובר position:sticky. */
+    overflow-x: clip;
 }
 
 body {
@@ -744,6 +748,7 @@ a {
     align-items: center;
     gap: 1.5rem;
     white-space: nowrap;
+    max-width: 100%;
 }
 
 .count-big-number {
@@ -1309,6 +1314,9 @@ a {
         gap: 1rem;
         justify-content: center;
         flex-direction: column;
+        /* nowrap הבסיסי הרחיב את המונה מעבר למסך צר/מוגדל */
+        white-space: normal;
+        text-align: center;
     }
 
     /* מונה החברים - צמצום רווחים, מספר וכותרת קטנים יותר */
@@ -1321,7 +1329,7 @@ a {
     }
 
     .count-big-number {
-        font-size: 3.5rem;
+        font-size: clamp(2rem, 12vw, 3.5rem);
         line-height: 1;
     }
 
