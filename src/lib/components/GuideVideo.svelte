@@ -1,5 +1,5 @@
 <script>
-    // נגן סרטון ההדרכה (eitanium). נגן צף בדסקטופ: אחרי שהגולש לחץ על הנגן
+    // נגן סרטון ההדרכה (eitanium). נגן צף (דסקטופ ונייד): אחרי שהגולש לחץ על הנגן
     // והסרטון מתנגן, גלילה אל מתחתיו מצמידה אותו לפינת המסך. רק CSS - העברת
     // ה-iframe ב-DOM הייתה טוענת אותו מחדש. העיצוב ב-app.css (.video-container-large).
     import { onMount } from "svelte";
@@ -28,9 +28,8 @@
         updateVideoFloat();
     }
     onMount(() => {
-        const desktop = matchMedia("(min-width: 769px)");
         const io = new IntersectionObserver(([e]) => {
-            videoOutOfView = desktop.matches && !e.isIntersecting && e.boundingClientRect.top < 0;
+            videoOutOfView = !e.isIntersecting && e.boundingClientRect.top < 0;
             // חזרה לסרטון מאפסת את הסגירה - בגלילה הבאה הוא יצוף שוב
             if (e.isIntersecting) videoFloatClosed = false;
             updateVideoFloat();
@@ -45,8 +44,12 @@
         const onMessage = (e) => {
             if (e.origin !== VIDEO_ORIGIN || e.source !== videoFrame?.contentWindow) return;
             const type = e.data?.type;
-            if (type === "play") videoPlaying = true;
-            else if (type === "pause" || type === "ended") videoPlaying = false;
+            if (type === "play") {
+                videoPlaying = true;
+                // בנייד (בעיקר iOS) לחיצה בתוך ה-iframe לא תמיד מעבירה אליו פוקוס,
+                // ואז ה-blur לא יורה. הפעלה בנגן לא מתחיל מעצמו = לחיצה של הגולש.
+                if (navigator.userActivation?.hasBeenActive) videoClicked = true;
+            } else if (type === "pause" || type === "ended") videoPlaying = false;
             else return;
             updateVideoFloat();
         };

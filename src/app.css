@@ -675,6 +675,24 @@ a {
     background: rgba(0, 0, 0, 0.9);
 }
 
+/* נגן צף בנייד: קטן, בפינה הימנית-תחתונה (לשונית מגירת האתרים יושבת בקצה
+   השמאלי). z-index 950 נשאר מתחת להדר, למגירה ולשכבת הכיסוי שלה. */
+@media (max-width: 768px) {
+    .video-frame.video-floating {
+        inset: auto 0.6rem calc(0.75rem + env(safe-area-inset-bottom, 0px)) auto;
+        width: min(48vw, 220px);
+        border-radius: 10px;
+    }
+
+    .video-float-close {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        top: 4px;
+        right: 4px;
+    }
+}
+
 .video-row {
     display: flex;
     align-items: center;
