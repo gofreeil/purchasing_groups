@@ -8,7 +8,6 @@
     import TapHint from "$lib/components/TapHint.svelte";
     import DoneHand from "$lib/components/DoneHand.svelte";
     import GuideVideo from "$lib/components/GuideVideo.svelte";
-    import VideoTranscript from "$lib/components/VideoTranscript.svelte";
     import { VIDEO } from "$lib/video.js";
     import { readJoined } from "$lib/joined.js";
     import { track } from "$lib/track.js";
@@ -211,7 +210,6 @@
 
         <div class="together-side">
             <p class="together-tagline">קהילות יוצאים לחירות | ביחד | מעלים את התדר</p>
-            <VideoTranscript side />
             <img
                 class="together-logo"
                 src="/images/TOGETHER%20LOGO%20PNG-05.png"
