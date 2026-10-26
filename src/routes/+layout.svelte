@@ -458,6 +458,8 @@
 					>{$t.footer.contactUs}</a
 				>
 				<span class="dot">|</span>
+				<a href="/support">🛟 תמיכה באתר</a>
+				<span class="dot">|</span>
 				<a href="/advertise">{$t.footer.advertiseWithUs}</a>
 			</nav>
 

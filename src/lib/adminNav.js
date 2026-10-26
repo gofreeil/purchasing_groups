@@ -95,6 +95,14 @@ export function adminNav(isAdmin, superAdmin = false) {
             alert: 'ads',
         },
         {
+            href: '/support',
+            path: '/support',
+            icon: '🛟',
+            label: 'תמיכה',
+            title: 'פניות תמיכה',
+            desc: 'פניות חברים, צ\'אט והקצאה לחברות שירות',
+        },
+        {
             href: '/admin/stats',
             path: '/admin/stats',
             icon: '📈',
