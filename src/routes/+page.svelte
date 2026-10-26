@@ -211,6 +211,7 @@
 
         <div class="together-side">
             <p class="together-tagline">קהילות יוצאים לחירות | ביחד | מעלים את התדר</p>
+            <VideoTranscript side />
             <img
                 class="together-logo"
                 src="/images/TOGETHER%20LOGO%20PNG-05.png"
@@ -228,8 +229,6 @@
             />
         </div>
     </div>
-
-    <VideoTranscript />
 
     <!-- Annual Savings Counter -->
     <div class="savings-counter-final" role="region" aria-label="חיסכון שנתי">

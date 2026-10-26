@@ -2,17 +2,19 @@
     import { VIDEO } from "$lib/video.js";
 
     /** fill: ממלא את רוחב ההורה במקום 66% (דף אודותינו) */
-    let { fill = false } = $props();
+    let { fill = false, side = false } = $props();
 </script>
 
 <!-- נגישות: תיאור הסרטון לקוראי מסך (aria-describedby של ה-iframe) + תמלול מלא
      מקופל - לעיוורים ולכבדי שמיעה, וגם טקסט שגוגל קורא -->
 <p id="video-desc" class="sr-only">{VIDEO.description} התמלול המלא נמצא מתחת לסרטון.</p>
-<details class="video-transcript" class:fill>
+<details class="video-transcript" class:fill class:side>
     <summary><span aria-hidden="true">📝</span> תמלול הסרטון</summary>
-    {#each VIDEO.transcript as para}
-        <p>{para}</p>
-    {/each}
+    <div class="body">
+        {#each VIDEO.transcript as para}
+            <p>{para}</p>
+        {/each}
+    </div>
 </details>
 
 <style>
@@ -41,6 +43,27 @@
         width: 100%;
         max-width: none;
         margin-top: 0.5rem;
+    }
+    /* בעמוד הבית: כפתור קטן ליד הסרטון, הטקסט נפתח כחלון צף בלי להגדיל את הגובה */
+    .video-transcript.side {
+        position: relative;
+        width: fit-content;
+        max-width: none;
+        margin: 0.3rem auto 0;
+    }
+    .video-transcript.side .body {
+        position: absolute;
+        top: 100%;
+        right: 50%;
+        transform: translateX(50%);
+        z-index: 30;
+        width: min(360px, 90vw);
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 0.5rem 0.8rem;
+        background: #0b1020;
+        border: 1px solid #facc15;
+        border-radius: 8px;
     }
     .video-transcript summary {
         width: fit-content;
