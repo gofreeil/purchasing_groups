@@ -4,7 +4,7 @@
     import { goto } from "$app/navigation";
     import { adPlans, planFor, normalizePlanDays, DEFAULT_PLAN_DAYS } from "$lib/adPlans.js";
     import { AD_DRAFT_KEY, getAdEditTarget } from "$lib/adDraft.js";
-    import { DEFAULT_AD_STYLE, parseAdStyle } from "$lib/adStyle.js";
+    import { DEFAULT_AD_STYLE, parseAdStyle, lpLogoStyle } from "$lib/adStyle.js";
     import {
         AD_BODY_LIMIT, AD_EFFECTIVE_LIMIT, SIDE_IMAGE_MAX_BYTES,
         bodyBytes, fmtWeight, approxDataUrlBytes, compressImageToFit,
@@ -61,6 +61,11 @@
     // העיצוב שנבחר בבילדר (כל השדות של landing._adStyle - כמו בקהילה בשכונה)
     // נשלח עם המודעה, כדי שהכרטיס בטור הפרסומות ייראה כמו בדמו החי
     let adStyleFromDraft = $state({ ...DEFAULT_AD_STYLE });
+    // לוגו בדף הנחיתה: יישור, רקע וגודל משלו (נשמרים בטיוטה ובעיצוב)
+    let lpAlign = $state(/** @type {'right' | 'center' | 'left'} */ ("right"));
+    let lpBg = $state(/** @type {'white' | 'black' | 'clear' | null} */ (null));
+    let lpSize = $state(/** @type {number | null} */ (null));
+    const lpStyle = $derived({ ...adStyleFromDraft, lpLogoAlign: lpAlign, lpLogoBg: lpBg, lpLogoSize: lpSize });
 
     // ===== גרירת קבצים =====
     let isDraggingLandingImage = $state(false);
@@ -109,7 +114,7 @@
                 uniqueness, phone, whatsapp, website, email, address, hours,
                 // עותק עמוק — כיווץ תמונות מוצר לא ישנה את המצב שעל המסך
                 products: products.map((p) => ({ ...p })),
-                _adStyle: { ...adStyleFromDraft },
+                _adStyle: { ...lpStyle },
             },
             // עריכה של פרסומת קיימת. השרת מאמת שהיא באמת של המפרסם -
             // מזהה זר פשוט לא מכובד ונכנס כפרסומת חדשה.
@@ -372,16 +377,26 @@
                     logo = d.logo ?? "";
                     logoShape = d.logoShape ?? "square";
                     gradient = d.gradient ?? gradient;
+                    lpAlign = d.lpLogoAlign === "center" || d.lpLogoAlign === "left" ? d.lpLogoAlign : "right";
+                    lpBg = d.lpLogoBg === "white" || d.lpLogoBg === "black" || d.lpLogoBg === "clear" ? d.lpLogoBg : null;
+                    lpSize = typeof d.lpLogoSize === "number" ? d.lpLogoSize : null;
                     // הטיוטה שומרת את השדות בשמות של הבילדר; כאן הם נארזים
                     // לאובייקט העיצוב שנשלח עם המודעה (ומנורמל שוב בשרת)
                     adStyleFromDraft = parseAdStyle({
                         logoShape: d.logoShape,
+                        hoverLogo: d.hoverLogo,
+                        hoverLogoX: d.hoverLogoX,
+                        hoverLogoY: d.hoverLogoY,
+                        hoverLogoSize: d.hoverLogoSize,
+                        logoBg: d.logoBg,
+                        logoSize: d.logoSize,
                         logoAnchor: d.logoPosition,
                         logoX: d.logoFreeX,
                         logoY: d.logoFreeY,
                         bandHeight: d.diagHeight,
                         titleOffsetY: d.titleOffsetY,
                         titleColor: d.titleColor,
+                        titleFontSize: d.titleFontSize,
                         // טיפוגרפיית הסלוגן משלב 5
                         subFontSize: d.subFontSize,
                         subLineHeight: d.subLineHeight,
@@ -410,6 +425,7 @@
                 landingHeadline, landingPitch, landingExtended, landingImage, landingAdvantages,
                 phone, whatsapp, website, email,
                 products, uniqueness, address, hours,
+                lpLogoAlign: lpAlign, lpLogoBg: lpBg, lpLogoSize: lpSize,
             };
             localStorage.setItem(LS_KEY, JSON.stringify(merged));
             draftSaveFailed = false;
@@ -763,6 +779,29 @@
                 </div>
             </section>
 
+            {#if logo}
+                <section class="step-card">
+                    <div class="lp-logo-ctl">
+                        <span class="lp-logo-title">לוגו בדף הנחיתה:</span>
+                        <div class="lp-seg">
+                            {#each [["right", "ימין"], ["center", "מרכז"], ["left", "שמאל"]] as [v, label]}
+                                <button type="button" onclick={() => (lpAlign = /** @type {'right' | 'center' | 'left'} */ (v))} class:active={lpAlign === v}>{label}</button>
+                            {/each}
+                        </div>
+                        <div class="lp-seg">
+                            {#each [["white", "לבן"], ["black", "שחור"], ["clear", "שקוף"]] as [v, label]}
+                                <button type="button" onclick={() => (lpBg = /** @type {'white' | 'black' | 'clear'} */ (v))} class:active={(lpBg ?? adStyleFromDraft.logoBg) === v}>{label}</button>
+                            {/each}
+                        </div>
+                        <div class="lp-seg lp-size">
+                            <button type="button" aria-label="-" onclick={() => (lpSize = Math.max(30, (lpSize ?? 54) - 6))}>−</button>
+                            <input type="range" min="30" max="140" step="2" value={lpSize ?? 54} oninput={(e) => (lpSize = +e.currentTarget.value)} aria-label="גודל הלוגו" />
+                            <button type="button" aria-label="+" onclick={() => (lpSize = Math.min(140, (lpSize ?? 54) + 6))}>+</button>
+                        </div>
+                    </div>
+                </section>
+            {/if}
+
             <!-- =================== תצוגה מקדימה =================== -->
             <section class="step-card">
                 <div class="step-head">
@@ -778,7 +817,7 @@
                             <div class="landing-hero-inner" class:has-media={!!(landingImage || mainImage)}>
                                 <div class="landing-hero-content">
                                     {#if logo}
-                                        <img src={logo} alt="לוגו" class="landing-logo" class:circle={logoShape === "circle"} />
+                                        <img src={logo} alt="לוגו" class="landing-logo" class:circle={logoShape === "circle"} style={lpLogoStyle(lpStyle)} />
                                     {/if}
                                     <h1>{landingHeadline || title || "כותרת דף הנחיתה"}</h1>
                                     <p>{landingPitch || subtitle || "משפט הפתיחה יופיע כאן"}</p>
@@ -1588,6 +1627,31 @@
         .landing-logo { width: 68px; height: 68px; border-radius: 0.85rem; }
     }
     .landing-logo.circle { border-radius: 999px; }
+    .lp-logo-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.75rem; }
+    .lp-logo-title { font-weight: 700; color: #d1d5db; }
+    .lp-seg {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
+    }
+    .lp-seg button {
+        padding: 0.25rem 0.625rem;
+        border-radius: 0.375rem;
+        border: 0;
+        background: transparent;
+        color: #d1d5db;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .lp-seg button:hover { color: #fff; }
+    .lp-seg button.active { background: #f59e0b; color: #000; }
+    .lp-size button { width: 1.5rem; height: 1.5rem; padding: 0; background: rgba(255, 255, 255, 0.05); }
+    .lp-size input { width: 5rem; accent-color: #f59e0b; }
     .landing-hero h1 {
         color: white;
         font-size: 1.55rem;

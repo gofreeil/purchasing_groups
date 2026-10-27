@@ -3,11 +3,15 @@
     // עיצוב מינימליסטי: הכותרת, משפט הפתיחה והיתרונות יושבים *ליד* התמונה
     // ולא מתחתיה - כדי לחסוך גלילה. הגולש רואה את כל העיקר במסך הראשון.
     import Seo from "$lib/components/Seo.svelte";
+    import { parseAdStyle, lpLogoStyle } from "$lib/adStyle.js";
 
     let { data } = $props();
     let ad = $derived(data.ad);
     let lp = $derived(data.ad.landing ?? {});
 
+    // עיצוב הלוגו שנקבע בבילדר (landing._adStyle); פרסומת ותיקה בלי עיצוב נשארת כמו שהייתה
+    let adStyle = $derived(parseAdStyle(lp._adStyle));
+    let logoCircle = $derived(adStyle?.logoShape === "circle");
     let heroImage = $derived(lp.image || ad.mainImage || "");
     let advList = $derived((lp.advantages ?? []).filter((/** @type {string} */ a) => a?.trim()));
 
@@ -78,7 +82,7 @@
         <div class="al-hero-inner" class:has-media={!!heroImage}>
             <div class="al-copy">
                 {#if ad.logo}
-                    <img src={ad.logo} alt="לוגו {ad.title}" class="al-logo" width="68" height="68" decoding="async" />
+                    <img src={ad.logo} alt="לוגו {ad.title}" class="al-logo" class:is-circle={logoCircle} width="68" height="68" decoding="async" style={adStyle ? lpLogoStyle(adStyle) : undefined} />
                 {/if}
                 <h1>{lp.headline || ad.title}</h1>
                 {#if lp.pitch}
@@ -224,6 +228,7 @@
         margin-bottom: 0.75rem;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
     }
+    .al-logo.is-circle { border-radius: 9999px; }
     @media (min-width: 860px) {
         .al-logo { width: 88px; height: 88px; border-radius: 1.1rem; padding: 7px; }
     }

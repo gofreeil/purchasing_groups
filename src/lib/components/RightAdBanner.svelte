@@ -3,7 +3,7 @@
 	import { adImgFit, parseAdImageFit } from "$lib/adImageFit.js";
 	import { AD_SLOT_COUNT, AD_SLOT_COLORS } from "$lib/adSlots.js";
 	import {
-		parseAdStyle, legacyAdStyle, adStyleVars, logoAnchorClass, logoFreeStyle, logoCornerSide,
+		parseAdStyle, legacyAdStyle, adStyleVars, logoAnchorClass, logoFreeStyle, logoBgStyle, logoSizeStyle, titleSizeStyle, hoverLogoStyle, logoCornerSide,
 	} from "$lib/adStyle.js";
 	import { logoClearance } from "$lib/logoClearance.js";
 	import { gradientStyle } from "$lib/adGradient.js";
@@ -147,7 +147,7 @@
 							class:has-corner-logo-left={cornerSide === "left"}
 							style="transform: translateY({st.titleOffsetY}px);"
 						>
-							<h3 class="promo-title" style="color: {st.titleColor};"><span class="logo-avoid" aria-hidden="true"></span>{ad.title}</h3>
+							<h3 class="promo-title" style="color: {st.titleColor};{titleSizeStyle(st.titleFontSize)}"><span class="logo-avoid" aria-hidden="true"></span>{ad.title}</h3>
 						</div>
 						{#if ad.subtitle}
 							<div class="promo-sub-wrap">
@@ -163,7 +163,7 @@
 								data-ad-logo
 								class="promo-logo {logoAnchorClass(st, 'promo')}"
 								class:promo-logo-circle={st.logoShape === "circle"}
-								style={logoFreeStyle(st)}
+								style={logoFreeStyle(st) + logoBgStyle(st.logoBg) + logoSizeStyle(st.logoSize)}
 							/>
 						{/if}
 						<div class="paid-ad-hover">
@@ -171,6 +171,9 @@
 								<h3>{ad.title}</h3>
 								<p>{ad.subtitle}</p>
 							</div>
+							{#if ad.logo && st.hoverLogo}
+								<img src={ad.logo} alt="" class="promo-hover-logo" style={hoverLogoStyle(st, logoBgStyle(st.logoBg))} />
+							{/if}
 						</div>
 					</div>
 					<!-- כרטיס מוצר מהחנות - בלי רצועת המחיר ("₪.. · לצפייה בחנות").
@@ -413,6 +416,14 @@
 	}
 	.promo-logo-circle {
 		border-radius: 50%;
+	}
+	/* הלוגו בטקסט הריחוף: המיקום והגודל מגיעים מ-hoverLogoStyle; רקע לבן + ריפוד + צל כמו בקהילה בשכונה */
+	.promo-hover-logo {
+		box-sizing: border-box;
+		max-width: none;
+		background: white;
+		padding: 3px;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 	}
 	/* צד הריחוף: absolute inset-0 flex bg-black/60 backdrop-blur-sm (v4 = 8px) */
 	.paid-ad-hover {

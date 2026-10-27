@@ -72,6 +72,13 @@
     let logo = $state("");
     let logoOriginal = $state("");
     let logoShape = $state(/** @type {'square' | 'circle'} */ ("square"));
+    // לוגו על העכבר (שלב 6), גודל ורקע הלוגו
+    let hoverLogo = $state(false);
+    let hoverLogoX = $state(50);
+    let hoverLogoY = $state(22);
+    let hoverLogoSize = $state(56);
+    let logoSize = $state(36);
+    let logoBg = $state(/** @type {'white' | 'black' | 'clear'} */ ("white"));
     let hasCircleCrop = $state(false);
     let logoPosition = $state(/** @type {'right' | 'left' | 'cta'} */ ("right"));
     // נהיה true ברגע שהמפרסם בוחר מיקום בעצמו. עד אז המיקום מתחלף
@@ -93,9 +100,9 @@
     );
     // מיקום inline - רק אחרי שהמפרסם הזיז את הלוגו בעצמו
     let logoFreeStyle = $derived(
-        logoFree
+        (logoFree
             ? `left:${logoFreeX}%; top:${logoFreeY}%; right:auto; bottom:auto; transform:translate(-50%,-50%);`
-            : ""
+            : "") + (logoBg === "black" ? "background:#000;" : logoBg === "clear" ? "background:transparent;box-shadow:none;" : "") + (logoSize !== 36 ? `width:${logoSize}px;height:${logoSize}px;` : "")
     );
 
     // מידות הגרירה, נמדדות בלחיצה מול התצוגה שבה הלוגו נמצא (הדמו החי /
@@ -291,6 +298,11 @@
     let mainImageFit = $derived({ x: mainImageObjectX, y: mainImageObjectY, z: mainImageZoom });
     let title = $state("");
     let titleColor = $state("#ffffff");
+    let titleFontSize = $state(1.15);
+    // לוגו בדף הנחיתה (נקבע בעמוד הנחיתה) - נשמר בטיוטה כדי שלא יתאפס בעריכה
+    let lpLogoAlign = $state(/** @type {'right' | 'center' | 'left'} */ ("right"));
+    let lpLogoBg = $state(/** @type {'white' | 'black' | 'clear' | null} */ (null));
+    let lpLogoSize = $state(/** @type {number | null} */ (null));
     let titleOffsetY = $state(0);
     let subtitle = $state("");
     // טיפוגרפיית הסלוגן (שלב 5) - גודל, רווח בין שורות ויישור
@@ -407,11 +419,21 @@
     // משם נשמרת חזרה בלי לאבד אף פרמטר.
     let adStyle = $derived({
         logoShape,
+        logoBg,
+        logoSize,
+        hoverLogo,
+        hoverLogoX,
+        hoverLogoY,
+        hoverLogoSize,
+        lpLogoAlign,
+        lpLogoBg,
+        lpLogoSize,
         logoAnchor: logoPosition,
         logoX: logoFreeX,
         logoY: logoFreeY,
         bandHeight: diagHeight,
         titleOffsetY,
+        titleFontSize,
         titleColor,
         subFontSize,
         subLineHeight,
@@ -775,6 +797,15 @@
             // את מה שהיא מוצגת בו בטור (legacyAdStyle).
             const st = ad.adStyle ?? legacyAdStyle(title);
             logoShape = st.logoShape;
+            logoBg = st.logoBg ?? "white";
+            logoSize = st.logoSize ?? 36;
+            hoverLogo = st.hoverLogo === true;
+            hoverLogoX = st.hoverLogoX ?? 50;
+            hoverLogoY = st.hoverLogoY ?? 22;
+            hoverLogoSize = st.hoverLogoSize ?? 56;
+            lpLogoAlign = st.lpLogoAlign ?? "right";
+            lpLogoBg = st.lpLogoBg ?? null;
+            lpLogoSize = st.lpLogoSize ?? null;
             // הלוגו השמור כבר חתוך לעיגול - "עריכת החיתוך" זמינה מיד
             hasCircleCrop = st.logoShape === "circle";
             logoPosition = st.logoAnchor;
@@ -786,6 +817,7 @@
             diagHeight = st.bandHeight;
             titleColor = st.titleColor;
             titleOffsetY = st.titleOffsetY;
+            titleFontSize = st.titleFontSize ?? 1.15;
             subFontSize = st.subFontSize;
             subLineHeight = st.subLineHeight;
             subAlign = st.subAlign;
@@ -860,6 +892,12 @@
                     logo = d.logo ?? "";
                     logoOriginal = d.logoOriginal ?? d.logo ?? "";
                     logoShape = d.logoShape ?? "square";
+                    hoverLogo = d.hoverLogo === true;
+                    hoverLogoX = typeof d.hoverLogoX === "number" ? d.hoverLogoX : 50;
+                    hoverLogoY = typeof d.hoverLogoY === "number" ? d.hoverLogoY : 22;
+                    hoverLogoSize = typeof d.hoverLogoSize === "number" ? d.hoverLogoSize : 56;
+                    logoSize = typeof d.logoSize === "number" ? d.logoSize : 36;
+                    logoBg = d.logoBg === "black" || d.logoBg === "clear" ? d.logoBg : "white";
                     hasCircleCrop = Boolean(d.hasCircleCrop);
                     logoPosition = d.logoPosition ?? "right";
                     logoPositionExplicit = Boolean(d.logoPositionExplicit);
@@ -871,6 +909,10 @@
                     mainImageZoom = typeof d.mainImageZoom === "number" ? d.mainImageZoom : 1;
                     title = d.title ?? "";
                     titleColor = d.titleColor ?? "#ffffff";
+                    titleFontSize = typeof d.titleFontSize === "number" ? d.titleFontSize : 1.15;
+                    lpLogoAlign = d.lpLogoAlign === "center" || d.lpLogoAlign === "left" ? d.lpLogoAlign : "right";
+                    lpLogoBg = d.lpLogoBg === "white" || d.lpLogoBg === "black" || d.lpLogoBg === "clear" ? d.lpLogoBg : null;
+                    lpLogoSize = typeof d.lpLogoSize === "number" ? d.lpLogoSize : null;
                     titleOffsetY = typeof d.titleOffsetY === "number" ? d.titleOffsetY : 0;
                     subtitle = d.subtitle ?? "";
                     subFontSize = typeof d.subFontSize === "number" ? d.subFontSize : DEFAULT_SUB_FONT_SIZE;
@@ -946,8 +988,8 @@
     $effect(() => {
         if (!browser) return;
         const snapshot = {
-            logo, logoOriginal, hasCircleCrop, logoShape, logoPosition, logoPositionExplicit, logoFreeX, logoFreeY,
-            mainImage, mainImageObjectX, mainImageObjectY, mainImageZoom, title, titleColor, titleOffsetY,
+            logo, logoOriginal, hasCircleCrop, logoShape, logoBg, logoSize, hoverLogo, hoverLogoX, hoverLogoY, hoverLogoSize, logoPosition, logoPositionExplicit, logoFreeX, logoFreeY,
+            mainImage, mainImageObjectX, mainImageObjectY, mainImageZoom, title, titleColor, titleOffsetY, titleFontSize, lpLogoAlign, lpLogoBg, lpLogoSize,
             subtitle, subFontSize, subLineHeight, subAlign, hoverText, cta, gradient, diagHeight,
             landingHeadline, landingPitch, landingExtended, landingImage, landingAdvantages,
             uniqueness, phone, whatsapp, website, email, address, hours, products,
@@ -1272,6 +1314,22 @@
                                     </div>
                                 </div>
                                 <div>
+                                    <p class="control-label">רקע הלוגו</p>
+                                    <div class="seg-group">
+                                        {#each [["white", "לבן"], ["black", "שחור"], ["clear", "שקוף"]] as [v, label]}
+                                            <button type="button" onclick={() => (logoBg = /** @type {'white' | 'black' | 'clear'} */ (v))} class="seg-btn" class:active={logoBg === v}>{label}</button>
+                                        {/each}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="control-label">גודל הלוגו</p>
+                                    <div class="seg-group logo-size-ctl">
+                                        <button type="button" aria-label="-" onclick={() => (logoSize = Math.max(20, logoSize - 4))} class="seg-btn">−</button>
+                                        <input type="range" min="20" max="80" step="2" bind:value={logoSize} class="range-input logo-size-range" aria-label="גודל הלוגו" />
+                                        <button type="button" aria-label="+" onclick={() => (logoSize = Math.min(80, logoSize + 4))} class="seg-btn">+</button>
+                                    </div>
+                                </div>
+                                <div>
                                     <p class="control-label">{T.logoPos}</p>
                                     <div class="seg-group">
                                         <button type="button" onclick={() => setLogoAnchor("right")} class="seg-btn" class:active={!logoFree && logoPosition === "right"}>{T.posRight}</button>
@@ -1389,6 +1447,14 @@
                         class="text-input"
                     />
                     <div class="char-count">{title.length}/40</div>
+
+                    <div class="slider-block">
+                        <div class="slider-head">
+                            <p>גודל הכותרת <span class="amber-strong">{titleFontSize.toFixed(2)}</span></p>
+                            <button type="button" onclick={() => (titleFontSize = 1.15)} class="slider-reset">{T.resetWord}</button>
+                        </div>
+                        <input type="range" min="0.8" max="1.8" step="0.05" bind:value={titleFontSize} class="range-input" aria-label="גודל הכותרת" />
+                    </div>
 
                     <div class="slider-block">
                         <div class="slider-head">
@@ -1555,6 +1621,20 @@
                     ></textarea>
                     <div class="char-count">{hoverText.length}/90</div>
 
+                    {#if logo}
+                        <div class="hover-logo-ctl">
+                            <label class="hover-logo-check">
+                                <input type="checkbox" bind:checked={hoverLogo} onchange={() => activeStep === "hover" || (activeStep = "hover")} />
+                                הצג את הלוגו גם בטקסט הריחוף
+                            </label>
+                            {#if hoverLogo}
+                                <div class="hover-logo-row"><span>אופקי</span><input type="range" min="0" max="100" step="1" class="range-input" bind:value={hoverLogoX} /></div>
+                                <div class="hover-logo-row"><span>אנכי</span><input type="range" min="0" max="100" step="1" class="range-input" bind:value={hoverLogoY} /></div>
+                                <div class="hover-logo-row"><span>גודל</span><input type="range" min="20" max="120" step="2" class="range-input" bind:value={hoverLogoSize} /></div>
+                            {/if}
+                        </div>
+                    {/if}
+
                     <div class="step-nav-row">
                         <button type="button" class="step-nav-btn" onclick={() => advance(prevOf("hover"))}>{T.prevStep}</button>
                         {#if hoverText}
@@ -1589,7 +1669,7 @@
                                     <div class="mobile-popup">
                                         <div class="popup-title-row">
                                             {#if logo}
-                                                <img src={logo} alt={T.logoAlt} class="popup-logo-above" class:circle={logoShape === "circle"} />
+                                                <img src={logo} alt={T.logoAlt} class="popup-logo-above" class:circle={logoShape === "circle"} style={logoBg === "black" ? "background:#000;" : logoBg === "clear" ? "background:transparent;" : ""} />
                                             {/if}
                                             <h3 class="popup-title-above" style:color={titleColor}>{title || T.phTitle}</h3>
                                         </div>
@@ -1638,7 +1718,7 @@
                                         style:opacity={showHover ? 0 : 1}
                                         style:transform="translateY({titleOffsetY}px)"
                                     >
-                                        <h3 class="pro-title" style:color={titleColor}><span class="logo-avoid" aria-hidden="true"></span>{title || T.phTitle}</h3>
+                                        <h3 class="pro-title" style:color={titleColor} style:font-size={titleFontSize !== 1.15 ? `${titleFontSize}rem` : undefined}><span class="logo-avoid" aria-hidden="true"></span>{title || T.phTitle}</h3>
                                     </div>
                                     <div class="pro-title-wrap" style:opacity={showHover ? 0 : 1}>
                                         <p class="pro-sub"><span class="logo-avoid" data-anchor="bottom" aria-hidden="true"></span>{subtitle || T.phSlogan}</p>
@@ -1646,6 +1726,9 @@
                                     <div class="hover-overlay" style:opacity={showHover ? 1 : 0}>
                                         <h3 class="hover-title">{title || T.phTitleShort}</h3>
                                         <p class="hover-text">{hoverText || T.phHover}</p>
+                                        {#if logo && hoverLogo}
+                                            <img src={logo} alt="" class="hover-logo" style="left:{hoverLogoX}%;top:{hoverLogoY}%;width:{hoverLogoSize}px;height:{hoverLogoSize}px;{logoShape === 'circle' ? 'border-radius:50%;' : ''}{logoBg === 'black' ? 'background:#000;' : logoBg === 'clear' ? 'background:transparent;box-shadow:none;' : ''}" />
+                                        {/if}
                                     </div>
                                     {#if logo}
                                         <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
@@ -1743,7 +1826,7 @@
                                 style:opacity={activeStep === "hover" ? 0 : 1}
                             >
                                 {#if title}
-                                    <h3 class="pro-title" style:color={titleColor}><span class="logo-avoid" aria-hidden="true"></span>{title}</h3>
+                                    <h3 class="pro-title" style:color={titleColor} style:font-size={titleFontSize !== 1.15 ? `${titleFontSize}rem` : undefined}><span class="logo-avoid" aria-hidden="true"></span>{title}</h3>
                                 {:else}
                                     <div class="placeholder-dashed placeholder-line">{T.phTitleStep}</div>
                                 {/if}
@@ -1786,6 +1869,9 @@
                             <div class="hover-overlay" style:opacity={activeStep === "hover" ? 1 : 0}>
                                 <h3 class="hover-title">{title || T.phTitleShort}</h3>
                                 <p class="hover-text">{hoverText || T.phHoverShort}</p>
+                                {#if logo && hoverLogo}
+                                    <img src={logo} alt="" class="hover-logo" style="left:{hoverLogoX}%;top:{hoverLogoY}%;width:{hoverLogoSize}px;height:{hoverLogoSize}px;{logoShape === 'circle' ? 'border-radius:50%;' : ''}{logoBg === 'black' ? 'background:#000;' : logoBg === 'clear' ? 'background:transparent;box-shadow:none;' : ''}" />
+                                {/if}
                             </div>
                         </div>
                         <div class="promo-cta" style={gradientStyle(gradient, "to right")}>
@@ -3262,6 +3348,46 @@
         pointer-events: none;
         z-index: 4;
     }
+    .hover-logo {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        object-fit: contain;
+        border-radius: 6px;
+        background: white;
+        padding: 3px;
+        box-sizing: border-box;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
+    .hover-logo-ctl {
+        margin-top: 0.75rem;
+        padding: 0.6rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .hover-logo-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #d1d5db;
+        cursor: pointer;
+    }
+    .hover-logo-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+    .hover-logo-row span { width: 3rem; flex-shrink: 0; }
+    .hover-logo-row input { flex: 1; }
+    .logo-size-ctl { align-items: center; gap: 0.25rem; }
+    .logo-size-range { width: 5rem; }
     .hover-title {
         color: white;
         font-weight: 700;
