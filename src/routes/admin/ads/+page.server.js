@@ -67,6 +67,11 @@ export async function load({ locals, fetch }) {
             // גובר על extraSlots הגולמי (0-based) של הרשומה
             extraSlots: extraMap.get(a.id) ?? [],
             editable: superAdmin || sameAdvertiser(a, identity),
+            // השדות של כרטיס הטור (AdCard) בשמות שה-layout נותן להם - לתצוגה
+            // המקדימה בריחוף/הקשה על הכותרת. הלוגו והתמונה כבר ברשומה.
+            adStyle: a.landing?._adStyle ?? null,
+            hover: a.hoverText,
+            shop: Boolean(a.landing?._shopProduct),
         }));
     } catch (err) {
         console.error('admin/ads load failed:', err);

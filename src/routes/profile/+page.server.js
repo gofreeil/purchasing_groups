@@ -117,12 +117,18 @@ async function loadMySchedule(myRecords, fetch, everyone = false) {
                     expiresAt: a.expiresAt,
                     durationDays: a.durationDays,
                     paused: a.paused,
+                    subtitle: a.subtitle,
                     cta: a.cta,
+                    hover: a.hoverText,
                     gradient: a.gradient,
                     mainImageFit: a.mainImageFit,
-                    // התמונה ככתובת מהקאש של הטור - רק לפרסומת שבאוויר (הנתיב
+                    // העיצוב מהבילדר - כמו בטור (+layout.server.js)
+                    adStyle: a.landing?._adStyle ?? null,
+                    shop: Boolean(a.landing?._shopProduct),
+                    // התמונות ככתובת מהקאש של הטור - רק לפרסומת שבאוויר (הנתיב
                     // מגיש מאושרות חיות בלבד, והרשומות כאן בלי ה-base64 הכבד)
                     mainImage: liveById.has(a.id) ? adImageUrl(liveById.get(a.id), 'main') : '',
+                    logo: liveById.has(a.id) ? adImageUrl(liveById.get(a.id), 'logo') : '',
                 })),
         };
     } catch (err) {

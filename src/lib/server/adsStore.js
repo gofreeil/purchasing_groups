@@ -1277,6 +1277,7 @@ export async function getMyAdsWithRecords(identity, { fetch: f = fetch } = {}) {
         'subtitle',
         // הטקסט והצבע של כרטיס הפרסומת - לתצוגה המקדימה בטבלת התזמון
         'cta',
+        'hover_text',
         'gradient',
         'expires_at',
         'duration_days',
