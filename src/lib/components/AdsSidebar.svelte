@@ -7,7 +7,7 @@
 	/** @type {{ approvedAds?: never }} */
 	let {} = $props();
 
-	let merged = $derived(ads.map((a) => ({ ...a, target: "_blank" })));
+	let merged = $derived(ads.map((a) => ({ ...a, target: "_self" })));
 </script>
 
 <aside class="promo-sidebar" aria-label="אתרי יוצאים לחירות">
