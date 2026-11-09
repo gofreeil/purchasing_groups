@@ -357,7 +357,6 @@
                         </span>
                     </span>
                 </div>
-                {#if card.savingsText || card.annualSavingsText || (sheet?.monthly ?? 0) > 0 || (sheet?.annual ?? 0) > 0}
                 <div class="status-col">
                     <span class="status-label">{$t.purchases.saved}</span>
                     <span class="status-value highlight-monthly" style="color: #4ade80; font-weight: bold;">
@@ -367,9 +366,8 @@
                         {card.annualSavingsText ?? `${(sheet?.annual ?? 0).toLocaleString('he-IL')} ${$t.currency} ${$t.purchases.perYear}`}
                     </span>
                 </div>
-                {/if}
 
-                {#if card.rating !== undefined && card.rating > 0}
+                {#if card.rating !== undefined}
                     <div class="survey-badge-container">
                         <a
                             href={`/details/${campaign.slug}/responses`}

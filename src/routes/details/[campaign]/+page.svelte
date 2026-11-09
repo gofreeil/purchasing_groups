@@ -516,14 +516,11 @@
                     <div class="stat-value">{campaignStats.members}</div>
                     <div class="stat-label">{$t.details.statsMembers}</div>
                 </div>
-                {#if campaignStats.rating > 0}
                 <div class="stat-card">
                     <div class="stat-icon">⭐</div>
                     <div class="stat-value">{campaignStats.rating.toFixed(1)}/5</div>
                     <div class="stat-label">{$t.details.statsRating}</div>
                 </div>
-                {/if}
-                {#if campaignStats.savingsText || campaignStats.savings > 0}
                 <div class="stat-card">
                     <div class="stat-icon">💰</div>
                     <div class="stat-value">{campaignStats.savingsText ?? `${campaignStats.savings.toLocaleString('he-IL')} ${$t.currency}`}</div>
@@ -534,7 +531,6 @@
                         <div class="stat-sub">{campaignStats.annualSavings.toLocaleString('he-IL')} {$t.currency} בשנה</div>
                     {/if}
                 </div>
-                {/if}
                 <div class="stat-card">
                     <div class="stat-icon">💬</div>
                     <div class="stat-value">{campaignStats.reviews}</div>
