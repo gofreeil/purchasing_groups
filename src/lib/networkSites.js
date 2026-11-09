@@ -114,23 +114,5 @@ export const networkSites = [
 		width: 640,
 		height: 427,
 		color: 'linear-gradient(135deg, #059669, #0f766e)'
-	},
-	{
-	    id: 11,
-	    title: 'פנויים פנויות',
-	    href: 'https://singles.gofreeil.com/',
-	    image: '/assets/singles.webp',
-	    width: 640,
-	    height: 427,
-	    color: 'linear-gradient(135deg, #f43f5e, #db2777)'
-	},
-	{
-	    id: 12,
-	    title: 'המומחים של העם',
-	    href: 'https://experts.gofreeil.com/',
-	    image: '/assets/the-experts.webp',
-	    width: 1400,
-	    height: 933,
-	    color: 'linear-gradient(135deg, #0284c7, #1d4ed8)'
 	}
 ];
