@@ -536,13 +536,11 @@
                 📅 תקופת הפרסום ותאריך התפוגה
             </h2>
 
-            <div class="ap-period-gift">
-                <p class="g-title">🎁 יום העריכה - חינם על חשבון המערכת</p>
-                <ul>
-                    <li>היום, <strong>{fmtDate(today)}</strong>, הוא יום העריכה החינמית - לא נספר בתקופת הפרסום.</li>
-                    <li>הפרסומת תרוץ <strong>{periodDays} ימים מלאים</strong> - עד <strong>{fmtDate(expirationDate)} כולל</strong>.</li>
-                    <li>תקופת העריכה החינמית נגמרת היום ב-<strong>23:59</strong>. כדאי לסיים את העריכה לפני זה!</li>
-                </ul>
+            <div class="ap-period-gift compact">
+                <span class="g-title">🎁 יום העריכה - חינם על חשבון המערכת:</span>
+                <span>היום, <strong>{fmtDate(today)}</strong>, הוא יום העריכה החינמית - לא נספר בתקופת הפרסום.</span>
+                <span>• הפרסומת תרוץ <strong>{periodDays} ימים מלאים</strong> - עד <strong>{fmtDate(expirationDate)} כולל</strong>.</span>
+                <span class="g-note">(תקופת העריכה החינמית נגמרת היום ב-<strong>23:59</strong>. כדאי לסיים את העריכה לפני זה!)</span>
             </div>
 
             <!-- לוח שנה דו-חודשי עם סימונים -->
@@ -1436,11 +1434,31 @@
         color: #fde68a;
     }
 
+    .ap-period-gift.compact {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 0.5rem;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0.4rem 0.75rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.75rem;
+    }
+    .ap-period-gift.compact .g-title {
+        color: #fcd34d;
+        font-weight: 700;
+        margin: 0;
+    }
+    .ap-period-gift.compact .g-note {
+        color: #9ca3af;
+    }
+
     .ap-calendars {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 1.25rem;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
     }
     @media (max-width: 768px) {
         .ap-calendars {
@@ -1448,25 +1466,25 @@
         }
     }
     .ap-calendar {
-        border-radius: 0.75rem;
+        border-radius: 0.5rem;
         background: rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0.75rem;
+        padding: 0.5rem;
     }
     .cal-month {
         text-align: center;
         color: #fcd34d;
         font-weight: 900;
-        font-size: 0.9rem;
-        margin: 0 0 0.5rem;
+        font-size: 0.8rem;
+        margin: 0 0 0.25rem;
     }
     .cal-dows {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 2px;
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         color: #6b7280;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.15rem;
         text-align: center;
         font-weight: 700;
     }
@@ -1476,11 +1494,11 @@
         gap: 2px;
     }
     .cal-cell {
-        aspect-ratio: 1;
+        height: 1.35rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 700;
         border-radius: 4px;
         color: #d1d5db;
@@ -1491,22 +1509,22 @@
     .cal-cell.today {
         background: #f59e0b;
         color: #000;
-        box-shadow: 0 0 0 2px #fcd34d;
+        box-shadow: 0 0 0 1px #fcd34d;
     }
     .cal-cell.expiry {
         background: #ef4444;
         color: #fff;
-        box-shadow: 0 0 0 2px #fca5a5;
+        box-shadow: 0 0 0 1px #fca5a5;
     }
     .ap-cal-legend {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 1rem;
-        font-size: 0.75rem;
+        gap: 0.75rem;
+        font-size: 0.7rem;
         color: #9ca3af;
-        margin-bottom: 1.25rem;
+        margin-bottom: 0.5rem;
     }
     .ap-cal-legend > span {
         display: inline-flex;
@@ -1514,9 +1532,9 @@
         gap: 0.35rem;
     }
     .dot {
-        width: 0.75rem;
-        height: 0.75rem;
-        border-radius: 4px;
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 3px;
         display: inline-block;
     }
     .dot.amber { background: #f59e0b; }
@@ -1524,13 +1542,13 @@
 
     .ap-period-confirm {
         display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
+        align-items: center;
+        gap: 0.6rem;
         cursor: pointer;
-        border-radius: 0.75rem;
+        border-radius: 0.5rem;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 1rem;
+        padding: 0.5rem 0.75rem;
         transition: all 0.2s;
     }
     .ap-period-confirm:hover {
