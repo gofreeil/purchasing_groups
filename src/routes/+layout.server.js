@@ -38,6 +38,9 @@ export async function load({ locals, cookies, fetch }) {
             gradient: a.gradient,
             mainImage: adImageUrl(a, 'main'),
             mainImageFit: a.mainImageFit,
+            // התמונה הייעודית לפופ-אפ בנייד - ככתובת, כמו שאר התמונות
+            mobileImage: adImageUrl(a, 'mobile'),
+            mobileImageFit: a.mobileImageFit,
             // לוגו המפרסם והעיצוב מהבילדר (פרסומת שהופצה מקהילה בשכונה נושאת
             // אותו ב-_adStyle) - בלעדיהם הכרטיס היה תמונה חשופה, בלי כותרת
             logo: adImageUrl(a, 'logo'),

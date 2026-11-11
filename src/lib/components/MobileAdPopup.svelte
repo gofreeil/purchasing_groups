@@ -67,8 +67,8 @@
 				title={ad.title}
 				subtitle={ad.subtitle ?? ""}
 				cta={ad.cta ?? ""}
-				image={ad.mainImage}
-				imageFit={parseAdImageFit(ad.mainImageFit)}
+				image={ad.mobileImage || ad.mainImage}
+				imageFit={parseAdImageFit(ad.mobileImage && ad.mobileImageFit ? ad.mobileImageFit : ad.mainImageFit)}
 				logo={ad.logo ?? ""}
 				gradient={ad.gradient}
 				st={parseAdStyle(ad.adStyle) ?? legacyAdStyle(ad.title)}

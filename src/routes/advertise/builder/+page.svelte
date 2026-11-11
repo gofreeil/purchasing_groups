@@ -633,7 +633,7 @@
         applyPayloadImages(candidate);
         if (res.wasCompressed || fit.changed) {
             const finalUrl = target === "main" ? candidate.mainImage : target === "mobile" ? candidate.mobileImage : candidate.logo;
-            showCompressNotice(res.originalBytes, approxDataUrlBytes(finalUrl));
+            showCompressNotice(res.originalBytes, approxDataUrlBytes(finalUrl ?? ""));
         }
         if (target === "main") {
             mainImageObjectX = 50;
@@ -741,7 +741,7 @@
     }
     /**
      * @param {DragEvent} e
-     * @param {'main' | 'logo'} target
+     * @param {'main' | 'logo' | 'mobile'} target
      * @param {(v: boolean) => void} setActive
      */
     async function handleDrop(e, target, setActive) {
@@ -847,6 +847,10 @@
             mainImageObjectX = typeof ad.mainImageFit?.x === "number" ? ad.mainImageFit.x : 50;
             mainImageObjectY = typeof ad.mainImageFit?.y === "number" ? ad.mainImageFit.y : 50;
             mainImageZoom = typeof ad.mainImageFit?.z === "number" ? ad.mainImageFit.z : 1;
+            mobileImage = ad.mobileImage ?? "";
+            mobileImageObjectX = typeof ad.mobileImageFit?.x === "number" ? ad.mobileImageFit.x : 50;
+            mobileImageObjectY = typeof ad.mobileImageFit?.y === "number" ? ad.mobileImageFit.y : 50;
+            mobileImageZoom = typeof ad.mobileImageFit?.z === "number" ? ad.mobileImageFit.z : 1;
             title = ad.title ?? "";
             subtitle = ad.subtitle ?? "";
             hoverText = ad.hoverText ?? "";
@@ -1097,6 +1101,7 @@
         main: T.imgMain,
         logo: T.imgLogo,
         landing: T.imgLanding,
+        mobile: T.imgMobile,
         product: (/** @type {number} */ n) => fmt(T.imgProduct, { n }),
     });
     let heaviestLabel = $derived.by(() => heaviestImageLabel(buildPayloadSnapshot(), imageLabels));

@@ -72,6 +72,9 @@ export async function load({ locals, fetch }) {
             adStyle: a.landing?._adStyle ?? null,
             hover: a.hoverText,
             shop: Boolean(a.landing?._shopProduct),
+            // התמונה לנייד לא נדרשת במסך הזה - לא מוסיפים base64 לנתוני הדף
+            mobileImage: '',
+            landing: { ...(a.landing ?? {}), _mobileImage: undefined },
         }));
     } catch (err) {
         console.error('admin/ads load failed:', err);

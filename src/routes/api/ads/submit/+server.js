@@ -60,6 +60,13 @@ export async function POST({ request, fetch, locals }) {
                 logo: payload.logo ?? '',
                 mainImage: payload.mainImage,
                 mainImageFit: payload.mainImageFit,
+                // התמונה הייעודית לנייד (אופציונלית) - רק data URI של תמונה,
+                // כי היא מוגשת אחר כך מכתובת באתר
+                mobileImage:
+                    typeof payload.mobileImage === 'string' && payload.mobileImage.startsWith('data:image/')
+                        ? payload.mobileImage
+                        : '',
+                mobileImageFit: payload.mobileImageFit,
                 landing: {
                     headline: payload.landing.headline ?? '',
                     pitch: payload.landing.pitch ?? '',

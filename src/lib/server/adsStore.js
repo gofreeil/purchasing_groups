@@ -13,6 +13,9 @@
 //   landing._payment ("code" = הוזן קוד התנועה, כמו שולם | "pending" = לתיאום)
 //   landing._requestedDurationDays (אחד ממסלולי adPlans) - התקופה שהמפרסם ביקש.
 //   landing._mainImageFit ({ x, y, z }) - מיקום+זום התמונה הראשית מהבילדר.
+//   landing._mobileImage (data URI) + landing._mobileImageFit - התמונה הייעודית
+//   לפופ-אפ בנייד (שלב 7 בבילדר). מוגשת מ-/api/ad-image/<id>/mobile ולעולם
+//   לא יוצאת לדפדפן בתוך נתוני דף (ראה withAdImageUrls).
 
 import { strapiGet, strapiPost, strapiPut, strapiDelete } from '$lib/strapi.js';
 import { DEFAULT_PLAN_DAYS, normalizePlanDays } from '$lib/adPlans.js';
@@ -49,6 +52,7 @@ function fromStrapi(row) {
     if (!row) return null;
     const logo = row.logo ?? '';
     const mainImage = row.main_image ?? '';
+    const mobileImage = typeof row.landing?._mobileImage === 'string' ? row.landing._mobileImage : '';
     // גם תמונות דף הנחיתה נכנסות לחותם: כולן מוגשות מאותה כתובת עם אותו ?v=,
     // ולכן החלפת אחת מהן חייבת להחליף אותו - אחרת קאש ה-immutable יחזיק ישנה.
     const landingImages = [
@@ -70,9 +74,12 @@ function fromStrapi(row) {
         // חותם התוכן של התמונות, לשימוש כ-?v= בכתובת שלהן: כך אפשר להגיש
         // אותן בקאש immutable ועדיין להחליף תמונה בלי שגולש יראה ישנה.
         // ראה adImageUrl / imageStamp.
-        imgVersion: imageStamp(logo, mainImage, ...landingImages),
+        imgVersion: imageStamp(logo, mainImage, mobileImage, ...landingImages),
         // מודעות שנשלחו לפני הפיצ'ר - בלי fit; התצוגות משאירות אותן כפי שהיו
         mainImageFit: row.landing?._mainImageFit ? parseAdImageFit(row.landing._mainImageFit) : undefined,
+        // התמונה הייעודית לנייד (ריק = הפופ-אפ משתמש בתמונה הראשית)
+        mobileImage,
+        mobileImageFit: mobileImage ? parseAdImageFit(row.landing?._mobileImageFit) : undefined,
         landing: row.landing ?? {},
         submittedBy: {
             id: row.submitted_by_id ?? '',
@@ -193,6 +200,10 @@ export async function submitAd(payload, { fetch: f = fetch } = {}) {
                 _codeRequested: payload.payment === 'code',
                 _requestedDurationDays: normalizePlanDays(payload.requestedDurationDays),
                 _mainImageFit: parseAdImageFit(payload.mainImageFit),
+                // התמונה הייעודית לנייד - באותה עמודת json, בלי שינוי בסכמה
+                ...(payload.mobileImage
+                    ? { _mobileImage: payload.mobileImage, _mobileImageFit: parseAdImageFit(payload.mobileImageFit) }
+                    : {}),
                 // הקישור לפרסומת שהעדכון בא להחליף. הכותרת נשמרת לצידו
                 // כדי שמסך הניהול יוכל לומר "עדכון ל..." בלי שליפה נוספת.
                 ...(target ? { _replacesAdId: target.id, _replacesTitle: target.title } : {}),
@@ -349,7 +360,7 @@ export async function listApproved({ fetch: f = fetch } = {}) {
  * (/ads/<id>) - הדף שאליו מגיעה כל לחיצה על פרסומת, ולכן גם הוא חייב להגיש
  * תמונות מכתובת ולא מוטבעות. הוא היה הדף הכבד באתר: 2,020KB לצפייה, 98%
  * מהם base64 - יותר ממה שדף הבית שקל לפני התיקון.
- * @typedef {'logo' | 'main' | 'landing' | `product-${number}`} AdImageKind
+ * @typedef {'logo' | 'main' | 'mobile' | 'landing' | `product-${number}`} AdImageKind
  */
 
 /**
@@ -358,13 +369,14 @@ export async function listApproved({ fetch: f = fetch } = {}) {
  */
 export function isAdImageKind(v) {
     if (!v) return false;
-    return v === 'logo' || v === 'main' || v === 'landing' || /^product-\d+$/.test(v);
+    return v === 'logo' || v === 'main' || v === 'mobile' || v === 'landing' || /^product-\d+$/.test(v);
 }
 
 /** @param {any} ad @param {AdImageKind} kind @returns {string} */
 function pickImage(ad, kind) {
     if (kind === 'logo') return ad.logo ?? '';
     if (kind === 'main') return ad.mainImage ?? '';
+    if (kind === 'mobile') return ad.mobileImage ?? '';
     if (kind === 'landing') return ad.landing?.image ?? '';
     const idx = Number(kind.slice('product-'.length));
     return ad.landing?.products?.[idx]?.image ?? '';
@@ -400,11 +412,14 @@ export function withAdImageUrls(ad) {
             image: p?.image ? adImageUrl(ad, `product-${i}`) : '',
         }))
         : [];
+    // התמונה לנייד יושבת בתוך landing כ-base64 - לא יוצאת עם נתוני הדף
+    const { _mobileImage, _mobileImageFit, ...landing } = ad.landing ?? {};
     return {
         ...ad,
         logo: adImageUrl(ad, 'logo'),
         mainImage: adImageUrl(ad, 'main'),
-        landing: { ...ad.landing, image: adImageUrl(ad, 'landing'), products },
+        mobileImage: adImageUrl(ad, 'mobile'),
+        landing: { ...landing, image: adImageUrl(ad, 'landing'), products },
     };
 }
 

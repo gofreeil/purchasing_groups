@@ -25,6 +25,7 @@ const he = {
     imgMain: 'התמונה הראשית',
     imgLogo: 'הלוגו',
     imgLanding: 'תמונת דף הנחיתה',
+    imgMobile: 'התמונה לנייד',
     imgProduct: 'תמונת מוצר {n}',
 
     // מה חסר לפני המעבר לדף הנחיתה
@@ -260,6 +261,7 @@ const en = {
     imgMain: 'the main image',
     imgLogo: 'the logo',
     imgLanding: 'the landing page image',
+    imgMobile: 'the mobile image',
     imgProduct: 'product image {n}',
 
     missMain: 'the main image (step 1)',
@@ -482,6 +484,7 @@ const ru = {
     imgMain: 'главное изображение',
     imgLogo: 'логотип',
     imgLanding: 'изображение посадочной страницы',
+    imgMobile: 'изображение для мобильных',
     imgProduct: 'фото товара {n}',
 
     missMain: 'главное изображение (шаг 1)',

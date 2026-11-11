@@ -226,7 +226,7 @@ export async function shrinkDataUrlKeepAlpha(dataUrl, maxChars) {
 /**
  * מכווץ את תמונות המודעה (הגדולה קודם) עד שהגוף כולו נכנס מתחת לתקרה.
  * הלוגו אחרון בתור ומכווץ בהקטנת מידות בלבד (שומר שקיפות).
- * עובד על צורת ה-payload של השליחה: { logo, mainImage, landing: { image, products: [{image}] } }.
+ * עובד על צורת ה-payload של השליחה: { logo, mainImage, mobileImage?, landing: { image, products: [{image}] } }.
  * @param {any} payload
  * @param {number} [limit]
  * @returns {Promise<{ ok: boolean, changed: boolean }>}
@@ -247,6 +247,7 @@ export async function shrinkAdPayload(payload, limit = AD_BODY_LIMIT) {
             if (typeof cur === "string" && cur.startsWith("data:image/")) imgs.push({ cur, floor, png, apply });
         };
         push(payload.mainImage, MIN_MAIN_CHARS, false, (v) => { payload.mainImage = v; });
+        push(payload.mobileImage, MIN_SIDE_CHARS, false, (v) => { payload.mobileImage = v; });
         push(payload.landing?.image, MIN_SIDE_CHARS, false, (v) => { payload.landing.image = v; });
         for (const p of payload.landing?.products ?? []) push(p.image, MIN_SIDE_CHARS, false, (v) => { p.image = v; });
         push(payload.logo, MIN_LOGO_CHARS, true, (v) => { payload.logo = v; });
@@ -277,6 +278,7 @@ const HEAVIEST_LABELS_HE = {
     main: "התמונה הראשית",
     logo: "הלוגו",
     landing: "תמונת דף הנחיתה",
+    mobile: "התמונה לנייד",
     /** @param {number} n */
     product: (n) => `תמונת מוצר ${n}`,
 };
@@ -294,6 +296,7 @@ export function heaviestImageLabel(payload, labels = HEAVIEST_LABELS_HE) {
     };
     consider(labels.main, payload?.mainImage);
     consider(labels.logo, payload?.logo);
+    consider(labels.mobile, payload?.mobileImage);
     consider(labels.landing, payload?.landing?.image);
     (payload?.landing?.products ?? []).forEach((/** @type {any} */ p, /** @type {number} */ i) => {
         consider(labels.product(i + 1), p?.image);

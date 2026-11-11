@@ -40,6 +40,8 @@ export async function GET({ url, locals, fetch }) {
         logo: ad.logo,
         mainImage: ad.mainImage,
         mainImageFit: ad.mainImageFit ?? null,
+        mobileImage: ad.mobileImage ?? '',
+        mobileImageFit: ad.mobileImageFit ?? null,
         // העיצוב של הכרטיס (landing._adStyle); null בפרסומת ותיקה בלי עיצוב שמור
         adStyle: parseAdStyle(L._adStyle),
         landing: {
