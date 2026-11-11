@@ -38,6 +38,12 @@
  *   subFontSize: number,
  *   subLineHeight: number,
  *   subAlign: SubAlign,
+ *   mobTitleX: number,
+ *   mobTitleY: number,
+ *   mobSubX: number,
+ *   mobSubY: number,
+ *   mobCtaX: number,
+ *   mobCtaY: number,
  * }} AdStyle
  * logoShape - ריבוע (פינות מעוגלות) או עיגול מלא
  * logoSize - גודל הלוגו בפיקסלים (ריבוע)
@@ -52,7 +58,12 @@
  * subFontSize - גודל תת-הכותרת ב-rem
  * subLineHeight - רווח בין שורות תת-הכותרת (יחס, לא יחידה)
  * subAlign - יישור תת-הכותרת
+ * mob* - הזזת הכותרת / תת-הכותרת / הכפתור בכרטיס הנייד, באחוזי רוחב הכרטיס (cqw)
  */
+
+/** טווח ההזזה בנייד (באחוזי רוחב הכרטיס) */
+export const MOB_OFFSET_MIN = -50;
+export const MOB_OFFSET_MAX = 50;
 
 /** גודל הלוגו בפיקסלים (ריבוע) */
 export const DEFAULT_LOGO_SIZE = 36;
@@ -111,6 +122,12 @@ export const DEFAULT_AD_STYLE = {
     subFontSize: DEFAULT_SUB_FONT_SIZE,
     subLineHeight: DEFAULT_SUB_LINE_HEIGHT,
     subAlign: 'right',
+    mobTitleX: 0,
+    mobTitleY: 0,
+    mobSubX: 0,
+    mobSubY: 0,
+    mobCtaX: 0,
+    mobCtaY: 0,
 };
 
 /** @param {number} v @param {number} lo @param {number} hi */
@@ -162,7 +179,18 @@ export function parseAdStyle(raw) {
         subFontSize: clamp(num(o.subFontSize) ?? DEFAULT_SUB_FONT_SIZE, SUB_FONT_SIZE_MIN, SUB_FONT_SIZE_MAX),
         subLineHeight: clamp(num(o.subLineHeight) ?? DEFAULT_SUB_LINE_HEIGHT, SUB_LINE_HEIGHT_MIN, SUB_LINE_HEIGHT_MAX),
         subAlign: parseSubAlign(o.subAlign),
+        mobTitleX: mobOffset(o.mobTitleX),
+        mobTitleY: mobOffset(o.mobTitleY),
+        mobSubX: mobOffset(o.mobSubX),
+        mobSubY: mobOffset(o.mobSubY),
+        mobCtaX: mobOffset(o.mobCtaX),
+        mobCtaY: mobOffset(o.mobCtaY),
     };
+}
+
+/** @param {unknown} v */
+function mobOffset(v) {
+    return clamp(num(v) ?? 0, MOB_OFFSET_MIN, MOB_OFFSET_MAX);
 }
 
 /**

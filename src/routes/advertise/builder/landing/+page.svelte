@@ -401,6 +401,13 @@
                         subFontSize: d.subFontSize,
                         subLineHeight: d.subLineHeight,
                         subAlign: d.subAlign,
+                        // הזזת הטקסטים בכרטיס הנייד (שלב 7) - parseAdStyle מנרמל
+                        mobTitleX: d.mobTitleX,
+                        mobTitleY: d.mobTitleY,
+                        mobSubX: d.mobSubX,
+                        mobSubY: d.mobSubY,
+                        mobCtaX: d.mobCtaX,
+                        mobCtaY: d.mobCtaY,
                     }) ?? { ...DEFAULT_AD_STYLE };
                 }
             } catch {}

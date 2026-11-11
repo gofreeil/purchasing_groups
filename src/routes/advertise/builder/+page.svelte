@@ -3,6 +3,7 @@
     import { browser } from "$app/environment";
     import { goto } from "$app/navigation";
     import { adImgFit, AD_ZOOM_MIN, AD_ZOOM_MAX } from "$lib/adImageFit.js";
+    import MobileAdCard from "$lib/components/MobileAdCard.svelte";
     import { logoClearance } from "$lib/logoClearance.js";
     import { normalizePlanDays } from "$lib/adPlans.js";
     import {
@@ -319,6 +320,24 @@
     let subFontSize = $state(DEFAULT_SUB_FONT_SIZE);
     let subLineHeight = $state(DEFAULT_SUB_LINE_HEIGHT);
     let subAlign = $state(/** @type {import('$lib/adStyle.js').SubAlign} */ ("right"));
+    // הזזת הכותרת / הסלוגן / הכפתור בכרטיס הנייד (שלב 7), באחוזי רוחב הכרטיס
+    let mobTitleX = $state(0);
+    let mobTitleY = $state(0);
+    let mobSubX = $state(0);
+    let mobSubY = $state(0);
+    let mobCtaX = $state(0);
+    let mobCtaY = $state(0);
+    /** @param {unknown} v */
+    const num0 = (v) => (typeof v === "number" && isFinite(v) ? v : 0);
+    /** @param {'title' | 'sub' | 'cta'} key @param {number} x @param {number} y */
+    function moveMobile(key, x, y) {
+        if (key === "title") { mobTitleX = x; mobTitleY = y; }
+        else if (key === "sub") { mobSubX = x; mobSubY = y; }
+        else { mobCtaX = x; mobCtaY = y; }
+    }
+    function resetMobilePositions() {
+        mobTitleX = mobTitleY = mobSubX = mobSubY = mobCtaX = mobCtaY = 0;
+    }
     let hoverText = $state("");
     let cta = $state("הקלק לפרטים והזמנות");
     // גרדיאנט כמחרוזת CSS - תואם לשדה color של adsData.js באתר הזה
@@ -448,6 +467,12 @@
         subFontSize,
         subLineHeight,
         subAlign,
+        mobTitleX,
+        mobTitleY,
+        mobSubX,
+        mobSubY,
+        mobCtaX,
+        mobCtaY,
     });
 
     // שמירת מקום ללוגו בפינה שליד הכותרת - אותו כלל משותף של הטור הימני,
@@ -858,6 +883,12 @@
             subFontSize = st.subFontSize;
             subLineHeight = st.subLineHeight;
             subAlign = st.subAlign;
+            mobTitleX = num0(st.mobTitleX);
+            mobTitleY = num0(st.mobTitleY);
+            mobSubX = num0(st.mobSubX);
+            mobSubY = num0(st.mobSubY);
+            mobCtaX = num0(st.mobCtaX);
+            mobCtaY = num0(st.mobCtaY);
 
             const L = ad.landing ?? {};
             landingHeadline = L.headline ?? "";
@@ -959,6 +990,12 @@
                     subFontSize = typeof d.subFontSize === "number" ? d.subFontSize : DEFAULT_SUB_FONT_SIZE;
                     subLineHeight = typeof d.subLineHeight === "number" ? d.subLineHeight : DEFAULT_SUB_LINE_HEIGHT;
                     subAlign = d.subAlign === "center" || d.subAlign === "left" || d.subAlign === "justify" ? d.subAlign : "right";
+                    mobTitleX = num0(d.mobTitleX);
+                    mobTitleY = num0(d.mobTitleY);
+                    mobSubX = num0(d.mobSubX);
+                    mobSubY = num0(d.mobSubY);
+                    mobCtaX = num0(d.mobCtaX);
+                    mobCtaY = num0(d.mobCtaY);
                     hoverText = d.hoverText ?? "";
                     cta = d.cta || "הקלק לפרטים והזמנות";
                     gradient = d.gradient ?? gradient;
@@ -1032,7 +1069,7 @@
             logo, logoOriginal, hasCircleCrop, logoShape, logoBg, logoSize, hoverLogo, hoverLogoX, hoverLogoY, hoverLogoSize, logoPosition, logoPositionExplicit, logoFreeX, logoFreeY,
             mainImage, mainImageObjectX, mainImageObjectY, mainImageZoom,
             mobileImage, mobileImageObjectX, mobileImageObjectY, mobileImageZoom, title, titleColor, titleOffsetY, titleFontSize, lpLogoAlign, lpLogoBg, lpLogoSize,
-            subtitle, subFontSize, subLineHeight, subAlign, hoverText, cta, gradient, diagHeight,
+            subtitle, subFontSize, subLineHeight, subAlign, mobTitleX, mobTitleY, mobSubX, mobSubY, mobCtaX, mobCtaY, hoverText, cta, gradient, diagHeight,
             landingHeadline, landingPitch, landingExtended, landingImage, landingAdvantages,
             uniqueness, phone, whatsapp, website, email, address, hours, products,
         };
@@ -1745,32 +1782,32 @@
                             <div class="phone-screen">
                                 <div class="phone-notch"></div>
                                 <div class="phone-content">
-                                    <div class="mobile-popup">
-                                        <div class="popup-title-row">
-                                            {#if logo}
-                                                <img src={logo} alt={T.logoAlt} class="popup-logo-above" class:circle={logoShape === "circle"} style={logoBg === "black" ? "background:#000;" : logoBg === "clear" ? "background:transparent;" : ""} />
-                                            {/if}
-                                            <h3 class="popup-title-above" style:color={titleColor}>{title || T.phTitle}</h3>
-                                        </div>
-                                        <div class="popup-img pro-img-wrap">
-                                            {#if previewMobileImage}
-                                                <img src={previewMobileImage} alt={title} use:adImgFit={previewMobileFit} />
-                                            {:else}
-                                                <div class="img-placeholder">{T.mainImageAlt}</div>
-                                            {/if}
-                                            <div class="pro-diag" style={gradientStyle(gradient, "to bottom right")}></div>
-                                            <div class="pro-title-wrap mobile">
-                                                <p class="pro-sub">{subtitle || T.phSlogan}</p>
-                                            </div>
-                                            <div class="close-countdown">5</div>
-                                        </div>
-                                        <div class="popup-body">
-                                            <button type="button" class="popup-cta" style={gradientStyle(gradient, "to right")}>← {cta}</button>
-                                        </div>
+                                    <div class="mobile-popup-slot">
+                                        <MobileAdCard
+                                            editable
+                                            {title}
+                                            {subtitle}
+                                            {cta}
+                                            {gradient}
+                                            image={previewMobileImage}
+                                            imageFit={previewMobileFit}
+                                            {logo}
+                                            st={adStyle}
+                                            placeholder={T.mainImageAlt}
+                                            onedit={(f, v) => {
+                                                if (f === "title") title = v;
+                                                else if (f === "sub") subtitle = v;
+                                                else cta = v;
+                                            }}
+                                            onmove={moveMobile}
+                                        />
+                                        {#if mobTitleX || mobTitleY || mobSubX || mobSubY || mobCtaX || mobCtaY}
+                                            <button type="button" class="mobile-reset-pos" onclick={resetMobilePositions}>{T.b_mobile_reset_pos}</button>
+                                        {/if}
                                     </div>
                                 </div>
                             </div>
-                            <p class="preview-caption">{T.mobileCaption}</p>
+                            <p class="preview-caption">{T.mobileCaption} <b>{T.b_mobile_edit_hint}</b></p>
                         </div>
                     {:else}
                         <div class="preview-frame">
@@ -3155,6 +3192,12 @@
         align-items: center;
         justify-content: center;
         padding: 1rem;
+    }
+    .mobile-popup-slot { width: 100%; max-width: 240px; }
+    .mobile-reset-pos {
+        display: block; margin: 0.4rem auto 0; font-size: 0.7rem; padding: 0.15rem 0.6rem;
+        border-radius: 9999px; background: rgba(255, 255, 255, 0.08); color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.4);
     }
     .mobile-popup {
         width: 100%;

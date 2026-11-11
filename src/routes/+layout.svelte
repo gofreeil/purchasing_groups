@@ -10,6 +10,7 @@
 	import AdsSidebar from "$lib/components/AdsSidebar.svelte";
 	import RightAdBanner from "$lib/components/RightAdBanner.svelte";
 	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
+	import MobileAdPopup from "$lib/components/MobileAdPopup.svelte";
 	import WelcomeScreen from "$lib/components/WelcomeScreen.svelte";
 	import SiteEditor from "$lib/components/SiteEditor.svelte";
 	import { setTextReplacements, refreshTextReplacements } from "$lib/textReplace.js";
@@ -395,6 +396,8 @@
 	<!-- מגירת אתרי הרשת בנייד: אתרי "יוצאים לחירות" בלבד, בלי approvedAds -->
 	{#if !isAdminArea}
 		<MobileAdsDrawer />
+		<!-- פרסומת משלמת בנייד: פעם אחת לביקור, אחרי הניווט הראשון -->
+		<MobileAdPopup approvedAds={data?.approvedAds ?? []} />
 	{/if}
 
 	<!-- Footer -->
