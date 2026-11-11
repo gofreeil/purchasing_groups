@@ -1290,7 +1290,16 @@
             <div class="builder-steps">
 
                 <!-- =================== שלב 1: תמונה ראשית =================== -->
-                <section bind:this={stepRefs.image} class="step-card">
+                <!-- לחיצה על הכרטיס היא קיצור עכבר בלבד; משתמש מקלדת מגיע לשלב ע"י Tab
+                     לתוך הפקדים שבו, ולכן נוסף onfocusin שמדליק את אותו שלב (כמו בקהילה בשכונה) -->
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <section
+                    bind:this={stepRefs.image}
+                    class="step-card"
+                    onclick={() => activeStep === "image" || (activeStep = "image")}
+                    onfocusin={() => activeStep === "image" || (activeStep = "image")}
+                >
                     <div class="step-head" class:step-title-light={litFlags.image.title}>
                         <span class="step-num" class:step-num-light={litFlags.image.num}>1</span>
                         <h2>{T.s1Title}</h2>
@@ -1678,7 +1687,18 @@
                 </section>
 
                 <!-- =================== שלב 6: טקסט בריחוף =================== -->
-                <section bind:this={stepRefs.hover} class="step-card">
+                <!-- כמו בשלב 1: קיצור עכבר, ומקבילה למקלדת דרך onfocusin -->
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <section
+                    bind:this={stepRefs.hover}
+                    class="step-card"
+                    onclick={(e) => {
+                        if (/** @type {HTMLElement} */ (e.target).closest("button, a, input, textarea")) return;
+                        if (activeStep !== "hover") activeStep = "hover";
+                    }}
+                    onfocusin={() => { if (activeStep !== "hover") activeStep = "hover"; }}
+                >
                     <div class="step-head" class:step-title-light={litFlags.hover.title}>
                         <span class="step-num" class:step-num-light={litFlags.hover.num}>6</span>
                         <h2>{T.s6Title}</h2>
