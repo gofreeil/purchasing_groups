@@ -6,9 +6,25 @@
     import AdPreviewLayer from "$lib/components/AdPreviewLayer.svelte";
     import AdScheduleTable from "$lib/components/AdScheduleTable.svelte";
     import AdDurationModal from "$lib/components/AdDurationModal.svelte";
+    import AdRemoveDialog from "$lib/components/AdRemoveDialog.svelte";
 
     // מסך אישור פרסומות לאדמין - ממתינות / מאושרות / נדחות / אשפה.
     let { data, form } = $props();
+
+    // "מחק" פותח חלון עם כרטיס הפרסומת שנמחקת - לראות בדיוק מה מוחקים
+    /** @type {{ form: HTMLFormElement, ad: any } | null} */
+    let removeAsk = $state(null);
+    /** @param {MouseEvent} e @param {any} ad @param {string} [question] */
+    function askRemove(e, ad, question = '') {
+        const form = /** @type {HTMLButtonElement} */ (e.currentTarget).form;
+        if (form && ad) { e.preventDefault(); removeAsk = { form, ad }; return; }
+        if (question && !confirm(question)) e.preventDefault();
+    }
+    function finishRemove() {
+        const form = removeAsk?.form;
+        removeAsk = null;
+        form?.requestSubmit();
+    }
 
     /** @type {'pending' | 'approved' | 'rejected' | 'trash'} */
     let tab = $state("pending");
@@ -33,6 +49,7 @@
     let shown = $derived(tab === "pending" ? pending : tab === "approved" ? approved : tab === "rejected" ? rejected : []);
     // האשפה: נמחקו (שחזור) ופג תוקפן (חידוש) - מהשרת, החדשות בראש
     let trash = $derived(data.trash ?? []);
+    let trashOpen = $state(false);
 
     /** @param {string} iso */
     function fmtDate(iso) {
@@ -207,55 +224,7 @@
         {#if trash.length === 0}
             <p class="empty">האשפה ריקה.</p>
         {/if}
-        <div class="trash-list">
-            {#each trash as t (t.id)}
-                <div class="trash-row">
-                    <span class="trash-body">
-                        <button
-                            type="button"
-                            class="ad-title-btn trash-title"
-                            onmouseenter={(e) => preview?.show(e, adById.get(t.id) ?? t)}
-                            onmouseleave={() => preview?.hide()}
-                            onclick={() => preview?.open(adById.get(t.id) ?? t)}
-                            title="תצוגה מקדימה של הפרסומת"
-                        >{t.title}</button>
-                        <span class="trash-meta">
-                            <span class="status-pill {t.kind === 'deleted' ? 'rejected' : 'pending'}">{t.kind === "deleted" ? "נמחקה" : "פג התוקף"}</span>
-                            {fmtDate(t.at)} · {t.advertiserName}
-                        </span>
-                    </span>
-                    <span class="trash-actions">
-                        {#if t.kind === "deleted"}
-                            {#if data.superAdmin}
-                                <form method="POST" action="?/restore" use:enhance>
-                                    <input type="hidden" name="id" value={t.id} />
-                                    <button type="submit" class="a-btn approve" title="חזרה למצב שלפני המחיקה">♻ שחזר</button>
-                                </form>
-                                <form method="POST" action="?/purge" use:enhance>
-                                    <input type="hidden" name="id" value={t.id} />
-                                    <button type="submit" class="a-btn reject"
-                                            onclick={(e) => { if (!confirm(`למחוק לצמיתות את "${t.title}"? אין דרך חזרה.`)) e.preventDefault(); }}>
-                                        ✕ מחק לצמיתות
-                                    </button>
-                                </form>
-                            {/if}
-                        {:else}
-                            <form method="POST" action="?/approve" use:enhance>
-                                <input type="hidden" name="id" value={t.id} />
-                                <input type="hidden" name="durationDays" value={t.requestedDurationDays ?? ""} />
-                                <button type="submit" class="a-btn approve" title="פרסום מחדש לתקופה חדשה מהיום, באותו מקום בטור">♻ חדש</button>
-                            </form>
-                            {#if data.superAdmin}
-                                <form method="POST" action="?/remove" use:enhance>
-                                    <input type="hidden" name="id" value={t.id} />
-                                    <button type="submit" class="a-btn ghost" title="העברה לאשפה - אפשר לשחזר">🗑 מחק</button>
-                                </form>
-                            {/if}
-                        {/if}
-                    </span>
-                </div>
-            {/each}
-        </div>
+        {@render trashRows()}
     {:else if shown.length === 0}
         <p class="empty">אין פרסומות בקטגוריה הזו.</p>
     {/if}
@@ -573,6 +542,76 @@
         {/if}
     </section>
 
+    {#snippet trashRows()}
+        <div class="trash-list">
+            {#each trash as t (t.id)}
+                <div class="trash-row">
+                    <span class="trash-body">
+                        <button
+                            type="button"
+                            class="ad-title-btn trash-title"
+                            onmouseenter={(e) => preview?.show(e, adById.get(t.id) ?? t)}
+                            onmouseleave={() => preview?.hide()}
+                            onclick={() => preview?.open(adById.get(t.id) ?? t)}
+                            title="תצוגה מקדימה של הפרסומת"
+                        >{t.title}</button>
+                        <span class="trash-meta">
+                            <span class="status-pill {t.kind === 'deleted' ? 'rejected' : 'pending'}">{t.kind === "deleted" ? "נמחקה" : "פג התוקף"}</span>
+                            {fmtDate(t.at)} · {t.advertiserName}
+                        </span>
+                    </span>
+                    <span class="trash-actions">
+                        {#if t.kind === "deleted"}
+                            {#if data.superAdmin}
+                                <form method="POST" action="?/restore" use:enhance>
+                                    <input type="hidden" name="id" value={t.id} />
+                                    <button type="submit" class="a-btn approve" title="חזרה למצב שלפני המחיקה">♻ שחזר</button>
+                                </form>
+                                <form method="POST" action="?/purge" use:enhance>
+                                    <input type="hidden" name="id" value={t.id} />
+                                    <button type="submit" class="a-btn reject"
+                                            onclick={(e) => { if (!confirm(`למחוק לצמיתות את "${t.title}"? אין דרך חזרה.`)) e.preventDefault(); }}>
+                                        ✕ מחק לצמיתות
+                                    </button>
+                                </form>
+                            {/if}
+                        {:else}
+                            <form method="POST" action="?/approve" use:enhance>
+                                <input type="hidden" name="id" value={t.id} />
+                                <input type="hidden" name="durationDays" value={t.requestedDurationDays ?? ""} />
+                                <button type="submit" class="a-btn approve" title="פרסום מחדש לתקופה חדשה מהיום, באותו מקום בטור">♻ חדש</button>
+                            </form>
+                            {#if data.superAdmin}
+                                <form method="POST" action="?/remove" use:enhance>
+                                    <input type="hidden" name="id" value={t.id} />
+                                    <button type="submit" class="a-btn ghost" title="העברה לאשפה - אפשר לשחזר"
+                                            onclick={(e) => askRemove(e, data.ads.find((/** @type {any} */ a) => a.id === t.id))}>🗑 מחק</button>
+                                </form>
+                            {/if}
+                        {/if}
+                    </span>
+                </div>
+            {/each}
+        </div>
+    {/snippet}
+
+    <!-- אשפה - קומה מתקפלת: כל המחוקים והפגים + שחזור -->
+    <section class="trash-floor">
+        <button type="button" class="trash-floor-head" onclick={() => (trashOpen = !trashOpen)} aria-expanded={trashOpen}>
+            <span aria-hidden="true">🗑</span>
+            <h2>אשפה</h2>
+            <span class="sched-count">{trash.length}</span>
+            <span class="trash-floor-arrow">{trashOpen ? "▲" : "▼"}</span>
+        </button>
+        {#if trashOpen}
+            {#if trash.length === 0}
+                <p class="empty">האשפה ריקה.</p>
+            {:else}
+                {@render trashRows()}
+            {/if}
+        {/if}
+    </section>
+
     <!-- תצוגה מקדימה: ריחוף על כותרת פרסומת מאושרת (דסקטופ) / הקשה (נייד ודסקטופ) -->
     <AdPreviewLayer bind:this={preview} />
 </div>
@@ -580,6 +619,11 @@
 <!-- חלון הקציבה (משותף עם "הפרסומות שלי") -->
 {#if durationModal}
     <AdDurationModal ad={durationModal} onclose={() => (durationModal = null)} />
+{/if}
+
+<!-- "מחק": חלון אישור עם כרטיס הפרסומת שנמחקת -->
+{#if removeAsk}
+    <AdRemoveDialog ad={removeAsk.ad} onremove={finishRemove} onclose={() => (removeAsk = null)} />
 {/if}
 
 <svelte:window onkeydown={(e) => { if (e.key === "Escape") { durationModal = null; } }} />
@@ -931,6 +975,17 @@
     }
 
     /* --- טבלת תזמון הפרסומות (כמו בגמ"ח הארצי) --- */
+    .trash-floor { margin-top: 2rem; }
+    .trash-floor-head {
+        display: flex; align-items: center; gap: 0.5rem; width: 100%;
+        padding: 0.5rem 0.75rem; border-radius: 0.75rem; cursor: pointer;
+        background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #fff; text-align: right;
+    }
+    .trash-floor-head:hover { background: rgba(255, 255, 255, 0.08); }
+    .trash-floor-head h2 { margin: 0; font-size: 1.05rem; font-weight: 900; color: #fff; }
+    .trash-floor-arrow { margin-right: auto; color: #9ca3af; font-size: 0.75rem; }
+
     .sched { margin-top: 2.5rem; }
     .sched-head {
         display: flex; align-items: center; justify-content: space-between;
