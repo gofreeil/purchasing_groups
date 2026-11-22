@@ -12,6 +12,7 @@
 	import MobileAdsDrawer from "$lib/components/MobileAdsDrawer.svelte";
 	import MobileAdPopup from "$lib/components/MobileAdPopup.svelte";
 	import WelcomeScreen from "$lib/components/WelcomeScreen.svelte";
+	import SignupTip from "$lib/components/SignupTip.svelte";
 	import SiteEditor from "$lib/components/SiteEditor.svelte";
 	import { setTextReplacements, refreshTextReplacements } from "$lib/textReplace.js";
 	import { OTHER_NETWORK_SITES } from "$lib/seo.js";
@@ -361,12 +362,21 @@
 						{/if}
 					</div>
 				{:else}
-					<a
-						class="login-header-btn"
-						href={`/login?returnTo=${encodeURIComponent($page.url.pathname)}`}
-					>
-						{$t.login}
-					</a>
+					<!-- אורח: יד ובועה "לא רשום עדיין?" תלויות מתחת לכפתור (בעברית בלבד) -->
+					<span class="signup-anchor">
+						<a
+							class="login-header-btn"
+							href={`/login?returnTo=${encodeURIComponent($page.url.pathname)}`}
+						>
+							{$t.login}
+						</a>
+						<SignupTip
+							href={`/login?returnTo=${encodeURIComponent($page.url.pathname)}`}
+							from="#166534"
+							to="#064e3b"
+							hidden={$lang !== "he"}
+						/>
+					</span>
 				{/if}
 			</div>
 		</div>
@@ -583,6 +593,13 @@
 		background: rgba(250, 204, 21, 0.1);
 		border-color: #facc15;
 		color: #facc15;
+	}
+
+	/* עוגן ליד ולבועה של SignupTip שתלויות מתחת לכפתור ההתחברות */
+	.signup-anchor {
+		position: relative;
+		display: inline-flex;
+		flex-shrink: 0;
 	}
 
 	.lang-dropdown {
