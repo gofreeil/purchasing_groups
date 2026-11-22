@@ -1,4 +1,5 @@
 <script>
+    import FirstTimeTip from '$lib/components/FirstTimeTip.svelte';
     import PasswordInput from '$lib/components/PasswordInput.svelte';
     import { page } from '$app/stores';
     let { data, form } = $props();
@@ -42,11 +43,6 @@
     <h1>התחברות</h1>
     <p class="sub">בחר איך להתחבר. אם אין לך חשבון — ההתחברות יוצרת אותו אוטומטית.</p>
 
-    <!-- הודעה למשתמש חדש: הכניסה עם Google/Facebook היא גם ההרשמה -->
-    {#if !data.ssoName}
-        <p class="first-hint">👋 פעם ראשונה כאן? כניסה עם Google או Facebook יוצרת לך חשבון בלחיצה אחת.</p>
-    {/if}
-
     {#if communityError}
         <div class="community-notice">
             עדיין אין לך חשבון באתר יוצאים לחירות — חברות בקבוצות הווצאפ אינה חשבון באתר, וזה
@@ -80,6 +76,11 @@
             <p class="prov-note">זוהית דרך יוצאים לחירות. לא את/ה? אפשר להיכנס עם חשבון אחר למטה.</p>
 
             <div class="divider"><span>או</span></div>
+        {/if}
+
+        <!-- משתמש חדש: בועה עם יד שמצביעה על כפתור Google — הכניסה היא גם ההרשמה -->
+        {#if !data.ssoName}
+            <FirstTimeTip text="פעם ראשונה כאן? כניסה עם Google או Facebook יוצרת לך חשבון בלחיצה אחת." />
         {/if}
 
         <a
@@ -212,14 +213,6 @@
     .sub {
         color: rgba(255, 255, 255, 0.7);
         margin: 0 0 1.6rem;
-    }
-    /* הודעה למשתמש חדש: הכניסה עם Google/Facebook היא גם ההרשמה */
-    .first-hint {
-        color: #fde68a;
-        font-weight: 700;
-        font-size: 0.92rem;
-        line-height: 1.6;
-        margin: 0 0 1.4rem;
     }
     .community-notice {
         background: rgba(250, 204, 21, 0.12);
